@@ -2,7 +2,7 @@
 
 [![Discord Banner 2](https://discord.com/api/guilds/1346116394038722602/widget.png?style=banner3)](https://discord.gg/M74X2wmqY8)
 
-# erugo
+# erugo 
 
 erugo is a powerful, self-hosted file-sharing platform built with PHP and Laravel with a Vue.js frontend. It offers secure, customisable file-transfer capabilities through an elegant user interface, giving you complete control over your data while providing a seamless experience for both senders and recipients.
 
