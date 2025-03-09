@@ -74,4 +74,15 @@ class User extends Authenticatable implements JWTSubject
     {
         return explode(' ', $this->name)[0];
     }
+
+    /**
+     * The authentication providers that this user has linked
+     */
+    public function authProviders()
+    {
+        return $this->belongsToMany(AuthProvider::class, 'user_auth_provider')
+            ->withPivot(['provider_user_id', 'provider_email', 'access_token', 
+                         'refresh_token', 'token_expires_at', 'provider_data'])
+            ->withTimestamps();
+    }
 }

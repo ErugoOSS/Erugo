@@ -48,6 +48,15 @@
     "from": "Messaggio da {name}"
   },
   "settings": {
+    "account": {
+      "change_password": "Cambiare la password",
+      "create_link": "Collegamento",
+      "email": "Il mio indirizzo e-mail",
+      "linked_accounts_description": "Collegare l'account a un provider esterno per facilitare l'accesso. Dopo il collegamento, è possibile accedere direttamente selezionando il pulsante del provider nella schermata di login.",
+      "myProfile_description": "Aggiornare l'indirizzo e-mail o cambiare il nome. È possibile modificare la password facendo clic sul pulsante \"Cambia la mia password\" e seguendo le istruzioni.",
+      "name": "Il mio nome completo",
+      "unlink": "Unlink"
+    },
     "branding": {
       "background_images": "Immagini di sfondo",
       "background_images_description": "Caricate immagini di sfondo personalizzate per sostituire quelle predefinite di Unsplash. Le immagini ruotano in modo casuale ogni 3 minuti per creare un branding dinamico.",
@@ -83,6 +92,9 @@
       "branding": {
         "save": "Salvare le impostazioni del marchio"
       },
+      "myProfile": {
+        "save": "Salvare le modifiche al profilo"
+      },
       "myShares": {
         "create": "Creare la condivisione"
       },
@@ -96,7 +108,7 @@
     "close": "Chiudere",
     "description": {
       "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete il vostro marchio.",
-      "myProfile": "Gestire il proprio profilo.",
+      "myProfile": "Gestire il proprio account.",
       "myShares": "Gestire le azioni.",
       "system": "Gestire il comportamento della vostra istanza Erugo.",
       "users": "Gestire gli utenti."
@@ -210,8 +222,9 @@
     },
     "title": {
       "branding": "Marchio e interfaccia utente",
+      "linked_accounts": "Conti collegati",
       "manage": "Gestire",
-      "myProfile": "Il mio profilo",
+      "myProfile": "Il mio account",
       "myShares": "Le mie azioni",
       "system": "Impostazioni del sistema",
       "users": "Utenti",
@@ -227,9 +240,10 @@
       "admin_help_text": "Rendere l'utente un amministratore.",
       "admin_help_text_2": "L'utente avrà gli stessi privilegi dell'utente.\n",
       "cannot_delete_yourself": "Non è possibile cancellare se stessi",
-      "close": "Chiudere",
+      "close": "Annullamento",
       "created": "Creato",
       "current_password": "Password corrente",
+      "current_password_required": "È richiesta la password corrente",
       "delete": "Cancellare",
       "edit": "Modifica",
       "edit_my_profile": "Modifica il mio profilo",
@@ -239,10 +253,24 @@
       "failed_to_update_user": "Impossibile aggiornare l'utente",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Lasciare vuoto per mantenere la stessa password.",
+      "link_provider_confirm": "Collegare davvero il proprio account a questo provider?",
+      "linked": "Conto collegato",
       "name": "Nome",
+      "not_linked": "Conto non collegato",
       "password": "Nuova password",
       "password_confirmation": "Conferma la nuova password",
+      "password_confirmation_mismatch": "La password e la conferma della password devono corrispondere",
+      "password_min_length": "La password deve essere lunga almeno {length} caratteri",
+      "password_required": "La password è necessaria",
+      "password_update_failed": "Aggiornamento password fallito",
+      "password_updated": "Password aggiornata",
+      "profile_errors": "Controllare i dati immessi",
+      "profile_update_failed": "Non è stato possibile aggiornare il profilo",
+      "profile_updated": "Il tuo profilo è stato aggiornato",
+      "provider_unlink_failed": "Non è stato possibile scollegare il provider dal proprio account.",
+      "provider_unlinked": "Il fornitore è stato scollegato dall'account.",
       "save_changes": "Salva le modifiche",
+      "unlink_provider_confirm": "Davvero avete scollegato il vostro account da questo provider?",
       "update_password": "Aggiornare la password",
       "user": "Utente",
       "user_created_successfully": "Utente creato con successo",

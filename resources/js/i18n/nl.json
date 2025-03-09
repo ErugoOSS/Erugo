@@ -48,6 +48,15 @@
     "from": "Bericht van"
   },
   "settings": {
+    "account": {
+      "change_password": "Mijn wachtwoord wijzigen",
+      "create_link": "Link",
+      "email": "Mijn e-mailadres",
+      "linked_accounts_description": "Koppel je account aan een externe provider om gemakkelijker in te loggen. Na de koppeling kun je direct inloggen door de knop van de provider te selecteren op het inlogscherm.",
+      "myProfile_description": "Werk je e-mailadres bij of verander je naam. Je kunt je wachtwoord wijzigen door op de knop \"Wijzig mijn wachtwoord\" te klikken en de aanwijzingen te volgen.",
+      "name": "Mijn volledige naam",
+      "unlink": "Ontkoppelen"
+    },
     "branding": {
       "background_images": "Achtergrondafbeeldingen",
       "background_images_description": "Upload aangepaste achtergrondafbeeldingen om de standaard Unsplash-afbeeldingen te vervangen. Afbeeldingen roteren elke 3 minuten willekeurig om dynamische branding te creëren.",
@@ -82,6 +91,9 @@
     "button": {
       "branding": {
         "save": "Branding-instellingen opslaan"
+      },
+      "myProfile": {
+        "save": "Profielwijzigingen opslaan"
       },
       "myShares": {
         "create": "Gedeelde link aanmaken"
@@ -210,6 +222,7 @@
     },
     "title": {
       "branding": "Branding & UI",
+      "linked_accounts": "Gekoppelde accounts",
       "manage": "Beheer",
       "myProfile": "Mijn profiel",
       "myShares": "Mijn Gedeelde Links",
@@ -227,9 +240,10 @@
       "admin_help_text": "Maak van de gebruiker een beheerder.",
       "admin_help_text_2": "De gebruiker heeft dezelfde rechten als jij.\n",
       "cannot_delete_yourself": "Je kunt jezelf niet verwijderen",
-      "close": "Sluit",
+      "close": "Annuleren",
       "created": "Aangemaakt",
       "current_password": "Huidig wachtwoord",
+      "current_password_required": "Huidig wachtwoord is vereist",
       "delete": "Verwijder",
       "edit": "Bewerk",
       "edit_my_profile": "Mijn profiel bewerken",
@@ -239,10 +253,24 @@
       "failed_to_update_user": "Gebruiker kon niet worden bijgewerkt",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Laat leeg om hetzelfde wachtwoord te behouden.",
+      "link_provider_confirm": "Koppel je je account echt aan deze provider?",
+      "linked": "Gekoppelde account",
       "name": "Naam",
+      "not_linked": "Account niet gekoppeld",
       "password": "Nieuw wachtwoord",
       "password_confirmation": "Nieuw wachtwoord bevestigen",
+      "password_confirmation_mismatch": "Wachtwoord en wachtwoordbevestiging moeten overeenkomen",
+      "password_min_length": "Wachtwoord moet minstens {length} tekens lang zijn",
+      "password_required": "Wachtwoord is vereist",
+      "password_update_failed": "Wachtwoord bijwerken mislukt",
+      "password_updated": "Wachtwoord bijgewerkt",
+      "profile_errors": "Controleer uw invoer",
+      "profile_update_failed": "Je profiel kon niet worden bijgewerkt",
+      "profile_updated": "Je profiel is bijgewerkt",
+      "provider_unlink_failed": "De provider is niet ontkoppeld van je account",
+      "provider_unlinked": "De provider is ontkoppeld van je account",
       "save_changes": "Wijzigingen opslaan",
+      "unlink_provider_confirm": "Echt je account loskoppelen van deze provider?",
       "update_password": "Wachtwoord bijwerken",
       "user": "Gebruiker",
       "user_created_successfully": "Gebruiker succesvol aangemaakt",

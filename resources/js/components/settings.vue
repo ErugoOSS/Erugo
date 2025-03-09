@@ -50,15 +50,14 @@ const getInitialTab = () => {
 // Track active tab
 const activeTab = ref(null)
 
-defineExpose({
-  setActiveTab
-})
+
 
 const createShare = () => {
   store.setSettingsOpen(false)
 }
 
 const handleNavItemClicked = (item) => {
+  console.log('handleNavItemClicked', item)
   const scrollableElement = document.querySelector('.tab-content-body')
   const element = document.getElementById(item)
   if (element) {
@@ -69,6 +68,11 @@ const handleNavItemClicked = (item) => {
     })
   }
 }
+
+defineExpose({
+  setActiveTab,
+  handleNavItemClicked
+})
 
 const getSettingsTitle = () => {
   // Check if t.value exists and is a function
@@ -244,9 +248,15 @@ const getSettingsTitle = () => {
                     <small>{{ $t('settings.description.myProfile') }}</small>
                   </span>
                 </h2>
+                <div class="user-actions">
+                  <button @click="$refs['myProfilePanel'].saveUser()">
+                    <Save />
+                    {{ $t('settings.button.myProfile.save') }}
+                  </button>
+                </div>
               </div>
               <div class="tab-content-body">
-                <MyProfile ref="myProfilePanel" v-if="store.settingsOpen" />
+                <MyProfile ref="myProfilePanel" v-if="store.settingsOpen" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
             <div

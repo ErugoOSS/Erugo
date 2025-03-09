@@ -48,6 +48,15 @@
     "from": "Message from {name}"
   },
   "settings": {
+    "account": {
+      "change_password": "Change my password",
+      "create_link": "Link",
+      "email": "My Email Address",
+      "linked_accounts_description": "Link your account with an external provider for easier sign-in. After linking, you can log in directly by selecting the provider's button on the login screen.",
+      "myProfile_description": "Update your email address or change your name. You can change you password by clicking the \"Change my password\" button and following the prompts.",
+      "name": "My Full Name",
+      "unlink": "Unlink"
+    },
     "branding": {
       "background_images": "Background Images",
       "background_images_description": "Upload custom background images to replace Unsplash defaults. Images rotate randomly every 3 minutes to create dynamic branding.",
@@ -83,6 +92,9 @@
       "branding": {
         "save": "Save Branding Settings"
       },
+      "myProfile": {
+        "save": "Save profile changes"
+      },
       "myShares": {
         "create": "Create Share"
       },
@@ -96,7 +108,7 @@
     "close": "Close",
     "description": {
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
-      "myProfile": "Manage your profile.",
+      "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
       "system": "Manage the behaviour of your Erugo instance.",
       "users": "Manage Your Users."
@@ -210,8 +222,9 @@
     },
     "title": {
       "branding": "Branding & UI",
+      "linked_accounts": "Linked Accounts",
       "manage": "Manage",
-      "myProfile": "My Profile",
+      "myProfile": "My Account",
       "myShares": "My Shares",
       "system": "System settings",
       "users": "Users",
@@ -227,9 +240,10 @@
       "admin_help_text": "Make the user an admin.",
       "admin_help_text_2": "User will have the privileges as you.\n",
       "cannot_delete_yourself": "You cannot delete yourself",
-      "close": "Close",
+      "close": "Cancel",
       "created": "Created",
       "current_password": "Current Password",
+      "current_password_required": "Current Password is required",
       "delete": "Delete",
       "edit": "Edit",
       "edit_my_profile": "Edit My Profile",
@@ -239,10 +253,24 @@
       "failed_to_update_user": "Failed to update user",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Leave blank to keep same password.",
+      "link_provider_confirm": "Really link your account to this provider?",
+      "linked": "Account Linked",
       "name": "Name",
+      "not_linked": "Account Not Linked",
       "password": "New Password",
       "password_confirmation": "Confirm New Password",
+      "password_confirmation_mismatch": "Password and Password Confirmation must match",
+      "password_min_length": "Password must be at least {length} characters long",
+      "password_required": "Password is required",
+      "password_update_failed": "Password update failed",
+      "password_updated": "Password updated",
+      "profile_errors": "Please check your input",
+      "profile_update_failed": "Failed to update your profile",
+      "profile_updated": "Your profile was updated",
+      "provider_unlink_failed": "Failed to unlink the provider from your account",
+      "provider_unlinked": "The provider has been unlinked from your account",
       "save_changes": "Save Changes",
+      "unlink_provider_confirm": "Really unlink your account from this provider?",
       "update_password": "Update Password",
       "user": "User",
       "user_created_successfully": "User created successfully",

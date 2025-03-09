@@ -87,3 +87,7 @@ Route::get('/auth/provider/{provider}/login', [ExternalAuthController::class, 'p
 //auth provider callback
 Route::get('/auth/provider/{provider}/callback', [ExternalAuthController::class, 'providerCallback'])
     ->name('social.provider.callback');
+
+//auth provider link account
+Route::get('/auth/provider/{provider}/link', [ExternalAuthController::class, 'linkAccount'])
+    ->name('social.provider.link');

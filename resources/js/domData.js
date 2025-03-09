@@ -6,6 +6,16 @@ export const domData = () => {
   return data
 }
 
+export const domError = () => {
+  const error = document.body.getAttribute('data-error')
+  return error || ''
+}
+
+export const domSuccess = () => {
+  const success = document.body.getAttribute('data-success')
+  return success || ''
+}
+
 const getSettings = () => {
   const body = document.body
   if(!body) {

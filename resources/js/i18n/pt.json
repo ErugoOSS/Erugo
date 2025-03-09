@@ -39,7 +39,7 @@
   },
   "confirm_delete_user": "Tem a certeza de que pretende eliminar este utilizador?",
   "download": {
-    "files": "{value, plural, one {Baixar # ficheiro} many {Baixar {value} ficheiros} other {}}"
+    "files": "{value, plural, one {Descarregar # ficheiro} many {Descarregar {value} ficheiros} other {}}"
   },
   "email": "E-mail",
   "full_name": "Nome Completo",
@@ -48,19 +48,28 @@
     "from": "Mensagem de {name}"
   },
   "settings": {
+    "account": {
+      "change_password": "Alterar a minha palavra-passe",
+      "create_link": "Ligação",
+      "email": "O meu endereço de correio eletrónico",
+      "linked_accounts_description": "Associe a sua conta a um fornecedor externo para facilitar o início de sessão. Após a ligação, pode iniciar sessão diretamente selecionando o botão do fornecedor no ecrã de início de sessão.",
+      "myProfile_description": "Actualize o seu endereço de correio eletrónico ou altere o seu nome. Pode alterar a sua palavra-passe clicando no botão \"Alterar a minha palavra-passe\" e seguindo as instruções.",
+      "name": "O meu nome completo",
+      "unlink": "Desvincular"
+    },
     "branding": {
       "background_images": "Imagens de Fundo",
       "background_images_description": "Transferir imagens de fundo para personalizar e substituir as de Unplash. As imagens alternam aleatoriamente a cada 3 minutos para criar uma imagem de marca dinâmica.",
       "delete": "Apagar",
       "delete_theme": "Apagar o Tema",
       "delete_theme_description": "Apagar o tema selecionado. Isto vai removê-lo da lista de temas e não o poderá utilizar novamente. Não é possível apagar o tema atual ou grupos de temas.",
-      "download": "Baixar",
-      "download_theme": "Baixar Tema",
-      "download_theme_description": "Baixar o tema selecionado como ficheiro JSON. Este pode ser usado para criar um novo tema ou modificar o existente.",
+      "download": "Descarregar",
+      "download_theme": "Descarregar Tema",
+      "download_theme_description": "Descarregue o tema selecionado como ficheiro JSON. Este pode ser usado para criar um novo tema ou modificar o existente.",
       "in_pixels": "Em pixéis",
       "install_custom_theme": "Instalar um Tema Personalizado",
-      "install_custom_theme_description": "Instalar um tema personalizado a partir de um ficheiro JSON.\n\nEste pode ser um tema que tenha você modificado, criado ou baixado.",
-      "install_custom_theme_description_2": "Se baixar um tema da internet, por favor certifique-se que confia na fonte e que verificou que não tem código malicioso no mesmo antes de o instalar.",
+      "install_custom_theme_description": "Instalar um tema personalizado a partir de um ficheiro JSON.\n\nEste pode ser um tema que tenha você modificado, criado ou descarregado.",
+      "install_custom_theme_description_2": "Se descarregar um tema da internet, por favor certifique-se que confia na fonte e que verificou que não tem código malicioso no mesmo antes de o instalar.",
       "install_theme": "Instalar Tema",
       "logo": "Logotipo",
       "logo_description": "Apresente o seu logo de empresa em formato PNG no canto superior-esquerdo. Indique a largura em pixels - a altura ajustará automaticamente para manter o aspecto. Utilize uma imagem pelo menos tão larga quanto o seu monitor para garantir a qualidade.",
@@ -82,6 +91,9 @@
     "button": {
       "branding": {
         "save": "Guardar as Definições de Marca"
+      },
+      "myProfile": {
+        "save": "Guardar alterações de perfil"
       },
       "myShares": {
         "create": "Criar Partilha"
@@ -110,9 +122,9 @@
         "title": "Informação do fornecedor de autenticação"
       },
       "downloadLimit": {
-        "description": "Pode definir o limite de baixamentos para qualquer partilha ao clicar no número do lado direito e inserindo o novo limite. Deixe a caixa vazia para remover o limite.",
+        "description": "Pode definir o limite de descarregamentos para qualquer partilha ao clicar no número do lado direito e inserindo o novo limite. Deixe a caixa vazia para remover o limite.",
         "description2": "As alterações serão guardadas automaticamente quando clicar fora da caixa.",
-        "title": "Ajuda sobre o limite de baixamentos"
+        "title": "Ajuda sobre o limite de descarregamentos"
       }
     },
     "provider": {
@@ -151,7 +163,7 @@
       "emails": "Notificações",
       "enable_share_deleted_emails": "Ativar E-mails de Partilhas Eliminadas",
       "enable_share_deletion_warning_emails": "Ativar E-mails de Avisos de Eliminação de Partilhas",
-      "enable_share_downloaded_emails": "Ativar E-mails de Baixamento de Partilhas",
+      "enable_share_downloaded_emails": "Ativar E-mails de Partilhas Descarregadas",
       "enable_share_expired_warning_emails": "Ativar E-mails de Partilhas Expiradas",
       "enable_share_expiry_warning_emails": "Ativar E-mails de Aviso de Expiração de Partilhas",
       "enabled": "Ativado",
@@ -175,7 +187,67 @@
       "share_deleted_emails": "E-mails de \"partilha eliminada\"",
       "share_deleted_emails_description": "Notificar os utilizadores quando as suas partilhas forem permanentemente eliminadas do sistema. Isto assegura o ciclo de vida do conteúdo por motivos de segurança e conformidade.",
       "share_deletion_warning_emails": "E-mails de aviso de \"Partilha eliminada\"",
-      "share_deletion_warning_emails_description": "Avisa os utilizadores com antecedência de que as suas partilhas expiradas serão permanentemente eliminadas. Isto dará aos utilizadores uma oportunidade final de guardar conteúdo se este for importante."
+      "share_deletion_warning_emails_description": "Avisa os utilizadores com antecedência de que as suas partilhas expiradas serão permanentemente eliminadas. Isto dará aos utilizadores uma oportunidade final de guardar conteúdo se este for importante.",
+      "share_downloaded_emails": "E-mails de \"Partilha descarregada\"",
+      "share_downloaded_emails_description": "Notificar os proprietários das partilhas que o seu conteúdo foi descarregado pela primeira vez. Isto ajuda os utilizadores a manterem-se a par de quando os destinatários acedem aos ficheiros partilhados.",
+      "share_expired_warning_emails": "E-mails de aviso de \"Partilha expirada\"",
+      "share_expired_warning_emails_description": "Alertar os utilizadores quando as suas partilhas atingirem a data de expiração e deixarem de estar disponíveis para os seus destinatários. Ajuda a manter os utilizadores a par do estado das suas partilhas.",
+      "share_expiry_warning_emails": "E-mails de aviso de \"Partilha a expirar\"",
+      "share_expiry_warning_emails_description": "Enviar notificações proativas aos utilizadores avisando que as suas partilhas se aproximam da data de expiração. Isto dá oportunidade de extender o prazo para descarregamento se for necessário.",
+      "shares": "Partilhas",
+      "show_language_selector": "Apresentar Selecionador de Idioma",
+      "show_language_selector_description": "Visibilidade do menu de seleção de idioma no canto superior-direito da aplicação. Quando ligada os utilizadores podem rapidamente alternar entre os idiomas de interface disponíveis.",
+      "smtp": "SMTP",
+      "smtp_host": "Anfitrião de SMTP",
+      "smtp_host_description": "Endereço do servidor para envio de e-mails. Este é utilizado para enviar notificações e outros e-mails de sistema para os utilizadores.",
+      "smtp_password": "Palavra passe de SMTP",
+      "smtp_password_description": "A palavra passe utilizada para autenticação no seu servidor de SMTP. Estas credenciais permitem à aplicação o envio de e-mails através do fornecedor do serviço.",
+      "smtp_port": "Porta SMTP",
+      "smtp_port_description": "A porta utilizada para ligação com o seu servidor de SMTP. Portas comuns incluem 25 (padrão), 465 (SSL) e 587 (TLS).",
+      "smtp_sender_address": "Endereço SMTP do Remetente",
+      "smtp_sender_address_description": "O endereço de e-mail que será utilizado como remetente de todos os e-mails do sistema. Este endereço deverá ser válido e adequadamente configurado com o seu serviço SMTP.",
+      "smtp_sender_name": "Nome do Remetente de SMTP",
+      "smtp_sender_name_description": "O nome a aparecer como remetente dos e-mails de sistema. Os utilizadores verão este nome nos seus clientes de e-mail (ex. \"O nome da sua aplicação\" ou \"O suporte da sua aplicação\")",
+      "smtp_username": "Nome de utilizadores de SMTP",
+      "smtp_username_description": "O nome de utilizador necessário para autenticação com o seu servidor de SMTP. Este é tipicamente o endereço de e-mail ou nome de conta associada ao seu serviço de e-mail.",
+      "your_auth_providers": "O seus Fornecedores de Autenticação"
+    },
+    "system_auth_provider_info_link": "Sobre {name}",
+    "table": {
+      "actions": "Ações",
+      "dates": "Datas",
+      "downloads": "Descarregamentos",
+      "files": "Ficheiros",
+      "name": "Nome"
+    },
+    "title": {
+      "branding": "Marca & Interface",
+      "linked_accounts": "Contas Conectadas",
+      "manage": "Gerir",
+      "myProfile": "A Minha Conta",
+      "myShares": "As Minhas Partilhas",
+      "system": "Definições de Sistema",
+      "users": "Utilizadores",
+      "users.edit": "Editar {name}"
+    },
+    "users": {
+      "account": "Tipo de Conta",
+      "close": "Cancelar",
+      "current_password_required": "É necessária uma palavra-passe atual",
+      "link_provider_confirm": "Associar realmente a sua conta a este fornecedor?",
+      "linked": "Conta ligada",
+      "not_linked": "Conta não ligada",
+      "password_confirmation_mismatch": "A palavra-passe e a confirmação da palavra-passe têm de corresponder",
+      "password_min_length": "A palavra-passe deve ter pelo menos {length} caracteres",
+      "password_required": "É necessária uma palavra-passe",
+      "password_update_failed": "Falha na atualização da palavra-passe",
+      "password_updated": "Palavra-passe actualizada",
+      "profile_errors": "Verifique a sua entrada",
+      "profile_update_failed": "Falha ao atualizar o seu perfil",
+      "profile_updated": "O seu perfil foi atualizado",
+      "provider_unlink_failed": "Falha ao desvincular o fornecedor da sua conta",
+      "provider_unlinked": "O fornecedor foi desvinculado da sua conta",
+      "unlink_provider_confirm": "Desvincular realmente a sua conta deste fornecedor?"
     }
   }
 }

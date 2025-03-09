@@ -39,7 +39,7 @@
   },
   "confirm_delete_user": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
   "download": {
-    "files": "{value, plural, one {Télécharger fichier #.} other {Télécharger fichiers {value}} }"
+    "files": "{value, plural, one {Télécharger # fichier} other {Télécharger {value} fichiers} }"
   },
   "email": "Adresse mail",
   "full_name": "Nom complet",
@@ -48,6 +48,15 @@
     "from": "Message de {name}"
   },
   "settings": {
+    "account": {
+      "change_password": "Modifier mon mot de passe",
+      "create_link": "Lier",
+      "email": "Mon adresse e-mail",
+      "linked_accounts_description": "Liez votre compte à un fournisseur externe pour faciliter la connexion. Une fois le lien établi, vous pouvez vous connecter directement en sélectionnant le bouton du fournisseur sur l'écran de connexion.",
+      "myProfile_description": "Mettez à jour votre adresse e-mail ou changez votre nom. Vous pouvez modifier votre mot de passe en cliquant sur le bouton « Modifier mon mot de passe » et en suivant les instructions.",
+      "name": "Mon nom complet",
+      "unlink": "Délier"
+    },
     "branding": {
       "background_images": "Images de fond",
       "background_images_description": "Téléchargez des images d'arrière-plan personnalisées pour remplacer les images par défaut d'Unsplash. Les images tournent de manière aléatoire toutes les 3 minutes pour créer une identité visuelle dynamique.",
@@ -82,6 +91,9 @@
     "button": {
       "branding": {
         "save": "Sauvegarder les paramètres de votre identité visuelle."
+      },
+      "myProfile": {
+        "save": "Enregistrer les modifications du profil"
       },
       "myShares": {
         "create": "Créer un partage"
@@ -210,6 +222,7 @@
     },
     "title": {
       "branding": "Identité visuelle et interface utilisateur",
+      "linked_accounts": "Comptes liés",
       "manage": "Gérer",
       "myProfile": "Mon profil",
       "myShares": "Mes partages",
@@ -230,6 +243,7 @@
       "close": "Fermer",
       "created": "Créé",
       "current_password": "Mot de passe actuel",
+      "current_password_required": "Le mot de passe actuel est requis",
       "delete": "Supprimer",
       "edit": "Editer",
       "edit_my_profile": "Modifier mon profil",
@@ -239,10 +253,24 @@
       "failed_to_update_user": "Échec de la mise à jour de l'utilisateur",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Ne rien indiquer pour conserver le même mot de passe.",
+      "link_provider_confirm": "Voulez-vous vraiment lier votre compte à ce fournisseur ?",
+      "linked": "Compte lié",
       "name": "Nom",
+      "not_linked": "Compte non lié",
       "password": "Nouveau mot de passe",
       "password_confirmation": "Confirmer le nouveau mot de passe",
+      "password_confirmation_mismatch": "Le mot de passe et la confirmation du mot de passe doivent correspondre",
+      "password_min_length": "Le mot de passe doit contenir au moins {length} caractères",
+      "password_required": "Le mot de passe est requis",
+      "password_update_failed": "La mise à jour du mot de passe a échoué",
+      "password_updated": "Mot de passe mis à jour",
+      "profile_errors": "Veuillez vérifier votre saisie",
+      "profile_update_failed": "Impossible de mettre à jour votre profil",
+      "profile_updated": "Votre profil a été mis à jour",
+      "provider_unlink_failed": "Impossible de dissocier le fournisseur de votre compte",
+      "provider_unlinked": "Le fournisseur a été dissocié de votre compte",
       "save_changes": "Enregistrer les modifications",
+      "unlink_provider_confirm": "Voulez-vous vraiment dissocier votre compte de ce fournisseur ?",
       "update_password": "Mise à jour du mot de passe",
       "user": "Utilisateur",
       "user_created_successfully": "Utilisateur créé avec succès",

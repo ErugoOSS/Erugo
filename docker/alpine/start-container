@@ -55,6 +55,15 @@ echo "* * * * * . /var/www/html/.env.cron; cd /var/www/html && php artisan sched
 # Always run migrations
 su-exec erugo php artisan migrate --force
 su-exec erugo php artisan db:seed --force
+# Clear templates cache
+su-exec erugo php artisan view:clear
+# Clear config cache
+su-exec erugo php artisan config:clear
+# Clear route cache
+su-exec erugo php artisan route:clear
+# Clear compiled classes
+su-exec erugo php artisan clear-compiled
+
 
 # Execute command or start supervisor
 if [ $# -gt 0 ]; then

@@ -7,7 +7,9 @@ use Jumbojett\OpenIDConnectClient;
 use App\AuthProviders\AuthProviderUser;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Validator;
-
+use App\AuthProviders\overrides\ErugoOpenIDConnectclient;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cookie;
 
 class OIDCAuthProvider extends BaseAuthProvider
 {
@@ -33,46 +35,73 @@ class OIDCAuthProvider extends BaseAuthProvider
       $this->throwMissingDataException();
     }
 
-    $client =  new OpenIDConnectClient(
+    $client =  new ErugoOpenIDConnectclient(
       $this->base_url,
       $this->client_id,
       $this->client_secret
     );
+
     // Set callback URL and required scopes
-    $client->setRedirectURL(route('social.provider.callback', ['provider' => $this->provider->uuid]));
+    $route = route('social.provider.callback', ['provider' => $this->provider->uuid]);
+    $client->setRedirectURL($route);
     $client->addScope(['openid', 'email', 'profile']);
+
     return $client;
   }
+
   public function redirect()
   {
-    // Create OIDC client
-    $oidc =  $this->createClient();
+    // Store the linking data in an encrypted cookie
+    $linkingData = [
+      'linkingAccount' => session('linkingAccount'),
+      'linkingUserId' => session('linkingUserId')
+    ];
+    session_start();
+    $_SESSION['oidc_linking_data'] = $linkingData;
 
-    // Begin authentication flow - this will redirect the user
+
+    // Create OIDC client
+    $oidc = $this->createClient();
+
+    // Begin authentication flow
     $oidc->authenticate();
 
-    // This code will only run if authentication fails to redirect
     $this->throwAuthFailureException();
   }
 
   public function handleCallback(): AuthProviderUser
   {
-    // Create OIDC client
-    $oidc = $this->createClient();
+    session_start();
+    $linkingData = $_SESSION['oidc_linking_data'];
 
-    // Complete authentication and get user info
+    \Log::info("Linking data: " . json_encode($linkingData));
+
+    if (isset($linkingData['linkingAccount']) && isset($linkingData['linkingUserId'])) {
+      session(['linkingAccount' => $linkingData['linkingAccount']]);
+      session(['linkingUserId' => $linkingData['linkingUserId']]);
+    }
+
+    // Create OIDC client and complete authentication
+    $oidc = $this->createClient();
     $oidc->authenticate();
+
+    // Get user info
     $userInfo = $oidc->requestUserInfo();
 
-    // Return the user information as an AuthProviderUser
-    return new AuthProviderUser([
+    \Log::info("User info: " . json_encode($userInfo));
+    $userdata = [
       'sub' => $userInfo->sub,
       'name' => $userInfo->name,
       'email' => $userInfo->email,
-      'avatar' => $userInfo->picture,
-      'verified' => $userInfo->email_verified,
-    ]);
+      'avatar' => $userInfo->picture ?? null,
+      'verified' => $userInfo->email_verified ?? false
+    ];
+
+    \Log::info("User data: " . json_encode($userdata));
+
+    return new AuthProviderUser($userdata);
   }
+
 
   public static function getIcon(): string
   {

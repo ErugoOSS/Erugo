@@ -48,6 +48,15 @@
     "from": "Nachricht von {name}"
   },
   "settings": {
+    "account": {
+      "change_password": "Mein Passwort ändern",
+      "create_link": "Link",
+      "email": "Meine E-Mail Adresse",
+      "linked_accounts_description": "Verknüpfen Sie Ihr Konto mit einem externen Anbieter, um sich einfacher anzumelden. Nach der Verknüpfung können Sie sich direkt anmelden, indem Sie die Schaltfläche des Anbieters auf dem Anmeldebildschirm auswählen.",
+      "myProfile_description": "Aktualisieren Sie Ihre E-Mail Adresse oder ändern Sie Ihren Namen. Sie können Ihr Passwort ändern, indem Sie auf die Schaltfläche \"Mein Passwort ändern\" klicken und den Anweisungen folgen.",
+      "name": "Mein vollständiger Name",
+      "unlink": "Unlink"
+    },
     "branding": {
       "background_images": "Hintergrundbilder",
       "background_images_description": "Laden Sie benutzerdefinierte Hintergrundbilder hoch, um die Unsplash-Standardwerte zu ersetzen. Die Bilder werden alle 3 Minuten nach dem Zufallsprinzip gedreht, um ein dynamisches Branding zu schaffen.",
@@ -83,6 +92,9 @@
       "branding": {
         "save": "Branding-Einstellungen speichern"
       },
+      "myProfile": {
+        "save": "Profiländerungen speichern"
+      },
       "myShares": {
         "create": "Anteil erstellen"
       },
@@ -96,7 +108,7 @@
     "close": "Schließen Sie",
     "description": {
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihr eigenes Branding hinzu.",
-      "myProfile": "Verwalten Sie Ihr Profil.",
+      "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre Anteile.",
       "system": "Verwalten Sie das Verhalten Ihrer Erugo-Instanz.",
       "users": "Verwalten Sie Ihre Benutzer."
@@ -210,8 +222,9 @@
     },
     "title": {
       "branding": "Markenbildung & Benutzeroberfläche",
+      "linked_accounts": "Verknüpfte Konten",
       "manage": "Verwalten Sie",
-      "myProfile": "Mein Profil",
+      "myProfile": "Mein Konto",
       "myShares": "Meine Aktien",
       "system": "Systemeinstellungen",
       "users": "Benutzer",
@@ -227,9 +240,10 @@
       "admin_help_text": "Machen Sie den Benutzer zu einem Administrator.",
       "admin_help_text_2": "Der Benutzer hat die gleichen Berechtigungen wie Sie.\n",
       "cannot_delete_yourself": "Sie können sich nicht selbst löschen",
-      "close": "Schließen Sie",
+      "close": "Abbrechen",
       "created": "Erstellt",
       "current_password": "Aktuelles Passwort",
+      "current_password_required": "Aktuelles Passwort ist erforderlich",
       "delete": "Löschen",
       "edit": "bearbeiten",
       "edit_my_profile": "Mein Profil bearbeiten",
@@ -239,10 +253,24 @@
       "failed_to_update_user": "Benutzer kann nicht aktualisiert werden",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Leer lassen, um dasselbe Passwort beizubehalten.",
+      "link_provider_confirm": "Verknüpfen Sie Ihr Konto wirklich mit diesem Anbieter?",
+      "linked": "Verbundenes Konto",
       "name": "Name",
+      "not_linked": "Nicht verknüpftes Konto",
       "password": "Neues Passwort",
       "password_confirmation": "Neues Passwort bestätigen",
+      "password_confirmation_mismatch": "Passwort und Passwort-Bestätigung müssen übereinstimmen",
+      "password_min_length": "Das Passwort muss mindestens {length} Zeichen lang sein",
+      "password_required": "Passwort ist erforderlich",
+      "password_update_failed": "Passwortaktualisierung fehlgeschlagen",
+      "password_updated": "Passwort aktualisiert",
+      "profile_errors": "Bitte überprüfen Sie Ihre Eingaben",
+      "profile_update_failed": "Sie konnten Ihr Profil nicht aktualisieren",
+      "profile_updated": "Ihr Profil wurde aktualisiert",
+      "provider_unlink_failed": "Die Verknüpfung des Anbieters mit Ihrem Konto konnte nicht aufgehoben werden",
+      "provider_unlinked": "Der Anbieter wurde von Ihrem Konto abgemeldet",
       "save_changes": "Änderungen speichern",
+      "unlink_provider_confirm": "Ihr Konto wirklich von diesem Anbieter abkoppeln?",
       "update_password": "Passwort aktualisieren",
       "user": "Benutzer",
       "user_created_successfully": "Benutzer erfolgreich angelegt",

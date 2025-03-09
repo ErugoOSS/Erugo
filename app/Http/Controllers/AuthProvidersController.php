@@ -7,6 +7,7 @@ use App\Models\AuthProvider;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\URL;
+
 /**
  * Controller responsible for managing authentication providers
  * 
@@ -41,6 +42,10 @@ class AuthProvidersController extends Controller
     $authProviders = $authProviders->map(function ($authProvider) {
       // Get the fully qualified provider class name
       $class = $this->getProviderClass($authProvider->provider_class);
+      //does the class exist?
+      if (!$this->classExists($class)) {
+        return null;
+      }
 
       // Return a formatted array with provider details
       return [
@@ -58,13 +63,25 @@ class AuthProvidersController extends Controller
       ];
     });
 
+    //remove nulls
+    $authProviders = $authProviders->filter(function ($authProvider) {
+      return $authProvider !== null;
+    });
+
+    //convert back to array
+    $authProvidersArray = [];
+    foreach ($authProviders as $authProvider) {
+      $authProvidersArray[] = $authProvider;
+    }
+
+
     // Return JSON response with success status and data
     return response()->json(
       [
         'status' => 'success',
         'message' => 'Auth providers fetched successfully',
         'data' => [
-          'authProviders' => $authProviders
+          'authProviders' => $authProvidersArray
         ]
       ]
     );
@@ -210,6 +227,11 @@ class AuthProvidersController extends Controller
   {
     // Get the provider class to use its validator
     $class = $this->getProviderClass($provider['class']);
+    //does the class exist?
+    if (!$this->classExists($class)) {
+      $errorBag->add($provider['id'], 'Provider class does not exist');
+      return false;
+    }
     // Validate provider-specific configuration
     $providerConfigValidator = $class::getValidator($provider['provider_config']);
 
@@ -303,6 +325,10 @@ class AuthProvidersController extends Controller
     $providers = [];
     foreach ($providerTypes as $providerType) {
       $class = $this->getProviderClass($providerType);
+      //does the class exist?
+      if (!$this->classExists($class)) {
+        continue;
+      }
       $providers[] = [
         'name' => $class::getName(),
         'description' => $class::getDescription(),
@@ -340,6 +366,10 @@ class AuthProvidersController extends Controller
     // Transform each provider to include only necessary public information
     $authProviders = $authProviders->map(function ($authProvider) {
       $class = $this->getProviderClass($authProvider->provider_class);
+      //does the class exist?
+      if (!$this->classExists($class)) {
+        return null;
+      }
       $icon = $class::getIcon();
       return [
         'id' => $authProvider->id,
@@ -348,15 +378,40 @@ class AuthProvidersController extends Controller
       ];
     });
 
+    //remove nulls
+    $authProviders = $authProviders->filter(function ($authProvider) {
+      return $authProvider !== null;
+    });
+
+    //convert back to array
+    $authProvidersArray = [];
+    foreach ($authProviders as $authProvider) {
+      $authProvidersArray[] = $authProvider;
+    }
     // Return JSON response with success status and data
     return response()->json(
       [
         'status' => 'success',
         'message' => 'Auth providers fetched successfully',
         'data' => [
-          'authProviders' => $authProviders
+          'authProviders' => $authProvidersArray
         ]
       ]
     );
+  }
+
+  private function classExists($class)
+  {
+    //can we find the file?
+    $classWithoutNamespace = str_replace('App\\AuthProviders\\', '', $class);
+    $path = app_path('AuthProviders/' . $classWithoutNamespace . '.php');
+    if (!file_exists($path)) {
+      return false;
+    }
+    //does the class exist?
+    if (!class_exists($class)) {
+      return false;
+    }
+    return true;
   }
 }

@@ -700,6 +700,20 @@ export const getAvailableProviderTypes = async () => {
   return data.data.providers
 }
 
+export const unlinkProvider = async (providerId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/users/me/providers/${providerId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 //misc methods
 export const getHealth = async () => {
   const response = await fetch(`${apiUrl}/api/health`)

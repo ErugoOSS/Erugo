@@ -8,11 +8,12 @@ import Settings from './components/settings.vue'
 import Setup from './components/setup.vue'
 import { unsplashImages } from './unsplashImages'
 import { getApiUrl } from './utils'
-import { domData } from './domData'
+import { domData, domError, domSuccess } from './domData'
 import { emitter, store } from './store'
 import { logout, getBackgroundImages } from './api'
 import { TolgeeProvider } from '@tolgee/vue'
 import LanguageSelector from './components/languageSelector.vue'
+import { useToast } from 'vue-toastification'
 
 const apiUrl = getApiUrl()
 
@@ -27,8 +28,30 @@ const auth = ref(null)
 const downloadShareCode = ref('')
 const settingsPanel = ref(null)
 const setupNeeded = ref(false)
+const toast = useToast()
 
 onMounted(() => {
+  if (domError().length > 0) {
+    console.log('error', domError())
+    nextTick(() => {
+      toast.error(domError())
+    })
+  }
+
+  if (domSuccess().length > 0) {
+    nextTick(() => {
+      console.log('domSuccess', domSuccess())
+      toast.success(domSuccess())
+      if (domSuccess() == 'Account linked successfully') {
+        store.setSettingsOpen(true)
+        settingsPanel.value.setActiveTab('myProfile')
+        setTimeout(() => {
+          settingsPanel.value.handleNavItemClicked('linked_accounts')
+        }, 500)
+      }
+    })
+  }
+
   setupNeeded.value = domData().setup_needed
 
   if (setupNeeded.value == 'true') {

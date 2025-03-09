@@ -50,6 +50,7 @@ Route::group([], function ($router) {
     Route::group(['prefix' => 'users/me', 'middleware' => ['auth']], function ($router) {
         Route::get('/', [UsersController::class, 'me'])->name('profile.view');
         Route::put('/', [UsersController::class, 'updateMe'])->name('profile.update');
+        Route::delete('/providers/{providerId}', [UsersController::class, 'unlinkProvider'])->name('profile.unlinkProvider');
     });
 
     //manage users [auth, admin]
@@ -145,4 +146,5 @@ Route::group([], function ($router) {
     Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
     Route::get('/backgrounds/{file}/thumb', [BackgroundsController::class, 'useThumb'])->name('backgrounds.useThumb');
     Route::get('/backgrounds/{file}', [BackgroundsController::class, 'use'])->name('backgrounds.use');
+
 });
