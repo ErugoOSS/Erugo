@@ -345,6 +345,7 @@ td {
       padding-bottom: 1.5px;
       color: var(--panel-section-text-color);
       z-index: 1;
+      pointer-events: none;
     }
   .download_count {
     position: relative;

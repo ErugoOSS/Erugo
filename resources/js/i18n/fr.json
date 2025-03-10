@@ -173,7 +173,8 @@
         "english": "Anglais",
         "french": "Anglais",
         "german": "Allemand",
-        "italian": "Italien"
+        "italian": "Italien",
+        "portuguese": "Portugais"
       },
       "login_message": "Message de connexion",
       "login_message_description": "Ajoutez un message personnalisé ou une annonce qui s'affichera sur l'écran de connexion. Ce message peut être utilisé pour des messages de bienvenue, des notifications importantes ou des annonces temporaires.",
@@ -269,7 +270,7 @@
       "profile_updated": "Votre profil a été mis à jour",
       "provider_unlink_failed": "Impossible de dissocier le fournisseur de votre compte",
       "provider_unlinked": "Le fournisseur a été dissocié de votre compte",
-      "save_changes": "Enregistrer les modifications",
+      "save_changes": "Enregistrer",
       "unlink_provider_confirm": "Voulez-vous vraiment dissocier votre compte de ce fournisseur ?",
       "update_password": "Mise à jour du mot de passe",
       "user": "Utilisateur",

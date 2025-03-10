@@ -19,7 +19,8 @@ const languages = [
   { code: 'de', name: 'Deutsch', flag: 'de' },
   { code: 'fr', name: 'Français', flag: 'fr' },
   { code: 'it', name: 'Italiano', flag: 'it' },
-  { code: 'nl', name: 'Nederlands', flag: 'nl' }
+  { code: 'nl', name: 'Nederlands', flag: 'nl' },
+  { code: 'pt', name: 'Português', flag: 'pt' }
 ]
 
 const handleClickOutside = (event) => {

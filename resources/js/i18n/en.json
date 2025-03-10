@@ -173,7 +173,8 @@
         "english": "English",
         "french": "French",
         "german": "German",
-        "italian": "Italian"
+        "italian": "Italian",
+        "portuguese": "Portuguese"
       },
       "login_message": "Login Message",
       "login_message_description": "Add a custom message or announcement that will be displayed on the login screen. This can be used for welcome messages, important notifications, or temporary announcements.",
@@ -238,7 +239,7 @@
       "add_user_description": "We'll send an email to the user with a link to set their&nbsp;password.",
       "admin": "Admin",
       "admin_help_text": "Make the user an admin.",
-      "admin_help_text_2": "User will have the privileges as you.\n",
+      "admin_help_text_2": "User will have the same privileges as you.",
       "cannot_delete_yourself": "You cannot delete yourself",
       "close": "Cancel",
       "created": "Created",
@@ -260,7 +261,7 @@
       "password": "New Password",
       "password_confirmation": "Confirm New Password",
       "password_confirmation_mismatch": "Password and Password Confirmation must match",
-      "password_min_length": "Password must be at least {length} characters long",
+      "password_min_length": "Password must be at least {length} characters long.",
       "password_required": "Password is required",
       "password_update_failed": "Password update failed",
       "password_updated": "Password updated",

@@ -173,7 +173,8 @@
         "english": "Englisch",
         "french": "Französisch",
         "german": "Deutsch",
-        "italian": "Italienisch"
+        "italian": "Italienisch",
+        "portuguese": "Portugiesisch"
       },
       "login_message": "Login-Nachricht",
       "login_message_description": "Fügen Sie eine benutzerdefinierte Nachricht oder Ankündigung hinzu, die auf dem Anmeldebildschirm angezeigt werden soll. Dies kann für Willkommensnachrichten, wichtige Benachrichtigungen oder temporäre Ankündigungen verwendet werden.",
@@ -238,7 +239,7 @@
       "add_user_description": "Wir senden dem Benutzer eine E-Mail mit einem Link, über den er sein&nbsp;Passwort festlegen kann.",
       "admin": "Verwaltung",
       "admin_help_text": "Machen Sie den Benutzer zu einem Administrator.",
-      "admin_help_text_2": "Der Benutzer hat die gleichen Berechtigungen wie Sie.\n",
+      "admin_help_text_2": "Der Benutzer hat die gleichen Rechte wie Sie.",
       "cannot_delete_yourself": "Sie können sich nicht selbst löschen",
       "close": "Abbrechen",
       "created": "Erstellt",
@@ -260,7 +261,7 @@
       "password": "Neues Passwort",
       "password_confirmation": "Neues Passwort bestätigen",
       "password_confirmation_mismatch": "Passwort und Passwort-Bestätigung müssen übereinstimmen",
-      "password_min_length": "Das Passwort muss mindestens {length} Zeichen lang sein",
+      "password_min_length": "Das Passwort muss mindestens {length} Zeichen lang sein.",
       "password_required": "Passwort ist erforderlich",
       "password_update_failed": "Passwortaktualisierung fehlgeschlagen",
       "password_updated": "Passwort aktualisiert",

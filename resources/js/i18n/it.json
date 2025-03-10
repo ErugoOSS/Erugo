@@ -173,7 +173,8 @@
         "english": "Inglese",
         "french": "Francese",
         "german": "Tedesco",
-        "italian": "Italiano"
+        "italian": "Italiano",
+        "portuguese": "Portoghese"
       },
       "login_message": "Messaggio di accesso",
       "login_message_description": "Aggiungere un messaggio o un annuncio personalizzato che verrà visualizzato nella schermata di accesso. Può essere utilizzato per messaggi di benvenuto, notifiche importanti o annunci temporanei.",
@@ -238,7 +239,7 @@
       "add_user_description": "Invieremo un'e-mail all'utente con un link per impostare la sua password.",
       "admin": "Admin",
       "admin_help_text": "Rendere l'utente un amministratore.",
-      "admin_help_text_2": "L'utente avrà gli stessi privilegi dell'utente.\n",
+      "admin_help_text_2": "L'utente avrà gli stessi privilegi dell'utente.",
       "cannot_delete_yourself": "Non è possibile cancellare se stessi",
       "close": "Annullamento",
       "created": "Creato",
@@ -260,7 +261,7 @@
       "password": "Nuova password",
       "password_confirmation": "Conferma la nuova password",
       "password_confirmation_mismatch": "La password e la conferma della password devono corrispondere",
-      "password_min_length": "La password deve essere lunga almeno {length} caratteri",
+      "password_min_length": "La password deve essere lunga almeno {length} caratteri.",
       "password_required": "La password è necessaria",
       "password_update_failed": "Aggiornamento password fallito",
       "password_updated": "Password aggiornata",

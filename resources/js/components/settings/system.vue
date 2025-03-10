@@ -304,6 +304,8 @@ const handleDeleteAuthProvider = async (id) => {
                     <option value="it">{{ t('settings.system.languages.italian') }}</option>
                     <!-- Dutch-->
                     <option value="nl">{{ t('settings.system.languages.dutch') }}</option>
+                    <!-- Portuguese-->
+                    <option value="pt">{{ t('settings.system.languages.portuguese') }}</option>
                   </select>
                 </div>
 

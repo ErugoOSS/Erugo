@@ -15,7 +15,7 @@ import de from './i18n/de.json'
 import fr from './i18n/fr.json'
 import it from './i18n/it.json'
 import nl from './i18n/nl.json'
-
+import pt from './i18n/pt.json'
 let clickOutsideEvent = null
 
 const showHelpTip = (event, helpTipId) => {
@@ -121,7 +121,8 @@ const tolgee = Tolgee().use(DevTools()).use(FormatIcu()).init({
     de,
     fr,
     it,
-    nl
+    nl,
+    pt
   }
 })
 

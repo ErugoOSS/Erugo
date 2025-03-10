@@ -173,7 +173,8 @@
         "english": "Inglês",
         "french": "Francês",
         "german": "Alemão",
-        "italian": "Italiano"
+        "italian": "Italiano",
+        "portuguese": "Português"
       },
       "login_message": "Mensagem de Início de Sessão",
       "login_message_description": "Adicionar uma mensagem personalizada que será apresentada no ecrã de início de sessão. Esta pode ser utilizada como mensagem de boas-vindas, notificações importantes ou avisos temporários.",
@@ -232,22 +233,80 @@
     },
     "users": {
       "account": "Tipo de Conta",
+      "actions": "Ações",
+      "active": "Ativar",
+      "add": "Adicionar Utilizador",
+      "add_user_description": "Enviaremos um e-mail ao utilizador com um link para definir a sua palavra&nbsp;passe.",
+      "admin": "Administrador",
+      "admin_help_text": "Transformar o utilizador em administrador.",
+      "admin_help_text_2": "O utilizador terá os mesmos privilégios que você.",
+      "cannot_delete_yourself": "Não se pode eliminar a si próprio.",
       "close": "Cancelar",
-      "current_password_required": "É necessária uma palavra-passe atual",
-      "link_provider_confirm": "Associar realmente a sua conta a este fornecedor?",
-      "linked": "Conta ligada",
-      "not_linked": "Conta não ligada",
-      "password_confirmation_mismatch": "A palavra-passe e a confirmação da palavra-passe têm de corresponder",
-      "password_min_length": "A palavra-passe deve ter pelo menos {length} caracteres",
-      "password_required": "É necessária uma palavra-passe",
-      "password_update_failed": "Falha na atualização da palavra-passe",
-      "password_updated": "Palavra-passe actualizada",
-      "profile_errors": "Verifique a sua entrada",
+      "created": "Criado",
+      "current_password": "Palavra Passe Atual",
+      "current_password_required": "É necessária a Palavra Passe atual",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "edit_my_profile": "Editar o meu Perfil",
+      "email": "E-mail",
+      "failed_to_create_user": "Falha ao criar o utilizador",
+      "failed_to_delete_user": "Falha ao eliminar o utilizador",
+      "failed_to_update_user": "Falha ao atualizar o utilizador",
+      "id": "Identificação",
+      "leave_blank_to_keep_same_password": "Deixar vazio para manter a mesma palavra passe.",
+      "link_provider_confirm": "Deseja realmente associar a sua conta a este fornecedor?",
+      "linked": "Conta Ligada",
+      "name": "Nome",
+      "not_linked": "Conta Não Ligada",
+      "password": "Nova Palavra Passe",
+      "password_confirmation": "Confirmar a Nova Palavra Passe",
+      "password_confirmation_mismatch": "A Palavra Passe e a sua confirmação têm de ser idênticas.",
+      "password_min_length": "A palavra passe deve ter pelo menos {length} caracteres.",
+      "password_required": "É necessária uma palavra passe",
+      "password_update_failed": "Falha na atualização da palavra passe",
+      "password_updated": "Palavra passe atualizada",
+      "profile_errors": "Verifique a sua introdução",
       "profile_update_failed": "Falha ao atualizar o seu perfil",
       "profile_updated": "O seu perfil foi atualizado",
       "provider_unlink_failed": "Falha ao desvincular o fornecedor da sua conta",
       "provider_unlinked": "O fornecedor foi desvinculado da sua conta",
-      "unlink_provider_confirm": "Desvincular realmente a sua conta deste fornecedor?"
+      "save_changes": "Guardar Alterações",
+      "unlink_provider_confirm": "Deseja realmente desvincular a sua conta deste fornecedor?",
+      "update_password": "Atualizar a Palavra Passe",
+      "user": "Utilizador",
+      "user_created_successfully": "Utilizador criado com sucesso",
+      "user_deleted_successfully": "Utilizador eliminado com sucesso",
+      "user_updated_successfully": "Utilizador atualizado com sucesso",
+      "you": "Você"
     }
+  },
+  "share": {
+    "button": {
+      "expireNow": "Expirar Agora",
+      "extend": "Extender"
+    },
+    "contains": {
+      "count": "{value, plural, one {Contém # ficheiro} many {Contém {value} ficheiros} other {}}"
+    },
+    "created": "Criado",
+    "data_loading": "Carregando...",
+    "deletes": "Elimina",
+    "download_limit_reached": "Limite de Descarregamentos Atingido",
+    "download_limit_reached.message": "A partilha que está a tentar descarregar atingiu o limite de descarregamentos. Por favor peça ao criador da partilha que aumente o limite.",
+    "expired": "Partilha Expirada",
+    "expired.message": "A partilha que está a tentar descarregar expirou. Por favor peça ao criador da partilha que estenda o seu prazo com mais tempo.",
+    "expires": "Expira",
+    "expires.in": "Expira em {days} {dias, plural, one {dia} other {dias}}, {hours} {horas, plural, one {hora} other {horas}}, {minutes} {minutos, plural, one {minuto} other {minutos}}",
+    "files": {
+      "count": "{value, plural, one {# ficheiro} many {# ficheiros} other {}}",
+      "including": "incluíndo:"
+    }
+  },
+  "total_size": "Tamanho Total",
+  "upload": {
+    "files": "{value, plural, one {Transferir # ficheiro} many {Transferir # ficheiros} other {}}"
+  },
+  "uploading": {
+    "files": "{value, plural, one {Transferindo # ficheiro} many {Transferindo # ficheiros} other {}}"
   }
 }
