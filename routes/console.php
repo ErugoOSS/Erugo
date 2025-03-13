@@ -6,13 +6,12 @@ use App\Jobs\sendExpiryWarningEmails;
 use App\Jobs\sendExpiredWarningEmails;
 use App\Jobs\sendDeletionWarningEmails;
 
-
 Schedule::job(cleanExpiredShares::class)->daily();
 Schedule::job(sendExpiryWarningEmails::class)->daily();
 Schedule::job(sendExpiredWarningEmails::class)->hourly();
 Schedule::job(sendDeletionWarningEmails::class)->daily();
 
-//command to manually run the job
+
 Artisan::command('shares:clean-expired', function () {
     cleanExpiredShares::dispatch();
 })->purpose('Clean expired shares');

@@ -1,5 +1,26 @@
 #!/bin/sh
 
+echo "Erugo is starting..."
+echo "================================================"
+
+cat << 'EOF'
+██████████████    ████████  █████████████    █████ █████████████  █████████  
+   ███        ████ █████████████████████████    ████████████████████████████████
+    ████      █████████    ██████████  █████    █████████     █████████     ████
+     ████     ██████████████████████   █████    █████████     ████████      ████
+   ████   ██  █████████        █████   █████    █████████     █████████     ████
+ ████   ██████████ █████████████████    ████████████████████████████████████████
+███   ████  █████   ██████████ █████    █████████████ █████████████ ██████████  
+████████                                                       ████              
+ ██████                                              █████████████              
+                                                      ██████████                
+
+█████████████████████████████████████████████████████████████████████████████████
+EOF
+
+echo "https://erugo.app"
+echo "================================================"
+
 export APP_URL=/
 export ASSET_URL=/
 
@@ -46,28 +67,38 @@ fi
 
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
-env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env.cron
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env
 
-# Update crontab to source the environment file
-echo "* * * * * . /var/www/html/.env.cron; cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" | crontab -u erugo -
+# Create a temporary crontab file
+echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab
 
+# Prevent crontab from complaining about the cache directory
+mkdir -p /root/.cache/crontab
+
+# Install the crontab for the erugo user
+crontab -u erugo /tmp/erugo-crontab
+
+# Clean up
+rm /tmp/erugo-crontab
 
 # Always run migrations
+echo "Running migrations..."
 su-exec erugo php artisan migrate --force
+
+echo "Running seeds..."
 su-exec erugo php artisan db:seed --force
-# Clear templates cache
+
+echo "Clearing templates cache..."
 su-exec erugo php artisan view:clear
-# Clear config cache
+
+echo "Clearing config cache..."
 su-exec erugo php artisan config:clear
-# Clear route cache
+
+echo "Clearing route cache..."
 su-exec erugo php artisan route:clear
-# Clear compiled classes
+
+echo "Clearing compiled classes..."
 su-exec erugo php artisan clear-compiled
 
-
-# Execute command or start supervisor
-if [ $# -gt 0 ]; then
-    exec su-exec erugo "$@"
-else
-    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-fi
+echo "Starting services..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
