@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, defineExpose, inject, computed, nextTick } from 'vue'
+import { ref, onMounted, defineExpose, inject, computed, nextTick, watch } from 'vue'
 import {
   Settings,
   Tag,
@@ -79,7 +79,7 @@ const loadSettings = async () => {
 
     settingsLoaded.value = true
   } catch (error) {
-    toast.error('Failed to load settings')
+    toast.error(t.value('settings.failedToLoadSettings'))
     console.error(error)
   }
 }
@@ -98,24 +98,34 @@ const loadAuthProviders = async () => {
 }
 
 const saveAuthProviders = async () => {
-  console.log('saving auth providers', authProviders.value)
+  console.log('saving auth providers')
   saving.value = true
   try {
     await bulkUpdateAuthProviders(authProviders.value)
     saving.value = false
-    toast.success('Auth providers saved successfully')
+    toast.success(t.value('settings.authProvidersSavedSuccessfully'))
     if (!onLocalhost.value) {
       await loadAuthProviders()
     }
   } catch (error) {
     saving.value = false
-    toast.error('Failed to save auth providers')
+    toast.error(t.value('settings.failedToSaveAuthProviders'))
     console.error(error)
   }
 }
 
 const saveSettings = async () => {
-  console.log('saving settings', settings.value)
+  console.log('saving settings')
+
+  if (!shareSettingsLookOk()) {
+    return
+  }
+
+  //check if settings.application_url ends with a / and remove it if it does
+  if (settings.value.application_url.endsWith('/')) {
+    settings.value.application_url = settings.value.application_url.slice(0, -1)
+  }
+
   saving.value = true
   try {
     await saveSettingsById({
@@ -125,14 +135,35 @@ const saveSettings = async () => {
     await saveAuthProviders()
 
     saving.value = false
-    toast.success('Settings saved successfully')
+    toast.success(t.value('settings.settingsSavedSuccessfully'))
     await loadSettings()
   } catch (error) {
     saving.value = false
-    toast.error('Failed to save settings')
+    toast.error(t.value('settings.failedToSaveSettings'))
     console.error(error)
   }
 }
+
+const shareSettingsLookOk = () => {
+  if (settings.value.allow_chunked_uploads == false && settings.allow_direct_uploads == false) {
+    toast.error(t.value('settings.system.atLeastOneUploadMode'))
+    return false
+  }
+
+  //check that the selected upload mode is enabled
+  if (settings.value.default_upload_mode == 'direct' && settings.value.allow_direct_uploads == false) {
+    toast.error(t.value('settings.system.direct_uploads_disabled_but_default'))
+    return false
+  }
+
+  if (settings.value.default_upload_mode == 'chunked' && settings.value.allow_chunked_uploads == false) {
+    toast.error(t.value('settings.system.chunked_uploads_disabled_but_default'))
+    return false
+  }
+
+  return true
+}
+
 
 const handleNavItemClicked = (item) => {
   emit('navItemClicked', item)
@@ -387,6 +418,29 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
+                <h6 class="mt-3 mb-3">{{ $t('settings.system.upload_modes') }}</h6>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input type="checkbox" id="allow_direct_uploads" v-model="settings.allow_direct_uploads" />
+                    <label for="allow_direct_uploads">{{ $t('settings.system.allow_direct_uploads') }}</label>
+                  </div>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input type="checkbox" id="allow_chunked_uploads" v-model="settings.allow_chunked_uploads" />
+                    <label for="allow_chunked_uploads">{{ $t('settings.system.allow_chunked_uploads') }}</label>
+                  </div>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <label for="default_upload_mode">{{ $t('settings.system.default_upload_mode') }}</label>
+                  <select id="default_upload_mode" v-model="settings.default_upload_mode">
+                    <option value="direct">{{ $t('settings.system.direct') }}</option>
+                    <option value="chunked">{{ $t('settings.system.chunked') }}</option>
+                  </select>
+                </div>
+
               </div>
             </div>
           </div>
@@ -398,6 +452,12 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.max_share_size_description') }}</p>
               <h6>{{ $t('settings.system.clean_files_after') }}</h6>
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
+              <h6>{{ $t('settings.system.allow_direct_uploads') }}</h6>
+              <p>{{ $t('settings.system.allow_direct_uploads_description') }}</p>
+              <h6>{{ $t('settings.system.allow_chunked_uploads') }}</h6>
+              <p>{{ $t('settings.system.allow_chunked_uploads_description') }}</p>
+              <h6>{{ $t('settings.system.default_upload_mode') }}</h6>
+              <p>{{ $t('settings.system.default_upload_mode_description') }}</p>
             </div>
           </div>
         </div>
@@ -729,7 +789,9 @@ const handleDeleteAuthProvider = async (id) => {
                   </div>
                 </div>
                 <div class="setting-group-body-item p-3 help-text text-small" id="new-provider" v-else>
-                  <p style="font-size: 0.8rem;opacity: 0.5;">{{ $t('settings.system.auth_providers_description_localhost') }}</p>
+                  <p style="font-size: 0.8rem; opacity: 0.5">
+                    {{ $t('settings.system.auth_providers_description_localhost') }}
+                  </p>
                 </div>
               </div>
             </div>

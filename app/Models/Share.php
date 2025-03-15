@@ -47,6 +47,11 @@ class Share extends Model
     return $this->hasMany(File::class);
   }
 
+  public function getFileCountAttribute()
+  {
+    return $this->files()->count();
+  }
+
   public function user()
   {
     return $this->belongsTo(User::class);
@@ -94,29 +99,31 @@ class Share extends Model
     }
 
     $deletesAt = now()->subDays($cleanFilesAfterDays);
-    \Log::info('Cleaning shares after ' . $deletesAt);
 
     return $query->where('expires_at', '<', $deletesAt)->where('status', '!=', 'deleted');
   }
 
 
-  public function cleanFiles()
+  public function cleanFiles($disableEmail = false)
   {
     try {
       $filePath = $this->path;
-      //is the path a directory?
-      if (is_dir($filePath)) {
+      $completePath = storage_path('app/shares/' . $filePath);
+
+      if (is_dir($completePath)) {
         //delete all files in the directory
-        $files = glob($filePath . '/*');
+        $files = glob($completePath . '/*');
         foreach ($files as $file) {
           unlink($file);
         }
         //delete the directory
-        rmdir($filePath);
+        rmdir($completePath);
+      } else {
       }
       //or is it a zip file?
-      if (is_file($filePath . '.zip')) {
-        unlink($filePath . '.zip');
+      if (is_file($completePath . '.zip')) {
+        unlink($completePath . '.zip');
+      } else {
       }
 
       $this->status = 'deleted';
@@ -126,13 +133,12 @@ class Share extends Model
 
       $shouldSend = $settingsService->get('emails_share_deleted_enabled') ?? true;
 
-      if ($shouldSend) {
+      if (!$disableEmail && $shouldSend) {
         sendEmail::dispatch($this->user->email, shareDeletedWarningMail::class, ['share' => $this]);
       }
 
       return true;
     } catch (\Exception $e) {
-      Log::error('Error cleaning files for share ' . $this->id . ': ' . $e->getMessage());
       return false;
     }
   }

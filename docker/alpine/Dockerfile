@@ -21,7 +21,8 @@ LABEL maintainer="Dean Ward"
 WORKDIR /var/www/html
 
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
+ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm83 -F"
+ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
 # Enable community repository for PHP packages
@@ -58,8 +59,19 @@ RUN apk add --no-cache \
     php83-fileinfo \
     tzdata \
     libcap \
+    zip \
+    php83-fpm \
+    caddy \
     && ln -s /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
+
+# Create necessary directories
+RUN mkdir -p /run/php /var/www/html/public /etc/php83/php-fpm.d /etc/caddy
+
+
+
+COPY ./docker/alpine/www.conf /etc/php83/php-fpm.d/www.conf
+COPY ./docker/alpine/Caddyfile /etc/caddy/Caddyfile
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -70,6 +82,9 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php83
 # Create erugo user and group
 RUN addgroup erugo && \
     adduser -D -G erugo erugo
+
+# Set permissions
+RUN chown -R erugo:erugo /run/php
 
 
 # Copy necessary files from build stages and local context

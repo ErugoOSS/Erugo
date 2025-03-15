@@ -2,9 +2,9 @@
 
 [![Discord Banner 2](https://discord.com/api/guilds/1346116394038722602/widget.png?style=banner3)](https://discord.gg/M74X2wmqY8)
 
-# erugo 
+# Erugo
 
-erugo is a powerful, self-hosted file-sharing platform built with PHP and Laravel with a Vue.js frontend. It offers secure, customisable file-transfer capabilities through an elegant user interface, giving you complete control over your data while providing a seamless experience for both senders and recipients.
+Erugo is a powerful, self-hosted file-sharing platform built with PHP and Laravel with a Vue.js frontend. It offers secure, customisable file-transfer capabilities through an elegant user interface, giving you complete control over your data while providing a seamless experience for both senders and recipients.
 
 ## Demo
 
@@ -38,7 +38,7 @@ _New login screen with external auth provider support_
 - ["Ditch WeTransfer! Self-Host Erugo for Secure File Sharing with Docker" by KeepItTechie](https://www.youtube.com/watch?v=FrcBALXDIRU)
 
 ## Community Content
-- [Installer erugo avec Docker (french)](https://belginux.com/installer-erugo-avec-docker/)
+- [Installer Erugo avec Docker (french)](https://belginux.com/installer-erugo-avec-docker/)
 
 ## Key Features
 
@@ -62,7 +62,7 @@ Give this repository a star to keep track of releases and updates. Stars are als
 
 ## Quick Start
 
-You can use the example docker-compose.yaml below to run erugo in a container.
+You can use the example docker-compose.yaml below to run Erugo in a container.
 
 ```
 services:
@@ -81,7 +81,7 @@ networks:
     driver: bridge
 ```
 
-The above docker-compose.yml provides a basic configuration starting point that will get erugo up and running with a default sqlite database.
+The above docker-compose.yml provides a basic configuration starting point that will get Erugo up and running with a default sqlite database.
 
 ```sh
 docker compose up -d
@@ -89,7 +89,7 @@ docker compose up -d
 
 ## Configuration Options
 
-erugo can be customised via the web interface.
+Erugo can be customised via the web interface.
 
 - General settings
   - Application name
@@ -118,7 +118,7 @@ erugo can be customised via the web interface.
   - Manage themes
 
 
-## Using erugo
+## Using Erugo
 
 ### Creating a Share
 
@@ -143,7 +143,7 @@ You can extend share expiration, expire shares, set maximum downloads, and more.
 
 ## Customization
 
-As an open-source project, erugo can be tailored to your needs:
+As an open-source project, Erugo can be tailored to your needs:
 
 - Customize the UI to match your brand
 - Modify URL structures and authentication methods
@@ -163,7 +163,7 @@ Erugo is fully translatable. If you would like to contribute a translation, plea
 
 ## Development
 
-erugo is a Laravel application and uses Laravel Sail to run the development environment.
+Erugo is a Laravel application and uses Laravel Sail to run the development environment.
 
 Run the following commands to start the server, run migrations, ans start vite in dev mode.
 
@@ -193,25 +193,25 @@ DOCKER_HUB_USERNAME=<your-docker-hub-username> ./publish-docker-image.sh
 We welcome community contributions! Feel free to:
 
 - Submit bug reports and feature requests
-- Translate erugo to your language
+- Translate Erugo to your language
 - Create pull requests
 - Engage in discussions
 
 ## License
 
-erugo is released under the MIT License, ensuring maximum flexibility for both personal and commercial use.
+Erugo is released under the MIT License, ensuring maximum flexibility for both personal and commercial use.
 
 ---
 
-🚀 **Ready to start? Download erugo and begin sharing files securely in minutes!**
+🚀 **Ready to start? Download Erugo and begin sharing files securely in minutes!**
 
 ## Disclaimer
 
 ### Intended Use
-erugo is designed for legitimate file-sharing purposes such as transferring work assets, design files, media content, and other non-sensitive data between trusted parties. It is not intended for sharing illegal, harmful, or unauthorized content.
+Erugo is designed for legitimate file-sharing purposes such as transferring work assets, design files, media content, and other non-sensitive data between trusted parties. It is not intended for sharing illegal, harmful, or unauthorized content.
 
 ### Administrator Responsibility
-As a self-hosted application, administrators who deploy erugo are solely responsible for:
+As a self-hosted application, administrators who deploy Erugo are solely responsible for:
 - Compliance with all applicable local, national, and international laws
 - Proper configuration and security of their instance
 - Monitoring and moderating the content shared through their instance
@@ -228,4 +228,4 @@ We strongly recommend that administrators:
 - Regularly review system logs
 - Consider implementing additional monitoring if deploying in production environments
 
-By downloading, installing, or using erugo, you acknowledge that you have read and understood this disclaimer.
+By downloading, installing, or using Erugo, you acknowledge that you have read and understood this disclaimer.

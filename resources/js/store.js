@@ -5,7 +5,15 @@ import debounce from './debounce'
 const emitter = mitt()
 const toast = useToast()
 
-
+const uploadController = reactive({
+  pause: false,
+  pauseUpload() {
+    this.pause = true
+  },
+  resumeUpload() {
+    this.pause = false
+  }
+})
 
 const store = reactive({
   userId: null,
@@ -97,4 +105,6 @@ const showResetPasswordToast = () => {
 const debouncedShowResetPasswordToast = debounce(showResetPasswordToast, 100)
 
 
-export { emitter, store }
+
+
+export { emitter, store, uploadController }

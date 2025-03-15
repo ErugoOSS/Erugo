@@ -10,7 +10,7 @@ const tolgee = useTolgee(['language'])
 
 const dropdownVisible = ref(false)
 const showLanguageSelector = computed(() => {
-  return domData().show_language_selector === 'true'
+  return domData().show_language_selector === true
 })
 
 // Define available languages as a data structure
@@ -93,10 +93,16 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 5px;
+  opacity: 0.4;
+  transition: all 0.3s ease-in-out;
+  transform-origin: top right;
+  transform: scale(0.8);
 
   &:hover {
     background: var(--primary-button-background-color-hover);
     color: var(--primary-button-text-color-hover);
+    opacity: 1;
+    transform: scale(1);
   }
 
   svg {

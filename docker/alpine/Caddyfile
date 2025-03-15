@@ -1,0 +1,61 @@
+# Basic Caddyfile for Laravel
+:80 {
+    root * /var/www/html/public
+
+		# Handle static files first
+    file_server {
+        index index.php
+    }
+    
+    # Handle internal file serving for downloads
+    @download {
+        header X-Accel-Filepath *
+    }
+    
+    handle @download {
+        # Remove the X-Accel-Filepath header so it doesn't get sent to the client
+        header -X-Accel-Filepath
+        
+        # Extract the filepath from the header and serve it directly
+        rewrite * {header.X-Accel-Filepath}
+        
+        # Serve the file directly from the filesystem
+        file_server {
+            root /
+        }
+    }
+    
+    # Enable PHP processing
+    php_fastcgi unix//run/php/php-fpm.sock
+    
+    # Handle Laravel's front controller pattern
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Cache static assets
+    @static {
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    
+    # Enable Gzip compression
+    encode gzip
+    
+    # Simplified logging
+    log {
+        output file /var/www/html/storage/logs/caddy.log
+        format json
+    }
+    
+    # Provide security headers
+    header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-XSS-Protection "1; mode=block"
+        
+        # Remove server header
+        -Server
+    }
+}

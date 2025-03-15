@@ -1,0 +1,89 @@
+.Vue-Toastification__close-button {
+  opacity: 1!important;
+  height: 20px!important;
+  width: 20px!important;
+  &:hover {
+    background: none!important;
+  }
+}
+
+.Vue-Toastification__progress-bar {
+  border-radius: var(--panel-border-radius)!important;
+}
+
+
+.Vue-Toastification__toast {
+  border-radius: var(--panel-border-radius)!important;
+  border: none;
+  overflow: hidden;
+  color: var(--panel-text-color) !important;
+  background-color: var(--panel-background-color)!important;
+}
+
+.Vue-Toastification__toast--default {
+  background: var(--panel-background-color);
+  .Vue-Toastification__progress-bar {
+    background: #1976d2;
+  }
+  .Vue-Toastification__icon {
+    color: #1976d2;
+  }
+  .Vue-Toastification__close-button {
+    color: #1976d2;
+  }
+}
+.Vue-Toastification__toast--info {
+  background: var(--panel-background-color);
+  .Vue-Toastification__progress-bar {
+    background: #2196f3;
+  }
+  .Vue-Toastification__icon {
+    color: #2196f3;
+  }
+  .Vue-Toastification__close-button {
+    color: #2196f3;
+  }
+}
+.Vue-Toastification__toast--success {
+  background: var(--panel-background-color);
+  .Vue-Toastification__progress-bar {
+    background: #4caf50;
+  }
+  .Vue-Toastification__icon {
+    color: #4caf50;
+  }
+  .Vue-Toastification__close-button {
+    color: #4caf50;
+  }
+}
+.Vue-Toastification__toast--error {
+  background: var(--panel-background-color);
+  .Vue-Toastification__progress-bar {
+    background: #ff5252;
+  }
+  .Vue-Toastification__icon {
+    color: #ff5252;
+  }
+  .Vue-Toastification__close-button {
+    color: #ff5252;
+  }
+}
+.Vue-Toastification__toast--warning {
+  background: var(--panel-background-color);
+  .Vue-Toastification__progress-bar {
+    background: #ffc107;
+  }
+  .Vue-Toastification__icon {
+    color: #ffc107;
+  }
+  .Vue-Toastification__close-button {
+    color: #ffc107;
+  }
+}
+
+.Vue-Toastification__container.bottom-left,
+.Vue-Toastification__container.bottom-right,
+.Vue-Toastification__container.bottom-center {
+  bottom: 80px !important;
+  flex-direction: column-reverse;
+}

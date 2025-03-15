@@ -21,6 +21,9 @@ EOF
 echo "https://erugo.app"
 echo "================================================"
 
+
+
+
 export APP_URL=/
 export ASSET_URL=/
 
@@ -34,6 +37,13 @@ if [ ! -f /var/www/html/storage/.setup-lock ]; then
 else
     echo "Setup already completed, skipping..."
 fi
+
+# Make sure php-fpm run directory exists and has correct permissions
+mkdir -p /run/php
+chown -R erugo:erugo /run/php
+
+# Make sure public directory has correct permissions
+chown -R erugo:erugo /var/www/html/public
 
 # if the app.key file exists, load its contents into the environment as APP_KEY, otherwise generate a new one
 if [ -f /var/www/html/storage/app.key ]; then
@@ -99,6 +109,9 @@ su-exec erugo php artisan route:clear
 
 echo "Clearing compiled classes..."
 su-exec erugo php artisan clear-compiled
+
+echo "Updating legacy share paths..."
+su-exec erugo php artisan update-legacy-share-paths
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

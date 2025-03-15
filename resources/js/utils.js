@@ -21,9 +21,9 @@ const niceFileSize = size => {
 }
 
 const niceFileType = type => {
-  //take raw mime type and convert to human readable
   if (!type) return 'Unknown'
-  let mimeType = type.split('/')[1].split('+')[0]
+  if(type == 'unknown') return 'Unknown'
+  let mimeType = type?.split('/')[1].split('+')[0]
   mimeType = mimeType.charAt(0).toUpperCase() + mimeType.slice(1)
   //split . and take the last part
   mimeType = mimeType.split('.').pop()

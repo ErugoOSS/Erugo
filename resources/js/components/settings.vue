@@ -1,12 +1,25 @@
 <script setup>
 import { store } from '../store'
-import { CircleX, Settings, Users as UsersIcon, UserPlus, Save, Palette, User, Boxes, Plus } from 'lucide-vue-next'
+import {
+  CircleX,
+  Settings,
+  Users as UsersIcon,
+  UserPlus,
+  Save,
+  Palette,
+  User,
+  Boxes,
+  Plus,
+  EllipsisVertical,
+  Bomb
+} from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
 import BrandingSettings from './settings/branding.vue'
 import SystemSettings from './settings/system.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
+import ButtonWithMenu from './buttonWithMenu.vue'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -14,8 +27,11 @@ const { t } = useTranslate()
 
 //settings panels
 const usersPanel = ref(null)
+const mySharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
+
+const showDeletedShares = ref(false)
 // Create refs for the tab contents
 const tabContents = ref({
   branding: ref(null),
@@ -27,6 +43,11 @@ const tabContents = ref({
 
 onMounted(() => {
   activeTab.value = getInitialTab()
+  //do we have showDeletedShares in local storage?
+  const showDeletedSharesSetting = localStorage.getItem('showDeletedShares')
+  if (showDeletedSharesSetting) {
+    showDeletedShares.value = showDeletedSharesSetting === 'true'
+  }
 })
 
 const closeSettings = () => {
@@ -49,8 +70,6 @@ const getInitialTab = () => {
 
 // Track active tab
 const activeTab = ref(null)
-
-
 
 const createShare = () => {
   store.setSettingsOpen(false)
@@ -102,6 +121,16 @@ const getSettingsTitle = () => {
     default:
       return t.value('settings.title.erugo')
   }
+}
+
+const handlePruneExpiredShares = () => {
+  mySharesPanel.value.handlePruneExpiredShares()
+}
+
+const setShowDeletedShares = (value) => {
+  showDeletedShares.value = value
+  localStorage.setItem('showDeletedShares', value)
+  mySharesPanel.value.setShowDeletedShares(value)
 }
 </script>
 
@@ -274,10 +303,35 @@ const getSettingsTitle = () => {
                   </span>
                 </h2>
                 <div class="user-actions">
-                  <button @click="createShare">
-                    <Plus />
-                    {{ $t('settings.button.myShares.create') }}
-                  </button>
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <div class="checkbox-container pt-4">
+                        <input type="checkbox" id="show_deleted_shares" :checked="showDeletedShares" @change="setShowDeletedShares($event.target.checked)" />
+                        <label for="show_deleted_shares">{{ $t('settings.system.show_deleted_shares') }}</label>
+                      </div>
+                    </div>
+                    <div class="col-auto pe-0">
+                      <button @click="createShare">
+                        <Plus />
+                        {{ $t('settings.button.myShares.create') }}
+                      </button>
+                    </div>
+                    <div class="col-auto pe-0">
+                      <buttonWithMenu
+                        :items="[
+                          {
+                            icon: Bomb,
+                            label: t('settings.button.myShares.pruneExpired'),
+                            action: handlePruneExpiredShares
+                          }
+                        ]"
+                      >
+                        <template #icon>
+                          <EllipsisVertical />
+                        </template>
+                      </buttonWithMenu>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="tab-content-body">

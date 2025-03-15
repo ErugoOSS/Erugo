@@ -13,7 +13,7 @@ use App\Http\Middleware\maxRequestSize;
 use App\Services\SettingsService;
 use App\Http\Controllers\ThemesController;
 use App\Http\Controllers\AuthProvidersController;
-
+use App\Http\Controllers\UploadsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -108,6 +108,9 @@ Route::group([], function ($router) {
 
         //set download limit
         Route::post('/{id}/set-download-limit', [SharesController::class, 'setDownloadLimit'])->name('shares.setDownloadLimit');
+
+        //prune expired shares
+        Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
     });
 
     //manage themes [auth, admin]
@@ -146,5 +149,22 @@ Route::group([], function ($router) {
     Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
     Route::get('/backgrounds/{file}/thumb', [BackgroundsController::class, 'useThumb'])->name('backgrounds.useThumb');
     Route::get('/backgrounds/{file}', [BackgroundsController::class, 'use'])->name('backgrounds.use');
+});
 
+
+// Chunked upload routes
+Route::group(['prefix' => 'uploads', 'middleware' => ['auth']], function ($router) {
+    // Create an upload session
+    Route::post('/create-session', [UploadsController::class, 'createSession'])->name('uploads.createSession');
+
+    // Upload a chunk
+    Route::post('/chunk', [UploadsController::class, 'uploadChunk'])
+        ->name('uploads.chunk')
+        ->middleware(maxRequestSize::class);
+
+    // Finalize an upload
+    Route::post('/finalize', [UploadsController::class, 'finalizeUpload'])->name('uploads.finalize');
+
+    // Create a share from chunks
+    Route::post('/create-share-from-chunks', [UploadsController::class, 'createShareFromChunks'])->name('uploads.createShareFromChunks');
 });

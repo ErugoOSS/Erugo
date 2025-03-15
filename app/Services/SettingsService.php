@@ -15,13 +15,24 @@ class SettingsService
     return $this->convertToCorrectType($setting->value);
   }
 
-  private function convertToCorrectType($value)
+  public function convertToCorrectType($value)
   {
+
+    if (is_array($value)) {
+      $value = (object)$value;
+    }
+
     if ($value === 'true') {
       return true;
     }
     if ($value === 'false') {
       return false;
+    }
+    if ($value === false) {
+      return false;
+    }
+    if ($value === true) {
+      return true;
     }
     if (is_numeric($value)) {
       return (int)$value;

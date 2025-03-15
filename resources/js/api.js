@@ -1,5 +1,5 @@
 import { getApiUrl } from './utils'
-import { store } from './store'
+import { store, uploadController } from './store'
 import { jwtDecode } from 'jwt-decode'
 import { useToast } from 'vue-toastification'
 import debounce from './debounce'
@@ -452,8 +452,8 @@ export const createShare = async (files, name, description, recipients, uploadId
   })
 }
 
-export const getMyShares = async () => {
-  const response = await fetchWithAuth(`${apiUrl}/api/shares`, {
+export const getMyShares = async (showDeletedShares = false) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares?show_deleted=${showDeletedShares}`, {
     method: 'GET',
     headers: {
       ...addJsonHeader()
@@ -509,6 +509,20 @@ export const setDownloadLimit = async (id, amount) => {
     throw new Error(data.message)
   }
   return data.data.share
+}
+
+export const pruneExpiredShares = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/prune-expired`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.shares
 }
 
 export const getShare = async (id) => {
@@ -772,3 +786,261 @@ const passwordChangeRequired = () => {
 }
 
 const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
+
+/**
+ * Uploads a file in chunks to the server
+ * @param {File} file - The file to upload
+ * @param {string} uploadId - Unique ID for this upload
+ * @param {string} shareName - Name of the share
+ * @param {string} shareDescription - Description of the share
+ * @param {Array} recipients - Recipients for the share
+ * @param {Function} onProgress - Progress callback function
+ * @param {Function} onComplete - Complete callback function
+ * @param {Function} onError - Error callback function
+ */
+export const uploadFileInChunks = async (
+  file,
+  uploadId,
+  shareName,
+  shareDescription,
+  recipients,
+  onProgress,
+  onComplete,
+  onError
+) => {
+  // Configuration
+  const chunkSize = 1024 * 1024 * 20 // 20MB chunks
+  const totalChunks = Math.ceil(file.size / chunkSize)
+  let currentChunk = 0
+  let totalUploaded = 0
+
+  // Create upload session first
+  try {
+    await createUploadSession(file, uploadId, totalChunks)
+  } catch (error) {
+    onError(error)
+    return
+  }
+
+  // Process chunks
+  const processChunk = async () => {
+
+    
+
+    if (currentChunk >= totalChunks) {
+      // All chunks uploaded, finalize the upload
+      try {
+        const result = await finalizeUpload(uploadId, file.name, shareName, shareDescription, recipients)
+        onComplete(result)
+      } catch (error) {
+        onError(error)
+      }
+      return
+    }
+
+    if (uploadController.pause) {
+      //we're paused so hold fire for 1 second and try again
+      setTimeout(processChunk, 1000)
+      return
+    }
+
+    const start = currentChunk * chunkSize
+    const end = Math.min(file.size, start + chunkSize)
+    const chunk = file.slice(start, end)
+
+    try {
+      await uploadChunk(chunk, uploadId, currentChunk, totalChunks, file.name)
+
+      // Update progress
+      totalUploaded += chunk.size
+      onProgress({
+        percentage: Math.round((totalUploaded / file.size) * 100),
+        uploadedBytes: totalUploaded,
+        totalBytes: file.size,
+        currentChunk,
+        totalChunks
+      })
+
+      // Process next chunk
+      currentChunk++
+      processChunk()
+    } catch (error) {
+      // Retry logic could be implemented here
+      onError(error)
+    }
+  }
+
+  // Start processing chunks
+  processChunk()
+}
+
+/**
+ * Creates an upload session on the server
+ */
+const createUploadSession = async (file, uploadId, totalChunks) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${store.jwt}`
+    },
+    body: JSON.stringify({
+      upload_id: uploadId,
+      filename: file.name,
+      filesize: file.size,
+      filetype: file.type,
+      total_chunks: totalChunks
+    })
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.message || 'Failed to create upload session')
+  }
+
+  return await response.json()
+}
+
+/**
+ * Uploads a single chunk to the server
+ */
+const uploadChunk = async (chunk, uploadId, chunkIndex, totalChunks, filename) => {
+  const formData = new FormData()
+  formData.append('chunk', chunk, filename)
+  formData.append('upload_id', uploadId)
+  formData.append('chunk_index', chunkIndex)
+  formData.append('total_chunks', totalChunks)
+
+  const response = await fetchWithAuth(`${apiUrl}/api/uploads/chunk`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${store.jwt}`
+    },
+    body: formData
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.message || 'Failed to upload chunk')
+  }
+
+  return await response.json()
+}
+
+/**
+ * Finalizes a chunked upload on the server
+ */
+const finalizeUpload = async (uploadId, filename, shareName, shareDescription, recipients) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/uploads/finalize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${store.jwt}`
+    },
+    body: JSON.stringify({
+      upload_id: uploadId,
+      filename: filename,
+      name: shareName,
+      description: shareDescription,
+      recipients: recipients
+    })
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.message || 'Failed to finalize upload')
+  }
+
+  return await response.json()
+}
+
+/**
+ * Uploads multiple files in chunks
+ * This is a wrapper for uploadFileInChunks that handles multiple files
+ */
+export const uploadFilesInChunks = async (
+  files,
+  uploadId,
+  shareName,
+  shareDescription,
+  recipients,
+  onProgress,
+  onComplete,
+  onError
+) => {
+  const totalSize = files.reduce((total, file) => total + file.size, 0)
+  let uploadedSize = 0
+
+  const results = []
+
+  // Process each file sequentially
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    const fileUploadId = `${uploadId}_file${i}`
+
+    await new Promise((resolve) => {
+      uploadFileInChunks(
+        file,
+        fileUploadId,
+        shareName,
+        shareDescription,
+        recipients,
+        (progress) => {
+          // Calculate overall progress
+          const fileTotalUploaded = (progress.percentage / 100) * file.size
+          const overallPercentage = Math.round(((uploadedSize + fileTotalUploaded) / totalSize) * 100)
+
+          onProgress({
+            percentage: overallPercentage,
+            uploadedBytes: uploadedSize + progress.uploadedBytes,
+            totalBytes: totalSize,
+            currentFile: i + 1,
+            totalFiles: files.length,
+            currentFileName: file.name
+          })
+        },
+        (result) => {
+          console.log('result', result)
+          results.push(result)
+          uploadedSize += file.size
+          resolve()
+        },
+        (error) => {
+          onError(error)
+          resolve() // Continue with next file even if this one fails
+        }
+      )
+    })
+  }
+
+  // All files have been uploaded, now create the share
+  try {
+    const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-chunks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${store.jwt}`
+      },
+      body: JSON.stringify({
+        upload_id: uploadId,
+        name: shareName,
+        description: shareDescription,
+        recipients: recipients,
+        fileInfo: results.map((r) => r.data.file.id)
+      })
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'Failed to create share from chunks')
+    }
+
+    const data = await response.json()
+    onComplete(data)
+  } catch (error) {
+    onError(error)
+  }
+}

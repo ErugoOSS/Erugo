@@ -129,7 +129,8 @@ const tolgee = Tolgee().use(DevTools()).use(FormatIcu()).init({
 
 createApp(App)
   .use(Toast, {
-    position: POSITION.BOTTOM_RIGHT
+    position: POSITION.BOTTOM_RIGHT,
+    transition: "Vue-Toastification__fade",
   })
   .use(VueTolgee, { tolgee })
   .provide('showHelpTip', showHelpTip)

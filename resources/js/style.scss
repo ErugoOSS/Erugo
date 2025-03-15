@@ -5,6 +5,7 @@
 @import "./styles/buttons.scss";
 @import "./styles/tables.scss";
 @import "./styles/inputs.scss";
+@import "./styles/toasts.scss";
 
 :root {
   /* link colors */
@@ -491,15 +492,19 @@ body {
 .upload-button-container {
   border-radius: 0 0 10px 10px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin-top: 0px;
   padding: 10px 20px;
   background: var(--uploader-background-color);
   backdrop-filter: blur(5px);
   z-index: 100;
+
+  .svg-container {
+    svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.5;
+    }
+  }
 }
 
 .version-info {
@@ -1007,4 +1012,8 @@ body {
 .tg-dev-tools {
   z-index: 9999999 !important; /* Use a value higher than your highest z-index */
   position: fixed !important;
+}
+
+.nowrap {
+  white-space: nowrap;
 }

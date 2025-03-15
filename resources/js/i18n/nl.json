@@ -28,6 +28,8 @@
     "password": "Wachtwoord",
     "password_reset_email_sent": "Wachtwoord reset e-mail verzonden",
     "password_reset_successfully": "Wachtwoord opnieuw ingesteld",
+    "password_set": "Wachtwoord succesvol ingesteld!",
+    "password_set_description": "Je wachtwoord is ingesteld. Je wordt zo meteen ingelogd.",
     "passwords_do_not_match": "Wachtwoorden komen niet overeen",
     "please_enter_email": "Voer een e-mailadres in",
     "please_enter_email_and_password": "Voer e-mail en wachtwoord in",
@@ -47,6 +49,7 @@
   "message": {
     "from": "Bericht van"
   },
+  "processing_uploaded_files": "Verwerken van geüploade bestanden",
   "settings": {
     "account": {
       "change_password": "Mijn wachtwoord wijzigen",
@@ -57,9 +60,18 @@
       "name": "Mijn volledige naam",
       "unlink": "Ontkoppelen"
     },
+    "authProvidersSavedSuccessfully": "Auth providers succesvol opgeslagen",
     "branding": {
       "background_images": "Achtergrondafbeeldingen",
-      "background_images_description": "Upload aangepaste achtergrondafbeeldingen om de standaard Unsplash-afbeeldingen te vervangen. Afbeeldingen roteren elke 3 minuten willekeurig om dynamische branding te creëren.",
+      "background_images_description": "Upload aangepaste achtergrondafbeeldingen om de standaard Unsplash-afbeeldingen te vervangen. Afbeeldingen roteren willekeurig met het interval dat je instelt.",
+      "background_slideshow_speed": "Beeldwisselinterval",
+      "background_slideshow_speed_1_day": "Een dag",
+      "background_slideshow_speed_1_hour": "1 uur",
+      "background_slideshow_speed_2_hours": "2 Uur",
+      "background_slideshow_speed_3_minutes": "3 minuten",
+      "background_slideshow_speed_5_minutes": "5 minuten",
+      "background_slideshow_speed_description": "Wijzig hoe vaak de achtergrondafbeelding willekeurig verandert (dit heeft alleen effect als je meerdere achtergrondafbeeldingen hebt). Stel in op 0 om de diavoorstelling uit te schakelen en in plaats daarvan op elke nieuwe pagina een willekeurige afbeelding weer te geven.",
+      "background_slideshow_speed_off": "uitschakelen",
       "delete": "Verwijder",
       "delete_theme": "Thema verwijderen",
       "delete_theme_description": "Verwijder het geselecteerde thema. Hierdoor wordt het verwijderd uit de lijst met thema's en kunt u het niet langer gebruiken. Het is niet mogelijk om het actieve thema of gebundelde thema's te verwijderen.",
@@ -67,6 +79,7 @@
       "download_theme": "Thema downloaden",
       "download_theme_description": "Download het geselecteerde thema als een JSON-bestand. Dit kan worden gebruikt om een nieuw thema te maken of een bestaand thema te wijzigen.",
       "in_pixels": "In pixels",
+      "in_seconds": "seconden",
       "install_custom_theme": "Een aangepast thema installeren\n",
       "install_custom_theme_description": "Installeer een aangepast thema vanuit een JSON-bestand.\n\nDit kan een thema zijn dat je zelf hebt aangepast of gemaakt, of een thema dat je hebt gedownload.",
       "install_custom_theme_description_2": "Als u een thema downloadt van het web, zorg er dan voor dat u de bron vertrouwt en controleer het thema op kwaadaardige code voordat u het installeert.",
@@ -96,7 +109,8 @@
         "save": "Profielwijzigingen opslaan"
       },
       "myShares": {
-        "create": "Gedeelde link aanmaken"
+        "create": "Gedeelde link aanmaken",
+        "pruneExpired": "Vervallen aandelen verwijderen"
       },
       "system": {
         "save": "Bewaar systeem instellingen"
@@ -106,6 +120,9 @@
       }
     },
     "close": "Sluit",
+    "confirm": {
+      "pruneExpiredShares": "Weet je zeker dat je je verlopen aandelen wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+    },
     "description": {
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
       "myProfile": "Beheer je profiel",
@@ -114,6 +131,7 @@
       "users": "Beheer je gebruikers."
     },
     "error": {
+      "pruneExpiredShares": "Mislukt bij het plannen van verlopen aandelen voor verwijdering!",
       "shareExpired": "Aandeel niet verlopen",
       "shareExtended": "Niet gelukt om aandeel uit te breiden"
     },
@@ -127,15 +145,23 @@
         "title": "Limiethulp downloaden"
       }
     },
+    "loading": "Aandelen laden...",
+    "noShares": "Je hebt geen aandelen. Waarom maak je er geen?",
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
     },
+    "settingsSavedSuccessfully": "Instellingen succesvol opgeslagen",
     "success": {
+      "pruneExpiredShares": "Vervallen aandelen zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
       "shareExtended": "Aandeel uitgebreid"
     },
     "system": {
+      "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
+      "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
+      "allow_direct_uploads": "Directe uploadmodus toestaan",
+      "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
       "application_name": "Naam toepassing",
       "application_name_description": "Pas de weergegeven naam van je applicatie aan die wordt weergegeven in titelbalken, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
       "application_url": "URL toepassing",
@@ -153,12 +179,18 @@
       "auth_providers_description_localhost": "Externe authenticatieconfiguratie is niet beschikbaar op localhost. OAuth providers hebben een volledig gekwalificeerde domeinnaam (FQDN) nodig om goed te functioneren. Ga naar Erugo via een geregistreerd domein om deze instellingen te configureren.",
       "callback_url": "Callback URL",
       "callback_url_description": "Gebruik de callback URL in de configuratie van je identity provider.",
+      "chunked": "Opgedeeld",
+      "chunked_uploads_disabled_but_default": "U hebt de standaard uploadmodus ingesteld op gebundeld, maar gebundelde uploads zijn uitgeschakeld!",
       "clean_files_after": "Bestanden opschonen na",
       "clean_files_after_description": "Hoe lang nadat een gedeelde link is verlopen worden de bestanden verwijderd uit het systeem.",
       "days": "Dagen",
       "default_language": "Standaard Taal",
       "default_language_description": "Stel de primaire taal in die standaard wordt gebruikt in de interface van de applicatie voor alle gebruikers. Individuele gebruikers kunnen deze instelling overschrijven met hun persoonlijke voorkeuren.",
+      "default_upload_mode": "Standaard uploadmodus",
+      "default_upload_mode_description": "Stel in welke modus standaard moet worden geselecteerd. Gebruikers kunnen dit wijzigen bij het aanmaken van een share als je meer dan één methode hebt ingeschakeld.",
       "delete_auth_provider": "Deze provider verwijderen",
+      "direct": "Direct",
+      "direct_uploads_disabled_but_default": "U hebt de standaard uploadmodus ingesteld op direct, maar direct uploaden is uitgeschakeld!",
       "disabled": "Uitgeschakeld",
       "emails": "Meldingen",
       "enable_share_deleted_emails": "Delen van verwijderde links e-mails inschakelen",
@@ -196,6 +228,7 @@
       "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen aandelen",
       "share_expiry_warning_emails_description": "Stuur proactieve meldingen naar gebruikers wanneer hun links bijna verlopen. Dit geeft hen de mogelijkheid om de toegang te verlengen als dat nodig is.",
       "shares": "Gedeelde Bestanden",
+      "show_deleted_shares": "Verwijderde aandelen weergeven",
       "show_language_selector": "Taalkeuze tonen",
       "show_language_selector_description": "Schakel de zichtbaarheid van het taalkeuzemenu in de rechterbovenhoek van de applicatie in. Als deze optie is ingeschakeld, kunnen gebruikers snel schakelen tussen de beschikbare interfacetalen.",
       "smtp": "SMTP",
@@ -211,6 +244,7 @@
       "smtp_sender_name_description": "De weergavenaam die wordt weergegeven als de afzender van systeem e-mails. Gebruikers zien deze naam in hun e-mailprogramma (bijv. \"Your App Name\" of \"Your App Support\").",
       "smtp_username": "SMTP Gebruikersnaam",
       "smtp_username_description": "De gebruikersnaam die nodig is om te verifiëren met je SMTP-server. Dit is meestal het e-mailadres of de accountnaam die is gekoppeld aan uw e-mailservice.",
+      "upload_modes": "Upload opties",
       "your_auth_providers": "Uw autorisatoren"
     },
     "system_auth_provider_info_link": "Over {name}",
@@ -290,6 +324,7 @@
     },
     "created": "Gemaakt",
     "data_loading": "Laden...",
+    "deleted": "Verwijderd",
     "deletes": "Verwijderd",
     "download_limit_reached": "Download limiet bereikt",
     "download_limit_reached.message": "De share die je probeert te downloaden heeft zijn downloadlimiet bereikt. Vraag de maker van de share om de downloadlimiet te verhogen.",
@@ -304,7 +339,15 @@
   },
   "total_size": "Totale grootte",
   "upload": {
-    "files": "{value, plural, one {# bestand uploaden} other {# bestanden uploaden}}"
+    "files": "{value, plural, one {# bestand uploaden} other {# bestanden uploaden}}",
+    "upload_mode_not_supported": "Er is geen geldige uploadmodus geselecteerd! We weten niet zeker wat we moeten voorstellen omdat dit niet mogelijk zou moeten zijn."
+  },
+  "uploader": {
+    "current_mode": {
+      "chunked": "Modus voor gebundeld uploaden",
+      "direct": "Directe uploadmodus"
+    },
+    "upload_mode_swapped": "Uploadmodus gewijzigd in {value}"
   },
   "uploading": {
     "files": "{value, plural, one {# bestand uploaden} other {# bestanden uploaden}}"

@@ -9,23 +9,49 @@ use App\Jobs\sendEmail;
 use App\Models\Share;
 use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
+use App\Services\SettingsService;
 
 function getSettings()
 {
-    $settings = Setting::whereLike('group', 'ui%')->orWhere('key', 'default_language')->orWhere('key', 'show_language_selector')->get();
+    
+    $settingsService = new SettingsService();
+
+    
+    
+    $settings = Setting::whereLike('group', 'ui%')
+        ->orWhere('key', 'default_language')
+        ->orWhere('key', 'show_language_selector')
+        ->orWhere('key', 'default_upload_mode')
+        ->orWhere('key', 'allow_direct_uploads')
+        ->orWhere('key', 'allow_chunked_uploads')
+        ->get();
+
+    $settings = $settings->map(function ($setting) use ($settingsService) {
+        return [
+            'key' => $setting->key,
+            'value' => $settingsService->convertToCorrectType($setting->value)
+        ];
+    });
+
     $indexedSettings = [];
     foreach ($settings as $setting) {
-        $indexedSettings[$setting->key] = $setting->value;
+        $indexedSettings[$setting['key']] = $setting['value'];
     }
+
+    //have we any users in the database?
+    $userCount = User::count();
+    $indexedSettings['setup_needed'] = $userCount > 0 ? false : true;
+
+    //grab the app url from env
+    $appURL = env('APP_URL');
+    $indexedSettings['api_url'] = $appURL;
+
+
     return $indexedSettings;
 }
 
 Route::get('/', function () {
     $indexedSettings = getSettings();
-
-    //have we any users in the database?
-    $userCount = User::count();
-    $indexedSettings['setup_needed'] = $userCount > 0 ? 'false' : 'true';
 
     //grab the app url from env
     $appURL = env('APP_URL');
@@ -40,13 +66,6 @@ Route::get('/', function () {
 Route::get('/reset-password/{token}', function ($token) {
     $indexedSettings = getSettings();
 
-    //have we any users in the database?
-    $userCount = User::count();
-    $indexedSettings['setup_needed'] = $userCount > 0 ? 'false' : 'true';
-
-    //grab the app url from env
-    $appURL = env('APP_URL');
-    $indexedSettings['api_url'] = $appURL;
     $indexedSettings['token'] = $token;
 
     $theme = Theme::where('active', true)->first();
@@ -57,14 +76,6 @@ Route::get('/reset-password/{token}', function ($token) {
 
 Route::get('/shares/{share}', function () {
     $indexedSettings = getSettings();
-
-    //have we any users in the database?
-    $userCount = User::count();
-    $indexedSettings['setup_needed'] = $userCount > 0 ? 'false' : 'true';
-
-    //grab the app url from env
-    $appURL = env('APP_URL');
-    $indexedSettings['api_url'] = $appURL;
 
     $theme = Theme::where('active', true)->first();
 

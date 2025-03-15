@@ -18,6 +18,7 @@ use App\Mail\shareDownloadedMail;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Services\SettingsService;
+use App\Jobs\cleanSpecificShares;
 
 class SharesController extends Controller
 {
@@ -55,7 +56,8 @@ class SharesController extends Controller
             $totalFileSize += $file->getSize();
         }
 
-        $sharePath = storage_path('app/shares/' . $user->id . '/' . $longId);
+        $sharePath = $user->id . '/' . $longId;
+        $completePath = storage_path('app/shares/' .  $sharePath);
 
         $shareData = [
             'name' => $request->name,
@@ -80,12 +82,12 @@ class SharesController extends Controller
             $file->save();
         }
 
-        if (!file_exists($sharePath)) {
-            mkdir($sharePath, 0777, true);
+        if (!file_exists($completePath)) {
+            mkdir($completePath, 0777, true);
         }
         $files = $request->file('files');
         foreach ($files as $file) {
-            $file->move($sharePath, $file->getClientOriginalName());
+            $file->move($completePath, $file->getClientOriginalName());
         }
         $share->status = 'pending';
         $share->save();
@@ -181,13 +183,15 @@ class SharesController extends Controller
             return redirect()->to('/shares/' . $shareId);
         }
 
+        $sharePath = storage_path('app/shares/' . $share->path);
+
         //if there is only one file, download it directly
         if ($share->file_count == 1) {
-            if (file_exists($share->path . '/' . $share->files[0]->name)) {
+            if (file_exists($sharePath . '/' . $share->files[0]->name)) {
 
                 $this->createDownloadRecord($share);
 
-                return response()->download($share->path . '/' . $share->files[0]->name);
+                return response()->download($sharePath . '/' . $share->files[0]->name);
             } else {
                 return redirect()->to('/shares/' . $shareId);
             }
@@ -203,7 +207,8 @@ class SharesController extends Controller
 
         //if the share is ready, download the zip file
         if ($share->status == 'ready') {
-            $filename = $share->path . '.zip';
+            $filename = $sharePath . '.zip';
+            \Log::info('looking for: ' . $filename);
             //does the file exist?
             if (file_exists($filename)) {
                 $this->createDownloadRecord($share);
@@ -233,7 +238,7 @@ class SharesController extends Controller
         ]);
     }
 
-    public function myShares()
+    public function myShares(Request $request)
     {
         $user = Auth::user();
 
@@ -244,7 +249,13 @@ class SharesController extends Controller
             ], 401);
         }
 
-        $shares = Share::where('user_id', $user->id)->orderBy('created_at', 'desc')->with('files')->get();
+        $showDeleted = $request->input('show_deleted', false);
+
+        $shares = Share::where('user_id', $user->id)->orderBy('created_at', 'desc')->with('files');
+        if ($showDeleted === 'false') {
+            $shares = $shares->where('status', '!=', 'deleted');
+        }
+        $shares = $shares->get();
         return response()->json([
             'status' => 'success',
             'message' => 'My shares',
@@ -359,8 +370,30 @@ class SharesController extends Controller
         ]);
     }
 
+    public function pruneExpiredShares()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
 
-    private function generateLongId()
+        $shares = Share::where('user_id', $user->id)->where('expires_at', '<', Carbon::now())->get();
+        cleanSpecificShares::dispatch($shares->pluck('id')->toArray(), $user->id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Expired shares scheduled for deletion',
+            'data' => [
+                'shares' => $shares
+            ]
+        ]);
+    }
+
+
+    public function generateLongId()
     {
         $maxAttempts = 10;
         $attempts = 0;

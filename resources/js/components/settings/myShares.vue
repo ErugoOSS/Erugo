@@ -1,12 +1,13 @@
 <script setup>
-import { ref, onMounted, inject } from 'vue'
-import { getMyShares, expireShare, extendShare, setDownloadLimit } from '../../api'
+import { ref, onMounted, inject, defineExpose } from 'vue'
+import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
   CalendarX2,
   HardDriveDownload,
-  MessageCircleQuestion
+  MessageCircleQuestion,
+  Rocket
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
@@ -15,20 +16,23 @@ import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
 
-
 const showHelpTip = inject('showHelpTip')
 const hideHelpTip = inject('hideHelpTip')
 
 const toast = useToast()
 const maxFilesToShow = 4
+const loadedShares = ref(false)
 
 const shares = ref([])
+const showDeletedShares = ref(false)
 onMounted(async () => {
+  showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
   loadShares()
 })
 
 const loadShares = async () => {
-  shares.value = await getMyShares()
+  shares.value = await getMyShares(showDeletedShares.value)
+  loadedShares.value = true
 }
 
 const handleExpireShareClick = async (share) => {
@@ -62,7 +66,6 @@ const handleDownloadLimitChange = async (share) => {
   }
 
   if (isNaN(newLimit)) {
-    toast.error('Invalid download limit')
     return
   }
   setDownloadLimit(share.id, newLimit)
@@ -90,6 +93,30 @@ const enableExtendShareButton = (share) => {
 const enableDownloadButton = (share) => {
   return !share.expired && !share.deleted
 }
+
+const handlePruneExpiredShares = async () => {
+  const confirmed = confirm(t.value('settings.confirm.pruneExpiredShares'))
+  if (!confirmed) {
+    return
+  }
+  try {
+    await pruneExpiredShares()
+    toast.success(t.value('settings.success.pruneExpiredShares'))
+    loadShares()
+  } catch (error) {
+    toast.error(t.value('settings.error.pruneExpiredShares'))
+  }
+}
+
+const setShowDeletedShares = (value) => {
+  showDeletedShares.value = value
+  loadShares()
+}
+
+defineExpose({
+  handlePruneExpiredShares,
+  setShowDeletedShares
+})
 </script>
 
 <template>
@@ -216,12 +243,16 @@ const enableDownloadButton = (share) => {
         </tr>
       </tbody>
     </table>
+    <div v-else-if="loadedShares" class="center-message">
+      <Rocket /> <p>{{ $t('settings.noShares') }}</p>
+    </div>
+    <div v-else class="center-message">
+      <p>{{ $t('settings.loading') }}</p>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-
-
 .files-container {
   display: flex;
   flex-direction: row;
@@ -331,22 +362,22 @@ td {
   height: var(--height);
   border-radius: 5px;
   .limit-label {
-      position: absolute;
-      left: 90px;
-      width: 90px;
-      top: 0;
-      bottom: 0;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0.3;
-      font-size: 0.5rem;
-      font-weight: normal;
-      padding-bottom: 1.5px;
-      color: var(--panel-section-text-color);
-      z-index: 1;
-      pointer-events: none;
-    }
+    position: absolute;
+    left: 90px;
+    width: 90px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0.3;
+    font-size: 0.5rem;
+    font-weight: normal;
+    padding-bottom: 1.5px;
+    color: var(--panel-section-text-color);
+    z-index: 1;
+    pointer-events: none;
+  }
   .download_count {
     position: relative;
     display: flex;
@@ -383,7 +414,6 @@ td {
       font-weight: normal;
       padding-bottom: 1.5px;
     }
-    
   }
   .download_limit_input {
     position: relative !important;
@@ -398,6 +428,22 @@ td {
     &:focus {
       outline: none;
     }
+  }
+}
+.center-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  min-height: 300px;
+  font-size: 1.5rem;
+  color: var(--panel-section-text-color);
+  svg {
+    width: 4rem;
+    height: 4rem;
+    margin-right: 10px;
+    margin-top: -20px;
   }
 }
 </style>

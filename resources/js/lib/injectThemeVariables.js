@@ -1,6 +1,4 @@
 const injectThemeVariables = (location, theme) => {
-  console.log('injecting theme', theme)
-  console.log('location', location)
 
   const injectionPoint = document.querySelector(location)
   if (!theme) {

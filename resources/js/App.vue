@@ -29,6 +29,7 @@ const downloadShareCode = ref('')
 const settingsPanel = ref(null)
 const setupNeeded = ref(false)
 const toast = useToast()
+const slideshowSpeed = ref(180)
 
 onMounted(() => {
   if (domError().length > 0) {
@@ -54,17 +55,19 @@ onMounted(() => {
 
   setupNeeded.value = domData().setup_needed
 
-  if (setupNeeded.value == 'true') {
+  if (setupNeeded.value) {
     store.setMode('setup')
     return
   }
 
   setMode()
-  setTimeout(changeBackground, 180000)
+
   version.value = domData().version
   logoWidth.value = domData().logo_width
-  useMyBackgrounds.value = domData().use_my_backgrounds === 'true'
-  showPoweredBy.value = domData().show_powered_by === 'true'
+  useMyBackgrounds.value = domData().use_my_backgrounds
+  showPoweredBy.value = domData().show_powered_by
+  slideshowSpeed.value = domData().background_slideshow_speed
+  setTimeout(changeBackground, slideshowSpeed.value * 1000)
   getBackgroundImages().then((data) => {
     backgroundImages.value = data.files
     nextTick(() => {

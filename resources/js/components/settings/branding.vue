@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted, watch, defineExpose, onBeforeUnmount, computed } from 'vue'
-import { Pipette, Image, Ruler, Tag, X, Dice5, Images, FileDown, Trash, FileUp } from 'lucide-vue-next'
+import { Pipette, Image, Ruler, Tag, X, Dice5, Images, FileDown, Trash, FileUp, Clock8   } from 'lucide-vue-next'
 import injectThemeVariables from '../../lib/injectThemeVariables'
+import ButtonWithMenu from '../buttonWithMenu.vue'
 
 import {
   getSettingsByGroup,
@@ -19,8 +20,11 @@ import {
 import FileInput from '../fileInput.vue'
 import { useToast } from 'vue-toastification'
 import { niceFileName, mapSettings } from '../../utils'
-const toast = useToast()
 
+import { useTranslate } from '@tolgee/vue'
+
+const { t } = useTranslate()
+const toast = useToast()
 const themeEditor = ref(null)
 const showThemeEditor = ref(false)
 
@@ -33,7 +37,8 @@ const settings = ref({
   css_accent_color_light: '',
   use_my_backgrounds: false,
   show_powered_by: true,
-  application_name: ''
+  application_name: '',
+  background_slideshow_speed: ''
 })
 
 const newBackgroundImage = ref(null)
@@ -200,7 +205,6 @@ const handleNavItemClicked = (item) => {
 
 onBeforeUnmount(async () => {
   const activeTheme = await getActiveTheme()
-  console.log('activeTheme', activeTheme)
   if (activeTheme) {
     injectThemeVariables('body', activeTheme.theme)
   }
@@ -257,6 +261,57 @@ const handleDeleteTheme = async () => {
       toast.error('Failed to delete theme')
     })
 }
+
+const backgroundSlideshowSpeedOptions = [
+  {
+    label: t.value('settings.branding.background_slideshow_speed_3_minutes'),
+    value: 180,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 180
+    }
+  },
+  {
+    label: t.value('settings.branding.background_slideshow_speed_5_minutes'),
+    value: 300,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 300
+    }
+  },
+  {
+    label: t.value('settings.branding.background_slideshow_speed_1_hour'),
+    value: 3600,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 3600
+    }
+  },
+  {
+    label: t.value('settings.branding.background_slideshow_speed_2_hours'),
+    value: 7200,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 7200
+    }
+  },
+  {
+    label: t.value('settings.branding.background_slideshow_speed_1_day'),
+    value: 86400,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 86400
+    }
+  },
+  {
+    label: t.value('settings.branding.background_slideshow_speed_off'),
+    value: 0,
+    icon: Clock8,
+    action: () => {
+      settings.value.background_slideshow_speed = 0
+    }
+  }
+]
 
 //define exposed methods
 defineExpose({
@@ -333,6 +388,25 @@ defineExpose({
                     <input type="checkbox" v-model="settings.use_my_backgrounds" id="useMyBackgrounds" />
                     <label for="useMyBackgrounds">{{ $t('settings.branding.use_my_backgrounds') }}</label>
                   </div>
+
+                  <div class="setting-group-body-item">
+                    <label for="backgroundSlideshowSpeed">
+                      {{ $t('settings.branding.background_slideshow_speed') }}
+                      <small>({{ $t('settings.branding.in_seconds') }})</small>
+                  </label>
+                    <div class="row">
+                      <div class="col pe-1">
+                        <input type="number" v-model="settings.background_slideshow_speed" />
+                      </div>
+                      <div class="col-auto ps-1">
+                        <buttonWithMenu :items="backgroundSlideshowSpeedOptions" :secondary="false">
+                          <template #icon>
+                            <Clock8 />
+                          </template>
+                        </buttonWithMenu>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -344,6 +418,9 @@ defineExpose({
 
               <h6>{{ $t('settings.branding.use_my_backgrounds') }}</h6>
               <p>{{ $t('settings.branding.use_my_backgrounds_description') }}</p>
+
+              <h6>{{ $t('settings.branding.background_slideshow_speed') }}</h6>
+              <p>{{ $t('settings.branding.background_slideshow_speed_description') }}</p>
             </div>
           </div>
         </div>

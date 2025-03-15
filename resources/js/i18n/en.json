@@ -28,6 +28,8 @@
     "password": "Password",
     "password_reset_email_sent": "Password reset email sent",
     "password_reset_successfully": "Password reset successfully",
+    "password_set": "Password set successfully!",
+    "password_set_description": "Your password has been set. You'll be logged in in a moment.",
     "passwords_do_not_match": "Passwords do not match",
     "please_enter_email": "Please enter an email address",
     "please_enter_email_and_password": "Please enter email and password",
@@ -47,6 +49,7 @@
   "message": {
     "from": "Message from {name}"
   },
+  "processing_uploaded_files": "Processing uploaded files",
   "settings": {
     "account": {
       "change_password": "Change my password",
@@ -57,9 +60,18 @@
       "name": "My Full Name",
       "unlink": "Unlink"
     },
+    "authProvidersSavedSuccessfully": "Auth providers saved successfully",
     "branding": {
       "background_images": "Background Images",
-      "background_images_description": "Upload custom background images to replace Unsplash defaults. Images rotate randomly every 3 minutes to create dynamic branding.",
+      "background_images_description": "Upload custom background images to replace Unsplash defaults. Images rotate randomly at the interval you set.",
+      "background_slideshow_speed": "Image Change Interval",
+      "background_slideshow_speed_1_day": "One day",
+      "background_slideshow_speed_1_hour": "1 Hour",
+      "background_slideshow_speed_2_hours": "2 Hours",
+      "background_slideshow_speed_3_minutes": "3 Minutes",
+      "background_slideshow_speed_5_minutes": "5 Minutes",
+      "background_slideshow_speed_description": "Change how often the background image randomly changes (this only has an effect if you have multiple background images). Set to 0 to disable the slideshow and show a random image on each page fresh instead.",
+      "background_slideshow_speed_off": "Disable",
       "delete": "Delete",
       "delete_theme": "Delete Theme",
       "delete_theme_description": "Delete the selected theme. This will remove it from the list of themes and you will no longer be able to use it. It is not possible to delete the active theme or bundled themes.",
@@ -67,6 +79,7 @@
       "download_theme": "Download Theme",
       "download_theme_description": "Download the selected theme as a JSON file. This can be used to create a new theme or modify an existing one.",
       "in_pixels": "In pixels",
+      "in_seconds": "seconds",
       "install_custom_theme": "Install a Custom Theme\n",
       "install_custom_theme_description": "Install a custom theme from a JSON file.\n\nThis can be a theme you have modified or created yourself or one you have downloaded.",
       "install_custom_theme_description_2": "If you download a theme from the web, please ensure you trust the source and have checked the theme for malicious code before installing.",
@@ -96,7 +109,8 @@
         "save": "Save profile changes"
       },
       "myShares": {
-        "create": "Create Share"
+        "create": "Create Share",
+        "pruneExpired": "Delete expired shares"
       },
       "system": {
         "save": "Save System Settings"
@@ -106,6 +120,9 @@
       }
     },
     "close": "Close",
+    "confirm": {
+      "pruneExpiredShares": "Are you sure you want to delete your expired shares? This cannot be undone."
+    },
     "description": {
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
       "myProfile": "Manage your account.",
@@ -114,6 +131,7 @@
       "users": "Manage Your Users."
     },
     "error": {
+      "pruneExpiredShares": "Failed to schedule expired shares for deletion!",
       "shareExpired": "Failed to expire share",
       "shareExtended": "Failed to extend share"
     },
@@ -127,15 +145,23 @@
         "title": "Download Limit Help"
       }
     },
+    "loading": "Shares loading...",
+    "noShares": "You have no shares. Why not create one?",
     "provider": {
       "edit": "Edit",
       "view": "View"
     },
+    "settingsSavedSuccessfully": "Settings saved successfully",
     "success": {
+      "pruneExpiredShares": "Expired shares have been scheduled for deletion and will be processed in the background.",
       "shareExpired": "Share expired",
       "shareExtended": "Share extended"
     },
     "system": {
+      "allow_chunked_uploads": "Allow chunked upload mode",
+      "allow_chunked_uploads_description": "Chunked upload mode breaks files into smaller segments that are transferred sequentially. While slightly slower than direct upload for smaller files, this method provides greater stability and reliability when transferring large files. Chunked uploads support progress tracking and allow users to manually pause and resume transfers, making it ideal for files over 100MB or when using unstable network connections.",
+      "allow_direct_uploads": "Allow direct upload mode",
+      "allow_direct_uploads_description": "Direct upload mode transmits files in a single, uninterrupted request. While this method offers the fastest transfer speeds for most files, extremely large files may cause stability issues or timeouts. For optimal performance with files exceeding 100MB, chunked uploads may be a better option.",
       "application_name": "Application Name",
       "application_name_description": "Customise the displayed name of your application that appears in title bars, dialogs, and other interface elements. This helps maintain consistent branding throughout the user experience.",
       "application_url": "Application URL",
@@ -153,12 +179,18 @@
       "auth_providers_description_localhost": "External authentication configuration is unavailable on localhost. OAuth providers require a fully qualified domain name (FQDN) to properly function. Please access Erugo through a registered domain to configure these settings.",
       "callback_url": "Callback URL",
       "callback_url_description": "Use the callback URL provided in your identity provider configuration.",
+      "chunked": "Chunked",
+      "chunked_uploads_disabled_but_default": "You have set the default upload mode to chunked, but chunked uploads are disabled!",
       "clean_files_after": "Clean Files After",
       "clean_files_after_description": "How long after a share expires before files are deleted from the system.",
       "days": "Days",
       "default_language": "Default Language",
       "default_language_description": "Set the primary language that will be used throughout the application interface for all users by default. Individual users can override this setting with their personal preferences.",
+      "default_upload_mode": "Default upload mode",
+      "default_upload_mode_description": "Set which mode should be selected by default. Users can change this when creating a share if you have more than one method enabled.",
       "delete_auth_provider": "Delete this provider",
+      "direct": "Direct",
+      "direct_uploads_disabled_but_default": "You have set the default upload mode to direct, but direct uploads are disabled!",
       "disabled": "Disabled",
       "emails": "Notifications",
       "enable_share_deleted_emails": "Enable Share Deleted Emails",
@@ -196,6 +228,7 @@
       "share_expiry_warning_emails": "\"Share expiry\" warning emails",
       "share_expiry_warning_emails_description": "Send proactive notifications to users when their shares are approaching expiration. This gives them the opportunity to extend access if needed.",
       "shares": "Shares",
+      "show_deleted_shares": "Show deleted shares",
       "show_language_selector": "Show Language Selector",
       "show_language_selector_description": "Toggle the visibility of the language selection dropdown in the top right corner of the application. When enabled, users can quickly switch between available interface languages.",
       "smtp": "SMTP",
@@ -211,6 +244,7 @@
       "smtp_sender_name_description": "The display name that will appear as the sender of system emails. Users will see this name in their email client (e.g. \"Your App Name\" or \"Your App Support\").",
       "smtp_username": "SMTP Username",
       "smtp_username_description": "The username required to authenticate with your SMTP server. This is typically the email address or account name associated with your email service.",
+      "upload_modes": "Upload modes",
       "your_auth_providers": "Your Auth Providers"
     },
     "system_auth_provider_info_link": "About {name}",
@@ -290,6 +324,7 @@
     },
     "created": "Created",
     "data_loading": "Loading...",
+    "deleted": "Deleted",
     "deletes": "Deletes",
     "download_limit_reached": "Download Limit Reached",
     "download_limit_reached.message": "The share you are trying to download has reached its download limit. Please ask the share creator to increase the download limit.",
@@ -304,7 +339,15 @@
   },
   "total_size": "Total Size",
   "upload": {
-    "files": "{value, plural, one {Upload # file} other {Upload # files}}"
+    "files": "{value, plural, one {Upload # file} other {Upload # files}}",
+    "upload_mode_not_supported": "No valid upload mode is selected! We're not sure what to suggest because this shouldn't be possible."
+  },
+  "uploader": {
+    "current_mode": {
+      "chunked": "Chunked upload mode",
+      "direct": "Direct upload mode"
+    },
+    "upload_mode_swapped": "Upload mode changed to {value}"
   },
   "uploading": {
     "files": "{value, plural, one {Uploading # file} other {Uploading # files}}"

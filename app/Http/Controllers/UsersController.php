@@ -289,6 +289,7 @@ class UsersController extends Controller
         'message' => 'User deleted successfully'
       ]);
     } catch (\Exception $e) {
+      \Log::error('Error deleting user ' . $user->id . ': ' . $e->getMessage());
       return response()->json(
         ['status' => 'error', 'message' => 'Failed to delete user'],
         500

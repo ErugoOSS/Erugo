@@ -28,6 +28,8 @@
     "password": "Password",
     "password_reset_email_sent": "Email di reimpostazione della password inviata",
     "password_reset_successfully": "La password è stata reimpostata con successo",
+    "password_set": "Password impostata con successo!",
+    "password_set_description": "La password è stata impostata. Tra poco sarà possibile effettuare l'accesso.",
     "passwords_do_not_match": "Le password non corrispondono",
     "please_enter_email": "Inserire un indirizzo e-mail",
     "please_enter_email_and_password": "Inserire e-mail e password",
@@ -47,6 +49,7 @@
   "message": {
     "from": "Messaggio da {name}"
   },
+  "processing_uploaded_files": "Elaborazione dei file caricati",
   "settings": {
     "account": {
       "change_password": "Cambiare la password",
@@ -57,9 +60,18 @@
       "name": "Il mio nome completo",
       "unlink": "Unlink"
     },
+    "authProvidersSavedSuccessfully": "Fornitori di autorizzazioni salvati con successo",
     "branding": {
       "background_images": "Immagini di sfondo",
-      "background_images_description": "Caricate immagini di sfondo personalizzate per sostituire quelle predefinite di Unsplash. Le immagini ruotano in modo casuale ogni 3 minuti per creare un branding dinamico.",
+      "background_images_description": "Caricate immagini di sfondo personalizzate per sostituire quelle predefinite di Unsplash. Le immagini ruotano in modo casuale all'intervallo impostato.",
+      "background_slideshow_speed": "Intervallo di cambio immagine",
+      "background_slideshow_speed_1_day": "Un giorno",
+      "background_slideshow_speed_1_hour": "1 ora",
+      "background_slideshow_speed_2_hours": "2 ore",
+      "background_slideshow_speed_3_minutes": "3 minuti",
+      "background_slideshow_speed_5_minutes": "5 minuti",
+      "background_slideshow_speed_description": "Modifica la frequenza con cui l'immagine di sfondo cambia casualmente (ha effetto solo se si hanno più immagini di sfondo). Impostare su 0 per disabilitare la presentazione e mostrare invece un'immagine casuale su ogni pagina fresca.",
+      "background_slideshow_speed_off": "Disattivare",
       "delete": "Cancellare",
       "delete_theme": "Elimina il tema",
       "delete_theme_description": "Eliminare il tema selezionato. In questo modo verrà rimosso dall'elenco dei temi e non sarà più possibile utilizzarlo. Non è possibile eliminare il tema attivo o i temi in bundle.",
@@ -67,6 +79,7 @@
       "download_theme": "Scarica il tema",
       "download_theme_description": "Scarica il tema selezionato come file JSON. Questo può essere utilizzato per creare un nuovo tema o modificarne uno esistente.",
       "in_pixels": "In pixel",
+      "in_seconds": "secondi",
       "install_custom_theme": "Installare un tema personalizzato\n",
       "install_custom_theme_description": "Installare un tema personalizzato da un file JSON.\n\nPuò trattarsi di un tema modificato o creato da voi stessi o di uno scaricato.",
       "install_custom_theme_description_2": "Se scaricate un tema dal web, assicuratevi di fidarvi della fonte e di aver controllato la presenza di codice maligno prima di installarlo.",
@@ -96,7 +109,8 @@
         "save": "Salvare le modifiche al profilo"
       },
       "myShares": {
-        "create": "Creare la condivisione"
+        "create": "Creare la condivisione",
+        "pruneExpired": "Cancellare le azioni scadute"
       },
       "system": {
         "save": "Salvare le impostazioni del sistema"
@@ -106,6 +120,9 @@
       }
     },
     "close": "Chiudere",
+    "confirm": {
+      "pruneExpiredShares": "Siete sicuri di voler eliminare le vostre azioni scadute? Non è possibile annullare questa operazione."
+    },
     "description": {
       "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete il vostro marchio.",
       "myProfile": "Gestire il proprio account.",
@@ -114,6 +131,7 @@
       "users": "Gestire gli utenti."
     },
     "error": {
+      "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle azioni scadute!",
       "shareExpired": "Azione non scaduta",
       "shareExtended": "Impossibile estendere la quota"
     },
@@ -127,15 +145,23 @@
         "title": "Scarica la Guida ai limiti"
       }
     },
+    "loading": "Caricamento delle azioni...",
+    "noShares": "Non avete azioni. Perché non crearne una?",
     "provider": {
       "edit": "Modifica",
       "view": "Vista"
     },
+    "settingsSavedSuccessfully": "Impostazioni salvate con successo",
     "success": {
+      "pruneExpiredShares": "Le azioni scadute sono state programmate per l'eliminazione e verranno elaborate in background.",
       "shareExpired": "Quota scaduta",
       "shareExtended": "Quota estesa"
     },
     "system": {
+      "allow_chunked_uploads": "Consentire la modalità di caricamento chunked",
+      "allow_chunked_uploads_description": "La modalità Chunked upload suddivide i file in segmenti più piccoli che vengono trasferiti in sequenza. Sebbene sia leggermente più lento del caricamento diretto per i file più piccoli, questo metodo offre maggiore stabilità e affidabilità durante il trasferimento di file di grandi dimensioni. I caricamenti chunked supportano il monitoraggio dell'avanzamento e consentono agli utenti di sospendere e riprendere manualmente i trasferimenti, il che li rende ideali per i file di dimensioni superiori a 100 MB o quando si utilizzano connessioni di rete instabili.",
+      "allow_direct_uploads": "Consentire la modalità di caricamento diretto",
+      "allow_direct_uploads_description": "La modalità di caricamento diretto trasmette i file in un'unica richiesta ininterrotta. Sebbene questo metodo offra la velocità di trasferimento più elevata per la maggior parte dei file, i file estremamente grandi possono causare problemi di stabilità o timeout. Per ottenere prestazioni ottimali con file di dimensioni superiori a 100 MB, l'opzione migliore è rappresentata dal caricamento a pezzi.",
       "application_name": "Nome dell'applicazione",
       "application_name_description": "Personalizzate il nome visualizzato dell'applicazione che appare nelle barre del titolo, nelle finestre di dialogo e in altri elementi dell'interfaccia. Questo aiuta a mantenere un branding coerente in tutta l'esperienza dell'utente.",
       "application_url": "URL dell'applicazione",
@@ -153,12 +179,18 @@
       "auth_providers_description_localhost": "La configurazione dell'autenticazione esterna non è disponibile su localhost. I provider OAuth richiedono un nome di dominio completamente qualificato (FQDN) per funzionare correttamente. Per configurare queste impostazioni, accedere a Erugo attraverso un dominio registrato.",
       "callback_url": "URL di richiamo",
       "callback_url_description": "Utilizzare l'URL di callback fornito nella configurazione del provider di identità.",
+      "chunked": "Tritato",
+      "chunked_uploads_disabled_but_default": "Avete impostato la modalità di caricamento predefinita su chunked, ma i caricamenti chunked sono disabilitati!",
       "clean_files_after": "Pulire i file dopo",
       "clean_files_after_description": "Quanto tempo dopo la scadenza di una condivisione prima che i file vengano eliminati dal sistema.",
       "days": "Giorni",
       "default_language": "Lingua predefinita",
       "default_language_description": "Impostare la lingua principale che verrà utilizzata nell'interfaccia dell'applicazione per tutti gli utenti per impostazione predefinita. I singoli utenti possono sovrascrivere questa impostazione con le loro preferenze personali.",
+      "default_upload_mode": "Modalità di caricamento predefinita",
+      "default_upload_mode_description": "Imposta quale modalità deve essere selezionata per impostazione predefinita. Gli utenti possono modificare questa impostazione durante la creazione di una condivisione se è stato abilitato più di un metodo.",
       "delete_auth_provider": "Cancellare questo provider",
+      "direct": "Diretto",
+      "direct_uploads_disabled_but_default": "Avete impostato la modalità di caricamento predefinita su diretto, ma i caricamenti diretti sono disabilitati!",
       "disabled": "Disabili",
       "emails": "Notifiche",
       "enable_share_deleted_emails": "Abilita la condivisione delle e-mail eliminate",
@@ -196,6 +228,7 @@
       "share_expiry_warning_emails": "\"Email di avviso di \"scadenza delle azioni",
       "share_expiry_warning_emails_description": "Inviate notifiche proattive agli utenti quando le loro azioni si stanno avvicinando alla scadenza. In questo modo hanno la possibilità di estendere l'accesso, se necessario.",
       "shares": "Azioni",
+      "show_deleted_shares": "Mostra le azioni eliminate",
       "show_language_selector": "Mostra il selettore della lingua",
       "show_language_selector_description": "Alterna la visibilità della tendina di selezione della lingua nell'angolo in alto a destra dell'applicazione. Se attivata, gli utenti possono passare rapidamente da una lingua all'altra dell'interfaccia.",
       "smtp": "SMTP",
@@ -211,6 +244,7 @@
       "smtp_sender_name_description": "Il nome visualizzato come mittente delle e-mail di sistema. Gli utenti vedranno questo nome nel loro client di posta elettronica (ad esempio, \"Your App Name\" o \"Your App Support\").",
       "smtp_username": "Nome utente SMTP",
       "smtp_username_description": "Il nome utente richiesto per l'autenticazione con il server SMTP. In genere si tratta dell'indirizzo e-mail o del nome dell'account associato al servizio di posta elettronica.",
+      "upload_modes": "Modalità di caricamento",
       "your_auth_providers": "I vostri fornitori di autorizzazioni"
     },
     "system_auth_provider_info_link": "Informazioni su {name}",
@@ -290,6 +324,7 @@
     },
     "created": "Creato",
     "data_loading": "Caricamento...",
+    "deleted": "Soppresso",
     "deletes": "Cancella",
     "download_limit_reached": "Scarica il limite raggiunto",
     "download_limit_reached.message": "La condivisione che si sta cercando di scaricare ha raggiunto il limite di download. Chiedere al creatore della condivisione di aumentare il limite di download.",
@@ -304,7 +339,15 @@
   },
   "total_size": "Peso totale",
   "upload": {
-    "files": "{value, plural, other {Caricare # file}}"
+    "files": "{value, plural, other {Caricare # file}}",
+    "upload_mode_not_supported": "Non è stata selezionata alcuna modalità di caricamento valida! Non sappiamo cosa suggerire perché questo non dovrebbe essere possibile."
+  },
+  "uploader": {
+    "current_mode": {
+      "chunked": "Modalità di caricamento a pezzi",
+      "direct": "Modalità di caricamento diretto"
+    },
+    "upload_mode_swapped": "Modalità di caricamento cambiata in {value}"
   },
   "uploading": {
     "files": "{value, plural, one {Caricamento del file} other {Caricamento di # file} }"
