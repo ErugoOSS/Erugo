@@ -188,15 +188,15 @@ body {
 
     width: 100%;
     padding: 0px 0px;
-    padding-bottom: 70px;
+    padding-bottom: 0px;
 
     @media (min-width: 900px) {
       width: 50%;
-      padding: 0px 40px;
+      padding: 0px 0px;
     }
     @media (min-width: 1500px) {
       width: 30%;
-      padding: 0px 40px;
+      padding: 0px 0px;
     }
   }
 
@@ -271,9 +271,10 @@ body {
   width: 100%;
   overflow-y: auto;
   z-index: 100;
-  padding-bottom: 15px;
+
 }
 .download-panel-content {
+
   z-index: 101;
   display: flex;
   flex-direction: column;
@@ -466,7 +467,7 @@ body {
   backdrop-filter: blur(10px);
   padding: 20px;
   padding-bottom: 0;
-  border-radius: 10px 10px 0 0;
+  border-radius: 0 var(--panel-border-radius) 0 0;
   margin-bottom: 0px;
 
   .buttons {
@@ -607,7 +608,7 @@ body {
 }
 
 .upload-button-container {
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 var(--panel-border-radius) 0;
   width: 100%;
   margin-top: 0px;
   padding: 10px 20px;

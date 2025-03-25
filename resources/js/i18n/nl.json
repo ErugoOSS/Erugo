@@ -6,7 +6,7 @@
   "No files added yet": "Nog geen bestanden toegevoegd",
   "No recipients": "Geen ontvangers",
   "Powered by": "Aangedreven door",
-  "Reverse Share": "Omgekeerd Aandeel",
+  "Reverse Share": "Omgekeerd delen",
   "Share Name": "Naam",
   "Share URL": "Gedeelde link",
   "We'll provide you with a link instead": {
@@ -20,7 +20,7 @@
     "end_guest_session": "Einde gastsessie",
     "failed_to_accept_invite": "Deze uitnodigingscode is ongeldig. De code is mogelijk verlopen, al gebruikt of ingetrokken door de afzender.",
     "failed_to_reset_password": "Wachtwoord niet opnieuw ingesteld",
-    "failed_to_send_password_reset_email": "Verzonden wachtwoord reset e-mail mislukt",
+    "failed_to_send_password_reset_email": "Verzenden wachtwoord reset e-mail is mislukt",
     "forgot_password": "Wachtwoord vergeten",
     "forgot_password_create_password": "Wachtwoord aanmaken",
     "forgot_password_create_password_description": "Voer uw nieuw wachtwoord in. Beide wachtwoorden moeten overeenkomen",
@@ -48,7 +48,10 @@
   },
   "button": {
     "reverse_share_invite": "Een verzoek tot omgekeerd delen maken",
-    "reverse_share_invite_send": "Aanvraag verzenden"
+    "reverse_share_invite_send": "Aanvraag versturen",
+    "share": {
+      "password_protect": "Wachtwoordbeveiliging"
+    }
   },
   "confirm_delete_user": "Weet je zeker dat je deze gebruiker wilt verwijderen?",
   "download": {
@@ -60,11 +63,21 @@
     "upload_success": "Uploaden gelukt!",
     "upload_success_message": "De persoon die deze bestanden heeft aangevraagd, ontvangt een e-mail met een downloadlink."
   },
-  "limit": "Beperk",
+  "invite": {
+    "labels": {
+      "message": "Bericht aan ontvanger"
+    },
+    "message": "Bericht (optioneel)"
+  },
+  "limit": "Limiet",
   "message": {
     "from": "Bericht van"
   },
   "processing_uploaded_files": "Verwerken van geüploade bestanden",
+  "reverse_invite_send": {
+    "error": "Kan uitnodiging voor omgekeerd delen niet verzenden",
+    "success": "Uitnodiging voor omgekeerd delen verzonden!"
+  },
   "settings": {
     "account": {
       "change_password": "Mijn wachtwoord wijzigen",
@@ -160,6 +173,9 @@
         "title": "Limiethulp downloaden"
       }
     },
+    "invite": {
+      "message": "Bericht (optioneel)"
+    },
     "loading": "Aandelen laden...",
     "noShares": "Je hebt geen aandelen. Waarom maak je er geen?",
     "provider": {
@@ -170,6 +186,12 @@
       "description": "Vraag bestanden aan bij een contactpersoon door hieronder hun gegevens in te voeren. Ze ontvangen een link waarmee ze eenmalig bestanden rechtstreeks naar jou kunnen uploaden. Zodra ze de bestanden hebben geüpload, ontvang je een melding per e-mail."
     },
     "settingsSavedSuccessfully": "Instellingen succesvol opgeslagen",
+    "share": {
+      "password": "Wachtwoord delen",
+      "password_confirm": "Wachtwoord gedeelde link bevestigen",
+      "password_protect_description": "Maak een wachtwoord aan voor je gedeelde link. Iedereen die dit bestand downloadt, heeft dit wachtwoord nodig om toegang te krijgen. Let op: Na het aanmaken wordt dit wachtwoord versleuteld en kunnen we het niet voor je achterhalen. Zorg ervoor dat je het op een veilige locatie opslaat.",
+      "remove_password": "Wachtwoord verwijderen"
+    },
     "success": {
       "pruneExpiredShares": "Vervallen aandelen zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
       "allow_direct_uploads": "Directe uploadmodus toestaan",
       "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
+      "allow_reverse_shares": "Aandelen met terugloop toestaan",
+      "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om reverse share verzoeken te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
       "application_name": "Naam toepassing",
       "application_name_description": "Pas de weergegeven naam van je applicatie aan die wordt weergegeven in titelbalken, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
       "application_url": "URL toepassing",
@@ -202,6 +226,7 @@
       "clean_files_after": "Bestanden opschonen na",
       "clean_files_after_description": "Hoe lang nadat een gedeelde link is verlopen worden de bestanden verwijderd uit het systeem.",
       "days": "Dagen",
+      "default_expiry_time": "Standaard verlooptijd",
       "default_language": "Standaard Taal",
       "default_language_description": "Stel de primaire taal in die standaard wordt gebruikt in de interface van de applicatie voor alle gebruikers. Individuele gebruikers kunnen deze instelling overschrijven met hun persoonlijke voorkeuren.",
       "default_upload_mode": "Standaard uploadmodus",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Stel de maximale grootte in van een gedeeld bestand die een gebruiker kan aanmaken. De waarde is in megabytes of gigabytes.",
       "provider_trust_warning": "Waarschuwing: Auth Provider Vertrouwen",
       "provider_trust_warning_description": "Zorg ervoor dat je alleen auth providers configureert en inschakelt die je vertrouwt. Authenticatieproviders hebben verhoogde toegangsrechten tot je applicatie en gebruikersgegevens. Het toevoegen van niet-vertrouwde of gecompromitteerde providers kan leiden tot onbevoegde toegang, gegevenslekken of accountovername.",
+      "reverse_shares": "Omgekeerde Aandelen",
       "select_auth_provider": "Selecteer een auth provider",
       "share_deleted_emails": "\"Deel verwijderde\" e-mails",
       "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun links permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
@@ -280,6 +306,9 @@
       "myProfile": "Mijn profiel",
       "myShares": "Mijn Gedeelde Links",
       "reverse_invite": "Aanvraag omgekeerd delen aanmaken",
+      "share": {
+        "password_protect": "Gedeelde link beveiligen met een wachtwoord"
+      },
       "system": "Systeem Instellingen",
       "users": "Gebruikers",
       "users.edit": "Bewerk {name}"
@@ -324,7 +353,7 @@
       "provider_unlink_failed": "De provider is niet ontkoppeld van je account",
       "provider_unlinked": "De provider is ontkoppeld van je account",
       "save_changes": "Wijzigingen opslaan",
-      "send_invite": "Aanvraag verzenden",
+      "send_invite": "Aanvraag versturen",
       "unlink_provider_confirm": "Echt je account loskoppelen van deze provider?",
       "update_password": "Wachtwoord bijwerken",
       "user": "Gebruiker",
@@ -346,6 +375,11 @@
     "data_loading": "Laden...",
     "deleted": "Verwijderd",
     "deletes": "Verwijderd",
+    "download": {
+      "invalid_password": "Wachtwoord delen is ongeldig",
+      "password_required": "Je moet het wachtwoord invoeren om deze share te downloaden.",
+      "password_required_short": "Wachtwoord invoeren"
+    },
     "download_limit_reached": "Download limiet bereikt",
     "download_limit_reached.message": "De share die je probeert te downloaden heeft zijn downloadlimiet bereikt. Vraag de maker van de share om de downloadlimiet te verhogen.",
     "expired": "Link verlopen",
@@ -356,7 +390,9 @@
       "count": "{value, plural, one {# bestand} other {# bestanden}}",
       "including": "inclusief:"
     },
-    "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien."
+    "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
+    "passwordNotProtected": "Open",
+    "passwordProtected": "Wachtwoord beveiligd"
   },
   "total_size": "Totale grootte",
   "upload": {
@@ -368,7 +404,19 @@
       "chunked": "Modus voor gebundeld uploaden",
       "direct": "Directe uploadmodus"
     },
+    "expiry_label": "Aandeel vervalt in {value} {unit} (verandering)",
+    "expiry_max_value": "Max: {value}",
+    "expiry_too_long": "De vervaltijd die je hebt opgegeven overschrijdt de maximumlimiet. We hebben het automatisch aangepast naar de langst toegestane periode.",
+    "expiry_unit": {
+      "days": "Dag(en)",
+      "months": "Maand(en)",
+      "weeks": "Week(en)",
+      "years": "Jaar/jaren"
+    },
     "guest_share_created": "Hartelijk dank! Je bestanden zijn succesvol verzonden. Over enkele ogenblikken wordt u uitgelogd.",
+    "password_confirmation_required": "Wachtwoordbevestiging vereist",
+    "password_mismatch": "Wachtwoorden komen niet overeen",
+    "password_required": "Wachtwoord is nodig om delen te beveiligen",
     "upload_mode_swapped": "Uploadmodus gewijzigd in {value}"
   },
   "uploading": {

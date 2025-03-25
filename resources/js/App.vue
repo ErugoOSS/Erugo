@@ -194,9 +194,7 @@ const openReverseShareInvite = () => {
 
     <div class="wrapper">
       <div class="left-panel">
-        <div class="logo-container">
-          <a href="/"><img :src="logoUrl" alt="Erugo" id="logo" :style="{ width: `${logoWidth}px` }" /></a>
-        </div>
+        
 
         <div class="ui-container">
           <template v-if="store.mode === 'upload'">

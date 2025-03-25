@@ -48,7 +48,10 @@
   },
   "button": {
     "reverse_share_invite": "Creare una richiesta di condivisione inversa",
-    "reverse_share_invite_send": "Invia la richiesta"
+    "reverse_share_invite_send": "Invia la richiesta",
+    "share": {
+      "password_protect": "Protezione con password"
+    }
   },
   "confirm_delete_user": "Siete sicuri di voler eliminare questo utente?",
   "download": {
@@ -60,11 +63,21 @@
     "upload_success": "Caricamento riuscito!",
     "upload_success_message": "La persona che ha richiesto questi file riceverà un'e-mail con un link per il download."
   },
+  "invite": {
+    "labels": {
+      "message": "Messaggio al destinatario"
+    },
+    "message": "Messaggio (facoltativo)"
+  },
   "limit": "Limite",
   "message": {
     "from": "Messaggio da {name}"
   },
   "processing_uploaded_files": "Elaborazione dei file caricati",
+  "reverse_invite_send": {
+    "error": "Impossibile inviare l'invito alla condivisione inversa",
+    "success": "Invito alla condivisione inversa inviato!"
+  },
   "settings": {
     "account": {
       "change_password": "Cambiare la password",
@@ -160,6 +173,9 @@
         "title": "Scarica la Guida ai limiti"
       }
     },
+    "invite": {
+      "message": "Messaggio (facoltativo)"
+    },
     "loading": "Caricamento delle azioni...",
     "noShares": "Non avete azioni. Perché non crearne una?",
     "provider": {
@@ -170,6 +186,12 @@
       "description": "Richiedete i file a un contatto inserendo i suoi dati qui sotto. Riceveranno un link che consente l'accesso una tantum per caricare i file direttamente a voi. Una volta caricati i file, riceverete una notifica via e-mail."
     },
     "settingsSavedSuccessfully": "Impostazioni salvate con successo",
+    "share": {
+      "password": "Condividi la password",
+      "password_confirm": "Confermare la password di condivisione",
+      "password_protect_description": "Creare una password per la condivisione. Chiunque scarichi questa condivisione avrà bisogno di questa password per accedervi. Nota bene: dopo la creazione, la password sarà crittografata e non sarà possibile recuperarla. Assicuratevi di salvarla in un luogo sicuro.",
+      "remove_password": "Rimuovere la password"
+    },
     "success": {
       "pruneExpiredShares": "Le azioni scadute sono state programmate per l'eliminazione e verranno elaborate in background.",
       "shareExpired": "Quota scaduta",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "La modalità Chunked upload suddivide i file in segmenti più piccoli che vengono trasferiti in sequenza. Sebbene sia leggermente più lento del caricamento diretto per i file più piccoli, questo metodo offre maggiore stabilità e affidabilità durante il trasferimento di file di grandi dimensioni. I caricamenti chunked supportano il monitoraggio dell'avanzamento e consentono agli utenti di sospendere e riprendere manualmente i trasferimenti, il che li rende ideali per i file di dimensioni superiori a 100 MB o quando si utilizzano connessioni di rete instabili.",
       "allow_direct_uploads": "Consentire la modalità di caricamento diretto",
       "allow_direct_uploads_description": "La modalità di caricamento diretto trasmette i file in un'unica richiesta ininterrotta. Sebbene questo metodo offra la velocità di trasferimento più elevata per la maggior parte dei file, i file estremamente grandi possono causare problemi di stabilità o timeout. Per ottenere prestazioni ottimali con file di dimensioni superiori a 100 MB, l'opzione migliore è rappresentata dal caricamento a pezzi.",
+      "allow_reverse_shares": "Consentire le azioni inverse",
+      "allow_reverse_shares_description": "Determina se gli utenti registrati devono avere il permesso di inviare richieste di condivisione inversa. Queste richieste forniscono a persone esterne un pass per il caricamento una tantum, consentendo loro di consegnare i file direttamente all'utente registrato che ha avviato la richiesta.\n\n\n\n\n",
       "application_name": "Nome dell'applicazione",
       "application_name_description": "Personalizzate il nome visualizzato dell'applicazione che appare nelle barre del titolo, nelle finestre di dialogo e in altri elementi dell'interfaccia. Questo aiuta a mantenere un branding coerente in tutta l'esperienza dell'utente.",
       "application_url": "URL dell'applicazione",
@@ -202,6 +226,7 @@
       "clean_files_after": "Pulire i file dopo",
       "clean_files_after_description": "Quanto tempo dopo la scadenza di una condivisione prima che i file vengano eliminati dal sistema.",
       "days": "Giorni",
+      "default_expiry_time": "Tempo di scadenza predefinito",
       "default_language": "Lingua predefinita",
       "default_language_description": "Impostare la lingua principale che verrà utilizzata nell'interfaccia dell'applicazione per tutti gli utenti per impostazione predefinita. I singoli utenti possono sovrascrivere questa impostazione con le loro preferenze personali.",
       "default_upload_mode": "Modalità di caricamento predefinita",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Imposta la dimensione massima di una condivisione che un utente può creare. Il valore è espresso in megabyte o gigabyte.",
       "provider_trust_warning": "Attenzione: Fiducia del fornitore di autorizzazioni",
       "provider_trust_warning_description": "Assicurarsi di configurare e abilitare solo i provider di autenticazione di cui ci si fida. I provider di autenticazione hanno privilegi di accesso elevati all'applicazione e ai dati degli utenti. L'aggiunta di provider non affidabili o compromessi potrebbe portare ad accessi non autorizzati, violazioni dei dati o acquisizione di account.",
+      "reverse_shares": "Azioni inverse",
       "select_auth_provider": "Selezionare un provider di autenticazione",
       "share_deleted_emails": "\"Email \"Condividi cancellate",
       "share_deleted_emails_description": "Notifica agli utenti quando le loro condivisioni sono state eliminate definitivamente dal sistema. Questo conferma il completamento del ciclo di vita dei contenuti ai fini della sicurezza e della conformità.",
@@ -280,6 +306,9 @@
       "myProfile": "Il mio account",
       "myShares": "Le mie azioni",
       "reverse_invite": "Creare una richiesta di condivisione inversa",
+      "share": {
+        "password_protect": "Protezione con password della condivisione"
+      },
       "system": "Impostazioni del sistema",
       "users": "Utenti",
       "users.edit": "Modifica {name}"
@@ -346,6 +375,11 @@
     "data_loading": "Caricamento...",
     "deleted": "Soppresso",
     "deletes": "Cancella",
+    "download": {
+      "invalid_password": "La password di condivisione non è valida",
+      "password_required": "Per scaricare questa condivisione è necessario inserire la password.",
+      "password_required_short": "Inserire la password"
+    },
     "download_limit_reached": "Scarica il limite raggiunto",
     "download_limit_reached.message": "La condivisione che si sta cercando di scaricare ha raggiunto il limite di download. Chiedere al creatore della condivisione di aumentare il limite di download.",
     "expired": "Quota scaduta",
@@ -356,7 +390,9 @@
       "count": "{value, plural, other {# files}}",
       "including": "compreso:"
     },
-    "not_found": "La condivisione che si sta cercando non è stata trovata. Potrebbe essere necessario effettuare il login per visualizzarla."
+    "not_found": "La condivisione che si sta cercando non è stata trovata. Potrebbe essere necessario effettuare il login per visualizzarla.",
+    "passwordNotProtected": "Aperto",
+    "passwordProtected": "Protetto da password"
   },
   "total_size": "Peso totale",
   "upload": {
@@ -368,7 +404,19 @@
       "chunked": "Modalità di caricamento a pezzi",
       "direct": "Modalità di caricamento diretto"
     },
+    "expiry_label": "L'azione scadrà nel {value} {unit} (modifica)",
+    "expiry_max_value": "Max: {value}",
+    "expiry_too_long": "Il tempo di scadenza inserito supera il limite massimo. L'abbiamo adattato automaticamente al periodo più lungo consentito.",
+    "expiry_unit": {
+      "days": "Giorno/i",
+      "months": "Mese/i",
+      "weeks": "Settimana/e",
+      "years": "Anno/i"
+    },
     "guest_share_created": "Grazie! I file sono stati inviati con successo. Tra pochi istanti verrà effettuato il logout.",
+    "password_confirmation_required": "È richiesta la conferma della password",
+    "password_mismatch": "Le password non corrispondono",
+    "password_required": "La password è necessaria per proteggere la condivisione",
     "upload_mode_swapped": "Modalità di caricamento cambiata in {value}"
   },
   "uploading": {
