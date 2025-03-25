@@ -267,7 +267,7 @@ class SharesController extends Controller
         ];
       }),
       'user' => [
-        'name' => $share->user->name,
+        'name' => $share->user ? $share->user->name : 'Guest User',
       ],
       'password_protected' => $share->password ? true : false
     ];
