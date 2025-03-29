@@ -768,11 +768,13 @@ body {
   align-items: center;
   justify-content: center;
   background: var(--panel-background-color);
+
   backdrop-filter: blur(10px);
   z-index: 101;
   padding: 20px;
   border-radius: 10px;
   width: 400px;
+  height: 100%;
   .auth-container-inner {
     display: flex;
     flex-direction: column;
