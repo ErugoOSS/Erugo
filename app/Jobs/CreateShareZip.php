@@ -25,8 +25,16 @@ class CreateShareZip implements ShouldQueue
   public function handle(): void
   {
 
+
+    if($this->share->user_id) {
+      $user_folder = $this->share->user_id;
+    } else {
+      //grab the first segment of the path
+      $user_folder = explode('/', $this->share->path)[0];
+    }
+
     //just check that we've not already created the zip file
-    $zipPath = storage_path('app/shares/' . $this->share->user_id . '/' . $this->share->long_id . '.zip');
+    $zipPath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id . '.zip');
     if (file_exists($zipPath)) {
       return;
     }
@@ -39,7 +47,7 @@ class CreateShareZip implements ShouldQueue
     }
     
     try {
-      $sourcePath = storage_path('app/shares/' . $this->share->user_id . '/' . $this->share->long_id);
+      $sourcePath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id);
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();

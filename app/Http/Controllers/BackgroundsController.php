@@ -17,11 +17,14 @@ class BackgroundsController extends Controller
 
         //keep only the files that are images
         $files = array_filter($files, function ($file) {
-            return in_array(pathinfo($file, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+            return in_array(
+                strtolower(pathinfo($file, PATHINFO_EXTENSION)),
+                ['jpg', 'jpeg', 'png', 'gif', 'webp']
+            );
         });
 
         $files = array_map(function ($file) {
-            return str_replace(['backgrounds/', '/backgrounds/'], '', $file);
+            return rawurlencode(str_replace(['backgrounds/', '/backgrounds/'], '', $file));
         }, $files);
 
         $files = array_values($files);
@@ -37,6 +40,7 @@ class BackgroundsController extends Controller
 
     public function upload(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'background_image' => 'required|image|mimes:jpg,jpeg,png,gif,webp',
         ]);
@@ -54,13 +58,15 @@ class BackgroundsController extends Controller
         try {
             $file = $request->file('background_image');
             $fileName = $file->getClientOriginalName();
-            $file->storeAs('backgrounds', $fileName, 'public');
+            $extension = $file->getClientOriginalExtension();
+            $safeFilename = basename($fileName);
+            $file->storeAs('backgrounds', $safeFilename, 'public');
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Background image uploaded successfully',
                 'data' => [
-                    'file' => $fileName,
+                    'file' => $safeFilename . '.' . $extension,
                 ]
             ]);
         } catch (\Exception $e) {

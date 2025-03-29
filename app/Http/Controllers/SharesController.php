@@ -364,7 +364,7 @@ class SharesController extends Controller
       if (file_exists($filename)) {
         $this->createDownloadRecord($share);
 
-        return response()->download($filename);
+        return response()->download($filename, $share->name . '.zip');
       } else {
         //something went wrong, show the failed view
         return view('shares.failed', [

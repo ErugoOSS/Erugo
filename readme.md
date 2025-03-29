@@ -1,4 +1,4 @@
-![Docker Pulls](https://img.shields.io/docker/pulls/wardy784/erugo) ![GitHub Repo stars](https://img.shields.io/github/stars/deanward/erugo) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/deanward/erugo) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/deanward/erugo) ![GitHub commits since latest release](https://img.shields.io/github/commits-since/deanward/erugo/latest)
+[![Docker Pulls](https://img.shields.io/docker/pulls/wardy784/erugo)](https://hub.docker.com/r/wardy784/erugo) ![GitHub Repo stars](https://img.shields.io/github/stars/deanward/erugo) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/deanward/erugo) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/deanward/erugo) ![GitHub commits since latest release](https://img.shields.io/github/commits-since/deanward/erugo/latest) [![license](https://img.shields.io/github/license/dec0dOS/amazing-github-template.svg)](LICENSE)
 
 [![Discord Banner 2](https://img.shields.io/badge/Join%20Us%20On%20Discord-8A2BE2)](https://discord.gg/M74X2wmqY8)
 

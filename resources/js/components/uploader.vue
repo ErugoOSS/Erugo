@@ -521,6 +521,62 @@ watch(showPasswordForm, (newVal) => {
     passwordInput.value.focus()
   }
 })
+
+//file dropping
+const dropzone = ref(null)
+const handleDrop = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  dropBoxRemoveActiveClass()
+
+  const items = e.dataTransfer.items || []
+
+  for (const item of items) {
+    if (item.kind === 'file') {
+      // For Chromium-based browsers
+      const entry = item.webkitGetAsEntry?.()
+      if (entry?.isDirectory) {
+        console.log(`Skipping directory: ${entry.name}`)
+        continue
+      }
+
+      const file = item.getAsFile()
+      if (file) {
+        pushFile(file)
+      }
+    }
+  }
+}
+
+const handleDragOver = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  dropBoxAddActiveClass()
+}
+
+const handleDragLeave = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  dropBoxRemoveActiveClass(e)
+}
+const dropBoxAddActiveClass = () => {
+  dropzone.value.classList.add('active')
+}
+
+const dropBoxRemoveActiveClass = (e) => {
+  if (e == null) {
+    dropzone.value.classList.remove('active')
+  } else if (!dropzone.value.contains(e.relatedTarget)) {
+    dropzone.value.classList.remove('active')
+  }
+}
+
+const handleDropzoneClick = (e) => {
+  console.log(e)
+  if (e.target === dropzone.value) {
+    showFilePicker()
+  }
+}
 </script>
 
 <template>
@@ -542,7 +598,7 @@ watch(showPasswordForm, (newVal) => {
         <div class="progress-bar">
           <div class="progress-bar-fill" :style="{ width: `${uploadProgress}%` }"></div>
         </div>
-        <div class="pause-button" @click="togglePause">
+        <div class="pause-button" @click="togglePause" v-if="uploadSettings.uploadMode === 'chunked'">
           <Pause v-if="!isPaused" />
           <Play v-else />
         </div>
@@ -589,8 +645,17 @@ watch(showPasswordForm, (newVal) => {
       </select>
     </div>
   </div>
+
   <div class="upload-basket">
-    <div class="basket-items">
+    <div
+      class="basket-items dropzone"
+      @drop="handleDrop"
+      @dragenter="handleDragOver"
+      @dragover.prevent.stop
+      @dragleave="handleDragLeave($event)"
+      @click="handleDropzoneClick"
+      ref="dropzone"
+    >
       <div class="upload-basket-item" v-for="file in uploadBasket" :key="file.name" v-if="uploadBasket.length > 0">
         <div class="name">
           {{ file.name }}
@@ -1077,6 +1142,17 @@ watch(showPasswordForm, (newVal) => {
     .user-form {
       transform: translate(-50%, 0%);
     }
+  }
+}
+
+.dropzone {
+  transition: all 0.3s ease;
+  border-radius: var(--panel-border-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  &.active {
+    border: 1px dashed var(--link-color);
+    overflow: hidden;
   }
 }
 </style>

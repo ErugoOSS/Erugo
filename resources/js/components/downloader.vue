@@ -43,6 +43,7 @@ onMounted(() => {
 const fetchShare = async () => {
   try {
     share.value = await getShare(props.downloadShareCode)
+    document.title = share.value.name
   } catch (error) {
     console.log('error', error)
     if (error.message == 'Download limit reached') {

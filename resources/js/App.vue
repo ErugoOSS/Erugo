@@ -73,7 +73,8 @@ onMounted(() => {
   useMyBackgrounds.value = domData().use_my_backgrounds
   showPoweredBy.value = domData().show_powered_by
   slideshowSpeed.value = domData().background_slideshow_speed
-  setTimeout(changeBackground, slideshowSpeed.value * 1000)
+
+  setInterval(changeBackground, slideshowSpeed.value * 1000)
   getBackgroundImages().then((data) => {
     backgroundImages.value = data.files
     nextTick(() => {
@@ -88,11 +89,6 @@ onMounted(() => {
         emitter.emit('profileEditActive')
       })
     })
-  })
-
-  //next tick change background
-  nextTick(() => {
-    // changeBackground()
   })
 })
 
@@ -123,6 +119,7 @@ const handleLogoutClick = () => {
   logout()
 }
 
+const currentBackgroundIndex = ref(0)
 const changeBackground = async () => {
   let backgrounds = document.querySelectorAll('.backgrounds-item')
   if (backgrounds.length === 0) {
@@ -131,7 +128,11 @@ const changeBackground = async () => {
   backgrounds.forEach((background) => {
     background.classList.remove('active')
   })
-  backgrounds[Math.floor(Math.random() * backgrounds.length)].classList.add('active')
+  backgrounds[currentBackgroundIndex.value].classList.add('active')
+  currentBackgroundIndex.value++
+  if (currentBackgroundIndex.value >= backgrounds.length) {
+    currentBackgroundIndex.value = 0
+  }
 }
 
 const openSettings = () => {
