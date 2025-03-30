@@ -377,7 +377,7 @@ class UploadsController extends Controller
     foreach ($files as $file) {
       // Move file from temp to share directory
       $sourcePath = storage_path('app/' . $file->temp_path);
-      $originalPath = $request->filePaths[$file->id];
+      $originalPath = $request->filePaths[$file->id] ?? '';
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
       $destPath = $completePath . '/' . $originalPath;
