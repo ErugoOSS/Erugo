@@ -1,11 +1,13 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { niceFileSize, timeUntilExpiration, getApiUrl, niceFileType, niceFileName } from '../utils'
 import { FileIcon, HeartCrack, TrendingDown, FileX } from 'lucide-vue-next'
 import { getShare } from '../api'
 import { domError } from '../domData'
 import { useToast } from 'vue-toastification'
 import { useTranslate } from '@tolgee/vue'
+import DirectoryItem from './directory-item.vue'
+
 const { t } = useTranslate()
 
 const apiUrl = getApiUrl()
@@ -99,6 +101,54 @@ const downloadPasswordProtectedFiles = () => {
   form.submit()
   setTimeout(() => document.body.removeChild(form), 0)
 }
+
+const filesByDirectory = computed(() => {
+  const files = share?.value?.files
+  const structure = {}
+
+  if (!files) {
+    return {}
+  }
+
+  files.forEach((file) => {
+    const path = file.full_path || ''
+    const dirs = path ? path.split('/') : ['']
+
+    // Create nested structure
+    let current = structure
+    for (const dir of dirs) {
+      if (dir) {
+        if (!current[dir]) {
+          current[dir] = { files: [], directories: {} }
+        }
+        current = current[dir].directories
+      }
+    }
+
+    // Add file to its directory
+    if (path) {
+      const parentDir = dirs.reduce((acc, dir, index) => {
+        if (index < dirs.length - 1 && dir) {
+          return acc[dir].directories
+        }
+        return acc
+      }, structure)
+
+      const lastDir = dirs[dirs.length - 1]
+      if (lastDir) {
+        parentDir[lastDir].files.push(file)
+      }
+    } else {
+      // Root files
+      if (!structure.files) {
+        structure.files = []
+      }
+      structure.files.push(file)
+    }
+  })
+
+  return structure
+})
 </script>
 
 <template>
@@ -120,24 +170,8 @@ const downloadPasswordProtectedFiles = () => {
           })
         }}
       </div>
-      <div class="file-list">
-        <div v-for="file in share.files.slice(0, showFilesCount)" :key="file" class="file-item">
-          <div class="file-name">
-            <div class="name">
-              {{ niceFileName(file.name) }}
-              <div class="size">
-                {{ niceFileSize(file.size) }}
-              </div>
-            </div>
-          </div>
-
-          <div class="type">
-            {{ niceFileType(file.type) }}
-          </div>
-        </div>
-        <div v-if="share.files.length > showFilesCount" class="file-item more-files">
-          <div class="file-name more-files">and {{ share.files.length - showFilesCount }} more</div>
-        </div>
+      <div class="share-files-list">
+        <directory-item :structure="filesByDirectory" :is-root="true" :read-only="true" />
       </div>
       <div class="share-message mt-3" v-if="share.description">
         <h6>{{ $t('message.from', { name: splitFullName(share.user.name) }) }}</h6>
@@ -199,7 +233,6 @@ const downloadPasswordProtectedFiles = () => {
   </div>
 </template>
 <style lang="scss" scoped>
-
 .file-list {
   padding: 20px;
 }

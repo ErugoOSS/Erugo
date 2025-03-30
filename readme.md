@@ -10,7 +10,15 @@ Erugo is a powerful, self-hosted file-sharing platform built with PHP and Larave
 
 Check out a sample share on our demo site at [demo.erugo.app/shares/tight-silence-sweet-sea](https://demo.erugo.app/shares/tight-silence-sweet-sea). While uploads are disabled on the demo, you can experience the recipient's view and download the sample file.
 
-Please note we're running the demo on a very cheap VPS so it may take a few seconds to load. This isn't an indication of the performance of the software, just our budget ;).
+### Sponsored by Box to Play
+
+[![Box to Play](.github/images/sponsors/boxtoplay-logo.png)](https://www.boxtoplay.com/en/vps-hosting/vps-server?ref=erugo-readme)
+
+Box to Play offers premium VPS and game servers at competitive prices. They have generously contributed server resources to support Erugo's infrastructure, for which I am deeply grateful. Explore their services at [boxtoplay.com](https://www.boxtoplay.com/en/vps-hosting/vps-server?ref=erugo-readme).
+
+### Support Erugo's Development
+
+If you would like to support Erugo's development, please consider donating to the project. Your support helps me maintain and improve the software.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B11BF8EC)
 

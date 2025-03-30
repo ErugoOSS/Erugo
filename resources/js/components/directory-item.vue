@@ -2,12 +2,16 @@
 import { Folder, Trash, File } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, niceFileName } from '../utils'
 import { ref } from 'vue'
-defineProps({
+const props = defineProps({
   structure: {
     type: Object,
     required: true
   },
   isRoot: {
+    type: Boolean,
+    default: false
+  },
+  readOnly: {
     type: Boolean,
     default: false
   }
@@ -48,7 +52,7 @@ function getDirectories(structure) {
             {{ niceFileType(file.type) }}
           </div>
         </div>
-        <div class="hover-actions">
+        <div class="hover-actions" v-if="!readOnly">
           <button class="icon-only" @click="$emit('remove-file', file)">
             <Trash />
           </button>
@@ -82,7 +86,7 @@ function getDirectories(structure) {
                 {{ niceFileType(file.type) }}
               </div>
             </div>
-            <div class="hover-actions">
+            <div class="hover-actions" v-if="!readOnly">
               <button class="icon-only" @click="$emit('remove-file', file)">
                 <Trash />
               </button>
@@ -96,6 +100,7 @@ function getDirectories(structure) {
           :is-root="false"
           @remove-file="$emit('remove-file', $event)"
           class="subdirectory"
+          :read-only="readOnly"
         />
       </div>
     </template>

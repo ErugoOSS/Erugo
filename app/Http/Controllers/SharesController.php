@@ -80,9 +80,6 @@ class SharesController extends Controller
       $totalFileSize += $file->getSize();
     }
 
-    $sharePath = $user->id . '/' . $longId;
-    $completePath = storage_path('app/shares/' .  $sharePath);
-
     $password = $request->password;
     $passwordConfirm = $request->password_confirm;
 
@@ -96,6 +93,14 @@ class SharesController extends Controller
           'message' => 'Password confirmation does not match'
         ], 400);
       }
+    }
+
+    $sharePath = $user->id . '/' . $longId;
+    $completePath = storage_path('app/shares/' .  $sharePath);
+    
+    //create the directory if it doesn't exist
+    if (!file_exists($completePath)) {
+      mkdir($completePath, 0777, true);
     }
 
     $shareData = [
@@ -118,20 +123,19 @@ class SharesController extends Controller
         'type' => $file->getMimeType(),
         'size' => $file->getSize()
       ];
-      $file = File::create($fileData);
-      $file->share_id = $share->id;
-      $file->save();
+      $db_file = File::create($fileData);
+      $db_file->share_id = $share->id;
+      $db_file->save();
+      $file->dbFile = $db_file;
     }
 
-    if (!file_exists($completePath)) {
-      mkdir($completePath, 0777, true);
-    }
-    $files = $request->file('files');
     foreach ($files as $index => $file) {
       $originalPath = $request->file_paths[$index];
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
       $file->move($completePath . '/' . $originalPath, $file->getClientOriginalName());
+      $file->dbFile->full_path = $originalPath;
+      $file->dbFile->save();
     }
     $share->status = 'pending';
     $share->save();
@@ -272,6 +276,7 @@ class SharesController extends Controller
           'name' => $file->name,
           'size' => $file->size,
           'type' => $file->type,
+          'full_path' => $file->full_path,
           'created_at' => $file->created_at,
           'updated_at' => $file->updated_at
         ];

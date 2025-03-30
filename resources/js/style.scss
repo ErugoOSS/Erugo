@@ -269,7 +269,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   z-index: 100;
   padding-bottom: 15px;
 }
@@ -284,6 +284,7 @@ body {
   width: 100%;
   padding: 0px 0px;
   padding-bottom: 70px;
+  height: 100%;
   @media (min-width: 900px) {
     width: 50%;
     padding: 0px 0px;
@@ -309,12 +310,71 @@ body {
       margin-bottom: 20px;
     }
   }
-  .file-list {
+  .share-files-list {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-grow: 1;
+    width: 100%;
+
+    .upload-basket-folder {
+      position: relative;
+      background: var(--panel-background-color);
+      padding: 10px 10px;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      .upload-basket-folder {
+        padding-left: 10px;
+      }
+    }
+    .upload-basket-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-background-color);
+      padding: 5px 10px;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      margin-top: 5px;
+      cursor: default;
+      .name {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--uploader-item-text-color);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
+
+        svg {
+          width: 16px;
+          height: 16px;
+          margin-top: -3px;
+        }
+      }
+      .meta {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        color: var(--uploader-item-text-color);
+        font-size: 0.8rem;
+        margin-top: 3px;
+        margin-left: 5px;
+        opacity: 0.4;
+      }
+
+    }
   }
   .file-item {
     display: flex;

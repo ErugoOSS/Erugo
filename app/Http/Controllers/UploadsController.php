@@ -16,6 +16,8 @@ use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
 class UploadsController extends Controller
 {
   /**
@@ -213,7 +215,9 @@ class UploadsController extends Controller
     }
 
     // Path to the final assembled file
-    $finalFilePath = $tempAssembledFilePath . '/' . $request->filename;
+    $uuid = Str::uuid();
+    $extension = pathinfo($request->filename, PATHINFO_EXTENSION);
+    $finalFilePath = $tempAssembledFilePath . '/' . $uuid . '.' . $extension;
     $finalFileHandle = fopen($finalFilePath, 'wb');
 
     // Get all chunks in proper order and concatenate them
@@ -237,7 +241,7 @@ class UploadsController extends Controller
       'name' => $request->filename,
       'type' => $session->filetype ?? 'unknown',
       'size' => $session->filesize,
-      'temp_path' => 'temp/' . $user->id . '/' . $request->filename
+      'temp_path' => 'temp/' . $user->id . '/' . $uuid . '.' . $extension
     ]);
 
     // If recipients are provided, process them
@@ -301,7 +305,7 @@ class UploadsController extends Controller
 
     $maxExpiryTime = Setting::where('key', 'max_expiry_time')->first()->value;
     $expiryDate = Carbon::parse($request->expiry_date);
-    
+
     if ($maxExpiryTime !== null) {
       $now = Carbon::now();
 
@@ -346,8 +350,8 @@ class UploadsController extends Controller
     $password = $request->password;
     $passwordConfirm = $request->password_confirm;
 
-    if($password) {
-      if($password !== $passwordConfirm) {
+    if ($password) {
+      if ($password !== $passwordConfirm) {
         return response()->json([
           'status' => 'error',
           'message' => 'Password confirmation does not match'
@@ -377,13 +381,17 @@ class UploadsController extends Controller
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
       $destPath = $completePath . '/' . $originalPath;
+
       if (!file_exists($destPath)) {
         mkdir($destPath, 0777, true);
       }
+      
       rename($sourcePath, $destPath . '/' . $file->name);
 
       // Update file record
       $file->share_id = $share->id;
+      $file->full_path = $originalPath;
+      $file->temp_path = null;
       $file->save();
     }
 
