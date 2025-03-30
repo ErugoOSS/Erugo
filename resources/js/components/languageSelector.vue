@@ -80,7 +80,7 @@ onUnmounted(() => {
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 100;
+  z-index: 200;
   background: var(--primary-button-background-color);
   color: var(--primary-button-text-color);
   width: var(--icon-only-button-width);

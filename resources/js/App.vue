@@ -1,41 +1,47 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { LogOut, Settings as SettingsIcon, Info, MailPlus } from 'lucide-vue-next'
+
+//components
+import LanguageSelector from './components/languageSelector.vue'
 import Uploader from './components/uploader.vue'
 import Downloader from './components/downloader.vue'
 import Auth from './components/auth.vue'
 import Settings from './components/settings.vue'
 import Setup from './components/setup.vue'
-import { unsplashImages } from './unsplashImages'
+import ThankGuestForUpload from './components/thankGuestForUpload.vue'
+import ReverseInvite from './components/reverseInvite.vue'
+import Background from './components/layout/background.vue'
+
+//3rd party
+import { LogOut, Settings as SettingsIcon, MailPlus } from 'lucide-vue-next'
+import { TolgeeProvider } from '@tolgee/vue'
+import { useToast } from 'vue-toastification'
+import { useTranslate } from '@tolgee/vue'
+
+//1st party
 import { getApiUrl } from './utils'
 import { domData, domError, domSuccess } from './domData'
 import { emitter, store } from './store'
-import { logout, getBackgroundImages } from './api'
-import { TolgeeProvider } from '@tolgee/vue'
-import LanguageSelector from './components/languageSelector.vue'
-import { useToast } from 'vue-toastification'
-import ThankGuestForUpload from './components/thankGuestForUpload.vue'
-import { useTranslate } from '@tolgee/vue'
-import ReverseInvite from './components/reverseInvite.vue'
+import { logout } from './api'
+
+
+//use
 const { t } = useTranslate()
 
+//static data
 const apiUrl = getApiUrl()
-
 const logoUrl = `${apiUrl}/get-logo`
-const version = ref()
-const logoWidth = ref(100)
-const useMyBackgrounds = ref(false)
-const backgroundImages = ref([])
-const showPoweredBy = ref(false)
+const allowReverseShares = domData().allow_reverse_shares
+const logoWidth = domData().logo_width
+const showPoweredBy = domData().show_powered_by
+const setupNeeded = domData().setup_needed
 
+//reactive data
 const auth = ref(null)
 const downloadShareCode = ref('')
 const settingsPanel = ref(null)
-const setupNeeded = ref(false)
 const toast = useToast()
-const slideshowSpeed = ref(180)
 const reverseInvite = ref(null)
-const allowReverseShares = domData().allow_reverse_shares
 
 onMounted(() => {
   if (domError().length > 0) {
@@ -59,28 +65,15 @@ onMounted(() => {
     })
   }
 
-  setupNeeded.value = domData().setup_needed
-
   if (setupNeeded.value) {
     store.setMode('setup')
     return
   }
 
+  //figure out which mode the application is in
   setMode()
 
-  version.value = domData().version
-  logoWidth.value = domData().logo_width
-  useMyBackgrounds.value = domData().use_my_backgrounds
-  showPoweredBy.value = domData().show_powered_by
-  slideshowSpeed.value = domData().background_slideshow_speed
-
-  setInterval(changeBackground, slideshowSpeed.value * 1000)
-  getBackgroundImages().then((data) => {
-    backgroundImages.value = data.files
-    nextTick(() => {
-      changeBackground()
-    })
-  })
+  //register events
   emitter.on('showPasswordResetForm', () => {
     settingsPanel.value.setActiveTab('myProfile')
     nextTick(() => {
@@ -119,22 +112,6 @@ const handleLogoutClick = () => {
   logout()
 }
 
-const currentBackgroundIndex = ref(0)
-const changeBackground = async () => {
-  let backgrounds = document.querySelectorAll('.backgrounds-item')
-  if (backgrounds.length === 0) {
-    return
-  }
-  backgrounds.forEach((background) => {
-    background.classList.remove('active')
-  })
-  backgrounds[currentBackgroundIndex.value].classList.add('active')
-  currentBackgroundIndex.value++
-  if (currentBackgroundIndex.value >= backgrounds.length) {
-    currentBackgroundIndex.value = 0
-  }
-}
-
 const openSettings = () => {
   store.setSettingsOpen(true)
 }
@@ -146,30 +123,36 @@ const openReverseShareInvite = () => {
 
 <template>
   <TolgeeProvider>
+    <Background />
     <LanguageSelector />
-    <div class="backgrounds" v-if="!useMyBackgrounds">
-      <div
-        class="backgrounds-item"
-        v-for="image in unsplashImages"
-        :key="image"
-        :style="{
-          backgroundImage: `url(https://images.unsplash.com/${image.id}?q=80&w=1920&auto=format)`
-        }"
-      >
-        <div class="backgrounds-item-credit" v-html="image.credit"></div>
-      </div>
+    <div class="logo-container">
+      <a href="/"><img :src="logoUrl" alt="Erugo" id="logo" :style="{ width: `${logoWidth}px` }" /></a>
+    </div>
+    <div class="main">
+      <!-- auth: shows if user is not logged in and the mode is upload -->
+      <Auth v-show="!store.isLoggedIn() && store.mode === 'upload'" ref="auth" />
+
+      <!-- uploader: shows if user is logged in and mode is upload -->
+      <Uploader v-if="store.mode === 'upload' && store.isLoggedIn()" />
+
+      <!-- downloader -->
+      <Downloader v-if="store.mode === 'download'" :downloadShareCode="downloadShareCode" />
+
+      <!-- setup wizard: shows if mode is setup -->
+      <Setup v-if="store.mode === 'setup'" />
+
+      <!-- thank guest for upload: shows if mode is thank_guest_for_upload -->
+      <ThankGuestForUpload v-if="store.mode === 'thank_guest_for_upload'" />
     </div>
 
-    <div class="backgrounds" v-else>
-      <div
-        class="backgrounds-item"
-        v-for="image in backgroundImages"
-        :key="image"
-        :style="{ backgroundImage: `url(/api/backgrounds/${image})` }"
-      ></div>
-    </div>
-    <template v-if="store.isLoggedIn()">
-      <div class="main-menu">
+    <footer>
+      <!-- version info: shows if show_powered_by is true -->
+      <div class="powered-by" v-if="showPoweredBy">
+        {{ $t('Powered by') }}
+        <a href="https://github.com/deanward/erugo">Erugo</a>
+      </div>
+      <!-- main menu: shows if user is logged in -->
+      <div class="main-menu" v-if="store.isLoggedIn()">
         <button
           class="reverse-share-invite-button secondary icon-only"
           :title="t('button.reverse_share_invite')"
@@ -191,50 +174,12 @@ const openReverseShareInvite = () => {
           <LogOut />
         </button>
       </div>
-    </template>
+    </footer>
 
-    <div class="wrapper">
-      <div class="left-panel">
-        <div class="logo-container">
-          <a href="/"><img :src="logoUrl" alt="Erugo" id="logo" :style="{ width: `${logoWidth}px` }" /></a>
-        </div>
+    <!-- settings: load only if user is logged in -->
+    <Settings ref="settingsPanel" v-if="store.isLoggedIn()" />
 
-        <div class="ui-container">
-          <template v-if="store.mode === 'upload'">
-            <Uploader v-if="store.isLoggedIn()" />
-            <Auth v-show="!store.isLoggedIn()" ref="auth" />
-          </template>
-          <Downloader v-if="store.mode === 'download'" :downloadShareCode="downloadShareCode" />
-          <template v-if="store.mode === 'setup'">
-            <Setup />
-          </template>
-          <template v-if="store.mode === 'thank_guest_for_upload'">
-            <ThankGuestForUpload />
-          </template>
-        </div>
-      </div>
-      <div class="right-panel d-none d-md-flex">
-        <div class="right-panel-content" v-if="store.isGuest() && store.mode === 'upload' && store.isLoggedIn()">
-          <div class="right-panel-content-item">
-            <div class="right-panel-content-item-title">
-              <h5>{{ t('Reverse Share') }}</h5>
-              <p>
-                <Info />
-                {{ t('auth.guest_warning') }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="version-info" v-if="showPoweredBy">
-      <div class="version-info-text">
-        {{ $t('Powered by') }}
-        <a href="https://github.com/deanward/erugo">Erugo</a>
-        {{ version }}
-      </div>
-    </div>
-    <Settings ref="settingsPanel" />
+    <!-- reverse invite: load only if reverse shares are allowed and user is logged in and not a guest -->
     <ReverseInvite ref="reverseInvite" v-if="allowReverseShares && !store.isGuest() && store.isLoggedIn()" />
   </TolgeeProvider>
 </template>

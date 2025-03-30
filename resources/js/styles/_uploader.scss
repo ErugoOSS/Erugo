@@ -1,0 +1,409 @@
+// Common mixins
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@mixin blur-background($blur-amount) {
+  backdrop-filter: blur($blur-amount);
+}
+
+// Main components
+.upload-form {
+  position: relative;
+  width: 100%;
+  @include flex-column;
+  justify-content: center;
+  background: var(--uploader-header-background-color);
+  color: var(--uploader-header-text-color);
+  @include blur-background(10px);
+  padding: 20px;
+  padding-bottom: 0;
+  border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
+  margin-bottom: 0;
+
+  .buttons {
+    @include flex-row;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .max-size-label {
+    margin-top: 10px;
+    color: var(--uploader-header-text-color);
+    font-size: 0.8rem;
+  }
+}
+
+.upload-basket-details {
+  position: relative;
+  width: 100%;
+  background: var(--uploader-background-color);
+
+  input,
+  textarea {
+    border-radius: 0 !important;
+    border: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--panel-text-color), transparent 93%);
+  }
+}
+
+.upload-basket {
+  background: var(--uploader-background-color);
+  @include blur-background(5px);
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 6px;
+  flex-grow: 1;
+  @include flex-column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .basket-items {
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  .upload-basket-folder {
+    position: relative;
+    background: var(--uploader-item-background-color);
+    padding: 10px;
+    border-radius: var(--panel-border-radius);
+    margin-bottom: 3px;
+    
+    .upload-basket-folder {
+      padding-left: 20px;
+    }
+  }
+  
+  .upload-basket-item {
+    position: relative;
+    @include flex-column;
+    justify-content: space-between;
+    background: var(--uploader-item-background-color);
+    padding: 5px 10px;
+    border-radius: var(--panel-border-radius);
+    margin-bottom: 3px;
+    cursor: default;
+    
+    .name {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--uploader-item-text-color);
+      @include flex-row;
+      justify-content: flex-start;
+      gap: 5px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        margin-top: -3px;
+      }
+    }
+    
+    .meta {
+      @include flex-row;
+      justify-content: space-between;
+      width: 100%;
+      color: var(--uploader-item-text-color);
+      font-size: 0.8rem;
+      margin-top: 3px;
+      margin-left: 5px;
+      opacity: 0.4;
+    }
+    
+    .hover-actions {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      @include flex-row;
+      justify-content: flex-end;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      pointer-events: none;
+      padding-right: 10px;
+      background-image: linear-gradient(to right, var(--panel-item-action-hover-background-color-from) 50%, var(--panel-item-action-hover-background-color-to));
+      border-radius: 0 5px 5px 0;
+      
+      button {
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        width: var(--icon-only-button-width);
+        height: var(--icon-only-button-width);
+      }
+    }
+    
+    &:hover {
+      .hover-actions {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+  }
+  
+  .upload-basket-empty {
+    @include flex-column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    
+    .upload-basket-empty-text {
+      color: var(--uploader-text-color);
+      opacity: 0.7;
+      font-size: 0.8rem;
+      @include flex-row;
+      justify-content: center;
+      gap: 5px;
+      
+      svg {
+        width: 12px;
+        height: 12px;
+        margin-top: -2px;
+      }
+    }
+  }
+}
+
+.upload-button-container {
+  border-radius: 0 0 var(--panel-border-radius) var(--panel-border-radius);
+  width: 100%;
+  margin-top: 0;
+  padding: 10px 20px;
+  background: var(--uploader-background-color);
+  @include blur-background(5px);
+  z-index: 100;
+
+  .svg-container {
+    svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.5;
+    }
+  }
+}
+
+.progress-bar-container {
+  margin-top: -20px;
+  background: var(--panel-item-background-color);
+  border-radius: 5px;
+  @include flex-row;
+  justify-content: flex-start;
+  position: absolute;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  left: 0;
+  right: 0;
+  top: 20px;
+  bottom: 0;
+  z-index: 1000;
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 100%;
+    background: var(--progress-bar-background-color);
+    
+    .progress-bar-fill {
+      background: var(--progress-bar-fill-color);
+      border-radius: 5px;
+      transition: all 0.1s linear;
+      height: 100%;
+    }
+  }
+  
+  .pause-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  .progress-bar-text {
+    font-size: 24px;
+    color: var(--panel-text-color);
+    font-weight: 600;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    background: var(--panel-background-color);
+    padding: 10px;
+    border-radius: 5px;
+    
+    .progress-bar-text-sub {
+      font-size: 10px;
+      color: var(--panel-text-color);
+      opacity: 0.8;
+      font-weight: 400;
+    }
+  }
+}
+
+.recipients {
+  @include flex-row;
+  justify-content: flex-start;
+  gap: 10px;
+  background: var(--input-background-color);
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  
+  .recipient-list {
+    @include flex-row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-grow: 1;
+    min-height: 30px;
+  }
+
+  .recipient-list-empty {
+    @include flex-row;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.7rem;
+    color: var(--panel-text-color);
+    width: 100%;
+    flex-grow: 1;
+    font-style: italic;
+    
+    svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+}
+
+.expiry-settings-container {
+  width: 100%;
+  background: var(--uploader-header-background-color);
+  @include blur-background(10px);
+  color: var(--uploader-header-text-color);
+  text-align: center;
+
+  .expiry-label {
+    font-size: 0.8rem;
+    color: var(--panel-text-color);
+    font-weight: 200;
+    cursor: pointer;
+    user-select: none;
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    
+    &:hover {
+      color: var(--link-color-hover);
+    }
+    
+    svg {
+      width: 12px;
+      height: 12px;
+      margin-right: 5px;
+      margin-top: -2px;
+    }
+  }
+
+  .expiry-settings {
+    position: relative;
+    overflow: hidden;
+    max-height: 0;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+    @include flex-row;
+    justify-content: flex-start;
+    gap: 1px;
+    
+    &.visible {
+      max-height: 50px;
+    }
+    
+    input,
+    textarea,
+    select {
+      border-radius: 0 !important;
+      border: none;
+      display: block;
+      margin: 0;
+    }
+
+    input[type='number'] {
+      text-align: right;
+      
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        opacity: 0;
+        -moz-appearance: textfield;
+        appearance: textfield;
+        pointer-events: none;
+      }
+    }
+
+    .maxValueOverlay {
+      position: absolute;
+      left: 20px;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      opacity: 0.5;
+    }
+  }
+}
+
+
+
+.dropzone {
+  transition: all 0.3s ease;
+  border-radius: var(--panel-border-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  
+  &.active {
+    border: 1px dashed var(--link-color);
+    overflow: hidden;
+  }
+}

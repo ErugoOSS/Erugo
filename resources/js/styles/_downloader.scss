@@ -1,0 +1,150 @@
+.download-panel-content {
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-background-color);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  height: 100%;
+  border-radius: var(--panel-border-radius);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  h1 {
+    color: var(--panel-text-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .total-size,
+  .share-expires {
+    color: var(--panel-text-color);
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    display: block;
+    &.share-expires {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+  }
+  .share-files-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-grow: 1;
+    width: 100%;
+
+    .upload-basket-folder {
+      position: relative;
+      background: var(--panel-background-color);
+      padding: 10px 10px;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      .upload-basket-folder {
+        padding-left: 10px;
+      }
+    }
+    .upload-basket-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-background-color);
+      padding: 5px 10px;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      margin-top: 5px;
+      cursor: default;
+      .name {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--uploader-item-text-color);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
+
+        svg {
+          width: 16px;
+          height: 16px;
+          margin-top: -3px;
+        }
+      }
+      .meta {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        color: var(--uploader-item-text-color);
+        font-size: 0.8rem;
+        margin-top: 3px;
+        margin-left: 5px;
+        opacity: 0.4;
+      }
+    }
+  }
+  .file-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    background: var(--panel-item-background-color);
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    .size {
+      color: var(--panel-text-color);
+      opacity: 0.8;
+      font-size: 0.8rem;
+    }
+    .type {
+      color: var(--panel-text-color);
+      opacity: 0.8;
+      font-size: 0.8rem;
+    }
+    &.more-files {
+      margin-top: 10px;
+      background: var(--panel-item-background-color);
+    }
+    .file-name {
+      color: var(--panel-text-color);
+      font-size: 1rem;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      //nowrap
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.more-files {
+        color: var(--panel-text-color);
+        font-size: 0.8rem;
+      }
+      svg {
+        width: 16px;
+        height: 16px;
+        margin-top: -1px;
+      }
+    }
+  }
+}

@@ -140,35 +140,35 @@ const handleDrop = (e) => {
 }
 
 const handleFileSelect = (event) => {
-  const files = event.target.files;
-  
+  const files = event.target.files
+
   if (files.length > 0) {
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
+      const file = files[i]
+
       // Check if it's a directory (webkitdirectory attribute adds a webkitRelativePath property)
       if (file.webkitRelativePath) {
         // Extract directory path from the webkitRelativePath
-        const pathParts = file.webkitRelativePath.split('/');
-        const directoryPath = pathParts.slice(0, -1).join('/');
-        
+        const pathParts = file.webkitRelativePath.split('/')
+        const directoryPath = pathParts.slice(0, -1).join('/')
+
         // Create file with path information
         const fileWithPath = new File([file], file.name, {
           type: file.type,
           lastModified: file.lastModified
-        });
-        
-        fileWithPath.path = directoryPath;
-        fileWithPath.fullPath = file.webkitRelativePath;
-        pushFile(fileWithPath);
+        })
+
+        fileWithPath.path = directoryPath
+        fileWithPath.fullPath = file.webkitRelativePath
+        pushFile(fileWithPath)
       } else {
         // Regular file
-        pushFile(file);
+        pushFile(file)
       }
     }
   }
-  
-  resetFileInput();
+
+  resetFileInput()
 }
 
 const recurseDirectory = (entry, path) => {
@@ -225,12 +225,7 @@ const recurseDirectory = (entry, path) => {
 }
 
 const pushFile = (file) => {
-
-  const ignore = [
-    '.DS_Store',
-    'Thumbs.db',
-    'desktop.ini'
-  ]
+  const ignore = ['.DS_Store', 'Thumbs.db', 'desktop.ini']
 
   if (ignore.includes(file.name)) {
     return
@@ -255,8 +250,6 @@ const pushFile = (file) => {
     }
   }
 }
-
-
 
 const removeFile = (file) => {
   uploadBasket.value = uploadBasket.value.filter((item) => item.fullPath !== file.fullPath)
@@ -787,66 +780,66 @@ const filesByDirectory = computed(() => {
     </div>
   </div>
   <div class="upload-basket-details pt-2">
-      <div class="recipients" v-if="!store.isGuest()">
-        <div class="button-outside-label uploader-add-recipient">
-          <button class="icon-only round" @click="addRecipient">
-            <Plus />
-          </button>
-          <div class="button-outside-label-text">{{ $t('Add Recipient') }}</div>
-        </div>
-        <div class="recipient-list">
-          <template v-if="recipients.length > 0">
-            <Recipient
-              v-for="recipient in recipients"
-              :key="recipient.id"
-              :recipient="recipient"
-              @remove="removeRecipient"
-              :ref="`recipient-${recipient.email}`"
-            />
-          </template>
-          <template v-else>
-            <div class="recipient-list-empty">
-              {{ $t('No recipients') }}
-              <br />
-              <small>{{ $t("We'll provide you with a link instead.") }}</small>
-            </div>
-          </template>
-        </div>
+    <div class="recipients" v-if="!store.isGuest()">
+      <div class="button-outside-label uploader-add-recipient">
+        <button class="icon-only round" @click="addRecipient">
+          <Plus />
+        </button>
+        <div class="button-outside-label-text">{{ $t('Add Recipient') }}</div>
       </div>
-
-      <div class="input-container mb-0">
-        <input
-          type="text"
-          v-model="shareName"
-          :placeholder="$t('Share Name')"
-          required
-          :class="{ error: errors.shareName }"
-          class="mb-0"
-          id="share-name"
-          name="share-name"
-          autocomplete="share-name"
-          v-if="!store.isGuest()"
-        />
-        <div class="error-message" v-if="errors.shareName">
-          {{ errors.shareName }}
-        </div>
-      </div>
-
-      <div class="input-container mt-0 mb-0">
-        <textarea
-          v-model="shareDescription"
-          :placeholder="$t('Message to share recipients (optional)')"
-          required
-          :class="{ error: errors.shareDescription }"
-          rows="1"
-          class="mt-0 mb-0"
-          v-if="!store.isGuest()"
-        />
-        <div class="error-message" v-if="errors.shareDescription">
-          {{ errors.shareDescription }}
-        </div>
+      <div class="recipient-list">
+        <template v-if="recipients.length > 0">
+          <Recipient
+            v-for="recipient in recipients"
+            :key="recipient.id"
+            :recipient="recipient"
+            @remove="removeRecipient"
+            :ref="`recipient-${recipient.email}`"
+          />
+        </template>
+        <template v-else>
+          <div class="recipient-list-empty">
+            {{ $t('No recipients') }}
+            <br />
+            <small>{{ $t("We'll provide you with a link instead.") }}</small>
+          </div>
+        </template>
       </div>
     </div>
+
+    <div class="input-container mb-0">
+      <input
+        type="text"
+        v-model="shareName"
+        :placeholder="$t('Share Name')"
+        required
+        :class="{ error: errors.shareName }"
+        class="mb-0"
+        id="share-name"
+        name="share-name"
+        autocomplete="share-name"
+        v-if="!store.isGuest()"
+      />
+      <div class="error-message" v-if="errors.shareName">
+        {{ errors.shareName }}
+      </div>
+    </div>
+
+    <div class="input-container mt-0 mb-0">
+      <textarea
+        v-model="shareDescription"
+        :placeholder="$t('Message to share recipients (optional)')"
+        required
+        :class="{ error: errors.shareDescription }"
+        rows="1"
+        class="mt-0 mb-0"
+        v-if="!store.isGuest()"
+      />
+      <div class="error-message" v-if="errors.shareDescription">
+        {{ errors.shareDescription }}
+      </div>
+    </div>
+  </div>
   <div class="upload-basket">
     <div
       class="basket-items dropzone"
@@ -1014,209 +1007,33 @@ const filesByDirectory = computed(() => {
 </template>
 
 <style scoped lang="scss">
-.progress-bar-container {
-  margin-top: -20px;
-  background: var(--panel-item-background-color);
-  border-radius: 5px;
+
+@mixin blur-background($blur-amount) {
+  backdrop-filter: blur($blur-amount);
+}
+
+@mixin flex-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  position: absolute;
-  opacity: 0;
-  transition: all 0.3s ease-in-out;
-  left: 0;
-  right: 0;
-  top: 20px;
-  bottom: 0;
-  z-index: 1000;
-  pointer-events: none;
-
-  &.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .progress-bar {
-    height: 100%;
-    width: 100%;
-    background: var(--progress-bar-background-color);
-    .progress-bar-fill {
-      background: var(--progress-bar-fill-color);
-      border-radius: 5px;
-      transition: all 0.1s linear;
-      height: 100%;
-    }
-  }
-  .pause-button {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    &:hover {
-      background: rgba(0, 0, 0, 0.2);
-    }
-    svg {
-      width: 16px;
-      height: 16px;
-    }
-  }
-  .progress-bar-text {
-    font-size: 24px;
-    color: var(--panel-text-color);
-    font-weight: 600;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    flex-direction: column;
-    background: var(--panel-background-color);
-    width: auto;
-    padding: 10px;
-    border-radius: 5px;
-    .progress-bar-text-sub {
-      font-size: 10px;
-      color: var(--panel-text-color);
-      opacity: 0.8;
-      font-weight: 400;
-    }
-  }
 }
-.recipients {
+
+@mixin flex-column {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  background: var(--input-background-color);
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
-
-  .recipient-list {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 10px;
-    flex-grow: 1;
-    min-height: 30px;
-  }
-
-  .recipient-list-empty {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 0.7rem;
-    color: var(--panel-text-color);
-    width: 100%;
-    flex-grow: 1;
-    font-style: italic;
-    svg {
-      width: 13px;
-      height: 13px;
-    }
-  }
 }
 
-.expiry-settings-container {
-  width: 100%;
-  background: var(--uploader-header-background-color);
-  backdrop-filter: blur(10px);
-  color: var(--uploader-header-text-color);
-  text-align: center;
-
-  .expiry-label {
-    font-size: 0.8rem;
-    color: var(--panel-text-color);
-    font-weight: 200;
-    cursor: pointer;
-    user-select: none;
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    &:hover {
-      color: var(--link-color-hover);
-    }
-    svg {
-      width: 12px;
-      height: 12px;
-      margin-right: 5px;
-      margin-top: -2px;
-    }
-  }
-
-  .expiry-settings {
-    position: relative;
-    overflow: hidden;
-    max-height: 0;
-    transition: all 0.3s ease-in-out;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 1px;
-    &.visible {
-      max-height: 50px;
-    }
-    input,
-    textarea,
-    select {
-      border-radius: 0 !important;
-      border: none;
-      display: block;
-      margin: 0;
-    }
-
-    input[type='number'] {
-      text-align: right;
-    }
-    input[type='number']::-webkit-inner-spin-button,
-    input[type='number']::-webkit-outer-spin-button {
-      opacity: 0;
-      -moz-appearance: textfield;
-      appearance: textfield;
-      pointer-events: none;
-    }
-
-    .maxValueOverlay {
-      position: absolute;
-      left: 20px;
-      padding: 5px;
-      border-radius: 5px;
-      font-size: 0.8rem;
-      opacity: 0.5;
-    }
-  }
-}
 
 .user-form-overlay {
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: var(--overlay-background-color);
-  backdrop-filter: blur(10px);
+  @include blur-background(10px);
   z-index: 230;
   opacity: 0;
   pointer-events: none;
@@ -1236,6 +1053,7 @@ const filesByDirectory = computed(() => {
       margin-right: 10px;
     }
   }
+
   .user-form {
     position: absolute;
     bottom: 0;
@@ -1245,15 +1063,14 @@ const filesByDirectory = computed(() => {
     background: var(--panel-background-color);
     color: var(--panel-text-color);
     padding: 20px;
-    border-radius: 10px 10px 0 0;
+    border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
     box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
+    @include flex-column;
     align-items: flex-start;
     justify-content: flex-start;
     gap: 10px;
     transition: all 0.3s ease;
-    padding-bottom: 20px;
+
     button {
       display: block;
       width: 100%;
@@ -1263,20 +1080,10 @@ const filesByDirectory = computed(() => {
   &.active {
     opacity: 1;
     pointer-events: auto;
+
     .user-form {
       transform: translate(-50%, 0%);
     }
-  }
-}
-
-.dropzone {
-  transition: all 0.3s ease;
-  border-radius: var(--panel-border-radius);
-  border: 1px solid transparent;
-  cursor: pointer;
-  &.active {
-    border: 1px dashed var(--link-color);
-    overflow: hidden;
   }
 }
 </style>
