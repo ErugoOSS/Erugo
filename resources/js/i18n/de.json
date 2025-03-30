@@ -48,7 +48,10 @@
   },
   "button": {
     "reverse_share_invite": "Erstellen Sie eine umgekehrte Freigabeanforderung",
-    "reverse_share_invite_send": "Anfrage senden"
+    "reverse_share_invite_send": "Anfrage senden",
+    "share": {
+      "password_protect": "Passwortschutz"
+    }
   },
   "confirm_delete_user": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
   "download": {
@@ -60,11 +63,21 @@
     "upload_success": "Upload erfolgreich!",
     "upload_success_message": "Die Person, die diese Dateien angefordert hat, erhält eine E-Mail mit einem Download-Link."
   },
+  "invite": {
+    "labels": {
+      "message": "Nachricht an den Empfänger"
+    },
+    "message": "Nachricht (fakultativ)"
+  },
   "limit": "Grenze",
   "message": {
     "from": "Nachricht von {name}"
   },
   "processing_uploaded_files": "Verarbeitung hochgeladener Dateien",
+  "reverse_invite_send": {
+    "error": "Reverse Share-Einladung kann nicht gesendet werden",
+    "success": "Einladung zur umgekehrten Freigabe gesendet!"
+  },
   "settings": {
     "account": {
       "change_password": "Mein Passwort ändern",
@@ -160,6 +173,9 @@
         "title": "Hilfe zu Download-Limits"
       }
     },
+    "invite": {
+      "message": "Nachricht (fakultativ)"
+    },
     "loading": "Geteilte Dateien laden...",
     "noShares": "Sie haben keine geteilten Dateien. Warum nicht eine anlegen?",
     "provider": {
@@ -170,6 +186,12 @@
       "description": "Fordern Sie Dateien von einer Kontaktperson an, indem Sie deren Daten unten eingeben. Er erhält einen Link, über den er einmalig Dateien direkt an Sie hochladen kann. Sobald sie die Dateien hochgeladen haben, erhalten Sie eine E-Mail-Benachrichtigung."
     },
     "settingsSavedSuccessfully": "Einstellungen erfolgreich gespeichert",
+    "share": {
+      "password": "Passwort teilen",
+      "password_confirm": "Freigabepasswort bestätigen",
+      "password_protect_description": "Erstellen Sie ein Passwort für Ihre Freigabe. Jeder, der diese Freigabe herunterlädt, benötigt dieses Passwort, um darauf zuzugreifen. Bitte beachten Sie: Nach der Erstellung wird dieses Kennwort verschlüsselt und wir können es nicht für Sie abrufen. Speichern Sie es daher an einem sicheren Ort.",
+      "remove_password": "Passwort entfernen"
+    },
     "success": {
       "pruneExpiredShares": "Abgelaufene geteilten Dateien sind zur Löschung vorgesehen und werden im Hintergrund verarbeitet.",
       "shareExpired": "Der Zeitraum zum Download der geteilten Dateien ist abgelaufen",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "Der Chunked-Upload-Modus unterteilt Dateien in kleinere Segmente, die nacheinander übertragen werden. Diese Methode ist zwar bei kleineren Dateien etwas langsamer als der direkte Upload, bietet aber bei der Übertragung großer Dateien mehr Stabilität und Zuverlässigkeit. Chunked Uploads unterstützen die Verfolgung des Fortschritts und ermöglichen es dem Benutzer, die Übertragung manuell anzuhalten und fortzusetzen. Dies ist ideal für Dateien über 100 MB oder bei instabilen Netzwerkverbindungen.",
       "allow_direct_uploads": "Direkten Upload-Modus zulassen",
       "allow_direct_uploads_description": "Beim direkten Upload werden die Dateien in einer einzigen, ununterbrochenen Anfrage übertragen. Während diese Methode für die meisten Dateien die schnellsten Übertragungsgeschwindigkeiten bietet, kann es bei extrem großen Dateien zu Stabilitätsproblemen oder Timeouts kommen. Für eine optimale Leistung bei Dateien, die größer als 100 MB sind, ist der Upload in Teilen die bessere Option.",
+      "allow_reverse_shares": "Umgekehrte Aktien zulassen",
+      "allow_reverse_shares_description": "Legt fest, ob Ihre registrierten Benutzer die Erlaubnis haben sollen, umgekehrte Freigabeanforderungen zu senden. Diese Anfragen geben externen Personen einen einmaligen Upload-Pass, der es ihnen ermöglicht, Dateien direkt an den registrierten Benutzer zu liefern, der die Anfrage initiiert hat.\n\n\n\n\n",
       "application_name": "Name der Anwendung",
       "application_name_description": "Passen Sie den angezeigten Namen Ihrer Anwendung an, der in Titelleisten, Dialogfeldern und anderen Oberflächenelementen erscheint. Dies trägt dazu bei, ein konsistentes Branding in der gesamten Benutzerumgebung zu erhalten.",
       "application_url": "URL der Anwendung",
@@ -202,6 +226,7 @@
       "clean_files_after": "Dateien bereinigen nach",
       "clean_files_after_description": "Zeitraum zwischen dem Ablauf der geteilten Dateien bis zum Löschen dieser Dateien aus dem System",
       "days": "Tage",
+      "default_expiry_time": "Standard-Verfallszeit",
       "default_language": "Standardsprache",
       "default_language_description": "Legen Sie die primäre Sprache fest, die standardmäßig auf der gesamten Anwendungsoberfläche für alle Benutzer verwendet wird. Einzelne Benutzer können diese Einstellung mit ihren persönlichen Präferenzen überschreiben.",
       "default_upload_mode": "Standard-Upload-Modus",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Legen Sie die maximale Größe von geteilten Dateien fest, die ein Benutzer erstellen kann. Der Wert wird in Megabyte oder Gigabyte angegeben.",
       "provider_trust_warning": "Warnung: Vertrauen in Auth Provider ",
       "provider_trust_warning_description": "Stellen Sie sicher, dass Sie nur Authentifizierungsanbieter konfigurieren und aktivieren, denen Sie vertrauen. Authentifizierungsanbieter verfügen über erweiterte Zugriffsrechte auf Ihre Anwendungs- und Benutzerdaten. Das Hinzufügen von nicht vertrauenswürdigen oder gefährdeten Anbietern kann zu unbefugtem Zugriff, Datenverletzungen oder Kontoübernahmen führen.",
+      "reverse_shares": "Reverse-Aktien",
       "select_auth_provider": "Wählen Sie einen Autorisierungsanbieter",
       "share_deleted_emails": "E-Mails bei gelöschten Dateien",
       "share_deleted_emails_description": "Benachrichtigung der Benutzer, wenn ihre Freigaben endgültig aus dem System gelöscht wurden. Dies bestätigt den Abschluss des Lebenszyklus von Inhalten aus Sicherheits- und Compliance-Gründen.",
@@ -280,6 +306,9 @@
       "myProfile": "Mein Konto",
       "myShares": "Meine Freigaben",
       "reverse_invite": "Umgekehrte Freigabeanforderung erstellen",
+      "share": {
+        "password_protect": "Freigabe mit Passwort schützen"
+      },
       "system": "Systemeinstellungen",
       "users": "Benutzer",
       "users.edit": "Bearbeiten {name}"
@@ -346,6 +375,11 @@
     "data_loading": "Laden...",
     "deleted": "Gelöscht",
     "deletes": "Löscht",
+    "download": {
+      "invalid_password": "Freigabepasswort ist ungültig",
+      "password_required": "Sie müssen das Passwort eingeben, um diese Freigabe herunterzuladen.",
+      "password_required_short": "Passwort eingeben"
+    },
     "download_limit_reached": "Download-Grenze erreicht",
     "download_limit_reached.message": "Die Freigabe, die Sie herunterladen möchten, hat ihr Download-Limit erreicht. Bitten Sie den Ersteller der Freigabe, das Download-Limit zu erhöhen.",
     "expired": "Freigabe abgelaufen",
@@ -356,7 +390,9 @@
       "count": "{value, plural, one {{count} Datei} other {{count} Dateien}}",
       "including": "einschließlich:"
     },
-    "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen."
+    "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
+    "passwordNotProtected": "Öffnen Sie",
+    "passwordProtected": "Passwort geschützt"
   },
   "total_size": "Gesamtgröße",
   "upload": {
@@ -368,7 +404,19 @@
       "chunked": "Chunked-Upload-Modus",
       "direct": "Direkter Upload-Modus"
     },
+    "expiry_label": "Die Aktie verfällt am {value} {unit} (Änderung)",
+    "expiry_max_value": "Max: {value}",
+    "expiry_too_long": "Die von Ihnen eingegebene Verfallszeit überschreitet die Höchstgrenze. Wir haben sie automatisch auf den längsten zulässigen Zeitraum angepasst.",
+    "expiry_unit": {
+      "days": "Tag(e)",
+      "months": "Monat(e)",
+      "weeks": "Woche(n)",
+      "years": "Jahr(e)"
+    },
     "guest_share_created": "Dankeschön! Ihre Dateien wurden erfolgreich gesendet. In wenigen Augenblicken werden Sie abgemeldet.",
+    "password_confirmation_required": "Passwortbestätigung erforderlich",
+    "password_mismatch": "Passwörter stimmen nicht überein",
+    "password_required": "Zum Schutz der Freigabe ist ein Passwort erforderlich",
     "upload_mode_swapped": "Upload-Modus auf {value} geändert"
   },
   "uploading": {

@@ -48,7 +48,10 @@
   },
   "button": {
     "reverse_share_invite": "Create a reverse share request",
-    "reverse_share_invite_send": "Send Request"
+    "reverse_share_invite_send": "Send Request",
+    "share": {
+      "password_protect": "Password protect"
+    }
   },
   "confirm_delete_user": "Are you sure you want to delete this user?",
   "download": {
@@ -60,11 +63,21 @@
     "upload_success": "Upload Successful!",
     "upload_success_message": "The person who requested these files will receive an email with a download link."
   },
+  "invite": {
+    "labels": {
+      "message": "Message to Recipient"
+    },
+    "message": "Message (optional)"
+  },
   "limit": "Limit",
   "message": {
     "from": "Message from {name}"
   },
   "processing_uploaded_files": "Processing uploaded files",
+  "reverse_invite_send": {
+    "error": "Unable to send reverse share invite",
+    "success": "Reverse share invite sent!"
+  },
   "settings": {
     "account": {
       "change_password": "Change my password",
@@ -160,6 +173,9 @@
         "title": "Download Limit Help"
       }
     },
+    "invite": {
+      "message": "Message (optional)"
+    },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
     "provider": {
@@ -170,6 +186,12 @@
       "description": "Request files from a contact by entering their details below. They'll receive a link that grants one-time access to upload files directly to you. Once they've uploaded the files, you'll receive an email notification."
     },
     "settingsSavedSuccessfully": "Settings saved successfully",
+    "share": {
+      "password": "Share password",
+      "password_confirm": "Confirm share password",
+      "password_protect_description": "Create a password for your share. Anyone downloading this share will need this password to access it. Please note: After creation, this password will be encrypted and we cannot retrieve it for you. Make sure to save it in a secure location.",
+      "remove_password": "Remove Password"
+    },
     "success": {
       "pruneExpiredShares": "Expired shares have been scheduled for deletion and will be processed in the background.",
       "shareExpired": "Share expired",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "Chunked upload mode breaks files into smaller segments that are transferred sequentially. While slightly slower than direct upload for smaller files, this method provides greater stability and reliability when transferring large files. Chunked uploads support progress tracking and allow users to manually pause and resume transfers, making it ideal for files over 100MB or when using unstable network connections.",
       "allow_direct_uploads": "Allow direct upload mode",
       "allow_direct_uploads_description": "Direct upload mode transmits files in a single, uninterrupted request. While this method offers the fastest transfer speeds for most files, extremely large files may cause stability issues or timeouts. For optimal performance with files exceeding 100MB, chunked uploads may be a better option.",
+      "allow_reverse_shares": "Allow reverse shares",
+      "allow_reverse_shares_description": "Determines whether your registered users should have permission to send reverse share requests. These requests provide external individuals with a one-time upload pass, allowing them to deliver files directly to the registered user who initiated the request.\n\n\n\n\n",
       "application_name": "Application Name",
       "application_name_description": "Customise the displayed name of your application that appears in title bars, dialogs, and other interface elements. This helps maintain consistent branding throughout the user experience.",
       "application_url": "Application URL",
@@ -202,6 +226,7 @@
       "clean_files_after": "Clean Files After",
       "clean_files_after_description": "How long after a share expires before files are deleted from the system.",
       "days": "Days",
+      "default_expiry_time": "Default Expiry Time",
       "default_language": "Default Language",
       "default_language_description": "Set the primary language that will be used throughout the application interface for all users by default. Individual users can override this setting with their personal preferences.",
       "default_upload_mode": "Default upload mode",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Set the maximum size of a share that a user can create. The value is in megabytes or gigabytes.",
       "provider_trust_warning": "Warning: Auth Provider Trust",
       "provider_trust_warning_description": "Ensure you only configure and enable auth providers that you trust. Authentication providers have elevated access privileges to your application and user data. Adding untrusted or compromised providers could lead to unauthorised access, data breaches, or account takeovers.",
+      "reverse_shares": "Reverse Shares",
       "select_auth_provider": "Select an auth provider",
       "share_deleted_emails": "\"Share deleted\" emails",
       "share_deleted_emails_description": "Notify users when their shares have been permanently deleted from the system. This confirms the completion of the content lifecycle for security and compliance purposes.",
@@ -280,6 +306,9 @@
       "myProfile": "My Account",
       "myShares": "My Shares",
       "reverse_invite": "Create reverse share request",
+      "share": {
+        "password_protect": "Password protect share"
+      },
       "system": "System settings",
       "users": "Users",
       "users.edit": "Edit {name}"
@@ -346,6 +375,11 @@
     "data_loading": "Loading...",
     "deleted": "Deleted",
     "deletes": "Deletes",
+    "download": {
+      "invalid_password": "Share password is invalid",
+      "password_required": "You must enter the password to download this share.",
+      "password_required_short": "Enter password"
+    },
     "download_limit_reached": "Download Limit Reached",
     "download_limit_reached.message": "The share you are trying to download has reached its download limit. Please ask the share creator to increase the download limit.",
     "expired": "Share Expired",
@@ -356,7 +390,9 @@
       "count": "{value, plural, one {# file} other {# files}}",
       "including": "including:"
     },
-    "not_found": "The share you are looking for was not found. You may need to log in to see it."
+    "not_found": "The share you are looking for was not found. You may need to log in to see it.",
+    "passwordNotProtected": "Open",
+    "passwordProtected": "Password protected"
   },
   "total_size": "Total Size",
   "upload": {
@@ -368,7 +404,19 @@
       "chunked": "Chunked upload mode",
       "direct": "Direct upload mode"
     },
+    "expiry_label": "Share will expire in {value} {unit}  (change)",
+    "expiry_max_value": "Max: {value}",
+    "expiry_too_long": "The expiry time you entered exceeds the maximum limit. We've automatically adjusted it to the longest period allowed.",
+    "expiry_unit": {
+      "days": "Day(s)",
+      "months": "Month(s)",
+      "weeks": "Week(s)",
+      "years": "Year(s)"
+    },
     "guest_share_created": "Thank you! Your files have been sent successfully. In a few moments you will be logged out.",
+    "password_confirmation_required": "Password confirmation required",
+    "password_mismatch": "Passwords don't match",
+    "password_required": "Password is required to protect share",
     "upload_mode_swapped": "Upload mode changed to {value}"
   },
   "uploading": {

@@ -6,7 +6,7 @@
   "No files added yet": "Ainda não tem ficheiros adicionados",
   "No recipients": "Sem destinatários",
   "Powered by": "Powered by",
-  "Reverse Share": "Ação inversa",
+  "Reverse Share": "Pedir Transferência",
   "Share Name": "Nome de partilha",
   "Share URL": "Endereço de partilha",
   "We'll provide you with a link instead": {
@@ -14,23 +14,23 @@
   },
   "auth": {
     "back_to_login": "Voltar à autenticação",
-    "confirm_end_guest_session": "Tem a certeza de que pretende terminar esta sessão? Uma vez que é um utilizador convidado, não poderá carregar ficheiros adicionais depois de terminar esta sessão.",
-    "confirm_password": "Confirmar a palavra-passe",
+    "confirm_end_guest_session": "Tem a certeza de que pretende terminar esta sessão? Sendo um utilizador convidado, não poderá carregar ficheiros adicionais depois de terminar esta sessão.",
+    "confirm_password": "Confirme a palavra-passe",
     "email": "E-mail",
-    "end_guest_session": "Fim da sessão de convidados",
+    "end_guest_session": "Terminar sessão de convidado",
     "failed_to_accept_invite": "Este código de convite não é válido. Pode ter expirado, já ter sido utilizado ou ter sido revogado pelo remetente.",
     "failed_to_reset_password": "Falha ao repor a palavra passe",
     "failed_to_send_password_reset_email": "Falha ao enviar o e-mail para repor a palavra passe",
     "forgot_password": "Esqueci-me da palavra passe",
     "forgot_password_create_password": "Criar palavra-passe",
-    "forgot_password_create_password_description": "Introduza a sua nova palavra-passe. Tanto a palavra-passe como a confirmação da palavra-passe têm de corresponder",
-    "guest_warning": "Os ficheiros que carregar utilizando o formulário do lado esquerdo serão partilhados diretamente com a pessoa que o convidou.",
+    "forgot_password_create_password_description": "Introduza a sua nova palavra-passe. Tanto a palavra-passe como a confirmação da palavra-passe têm de corresponder.",
+    "guest_warning": "Os ficheiros que carregar utilizando o formulário do lado esquerdo serão partilhados diretamente com a pessoa que enviou o convite.",
     "invalid_email_or_password": "Falha na autenticação",
-    "invite_accepted": "Convite para partilha inversa aceite. Já pode carregar ficheiros.",
+    "invite_accepted": "Convite para partilha aceite. Já pode carregar ficheiros para partilhar.",
     "login": "Iniciar Sessão",
     "login_successful": "Autenticação bem sucedida",
     "login_with": "Iniciar sessão com",
-    "logout": "Terminar sessão",
+    "logout": "Terminar Sessão",
     "or": "Ou",
     "password": "Palavra passe",
     "password_reset_email_sent": "E-mail para repor a palavra passe foi enviado",
@@ -47,8 +47,11 @@
     "welcome": "Bem-vindo"
   },
   "button": {
-    "reverse_share_invite": "Criar um pedido de partilha inversa",
-    "reverse_share_invite_send": "Enviar pedido"
+    "reverse_share_invite": "Enviar um pedido de partilha",
+    "reverse_share_invite_send": "Enviar pedido",
+    "share": {
+      "password_protect": "Proteger com palavra-passe"
+    }
   },
   "confirm_delete_user": "Tem a certeza de que pretende eliminar este utilizador?",
   "download": {
@@ -57,35 +60,45 @@
   "email": "E-mail",
   "full_name": "Nome Completo",
   "guest": {
-    "upload_success": "Carregamento bem-sucedido!",
-    "upload_success_message": "A pessoa que solicitou estes ficheiros receberá um e-mail com uma ligação para descarregamento."
+    "upload_success": "Carregamento bem sucedido!",
+    "upload_success_message": "A pessoa que solicitou estes ficheiros receberá um e-mail com uma ligação para descarregar os mesmos."
+  },
+  "invite": {
+    "labels": {
+      "message": "Mensagem para o Destinatário"
+    },
+    "message": "Mensagem (facultativo)"
   },
   "limit": "Limite",
   "message": {
     "from": "Mensagem de {name}"
   },
-  "processing_uploaded_files": "Processamento de ficheiros carregados",
+  "processing_uploaded_files": "Processando os ficheiros carregados",
+  "reverse_invite_send": {
+    "error": "Não é possível enviar convite para partilha inversa",
+    "success": "Convite para partilha enviado!"
+  },
   "settings": {
     "account": {
       "change_password": "Alterar a minha palavra-passe",
-      "create_link": "Ligação",
-      "email": "O meu endereço de correio eletrónico",
+      "create_link": "Associar",
+      "email": "O meu endereço de e-mail",
       "linked_accounts_description": "Associe a sua conta a um fornecedor externo para facilitar o início de sessão. Após a ligação, pode iniciar sessão diretamente selecionando o botão do fornecedor no ecrã de início de sessão.",
-      "myProfile_description": "Actualize o seu endereço de correio eletrónico ou altere o seu nome. Pode alterar a sua palavra-passe clicando no botão \"Alterar a minha palavra-passe\" e seguindo as instruções.",
+      "myProfile_description": "Atualize o seu endereço de e-mail ou altere o seu nome. Pode alterar a sua palavra-passe clicando no botão \"Alterar a minha palavra-passe\" e seguindo as instruções.",
       "name": "O meu nome completo",
-      "unlink": "Desvincular"
+      "unlink": "Desassociar"
     },
-    "authProvidersSavedSuccessfully": "Fornecedores de autenticação guardados com sucesso",
+    "authProvidersSavedSuccessfully": "Fornecedores de autenticação alterados com sucesso",
     "branding": {
       "background_images": "Imagens de Fundo",
       "background_images_description": "Transferir imagens de fundo para personalizar e substituir as de Unplash. As imagens alternam aleatoriamente a cada 3 minutos para criar uma imagem de marca dinâmica.",
-      "background_slideshow_speed": "Intervalo de mudança de imagem",
+      "background_slideshow_speed": "Intervalo de alternação de imagem",
       "background_slideshow_speed_1_day": "Um dia",
       "background_slideshow_speed_1_hour": "1 hora",
       "background_slideshow_speed_2_hours": "2 horas",
       "background_slideshow_speed_3_minutes": "3 Minutos",
       "background_slideshow_speed_5_minutes": "5 minutos",
-      "background_slideshow_speed_description": "Altera a frequência com que a imagem de fundo muda aleatoriamente (isto só tem efeito se tiver várias imagens de fundo). Defina como 0 para desativar a apresentação de diapositivos e mostrar uma imagem aleatória em cada página fresca.",
+      "background_slideshow_speed_description": "Altera a frequência com que a imagem de fundo se alterna aleatoriamente (isto só tem efeito se tiver várias imagens de fundo). Defina como 0 para desativar a alternação e apenas mostrar uma imagem nova após uma atualização de página.",
       "background_slideshow_speed_off": "Desativar",
       "delete": "Apagar",
       "delete_theme": "Apagar o Tema",
@@ -160,6 +173,9 @@
         "title": "Ajuda sobre o limite de descarregamentos"
       }
     },
+    "invite": {
+      "message": "Mensagem (facultativo)"
+    },
     "loading": "Carregando as transferências...",
     "noShares": "Não tem transferências. Porque não criar uma?",
     "provider": {
@@ -170,6 +186,12 @@
       "description": "Solicite ficheiros a um contacto introduzindo os seus dados abaixo. O contacto receberá uma ligação que lhe dá acesso único para carregar ficheiros diretamente para si. Depois de carregarem os ficheiros, receberá uma notificação por correio eletrónico."
     },
     "settingsSavedSuccessfully": "Definições guardadas com sucesso",
+    "share": {
+      "password": "Partilhar palavra-passe",
+      "password_confirm": "Confirmar a palavra-passe de partilha",
+      "password_protect_description": "Crie uma palavra-passe para a sua partilha. Qualquer pessoa que descarregue esta partilha necessitará desta palavra-passe para aceder à mesma. Nota: Após a criação, esta palavra-passe será encriptada e não será possível recuperá-la. Certifique-se de que a guarda num local seguro.",
+      "remove_password": "Remover a palavra-passe"
+    },
     "success": {
       "pruneExpiredShares": "As transferências expiradas foram agendadas para eliminação e serão processadas em segundo plano.",
       "shareExpired": "Partilha expirada",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "O modo de carregamento em blocos divide os ficheiros em segmentos mais pequenos que são transferidos sequencialmente. Embora ligeiramente mais lento do que o carregamento direto para ficheiros mais pequenos, este método proporciona maior estabilidade e fiabilidade na transferência de ficheiros grandes. Os carregamentos fragmentados suportam o acompanhamento do progresso e permitem aos utilizadores fazer uma pausa e retomar manualmente as transferências, o que o torna ideal para ficheiros com mais de 100 MB ou quando se utilizam ligações de rede instáveis.",
       "allow_direct_uploads": "Permitir o modo de carregamento direto",
       "allow_direct_uploads_description": "O modo de carregamento direto transmite ficheiros num pedido único e ininterrupto. Embora este método ofereça as velocidades de transferência mais rápidas para a maioria dos ficheiros, os ficheiros extremamente grandes podem causar problemas de estabilidade ou tempos limite. Para um desempenho ótimo com ficheiros com mais de 100 MB, os carregamentos divididos podem ser uma melhor opção.",
+      "allow_reverse_shares": "Permitir acções inversas",
+      "allow_reverse_shares_description": "Determina se os seus utilizadores registados devem ter permissão para enviar pedidos de partilha inversa. Estes pedidos fornecem a indivíduos externos um passe de carregamento único, permitindo-lhes entregar ficheiros diretamente ao utilizador registado que iniciou o pedido.\n\n\n\n\n",
       "application_name": "Nome da Aplicação",
       "application_name_description": "Personalizar o nome da aplicação que aparece na barra de título, caixas de diálogo e outros elementos de interface. Isto ajudará a manter a sua marca consistente na experiência do utilizador.",
       "application_url": "Endereço da Aplicação",
@@ -202,6 +226,7 @@
       "clean_files_after": "Eliminar Ficheiros Após",
       "clean_files_after_description": "Quanto tempo após uma partilha expirar, ela será eliminada do sistema.",
       "days": "Dias",
+      "default_expiry_time": "Prazo de validade por defeito",
       "default_language": "Lingua Predefinida",
       "default_language_description": "Defina a língua que será utilizada por todos os utilizadores na aplicação por defeito. Os utilizadores podem posteriormente alterar se assim preferirem.",
       "default_upload_mode": "Modo de carregamento predefinido",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Definir o tamanho máximo das partilhas que os utilizadores podem criar. O valor pode ser em megabytes ou gigabytes.",
       "provider_trust_warning": "Aviso: Confiança no fornecedor de autenticação",
       "provider_trust_warning_description": "Certifique-se de que configura e ativa apenas os fornecedores de autenticação em que confia. Os fornecedores de autenticação têm privilégios de acesso elevados à sua aplicação e aos dados do utilizador. A adição de fornecedores não confiáveis ou comprometidos pode levar a acessos não autorizados, fugas de informação ou aquisição de contas.",
+      "reverse_shares": "Acções reversíveis",
       "select_auth_provider": "Selecionar um fornecedor de autenticação",
       "share_deleted_emails": "E-mails de \"partilha eliminada\"",
       "share_deleted_emails_description": "Notificar os utilizadores quando as suas partilhas forem permanentemente eliminadas do sistema. Isto assegura o ciclo de vida do conteúdo por motivos de segurança e conformidade.",
@@ -280,6 +306,9 @@
       "myProfile": "A Minha Conta",
       "myShares": "As Minhas Partilhas",
       "reverse_invite": "Criar pedido de partilha inversa",
+      "share": {
+        "password_protect": "Proteger a partilha com palavra-passe"
+      },
       "system": "Definições de Sistema",
       "users": "Utilizadores",
       "users.edit": "Editar {name}"
@@ -346,6 +375,11 @@
     "data_loading": "Carregando...",
     "deleted": "Eliminado",
     "deletes": "Eliminação",
+    "download": {
+      "invalid_password": "A palavra-passe de partilha é inválida",
+      "password_required": "É necessário introduzir a palavra-passe para descarregar esta partilha.",
+      "password_required_short": "Introduzir a palavra-passe"
+    },
     "download_limit_reached": "Limite de Descarregamentos Atingido",
     "download_limit_reached.message": "A partilha que está a tentar descarregar atingiu o limite de descarregamentos. Por favor peça ao criador da partilha que aumente o limite.",
     "expired": "Partilha Expirada",
@@ -356,7 +390,9 @@
       "count": "{value, plural, one {# ficheiro} many {# ficheiros} other {}}",
       "including": "incluíndo:"
     },
-    "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver."
+    "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver.",
+    "passwordNotProtected": "Aberto",
+    "passwordProtected": "Protegido por palavra-passe"
   },
   "total_size": "Tamanho Total",
   "upload": {
@@ -368,7 +404,19 @@
       "chunked": "Modo de carregamento em blocos",
       "direct": "Modo de carregamento direto"
     },
+    "expiry_label": "A ação expirará em {value} {unit} (alteração)",
+    "expiry_max_value": "Máximo: {value}",
+    "expiry_too_long": "O tempo de expiração que introduziu excede o limite máximo. Ajustámo-lo automaticamente para o período mais longo permitido.",
+    "expiry_unit": {
+      "days": "Dia(s)",
+      "months": "Mês(es)",
+      "weeks": "Semana(s)",
+      "years": "Ano(s)"
+    },
     "guest_share_created": "Obrigado! Os seus ficheiros foram enviados com sucesso. Dentro de alguns instantes, a sessão será encerrada.",
+    "password_confirmation_required": "Confirmação da palavra-passe necessária",
+    "password_mismatch": "As palavras-passe não coincidem",
+    "password_required": "É necessária uma palavra-passe para proteger a partilha",
     "upload_mode_swapped": "Modo de carregamento alterado para {value}"
   },
   "uploading": {

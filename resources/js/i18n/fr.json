@@ -48,7 +48,10 @@
   },
   "button": {
     "reverse_share_invite": "Créer une demande de partage inversé",
-    "reverse_share_invite_send": "Envoyer une demande"
+    "reverse_share_invite_send": "Envoyer une demande",
+    "share": {
+      "password_protect": "Mot de passe"
+    }
   },
   "confirm_delete_user": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
   "download": {
@@ -60,11 +63,21 @@
     "upload_success": "Téléchargement réussi !",
     "upload_success_message": "La personne qui a demandé ces fichiers recevra un e-mail avec un lien de téléchargement."
   },
+  "invite": {
+    "labels": {
+      "message": "Message au destinataire"
+    },
+    "message": "Message (facultatif)"
+  },
   "limit": "Limite",
   "message": {
     "from": "Message de {name}"
   },
   "processing_uploaded_files": "Traitement des fichiers téléchargés",
+  "reverse_invite_send": {
+    "error": "Impossible d'envoyer l'invitation du partage inversé",
+    "success": "Invitation au partage inversé envoyée !"
+  },
   "settings": {
     "account": {
       "change_password": "Modifier mon mot de passe",
@@ -160,6 +173,9 @@
         "title": "Aide pour la limite de téléchargement"
       }
     },
+    "invite": {
+      "message": "Message (facultatif)"
+    },
     "loading": "Chargement des partages...",
     "noShares": "Vous n'avez pas de partages. Pourquoi ne pas en créer un ?",
     "provider": {
@@ -167,9 +183,15 @@
       "view": "Voir"
     },
     "reverse_invite": {
-      "description": "Demandez des fichiers à un contact en saisissant ses coordonnées ci-dessous. Il recevra un lien lui donnant un accès unique pour télécharger des fichiers directement vers vous. Une fois les fichiers téléchargés, vous recevrez une notification par courrier électronique."
+      "description": "Demandez des fichiers à un contact en saisissant ses coordonnées ci-dessous. Il recevra un lien lui donnant un accès unique pour télécharger des fichiers directement vers vous. Une fois les fichiers téléchargés, vous recevrez une notification par e-mail.."
     },
     "settingsSavedSuccessfully": "Paramètres enregistrés avec succès",
+    "share": {
+      "password": "Partager le mot de passe",
+      "password_confirm": "Confirmer le mot de passe du partage",
+      "password_protect_description": "Créez un mot de passe pour votre partage. Toute personne téléchargeant ce partage aura besoin de ce mot de passe pour y accéder. Remarque : après sa création, ce mot de passe sera crypté et nous ne pourrons pas le récupérer pour vous. Veillez à le sauvegarder dans un endroit sûr.",
+      "remove_password": "Supprimer le mot de passe"
+    },
     "success": {
       "pruneExpiredShares": "Les partages expirés ont été programmées pour être supprimées et seront traités en arrière-plan.",
       "shareExpired": "Partage expiré",
@@ -180,6 +202,8 @@
       "allow_chunked_uploads_description": "Le mode de téléchargement fragmenté, ou encore \"en morceaux\", divise les fichiers en segments plus petits, transférés séquentiellement. Bien que légèrement plus lente que le téléchargement direct pour les fichiers plus petits, cette méthode offre une stabilité et une fiabilité accrues lors du transfert de fichiers volumineux. Le téléchargement fragmenté prend en charge le suivi de la progression et permet aux utilisateurs de suspendre et de reprendre manuellement les transferts, ce qui est idéal pour les fichiers de plus de 100 Mo ou en cas de connexions réseau instables.",
       "allow_direct_uploads": "Autoriser le mode téléchargement direct",
       "allow_direct_uploads_description": "Le mode de téléchargement direct transmet les fichiers en une seule demande ininterrompue. Bien que cette méthode offre les vitesses de transfert les plus rapides pour la plupart des fichiers, les fichiers très volumineux peuvent entraîner des problèmes de stabilité ou des dépassements de délai. Pour des performances optimales avec des fichiers de plus de 100 Mo, il est préférable d'opter pour des téléchargements par morceaux.",
+      "allow_reverse_shares": "Autoriser les partages inversés",
+      "allow_reverse_shares_description": "Détermine si vos utilisateurs enregistrés doivent être autorisés à envoyer des demandes de partage inversé. Ces demandes permettent à des personnes externes d'obtenir une autorisation de téléchargement unique, ce qui leur permet de livrer des fichiers directement à l'utilisateur enregistré qui a initié la demande.",
       "application_name": "Nom de l'application",
       "application_name_description": "Personnalisez le nom de votre application qui apparaît dans les barres de titre, les boîtes de dialogue et d'autres éléments d'interface. Cela permet de maintenir une image de marque cohérente tout au long de l'expérience de l'utilisateur.",
       "application_url": "URL de l'application",
@@ -202,6 +226,7 @@
       "clean_files_after": "Nettoyer les fichiers après",
       "clean_files_after_description": "Combien de temps après l'expiration d'un partage avant que les fichiers ne soient supprimés du système.",
       "days": "Jours",
+      "default_expiry_time": "Délai d'expiration par défaut",
       "default_language": "Langue par défaut",
       "default_language_description": "Définir la langue principale qui sera utilisée par défaut dans l'interface de l'application pour tous les utilisateurs. Les utilisateurs individuels peuvent remplacer ce paramètre par leurs préférences personnelles.",
       "default_upload_mode": "Mode de téléchargement par défaut",
@@ -234,6 +259,7 @@
       "max_share_size_description": "Définit la taille maximale d'un partage qu'un utilisateur peut créer. La valeur est exprimée en mégaoctets ou en gigaoctets.",
       "provider_trust_warning": "Avertissement : confiance du fournisseur d'authentification",
       "provider_trust_warning_description": "Veillez à ne configurer et à n'activer que des fournisseurs d'authentification en qui vous avez confiance. Les fournisseurs d'authentification disposent de privilèges d'accès élevés à votre application et aux données des utilisateurs. L'ajout de fournisseurs non fiables ou compromis peut entraîner des accès non autorisés, des violations de données ou des prises de contrôle de comptes.",
+      "reverse_shares": "Partages inversés",
       "select_auth_provider": "Sélectionner un fournisseur d'authentification",
       "share_deleted_emails": "Mails \"Partage supprimé\"",
       "share_deleted_emails_description": "Notifier aux utilisateurs que leurs partages ont été définitivement supprimés du système. Cela confirme l'achèvement du cycle de vie du contenu à des fins de sécurité et de conformité.",
@@ -280,6 +306,9 @@
       "myProfile": "Mon profil",
       "myShares": "Mes partages",
       "reverse_invite": "Créer une demande de partage inversé",
+      "share": {
+        "password_protect": "Protéger le partage par un mot de passe"
+      },
       "system": "Paramètres du système",
       "users": "Utilisateurs",
       "users.edit": "Modifier {name}"
@@ -346,6 +375,11 @@
     "data_loading": "Chargement...",
     "deleted": "Supprimé",
     "deletes": "Suppression",
+    "download": {
+      "invalid_password": "Le mot de passe du partage est invalide",
+      "password_required": "Vous devez saisir le mot de passe pour télécharger ce partage.",
+      "password_required_short": "Entrez le mot de passe"
+    },
     "download_limit_reached": "Limite de téléchargement atteinte",
     "download_limit_reached.message": "Le partage que vous essayez de télécharger a atteint sa limite de téléchargement. Veuillez demander au créateur du partage d'augmenter la limite de téléchargement.",
     "expired": "Partage expiré",
@@ -356,11 +390,13 @@
       "count": "{value, plural, one {# fichier} other {# fichiers}}",
       "including": "y compris :"
     },
-    "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir."
+    "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
+    "passwordNotProtected": "Ouvert",
+    "passwordProtected": "Protégé par un mot de passe"
   },
   "total_size": "Taille totale",
   "upload": {
-    "files": "{value, plural, one {Télécharger # fichier} other {Télécharger # fichiers} }",
+    "files": "{value, plural, one {Envoyer # fichier} other {Envoyer # fichiers} }",
     "upload_mode_not_supported": "Aucun mode de téléchargement valide n'est sélectionné ! Nous ne savons pas trop quoi suggérer car cela ne devrait pas être possible."
   },
   "uploader": {
@@ -368,7 +404,19 @@
       "chunked": "Mode de téléchargement par morceaux",
       "direct": "Mode de téléchargement direct"
     },
+    "expiry_label": "Le partage expirera dans {value} {unit}  (modifier)",
+    "expiry_max_value": "Max {value}",
+    "expiry_too_long": "Le délai d'expiration que vous avez introduit dépasse la limite maximale. Nous l'avons automatiquement adapté à la période la plus longue autorisée.",
+    "expiry_unit": {
+      "days": "Jour(s)",
+      "months": "Mois",
+      "weeks": "Semaine(s)",
+      "years": "An(s)"
+    },
     "guest_share_created": "Merci ! Vos fichiers ont bien été envoyés. Vous serez déconnecté dans quelques instants.",
+    "password_confirmation_required": "Confirmation du mot de passe requise",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "password_required": "Un mot de passe est nécessaire pour protéger le partage",
     "upload_mode_swapped": "Le mode de téléchargement est passé à {value}\n"
   },
   "uploading": {
