@@ -119,6 +119,7 @@
       "other_ui_settings": "Outras",
       "select_theme": "Escolha o Tema",
       "select_theme_description": "Escolha entre uma variedade de temas existentes ou um que tenha instalado.",
+      "settings_saved": "Definições de marca guardadas com sucesso",
       "show_powered_by": "Apresentar Powered by Erugo",
       "show_powered_by_description": "Mostrar ou esconder a mensagem \"Powered by Erugo\" ao fundo da página. Este texto permite que a Erugo seja descoberta por outros utilizadores e ajudará-nos a crescer, no entanto  poderá esconder se assim desejar.",
       "theme": "Temas",
@@ -132,6 +133,9 @@
     "button": {
       "branding": {
         "save": "Guardar as Definições de Marca"
+      },
+      "emailTemplates": {
+        "save": "Guardar modelos de correio eletrónico"
       },
       "myProfile": {
         "save": "Guardar alterações de perfil"
@@ -153,10 +157,27 @@
     },
     "description": {
       "branding": "Personalizar a interface de utilizador da Erugo e adicionar a sua marca.",
+      "emailTemplates": "Gerir modelos de correio eletrónico",
       "myProfile": "Gerir o seu perfil.",
       "myShares": "Gerir as suas Partilhas",
       "system": "Gerir o comportamento da Erugo.",
       "users": "Gerir os seus utilizadores."
+    },
+    "emailTemplates": {
+      "accountCreated": "Conta criada",
+      "accountCreatedDescription": "Enviado aos novos utilizadores quando um administrador cria a sua conta. Contém uma ligação que permite ao utilizador definir a sua palavra-passe.",
+      "error": "Falha ao carregar modelos de correio eletrónico",
+      "error_loading_templates": "Falha no carregamento de modelos",
+      "error_saving_templates": "Falha ao guardar os modelos",
+      "passwordReset": "Redefinição da palavra-passe",
+      "sections": {
+        "action_text": "Texto do botão de ação",
+        "action_url": "Ação URL",
+        "content": "Conteúdo da mensagem",
+        "header": "Conteúdo do cabeçalho",
+        "subject": "Assunto"
+      },
+      "success": "Modelos guardados com sucesso"
     },
     "error": {
       "pruneExpiredShares": "Falha ao agendar a eliminação das transferências expiradas!",
@@ -301,6 +322,7 @@
     },
     "title": {
       "branding": "Marca & Interface",
+      "emailTemplates": "Modelos de correio eletrónico",
       "linked_accounts": "Contas Conectadas",
       "manage": "Gerir",
       "myProfile": "A Minha Conta",
@@ -362,6 +384,16 @@
       "user_updated_successfully": "Utilizador atualizado com sucesso",
       "you": "Você"
     }
+  },
+  "setup": {
+    "create_admin_account": "Criar conta de administrador",
+    "first_user": {
+      "email": "E-mail",
+      "name": "Nome Completo",
+      "password": "Palavra passe",
+      "password_confirmation": "Confirme a palavra-passe"
+    },
+    "intro": "Obrigado por instalar o Erugo! Crie o seu primeiro utilizador administrativo para começar."
   },
   "share": {
     "button": {

@@ -119,6 +119,7 @@
       "other_ui_settings": "Andere",
       "select_theme": "Thema Selecteren",
       "select_theme_description": "Kies uit een reeks kant-en-klare thema's of een thema dat je zelf hebt geïnstalleerd.",
+      "settings_saved": "Branding instellingen succesvol opgeslagen",
       "show_powered_by": "Toon Aangedreven door Erugo",
       "show_powered_by_description": "Toon of verberg de \"Aangedreven door Erugo\" tekst onderaan de pagina. Deze tekst zorgt ervoor dat Erugo ontdekt wordt door gebruikers en helpt ons te groeien, je kunt het echter verbergen als je dat wilt.\n",
       "theme": "Thema's",
@@ -132,6 +133,9 @@
     "button": {
       "branding": {
         "save": "Branding-instellingen opslaan"
+      },
+      "emailTemplates": {
+        "save": "E-mailsjablonen opslaan"
       },
       "myProfile": {
         "save": "Profielwijzigingen opslaan"
@@ -153,10 +157,27 @@
     },
     "description": {
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
+      "emailTemplates": "E-mailsjablonen beheren",
       "myProfile": "Beheer je profiel",
       "myShares": "Beheer je gedeelde links.",
       "system": "Beheer het gedrag van je Erugo instantie.",
       "users": "Beheer je gebruikers."
+    },
+    "emailTemplates": {
+      "accountCreated": "Account aangemaakt",
+      "accountCreatedDescription": "Wordt verstuurd naar nieuwe gebruikers wanneer een beheerder hun account aanmaakt. Bevat een link waarmee de gebruiker zijn wachtwoord kan instellen.",
+      "error": "Mislukt bij het laden van e-mailsjablonen",
+      "error_loading_templates": "Sjablonen niet geladen",
+      "error_saving_templates": "Opslaan van sjablonen mislukt",
+      "passwordReset": "Wachtwoord opnieuw instellen",
+      "sections": {
+        "action_text": "Tekst actieknop",
+        "action_url": "Actie URL",
+        "content": "Inhoud bericht",
+        "header": "Inhoud koptekst",
+        "subject": "Onderwerp"
+      },
+      "success": "Sjablonen succesvol opgeslagen"
     },
     "error": {
       "pruneExpiredShares": "Mislukt bij het plannen van verlopen aandelen voor verwijdering!",
@@ -301,6 +322,7 @@
     },
     "title": {
       "branding": "Branding & UI",
+      "emailTemplates": "Sjablonen voor e-mail",
       "linked_accounts": "Gekoppelde accounts",
       "manage": "Beheer",
       "myProfile": "Mijn profiel",
@@ -362,6 +384,16 @@
       "user_updated_successfully": "Gebruiker succesvol bijgewerkt",
       "you": "U"
     }
+  },
+  "setup": {
+    "create_admin_account": "Admin-account aanmaken",
+    "first_user": {
+      "email": "E-mail",
+      "name": "Volledige naam",
+      "password": "Wachtwoord",
+      "password_confirmation": "Wachtwoord bevestigen"
+    },
+    "intro": "Bedankt voor het installeren van Erugo! Maak je eerste admin gebruiker aan om te beginnen."
   },
   "share": {
     "button": {

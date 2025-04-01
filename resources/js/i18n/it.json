@@ -119,6 +119,7 @@
       "other_ui_settings": "Altro",
       "select_theme": "Selezionare il tema",
       "select_theme_description": "Scegliete tra una serie di temi già pronti o tra quelli che avete installato.",
+      "settings_saved": "Impostazioni del marchio salvate con successo",
       "show_powered_by": "Mostra Powered By Erugo",
       "show_powered_by_description": "Mostrare o nascondere il testo \"Powered by Erugo\" in fondo alla pagina. Questo testo permette a Erugo di essere scoperto dagli utenti e ci aiuta a crescere, tuttavia è possibile nasconderlo se lo si desidera.\n",
       "theme": "Temi",
@@ -132,6 +133,9 @@
     "button": {
       "branding": {
         "save": "Salvare le impostazioni del marchio"
+      },
+      "emailTemplates": {
+        "save": "Salvare i modelli di e-mail"
       },
       "myProfile": {
         "save": "Salvare le modifiche al profilo"
@@ -153,10 +157,27 @@
     },
     "description": {
       "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete il vostro marchio.",
+      "emailTemplates": "Gestire i modelli di e-mail",
       "myProfile": "Gestire il proprio account.",
       "myShares": "Gestire le azioni.",
       "system": "Gestire il comportamento della vostra istanza Erugo.",
       "users": "Gestire gli utenti."
+    },
+    "emailTemplates": {
+      "accountCreated": "Account creato",
+      "accountCreatedDescription": "Inviato ai nuovi utenti quando l'amministratore crea il loro account. Contiene un link che consente all'utente di impostare la propria password.",
+      "error": "Impossibile caricare i modelli di e-mail",
+      "error_loading_templates": "Non è riuscito a caricare i modelli",
+      "error_saving_templates": "Impossibile salvare i modelli",
+      "passwordReset": "Ripristino della password",
+      "sections": {
+        "action_text": "Testo del pulsante di azione",
+        "action_url": "Azione URL",
+        "content": "Contenuto del messaggio",
+        "header": "Contenuto dell'intestazione",
+        "subject": "Oggetto"
+      },
+      "success": "Modelli salvati con successo"
     },
     "error": {
       "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle azioni scadute!",
@@ -301,6 +322,7 @@
     },
     "title": {
       "branding": "Marchio e interfaccia utente",
+      "emailTemplates": "Modelli di e-mail",
       "linked_accounts": "Conti collegati",
       "manage": "Gestire",
       "myProfile": "Il mio account",
@@ -362,6 +384,16 @@
       "user_updated_successfully": "Utente aggiornato con successo",
       "you": "Tu"
     }
+  },
+  "setup": {
+    "create_admin_account": "Creare un account amministratore",
+    "first_user": {
+      "email": "Email",
+      "name": "Nome completo",
+      "password": "Password",
+      "password_confirmation": "Conferma la password"
+    },
+    "intro": "Grazie per aver installato Erugo! Create il vostro primo utente amministratore per iniziare."
   },
   "share": {
     "button": {

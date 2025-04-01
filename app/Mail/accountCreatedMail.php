@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+use App\Models\Setting;
 class accountCreatedMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -31,7 +32,7 @@ class accountCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Account Created! Set your password',
+            subject: Setting::where('key', 'email_subject_account_created')->first()->value,
         );
     }
 

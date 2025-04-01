@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
-
+use App\Models\Setting;
 class shareDownloadedMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -28,8 +28,7 @@ class shareDownloadedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your share has been downloaded',
-
+            subject: Setting::where('key', 'email_subject_share_downloaded')->first()->value,
         );
     }
 

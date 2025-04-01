@@ -13,11 +13,8 @@
     "vite": "^6.0.11"
   },
   "dependencies": {
-    "@codemirror/lang-json": "^6.0.1",
-    "@codemirror/lint": "^6.8.4",
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.36.3",
-    "@replit/codemirror-css-color-picker": "^6.3.0",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@tolgee/format-icu": "^6.2.2",
     "@tolgee/vue": "^6.2.2",
     "@vitejs/plugin-vue": "^5.2.1",
@@ -28,6 +25,7 @@
     "lucide-vue-next": "^0.474.0",
     "mitt": "^3.0.1",
     "vue": "^3.5.13",
+    "vue-codemirror": "^6.1.1",
     "vue-color-kit": "^1.0.6",
     "vue-toastification": "^2.0.0-rc.5"
   },

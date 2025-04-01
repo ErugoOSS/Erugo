@@ -119,6 +119,7 @@
       "other_ui_settings": "Other",
       "select_theme": "Select Theme",
       "select_theme_description": "Select from a range of pre-made themes or one one that you have installed.",
+      "settings_saved": "Branding settings saved successfully",
       "show_powered_by": "Show Powered By Erugo",
       "show_powered_by_description": "Show or hide the \"Powered by Erugo\" text on the bottom of the page. This text allows Erugo to be discovered by users and helps us to grow, however, you can hide it if you wish.\n",
       "theme": "Themes",
@@ -132,6 +133,9 @@
     "button": {
       "branding": {
         "save": "Save Branding Settings"
+      },
+      "emailTemplates": {
+        "save": "Save Email Templates"
       },
       "myProfile": {
         "save": "Save profile changes"
@@ -153,10 +157,27 @@
     },
     "description": {
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
+      "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
       "system": "Manage the behaviour of your Erugo instance.",
       "users": "Manage Your Users."
+    },
+    "emailTemplates": {
+      "accountCreated": "Account Created",
+      "accountCreatedDescription": "Sent to new users when a administrator creates their account. Contains a link that allows the user to set their password.",
+      "error": "Failed to load email templates",
+      "error_loading_templates": "Failed to load templates",
+      "error_saving_templates": "Failed to save templates",
+      "passwordReset": "Password Reset",
+      "sections": {
+        "action_text": "Action button text",
+        "action_url": "Action URL",
+        "content": "Message content",
+        "header": "Header content",
+        "subject": "Subject"
+      },
+      "success": "Templates saved successfully"
     },
     "error": {
       "pruneExpiredShares": "Failed to schedule expired shares for deletion!",
@@ -301,6 +322,7 @@
     },
     "title": {
       "branding": "Branding & UI",
+      "emailTemplates": "Email templates",
       "linked_accounts": "Linked Accounts",
       "manage": "Manage",
       "myProfile": "My Account",
@@ -362,6 +384,16 @@
       "user_updated_successfully": "User updated successfully",
       "you": "You"
     }
+  },
+  "setup": {
+    "create_admin_account": "Create Admin Account",
+    "first_user": {
+      "email": "Email",
+      "name": "Full Name",
+      "password": "Password",
+      "password_confirmation": "Confirm Password"
+    },
+    "intro": "Thank you for installing Erugo! Create your first admin user to get started."
   },
   "share": {
     "button": {

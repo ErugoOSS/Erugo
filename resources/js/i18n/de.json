@@ -119,6 +119,7 @@
       "other_ui_settings": "Andere",
       "select_theme": "Theme auswählen",
       "select_theme_description": "Wählen Sie aus einer Reihe von vorgefertigten Themes oder einem von Ihnen installierten Theme.",
+      "settings_saved": "Branding-Einstellungen erfolgreich gespeichert",
       "show_powered_by": "Powered by Erugo anzeigen",
       "show_powered_by_description": "Zeigen oder verbergen Sie den Text \"Powered by Erugo\" unten auf der Seite. Dieser Text ermöglicht es Erugo, von den Nutzern entdeckt zu werden und hilft uns zu wachsen, Sie können ihn jedoch ausblenden, wenn Sie es wünschen.\n",
       "theme": "Themen",
@@ -132,6 +133,9 @@
     "button": {
       "branding": {
         "save": "Branding-Einstellungen speichern"
+      },
+      "emailTemplates": {
+        "save": "E-Mail-Vorlagen speichern"
       },
       "myProfile": {
         "save": "Profiländerungen speichern"
@@ -153,10 +157,27 @@
     },
     "description": {
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihr eigenes Branding hinzu.",
+      "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre geteilten Dateien.",
       "system": "Verwalten Sie das Verhalten Ihrer Erugo-Instanz.",
       "users": "Verwalten Sie Ihre Benutzer."
+    },
+    "emailTemplates": {
+      "accountCreated": "Konto erstellt",
+      "accountCreatedDescription": "Wird an neue Benutzer gesendet, wenn ein Administrator ihr Konto erstellt. Enthält einen Link, über den der Benutzer sein Passwort festlegen kann.",
+      "error": "E-Mail-Vorlagen konnten nicht geladen werden",
+      "error_loading_templates": "Vorlagen konnten nicht geladen werden",
+      "error_saving_templates": "Vorlagen konnten nicht gespeichert werden",
+      "passwordReset": "Passwort zurücksetzen",
+      "sections": {
+        "action_text": "Text der Aktionsschaltfläche",
+        "action_url": "Aktions-URL",
+        "content": "Inhalt der Nachricht",
+        "header": "Inhalt der Kopfzeile",
+        "subject": "Thema"
+      },
+      "success": "Vorlagen erfolgreich gespeichert"
     },
     "error": {
       "pruneExpiredShares": "Abgelaufene geteilte Dateien konnten nicht zur Löschung eingeplant werden!",
@@ -301,6 +322,7 @@
     },
     "title": {
       "branding": "Branding & Benutzeroberfläche",
+      "emailTemplates": "E-Mail-Vorlagen",
       "linked_accounts": "Verknüpfte Konten",
       "manage": "Verwalten Sie",
       "myProfile": "Mein Konto",
@@ -362,6 +384,16 @@
       "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
       "you": "Sie"
     }
+  },
+  "setup": {
+    "create_admin_account": "Admin-Konto erstellen",
+    "first_user": {
+      "email": "E-Mail",
+      "name": "Vollständiger Name",
+      "password": "Passwort",
+      "password_confirmation": "Bestätigen Sie Ihr Passwort"
+    },
+    "intro": "Vielen Dank für die Installation von Erugo! Erstellen Sie Ihren ersten Admin-Benutzer, um loszulegen."
   },
   "share": {
     "button": {

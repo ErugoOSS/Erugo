@@ -806,6 +806,37 @@ export const createFirstUser = async (user) => {
   return data.data
 }
 
+
+export const getEmailTemplates = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/email-templates`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.templates
+}
+
+export const updateEmailTemplates = async (templates) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/email-templates`, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(templates)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+
 // Private functions
 const buildAuthSuccessData = (data) => {
   const decoded = jwtDecode(data.data.access_token)

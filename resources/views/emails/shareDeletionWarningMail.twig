@@ -5,22 +5,21 @@
 {% endblock %}
 
 {% block content %}
-	<h2>Hi
-		{{ share.user.first_name }},</h2>
-	<p>This is a reminder that your share ({{ share.name }}
-		/
-		{{ share.long_id }}) will be deleted in
-		{{ deletes_in }}.</p>
+<h2>Hi {{ share.user.first_name }},</h2>
+<p>This is a reminder that your share ({{ share.name }}
+	/
+	{{ share.long_id }}) will be deleted in
+	{{ deletes_in }}.</p>
 
-	{% if share.download_count > 0 %}
-		<p>The share has been downloaded
-			{{ share.download_count }}
-			time{{ share.download_count == 1 ? '' : 's' }}.</p>
-	{% else %}
-		<p>The share wasn't downloaded.</p>
-	{% endif %}
+{% if share.download_count > 0 %}
+	<p>The share has been downloaded
+		{{ share.download_count }}
+		time{{ share.download_count == 1 ? '' : 's' }}.</p>
+{% else %}
+	<p>The share wasn't downloaded.</p>
+{% endif %}
 
-	<p>You can revive it in the "My Shares" section of the app. This will prevent it from being deleted.</p>
+<p>You can revive it in the "My Shares" section of the app. This will prevent it from being deleted.</p>
 {% endblock %}
 
 {% block action_url %}{{ settings.application_url }}{% endblock %}

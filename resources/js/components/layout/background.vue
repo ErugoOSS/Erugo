@@ -13,22 +13,27 @@ const interval = ref(null)
 onMounted(() => {
   slideshowSpeed.value = domData().background_slideshow_speed
   useMyBackgrounds.value = domData().use_my_backgrounds
-
-  //remove the interval if it exists
-  if (interval.value) {
-    clearInterval(interval.value)
-  }
-  interval.value = setInterval(changeBackground, slideshowSpeed.value * 1000)
-  getBackgroundImages().then((data) => {
-    backgroundImages.value = data.files
-    nextTick(() => {
-      changeBackground()
+  
+  if (useMyBackgrounds.value) {
+    //remove the interval if it exists
+    if (interval.value) {
+      clearInterval(interval.value)
+    }
+    interval.value = setInterval(changeBackground, slideshowSpeed.value * 1000)
+    getBackgroundImages().then((data) => {
+      backgroundImages.value = data.files
+      nextTick(() => {
+        changeBackground()
+      })
     })
-  })
+  }
 })
 
 const currentBackgroundIndex = ref(0)
 const changeBackground = async () => {
+  if (!useMyBackgrounds.value) {
+    return
+  }
   let backgrounds = document.querySelectorAll('.backgrounds-item')
   if (backgrounds.length === 0) {
     return
@@ -42,20 +47,15 @@ const changeBackground = async () => {
     currentBackgroundIndex.value = 0
   }
 }
-
 </script>
 <template>
   <div class="backgrounds" v-if="!useMyBackgrounds">
     <div
-      class="backgrounds-item"
-      v-for="image in unsplashImages"
-      :key="image"
+      class="backgrounds-item active"
       :style="{
-        backgroundImage: `url(https://images.unsplash.com/${image.id}?q=80&w=1920&auto=format)`
+        backgroundImage: `url(/images/default-background.jpg)`
       }"
-    >
-      <div class="backgrounds-item-credit" v-html="image.credit"></div>
-    </div>
+    ></div>
   </div>
 
   <div class="backgrounds" v-else>

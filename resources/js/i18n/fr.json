@@ -133,6 +133,9 @@
       "branding": {
         "save": "Sauvegarder les paramètres de votre identité visuelle."
       },
+      "emailTemplates": {
+        "save": "Sauvegarder"
+      },
       "myProfile": {
         "save": "Enregistrer les modifications du profil"
       },
@@ -153,10 +156,16 @@
     },
     "description": {
       "branding": "Personnalisez l'interface utilisateur et l’identité visuelle de votre instance erugo.",
+      "emailTemplates": "Gérer les modèles",
       "myProfile": "Gérer votre profil.",
       "myShares": "Gérez vos partages.",
       "system": "Gérer le comportement de votre instance Erugo.",
       "users": "Gérez vos utilisateurs."
+    },
+    "emailTemplates": {
+      "accountCreated": "Compte créé",
+      "accountCreatedDescription": "Envoyé aux nouveaux utilisateurs lorsqu'un administrateur crée leur compte. Contient un lien qui permet à l'utilisateur de définir son mot de passe.",
+      "passwordReset": "Réinitialiser le mot de passe"
     },
     "error": {
       "pruneExpiredShares": "Impossible de planifier la suppression des partages expirés !",
@@ -301,6 +310,7 @@
     },
     "title": {
       "branding": "Identité visuelle et interface utilisateur",
+      "emailTemplates": "Modèles de mail",
       "linked_accounts": "Comptes liés",
       "manage": "Gérer",
       "myProfile": "Mon profil",
@@ -362,6 +372,16 @@
       "user_updated_successfully": "Mise à jour de l'utilisateur réussie",
       "you": "Vous"
     }
+  },
+  "setup": {
+    "create_admin_account": "Créer un compte administrateur",
+    "first_user": {
+      "email": "Mail",
+      "name": "Nom complet",
+      "password": "Mot de passe",
+      "password_confirmation": "Confirmez le mot de passe"
+    },
+    "intro": "Merci d'avoir installé Erugo ! Créez votre premier utilisateur administrateur pour commencer."
   },
   "share": {
     "button": {

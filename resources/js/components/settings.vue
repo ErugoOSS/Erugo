@@ -11,12 +11,14 @@ import {
   Boxes,
   Plus,
   EllipsisVertical,
-  Bomb
+  Bomb,
+  Mail
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
 import BrandingSettings from './settings/branding.vue'
 import SystemSettings from './settings/system.vue'
+import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import ButtonWithMenu from './buttonWithMenu.vue'
@@ -102,7 +104,8 @@ const getSettingsTitle = () => {
       system: 'System',
       users: 'Users',
       myProfile: 'My Profile',
-      myShares: 'My Shares'
+      myShares: 'My Shares',
+      emailTemplates: 'Email Templates'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
@@ -118,6 +121,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.myProfile')
     case 'myShares':
       return t.value('settings.title.myShares')
+    case 'emailTemplates':
+      return t.value('settings.title.emailTemplates')
     default:
       return t.value('settings.title.erugo')
   }
@@ -171,6 +176,17 @@ const setShowDeletedShares = (value) => {
             <h2>
               <Settings />
               {{ $t('settings.title.system') }}
+            </h2>
+          </div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'emailTemplates' }"
+            @click="setActiveTab('emailTemplates')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <Mail />
+              {{ $t('settings.title.emailTemplates') }}
             </h2>
           </div>
           <div
@@ -243,6 +259,28 @@ const setShowDeletedShares = (value) => {
                 <SystemSettings ref="systemSettings" v-if="store.settingsOpen" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
+
+            <div v-else-if="activeTab === 'emailTemplates'" class="settings-tab-content" ref="tabContents.emailTemplates" key="emailTemplates">
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Settings />
+                  <span>
+                    {{ $t('settings.title.emailTemplates') }}
+                    <small>{{ $t('settings.description.emailTemplates') }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <button @click="$refs['emailTemplates'].saveEmailTemplates()">
+                    <Save />
+                    {{ $t('settings.button.emailTemplates.save') }}
+                  </button>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <EmailTemplates ref="emailTemplates" v-if="store.settingsOpen" @navItemClicked="handleNavItemClicked" />
+              </div>
+            </div>
+
             <div v-else-if="activeTab === 'users'" class="settings-tab-content" ref="tabContents.users" key="users">
               <div class="tab-content-header">
                 <h2 class="d-none d-md-flex">
@@ -433,7 +471,6 @@ const setShowDeletedShares = (value) => {
     margin-top: 10px;
     padding: 10px;
     border-radius: var(--tabs-border-radius);
-    box-shadow: inset 0 -5px 2px 0 rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: all 300ms ease-in-out;
 

@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+use App\Models\Setting;
 class passwordResetMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -31,7 +32,7 @@ class passwordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset your password',
+            subject: Setting::where('key', 'email_subject_password_reset')->first()->value,
         );
     }
 

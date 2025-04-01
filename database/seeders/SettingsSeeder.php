@@ -312,7 +312,79 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
 
-
+            //email subjects
+            [
+                'key' => 'email_subject_accountCreatedMail.twig',
+                'value' => 'Account Created! Set your password',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_passwordResetMail.twig',
+                'value' => 'Reset your password',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_reverseShareInviteMail.twig',
+                'value' => 'You have been invited to share files',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareCreatedMail.twig',
+                'value' => 'Files have been shared with you',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareDeletedWarningMail.twig',
+                'value' => 'Your share has been deleted',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareDeletionWarningMail.twig',
+                'value' => 'Your share will be deleted soon',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareDownloadedMail.twig',
+                'value' => 'Your share has been downloaded',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareExpiredWarningMail.twig',
+                'value' => 'Your share has expired',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_shareExpiryWarningMail.twig',
+                'value' => 'Your share will expire soon',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
         ]);
     }
 }

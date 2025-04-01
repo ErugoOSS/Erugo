@@ -120,10 +120,10 @@ const saveSettings = async () => {
     loadThemes()
 
     saving.value = false
-    toast.success('Settings saved successfully')
+    toast.success(t.value('settings.branding.settings_saved'))
   } catch (error) {
     saving.value = false
-    toast.error('Failed to save settings')
+    toast.error(t.value('settings.branding.failed_to_save_settings'))
     console.error(error)
   }
 }

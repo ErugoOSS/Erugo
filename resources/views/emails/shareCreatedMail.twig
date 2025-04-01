@@ -4,10 +4,10 @@
 {% endblock %}
 
 {% block content %}
-	<h2>Hi
-		{{ recipient_name }},</h2>
-	<p>{{ sender_name }} shared {{ share.file_count }} file{{ share.file_count == 1 ? '' : 's' }} with you.</p>
-  <p>Click the button below to access your files.</p>
+<h2>Hi {{ recipient_name }},</h2>
+
+<p>{{ sender_name }} shared {{ share.file_count }} file{{ share.file_count == 1 ? '' : 's' }} with you.</p>
+<p>Click the button below to access your files.</p>
 {% endblock %}
 
 {% block action_url %}{{ settings.application_url }}/shares/{{ share.long_id }}{% endblock %}

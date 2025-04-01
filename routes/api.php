@@ -15,6 +15,7 @@ use App\Http\Controllers\ThemesController;
 use App\Http\Controllers\AuthProvidersController;
 use App\Http\Controllers\UploadsController;
 use App\Http\Controllers\ReverseSharesController;
+use App\Http\Controllers\EmailTemplatesController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -132,6 +133,12 @@ Route::group([], function ($router) {
         Route::put('/{id}', [AuthProvidersController::class, 'update'])->name('auth-providers.update');
         Route::delete('/{id}', [AuthProvidersController::class, 'delete'])->name('auth-providers.delete');
         Route::get('/{uuid}/callback-url', [AuthProvidersController::class, 'getCallbackUrl'])->name('auth-providers.getCallbackUrl');
+    });
+
+    //manage email templates [auth, admin]
+    Route::group(['prefix' => 'email-templates', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/', [EmailTemplatesController::class, 'index'])->name('email-templates.index');
+        Route::put('/', [EmailTemplatesController::class, 'update'])->name('email-templates.update');
     });
 
     //manage reverse shares [auth]

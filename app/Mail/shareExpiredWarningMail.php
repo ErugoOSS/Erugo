@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
+use App\Models\Setting;
 class shareExpiredWarningMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -29,7 +30,7 @@ class shareExpiredWarningMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your share has expired',
+            subject: Setting::where('key', 'email_subject_share_expired_warning')->first()->value,
         );
     }
 

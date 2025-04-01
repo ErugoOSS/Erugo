@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 use App\Models\Share;
-
+use App\Models\Setting;
 class shareCreatedMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -39,7 +39,7 @@ class shareCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->user->name . ' shared ' . $this->share->file_count . ' file' . ($this->share->file_count == 1 ? '' : 's') . ' with you',
+            subject: Setting::where('key', 'email_subject_share_created')->first()->value,
         );
     }
 

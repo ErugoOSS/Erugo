@@ -31,10 +31,10 @@ const { t } = useTranslate()
 //static data
 const apiUrl = getApiUrl()
 const logoUrl = `${apiUrl}/get-logo`
-const allowReverseShares = domData().allow_reverse_shares
-const logoWidth = domData().logo_width
-const showPoweredBy = domData().show_powered_by
-const setupNeeded = domData().setup_needed
+const allowReverseShares = ref(false)
+const logoWidth = ref(0)
+const showPoweredBy = ref(false)
+const setupNeeded = ref(false)
 
 //reactive data
 const auth = ref(null)
@@ -44,6 +44,13 @@ const toast = useToast()
 const reverseInvite = ref(null)
 
 onMounted(() => {
+
+  allowReverseShares.value = domData().allow_reverse_shares
+  logoWidth.value = domData().logo_width
+  showPoweredBy.value = domData().show_powered_by
+  setupNeeded.value = domData().setup_needed
+
+
   if (domError().length > 0) {
     console.log('error', domError())
     nextTick(() => {
@@ -125,7 +132,7 @@ const openReverseShareInvite = () => {
   <TolgeeProvider>
     <Background />
     <LanguageSelector />
-    <div class="logo-container">
+    <div class="logo-container" v-if="store.mode !== 'setup'">
       <a href="/"><img :src="logoUrl" alt="Erugo" id="logo" :style="{ width: `${logoWidth}px` }" /></a>
     </div>
     <div class="main">

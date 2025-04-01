@@ -5,21 +5,19 @@
 {% endblock %}
 
 {% block content %}
-	<h2>Hi
-		{{ share.user.first_name }},</h2>
-	<p>This is a reminder that your share ({{ share.name }}
-		/
-		{{ share.long_id }}) has been deleted.</p>
+<h2>Hi {{ share.user.first_name }},</h2>
 
-	{% if share.download_count > 0 %}
-		<p>The share has been downloaded
-			{{ share.download_count }}
-			time{{ share.download_count == 1 ? '' : 's' }}.</p>
-	{% else %}
-		<p>The share wasn't downloaded.</p>
-	{% endif %}
+<p>This is a reminder that your share "{{ share.name }}" ({{ share.long_id }}) has been deleted.</p>
 
-	<p>This share can no longer be revived.</p>
+{% if share.download_count > 0 %}
+	<p>The share has been downloaded
+		{{ share.download_count }}
+		time{{ share.download_count == 1 ? '' : 's' }}.</p>
+{% else %}
+	<p>The share wasn't downloaded.</p>
+{% endif %}
+
+<p>This share can no longer be revived.</p>
 {% endblock %}
 
 {% block action_url %}{{ settings.application_url }}{% endblock %}

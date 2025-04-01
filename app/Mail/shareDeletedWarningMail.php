@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
-
+use App\Models\Setting;
 class shareDeletedWarningMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -30,7 +30,7 @@ class shareDeletedWarningMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your share has been deleted',
+            subject: Setting::where('key', 'email_subject_share_deleted_warning')->first()->value,
         );
     }
 

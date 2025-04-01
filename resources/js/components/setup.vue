@@ -1,16 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { UserPlus, Hand } from 'lucide-vue-next'
 import { getApiUrl } from '../utils'
 import { createFirstUser, login } from '../api'
 import { useToast } from 'vue-toastification'
-
 import { store } from '../store'
+
+import { useTranslate } from '@tolgee/vue'
 
 const apiUrl = getApiUrl()
 const toast = useToast()
-const logoUrl = `${apiUrl}/get-logo`
-
+const emailInput = ref(null)
+const { t } = useTranslate()
 const newUser = ref({
   username: '',
   name: '',
@@ -24,6 +25,12 @@ const errors = ref({
   password: '',
   email: '',
   password_confirmation: ''
+})
+
+onMounted(() => {
+  emailInput.value.focus()
+  //set the title
+  document.title = 'Erugo First Run Setup'
 })
 
 const saveUser = async () => {
@@ -59,66 +66,93 @@ const saveUser = async () => {
 <template>
   <div class="setup-container">
     <div class="setup-inner">
-      <img :src="logoUrl" alt="Erugo" class="setup-logo" />
+      <div class="setup-logo-container">
+        <img src="../assets/images/erugo-logo.png" alt="Erugo" class="setup-logo" />
+      </div>
+
       <p>
-        <em>Thank you</em>
-        for installing erugo. Before you can use it, you need to create an admin account.
+        {{ t('setup.intro') }}
       </p>
 
-      <hr />
+      <div class="seperator">
+        
+      </div>
+
+
       <div class="setup-form">
         <!-- email -->
         <div class="input-container mt-2">
-          <label for="email">Email</label>
-          <input type="email" v-model="newUser.email" placeholder="Email" required :class="{ error: errors.email }" />
+          <label for="email">{{ t('setup.first_user.email') }}</label>
+          <input
+            type="email"
+            v-model="newUser.email"
+            :placeholder="t('setup.first_user.email')"
+            required
+            id="email"
+            :class="{ error: errors.email }"
+            @keyup.enter="saveUser"
+            ref="emailInput"
+          />
           <div class="error-message" v-if="errors.email">
-            {{ errors.email }}
+            {{ errors.email[0] }}
           </div>
         </div>
 
         <!-- full name -->
         <div class="input-container mt-2">
-          <label for="name">Full Name</label>
-          <input type="text" v-model="newUser.name" placeholder="Full Name" required :class="{ error: errors.name }" />
+          <label for="name">{{ t('setup.first_user.name') }}</label>
+          <input
+            type="text"
+            v-model="newUser.name"
+            :placeholder="t('setup.first_user.name')"
+            required
+            id="name"
+            :class="{ error: errors.name }"
+            @keyup.enter="saveUser"
+          />
           <div class="error-message" v-if="errors.name">
-            {{ errors.name }}
+            {{ errors.name[0] }}
           </div>
         </div>
 
         <!-- password -->
         <div class="input-container mt-2">
-          <label for="password">Password</label>
+          <label for="password">{{ t('setup.first_user.password') }}</label>
           <input
             type="password"
             v-model="newUser.password"
-            placeholder="Password"
+            :placeholder="t('setup.first_user.password')"
             required
+            id="password"
             :class="{ error: errors.password }"
+            @keyup.enter="saveUser"
           />
           <div class="error-message" v-if="errors.password">
-            {{ errors.password }}
+            {{ errors.password[0] }}
           </div>
         </div>
 
         <!-- confirm password -->
         <div class="input-container mt-2">
-          <label for="password_confirmation">Confirm Password</label>
+          <label for="password_confirmation">{{ t('setup.first_user.password_confirmation') }}</label>
           <input
             type="password"
             v-model="newUser.password_confirmation"
-            placeholder="Confirm Password"
+            :placeholder="t('setup.first_user.password_confirmation')"
             required
+            id="password_confirmation"
             :class="{ error: errors.password_confirmation }"
+            @keyup.enter="saveUser"
           />
           <div class="error-message" v-if="errors.password_confirmation">
-            {{ errors.password_confirmation }}
+            {{ errors.password_confirmation[0] }}
           </div>
         </div>
 
         <div class="button-bar mt-3">
           <button @click="saveUser">
             <UserPlus />
-            Create Admin Account
+            {{ t('setup.create_admin_account') }}
           </button>
         </div>
       </div>
@@ -133,22 +167,22 @@ const saveUser = async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--primary-color);
   z-index: 230;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  backdrop-filter: blur(10px);
+  align-items: center;
+  // backdrop-filter: blur(10px);
+  pointer-events: none;
 
   .setup-inner {
-    background: var(--accent-color-light-transparent);
+    background: var(--panel-background-color);
     padding: 20px;
-    border-radius: 0 0 10px 10px;
+    border-radius: var(--panel-border-radius);
     width: 30%;
-
+    pointer-events: auto;
     h1 {
       font-size: 24px;
-      color: var(--primary-color);
+      color: var(--panel-text-color);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -168,7 +202,18 @@ button {
 
 .setup-logo {
   width: 100px;
-  margin-top: 5px;
+  margin-top: 10px;
   margin-bottom: 15px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.seperator {
+  width: 100%;
+  height: 1px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  background: var(--panel-item-background-color);
 }
 </style>

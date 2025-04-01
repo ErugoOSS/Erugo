@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 use App\Models\ReverseShareInvite;
+use App\Models\Setting;
 
 class reverseShareInviteMail extends Mailable
 {
@@ -41,7 +42,7 @@ class reverseShareInviteMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->user->name . ' is requesting files from you',
+            subject: Setting::where('key', 'email_subject_reverse_share_invite')->first()->value,
         );
     }
 
