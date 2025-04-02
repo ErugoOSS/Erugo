@@ -6,6 +6,10 @@ footer {
   width: 100%;
   gap: 20px;
   height: 60px;
+
+  @media (max-width: 900px) {
+    // padding: 10px;
+  }
 }
 
 .main-menu {
@@ -16,7 +20,9 @@ footer {
   background: var(--panel-background-color);
   padding: 5px;
   border-radius: var(--button-border-radius);
-
+  @media (max-width: 900px) {
+    border-radius: var(--button-border-radius) 0 0 0;
+  }
   button {
     margin-right: 0;
     background: none;

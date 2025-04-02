@@ -168,11 +168,13 @@ body {
 
 #app {
   height: 100vh;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
+  @media (min-width: 900px) {
+    padding: 20px;
+  }
 }
 
 .main {
@@ -184,7 +186,6 @@ body {
   overflow: hidden;
   width: min(500px, 100%);
   margin-bottom: 20px;
-
   @media (min-width: 900px) {
     margin-bottom: -60px;
   }
@@ -195,6 +196,11 @@ body {
   justify-content: flex-start;
   align-items: flex-start;
   width: 100%;
+
+  @media (max-width: 900px) {
+    justify-content: center;
+    padding-top: 10px;
+  }
 
   #logo {
     z-index: 200;
