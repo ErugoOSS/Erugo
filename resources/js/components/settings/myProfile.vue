@@ -468,7 +468,7 @@ const handleUnlinkProvider = async (provider) => {
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 100%);
-    width: 500px;
+    width: min(500px, 100vw);
     background: var(--panel-background-color);
     color: var(--panel-text-color);
     padding: 20px;

@@ -98,6 +98,12 @@ onUnmounted(() => {
   transform-origin: top right;
   transform: scale(0.8);
 
+  @media (max-width: 900px) {
+    top: 5px;
+    right: 5px;
+    transform: scale(1);
+  }
+
   &:hover {
     background: var(--primary-button-background-color-hover);
     color: var(--primary-button-text-color-hover);
