@@ -30,7 +30,7 @@ class shareDeletedWarningMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_share_deleted_warning')->first()->value,
+            subject: Setting::where('key', 'email_subject_shareDeletedWarningMail.twig')->first()->value,
         );
     }
 

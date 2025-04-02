@@ -42,7 +42,7 @@ class reverseShareInviteMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_reverse_share_invite')->first()->value,
+            subject: Setting::where('key', 'email_subject_reverseShareInviteMail.twig')->first()->value,
         );
     }
 

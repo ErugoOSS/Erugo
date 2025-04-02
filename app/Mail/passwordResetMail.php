@@ -32,7 +32,7 @@ class passwordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_password_reset')->first()->value,
+            subject: Setting::where('key', 'email_subject_passwordResetMail.twig')->first()->value,
         );
     }
 

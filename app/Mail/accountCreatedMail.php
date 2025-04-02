@@ -32,7 +32,7 @@ class accountCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_account_created')->first()->value,
+            subject: Setting::where('key', 'email_subject_accountCreatedMail.twig')->first()->value,
         );
     }
 

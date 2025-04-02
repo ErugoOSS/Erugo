@@ -32,7 +32,7 @@ class shareExpiryWarningMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_share_expiry_warning')->first()->value,
+            subject: Setting::where('key', 'email_subject_shareExpiryWarningMail.twig')->first()->value,
         );
     }
 

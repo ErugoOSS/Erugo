@@ -28,7 +28,7 @@ class shareDownloadedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_share_downloaded')->first()->value,
+            subject: Setting::where('key', 'email_subject_shareDownloadedMail.twig')->first()->value,
         );
     }
 
