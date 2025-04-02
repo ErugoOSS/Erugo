@@ -5,7 +5,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/storage/templates
+/storage/templates/*
 /vendor
 .env
 .env.backup
