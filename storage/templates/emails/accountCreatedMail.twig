@@ -1,9 +1,0 @@
-  {% extends 'emails/layout' %}
-  {% block header %}Account Created! Set your passwords{% endblock %}
-  {% block content %}<h2>Hi {{ user.name }},</h2>
-
-<p>We've created an account for you on {{ settings.application_name }}.</p>
-<p>Please set your password to get started.</p>{% endblock %}
-  {% block action_url %}{{ settings.application_url }}/reset-password/{{ token }}{% endblock %}
-  {% block action_text %}Set Password{% endblock %}
-  {# file generated at 2025-04-01 21:01:49 #}

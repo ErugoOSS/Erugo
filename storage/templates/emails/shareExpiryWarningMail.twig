@@ -1,9 +1,0 @@
-  {% extends 'emails/layout' %}
-  {% block header %}Your share is expiring soon{% endblock %}
-  {% block content %}<h2>Hi {{ share.user.first_name }},</h2>
-<p>This is a reminder that your share ({{ share.name }} / {{ share.long_id }}) will expire in
-	{{ share_expires_in }}.</p>
-<p>You can extend the expiry date in the "My Shares" section of the app.</p>{% endblock %}
-  {% block action_url %}{{ settings.application_url }}{% endblock %}
-  {% block action_text %}Visit {{ settings.application_name }}{% endblock %}
-  {# file generated at 2025-04-01 21:01:50 #}

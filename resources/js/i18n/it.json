@@ -166,6 +166,8 @@
     "emailTemplates": {
       "accountCreated": "Account creato",
       "accountCreatedDescription": "Inviato ai nuovi utenti quando l'amministratore crea il loro account. Contiene un link che consente all'utente di impostare la propria password.",
+      "baseTemplate": "Modello base",
+      "baseTemplateDescription": "Controlla il modello di base da cui ereditano tutti gli altri modelli.",
       "error": "Impossibile caricare i modelli di e-mail",
       "error_loading_templates": "Non è riuscito a caricare i modelli",
       "error_saving_templates": "Impossibile salvare i modelli",
@@ -174,6 +176,8 @@
         "action_text": "Testo del pulsante di azione",
         "action_url": "Azione URL",
         "content": "Contenuto del messaggio",
+        "fallbackText": "Testo di descrizione del collegamento di riserva",
+        "fallbackTextDescription": "Per i client di posta elettronica che non sono in grado di visualizzare correttamente i pulsanti di azione, includiamo un link di ripiego nella parte inferiore dell'e-mail. Utilizzate questa opzione per personalizzare il testo che appare sopra questo link di ripiego, aiutando i destinatari a comprenderne lo scopo.",
         "header": "Contenuto dell'intestazione",
         "subject": "Oggetto"
       },

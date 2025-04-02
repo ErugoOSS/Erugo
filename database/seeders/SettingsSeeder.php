@@ -384,7 +384,16 @@ class SettingsSeeder extends Seeder
                 'group' => 'system.emails.subjects',
                 'created_at' => now(),
                 'updated_at' => now()
+            ],
+            [
+                'key' => 'email_template_fallback_text',
+                'value' => 'If you\'re having trouble with the button above, copy and paste the URL below into your web browser.',
+                'previous_value' => null,
+                'group' => 'system.emails',
+                'created_at' => now(),
+                'updated_at' => now()
             ]
+
         ]);
     }
 }

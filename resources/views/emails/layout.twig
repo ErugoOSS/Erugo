@@ -85,7 +85,7 @@
 						<a href="{{ block('action_url') }}" class="button">{{ block('action_text')|default('Click Here') }}</a>
 					</div>
 					<br><br>
-					<p class="f-fallback sub">If you're having trouble with the button above, copy and paste the URL below into your web browser.</p>
+					<p class="f-fallback sub">{{ settings.email_template_fallback_text }}</p>
 					<p class="f-fallback sub">{{ block('action_url') }}</p>
 				{% endif %}
 			</div>
@@ -93,9 +93,7 @@
 			<div class="footer">
 				<p>
 					<small>
-						You are receiving this email because you are a user of
 						<a href="{{ settings.application_url }}">{{ settings.application_name }}</a>
-						.
 					</small>
 				</p>
 			</div>

@@ -3,7 +3,7 @@
   "Add Folders": "Ajouter dossier(s)",
   "Add Recipient": "Ajouter destinataire(s)",
   "Message to share recipients (optional)": "Message au(x) destinataire(s) du partage (facultatif)",
-  "No files added yet": "Aucun fichier n'a encore été ajouté",
+  "No files added yet": "Aucun fichier ajouté",
   "No recipients": "Pas de destinataire(s)",
   "Powered by": "Propulsé par",
   "Reverse Share": "Partage inversé",
@@ -119,6 +119,7 @@
       "other_ui_settings": "Autres",
       "select_theme": "Sélectionner un thème",
       "select_theme_description": "Choisissez parmi une gamme de thèmes prédéfinis ou un thème que vous avez installé.",
+      "settings_saved": "Les paramètres de l'image de marque ont été sauvegardés avec succès",
       "show_powered_by": "Afficher Propulsé par Erugo",
       "show_powered_by_description": "Afficher ou masquer le texte \"Propulsé par Erugo\" en bas de page. Ce texte permet à Erugo d'être découvert par les utilisateurs et nous aide à nous développer, mais vous pouvez le masquer si vous le souhaitez.\n",
       "theme": "Thèmes",
@@ -165,7 +166,20 @@
     "emailTemplates": {
       "accountCreated": "Compte créé",
       "accountCreatedDescription": "Envoyé aux nouveaux utilisateurs lorsqu'un administrateur crée leur compte. Contient un lien qui permet à l'utilisateur de définir son mot de passe.",
-      "passwordReset": "Réinitialiser le mot de passe"
+      "error": "Échec du chargement des modèles de mail",
+      "error_loading_templates": "Échec du chargement des modèles",
+      "error_saving_templates": "Échec de l'enregistrement des modèles",
+      "passwordReset": "Réinitialiser le mot de passe",
+      "sections": {
+        "action_text": "Texte du bouton d'action",
+        "action_url": "Action URL",
+        "content": "Contenu du message",
+        "fallbackText": "Texte de description du lien de secours",
+        "fallbackTextDescription": "Pour les clients de messagerie qui ne peuvent pas afficher correctement les boutons d'action, nous incluons un lien de secours au bas de l'e-mail. Cette option permet de personnaliser le texte qui apparaît au-dessus de ce lien de secours, afin d'aider les destinataires à en comprendre l'utilité.",
+        "header": "Contenu de l'en-tête",
+        "subject": "Sujet"
+      },
+      "success": "Modèles enregistrés avec succès"
     },
     "error": {
       "pruneExpiredShares": "Impossible de planifier la suppression des partages expirés !",

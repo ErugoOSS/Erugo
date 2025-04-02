@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, defineExpose, inject } from 'vue'
 // import {} from 'lucide-vue-next'
-import { getEmailTemplates, updateEmailTemplates } from '../../api'
+import { getEmailTemplates, updateEmailTemplates, getSettingById, saveSettingsById } from '../../api'
 
 import { useToast } from 'vue-toastification'
 import { mapSettings } from '../../utils'
@@ -17,6 +17,7 @@ const toast = useToast()
 
 const saving = ref(false)
 const emailTemplates = ref([])
+const fallbackText = ref('aaa')
 
 const emit = defineEmits(['navItemClicked'])
 
@@ -36,6 +37,13 @@ onMounted(async () => {
   } catch (error) {
     console.error(error)
     toast.error(t.value('settings.emailTemplates.error_loading_templates'))
+  }
+
+  try {
+    const text = await getSettingById('email_template_fallback_text')
+    fallbackText.value = text.value
+  } catch (error) {
+    console.error(error)
   }
 })
 
@@ -58,11 +66,13 @@ const tidyTemplateName = (name) => {
 const saveEmailTemplates = async () => {
   try {
     await updateEmailTemplates(emailTemplates.value)
+    await saveSettingsById({ email_template_fallback_text: fallbackText.value })
     toast.success(t.value('settings.emailTemplates.success'))
   } catch (error) {
     console.error(error)
     toast.error(t.value('settings.emailTemplates.error_saving_templates'))
   }
+
 }
 
 const handleNavItemClicked = (item) => {
@@ -88,6 +98,11 @@ defineExpose({
     <div class="row mb-5">
       <div class="col-2 d-none d-md-block">
         <ul class="settings-nav pt-5">
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('baseTemplate')">
+              {{ $t('settings.emailTemplates.baseTemplate') }}
+            </a>
+          </li>
           <li v-for="template in emailTemplates" :key="template.id">
             <a href="#" @click.prevent="handleNavItemClicked(template.id)">
               {{ $t(template.name) }}
@@ -96,7 +111,32 @@ defineExpose({
         </ul>
       </div>
       <div class="col-12 col-md-10 pt-5">
-        
+        <div class="row mb-5">
+          <div class="col-12 col-md-8 pe-0 ps-0 ps-md-3">
+            <div class="setting-group" id="baseTemplate">
+              <div class="setting-group-header">
+                <h3>
+                  {{ $t('settings.emailTemplates.baseTemplate') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <div class="setting-group-body-item">
+                  <label for="baseTemplateFallbackText">{{ $t('settings.emailTemplates.sections.fallbackText') }}</label>
+                  <input type="text" id="baseTemplateFallbackText" v-model="fallbackText" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-md-block col ps-0">
+            <div class="section-help">
+              <h6>{{ $t('settings.emailTemplates.baseTemplate') }}</h6>
+              <p>{{ $t('settings.emailTemplates.baseTemplateDescription') }}</p>
+              <h6>{{ $t('settings.emailTemplates.sections.fallbackText') }}</h6>
+              <p>{{ $t('settings.emailTemplates.sections.fallbackTextDescription') }}</p>
+            </div>
+          </div>
+        </div>
+
         <div class="row mb-5" v-for="template in emailTemplates" :key="template.id">
           <div class="col-12 col-md-8 pe-0 ps-0 ps-md-3">
             <div class="setting-group" :id="template.id">
@@ -118,7 +158,6 @@ defineExpose({
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>

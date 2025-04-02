@@ -166,6 +166,8 @@
     "emailTemplates": {
       "accountCreated": "Konto erstellt",
       "accountCreatedDescription": "Wird an neue Benutzer gesendet, wenn ein Administrator ihr Konto erstellt. Enthält einen Link, über den der Benutzer sein Passwort festlegen kann.",
+      "baseTemplate": "Basis-Vorlage",
+      "baseTemplateDescription": "Steuert die Basisvorlage, von der alle anderen Vorlagen erben.",
       "error": "E-Mail-Vorlagen konnten nicht geladen werden",
       "error_loading_templates": "Vorlagen konnten nicht geladen werden",
       "error_saving_templates": "Vorlagen konnten nicht gespeichert werden",
@@ -174,6 +176,8 @@
         "action_text": "Text der Aktionsschaltfläche",
         "action_url": "Aktions-URL",
         "content": "Inhalt der Nachricht",
+        "fallbackText": "Fallback-Link Beschreibungstext",
+        "fallbackTextDescription": "Für E-Mail-Clients, die Aktionsschaltflächen nicht richtig anzeigen können, fügen wir einen Ausweichlink am Ende der E-Mail ein. Mit dieser Option können Sie den Text, der über diesem Ausweichlink erscheint, anpassen, damit die Empfänger seinen Zweck verstehen.",
         "header": "Inhalt der Kopfzeile",
         "subject": "Thema"
       },

@@ -166,6 +166,8 @@
     "emailTemplates": {
       "accountCreated": "Account aangemaakt",
       "accountCreatedDescription": "Wordt verstuurd naar nieuwe gebruikers wanneer een beheerder hun account aanmaakt. Bevat een link waarmee de gebruiker zijn wachtwoord kan instellen.",
+      "baseTemplate": "Basis sjabloon",
+      "baseTemplateDescription": "Bepaalt het basissjabloon waarvan alle andere sjablonen erven.",
       "error": "Mislukt bij het laden van e-mailsjablonen",
       "error_loading_templates": "Sjablonen niet geladen",
       "error_saving_templates": "Opslaan van sjablonen mislukt",
@@ -174,6 +176,8 @@
         "action_text": "Tekst actieknop",
         "action_url": "Actie URL",
         "content": "Inhoud bericht",
+        "fallbackText": "Fallback link beschrijvingstekst",
+        "fallbackTextDescription": "Voor e-mailclients die actieknoppen niet goed kunnen weergeven, voegen we een terugvallink toe onderaan de e-mail. Gebruik deze optie om de tekst aan te passen die boven deze terugvallink verschijnt, zodat ontvangers begrijpen wat het doel ervan is.",
         "header": "Inhoud koptekst",
         "subject": "Onderwerp"
       },

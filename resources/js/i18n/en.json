@@ -166,6 +166,8 @@
     "emailTemplates": {
       "accountCreated": "Account Created",
       "accountCreatedDescription": "Sent to new users when a administrator creates their account. Contains a link that allows the user to set their password.",
+      "baseTemplate": "Base Template",
+      "baseTemplateDescription": "Controls the base template from which all other templates inherit. ",
       "error": "Failed to load email templates",
       "error_loading_templates": "Failed to load templates",
       "error_saving_templates": "Failed to save templates",
@@ -174,6 +176,8 @@
         "action_text": "Action button text",
         "action_url": "Action URL",
         "content": "Message content",
+        "fallbackText": "Fallback link description text",
+        "fallbackTextDescription": "For email clients that cannot properly display action buttons, we include a fallback link at the bottom of the email. Use this option to customize the text that appears above this fallback link, helping recipients understand its purpose.",
         "header": "Header content",
         "subject": "Subject"
       },

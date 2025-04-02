@@ -54,6 +54,7 @@ class SettingsService
       'application_name',
       'application_url',
       'login_message',
+      'email_template_fallback_text',
     ];
 
     return $this->getMany($required_keys);

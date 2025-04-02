@@ -166,6 +166,8 @@
     "emailTemplates": {
       "accountCreated": "Conta criada",
       "accountCreatedDescription": "Enviado aos novos utilizadores quando um administrador cria a sua conta. Contém uma ligação que permite ao utilizador definir a sua palavra-passe.",
+      "baseTemplate": "Modelo de base",
+      "baseTemplateDescription": "Controla o modelo de base a partir do qual todos os outros modelos são herdados.",
       "error": "Falha ao carregar modelos de correio eletrónico",
       "error_loading_templates": "Falha no carregamento de modelos",
       "error_saving_templates": "Falha ao guardar os modelos",
@@ -174,6 +176,8 @@
         "action_text": "Texto do botão de ação",
         "action_url": "Ação URL",
         "content": "Conteúdo da mensagem",
+        "fallbackText": "Texto de descrição da ligação de recurso",
+        "fallbackTextDescription": "Para os clientes de correio eletrónico que não conseguem apresentar corretamente os botões de ação, incluímos uma ligação de recurso na parte inferior do correio eletrónico. Utilize esta opção para personalizar o texto que aparece por cima desta ligação de recurso, ajudando os destinatários a compreender o seu objetivo.",
         "header": "Conteúdo do cabeçalho",
         "subject": "Assunto"
       },
