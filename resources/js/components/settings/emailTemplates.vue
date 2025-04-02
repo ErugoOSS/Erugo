@@ -17,7 +17,7 @@ const toast = useToast()
 
 const saving = ref(false)
 const emailTemplates = ref([])
-const fallbackText = ref('aaa')
+const fallbackText = ref('')
 
 const emit = defineEmits(['navItemClicked'])
 
