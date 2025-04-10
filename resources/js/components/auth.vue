@@ -74,6 +74,7 @@ const attemptLogin = async () => {
     store.authSuccess(data)
     toast.success(t.value('auth.login_successful'))
   } catch (error) {
+    console.log(error)
     toast.error(t.value('auth.invalid_email_or_password'))
   }
 }

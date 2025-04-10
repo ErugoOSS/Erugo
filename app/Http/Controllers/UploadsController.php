@@ -17,9 +17,15 @@ use App\Jobs\sendEmail;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
+use App\Traits\ApiResponder;
+use App\Traits\CheckCreateFolder;
+use App\Traits\GenerateLongId;
+use Illuminate\Support\Facades\Log;
 class UploadsController extends Controller
 {
+  use ApiResponder;
+  use CheckCreateFolder;
+  use GenerateLongId;
   /**
    * Create an upload session for chunked file upload
    */
@@ -33,21 +39,12 @@ class UploadsController extends Controller
     ]);
 
     if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
+      return $this->error('Validation failed', 422, $validator->errors());
     }
 
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return $this->unauthorised();
     }
 
     // Create upload session
@@ -63,18 +60,10 @@ class UploadsController extends Controller
     ]);
 
     // Create temp directory for chunks
-    $tempDir = storage_path('app/chunks/' . $user->id . '/' . $request->upload_id);
-    if (!file_exists($tempDir)) {
-      mkdir($tempDir, 0777, true);
-    }
+    $tempDir = $user->id . '/' . $request->upload_id;
+    $this->checkCreateFolder($tempDir, 'chunks');
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Upload session created',
-      'data' => [
-        'session' => $session
-      ]
-    ]);
+    return $this->success(['session' => $session]);
   }
 
   /**
@@ -90,21 +79,12 @@ class UploadsController extends Controller
     ]);
 
     if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
+      return $this->validationError(['errors' => $validator->errors()]);
     }
 
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return $this->unauthorised();
     }
 
     // Find the upload session
@@ -113,26 +93,24 @@ class UploadsController extends Controller
       ->first();
 
     if (!$session) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Upload session not found'
-      ], 404);
+      return $this->error('Upload session not found', 404);
     }
 
     // Get the chunk file
     $chunk = $request->file('chunk');
     $chunkIndex = $request->chunk_index;
-
+    $chunkSize = $chunk->getSize();
     // Store the chunk file
-    $chunkPath = 'chunks/' . $user->id . '/' . $request->upload_id . '/' . $chunkIndex;
-    move_uploaded_file($chunk->getPathname(), storage_path('app/' . $chunkPath));
+    $chunkPath = $user->id . '/' . $request->upload_id . '/' . $chunkIndex;
+    $finalPath = Storage::disk('chunks')->putFile($chunkPath, $chunk);
+
 
     // Record the chunk upload
     ChunkUpload::create([
       'upload_session_id' => $session->id,
       'chunk_index' => $chunkIndex,
-      'chunk_size' => $chunk->getSize(),
-      'chunk_path' => $chunkPath,
+      'chunk_size' => $chunkSize,
+      'chunk_path' => $finalPath,
     ]);
 
     // Update the upload session
@@ -142,15 +120,11 @@ class UploadsController extends Controller
     }
     $session->save();
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Chunk uploaded',
-      'data' => [
-        'chunk_index' => $chunkIndex,
-        'received_chunks' => $session->chunks_received,
-        'total_chunks' => $session->total_chunks,
-        'is_complete' => ($session->chunks_received == $session->total_chunks)
-      ]
+    return $this->success([
+      'chunk_index' => $chunkIndex,
+      'received_chunks' => $session->chunks_received,
+      'total_chunks' => $session->total_chunks,
+      'is_complete' => ($session->chunks_received == $session->total_chunks)
     ]);
   }
 
@@ -167,21 +141,12 @@ class UploadsController extends Controller
     ]);
 
     if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
+      return $this->validationError(['errors' => $validator->errors()]);
     }
 
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return $this->unauthorised();
     }
 
     // Find the upload session
@@ -190,49 +155,40 @@ class UploadsController extends Controller
       ->first();
 
     if (!$session) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Upload session not found'
-      ], 404);
+      return $this->error('Upload session not found', 404);
     }
 
     // Check if all chunks are received
     if ($session->chunks_received != $session->total_chunks) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Not all chunks received',
-        'data' => [
+      return $this->error('Not all chunks received', 400, [
           'received_chunks' => $session->chunks_received,
           'total_chunks' => $session->total_chunks
         ]
-      ], 400);
-    }
-
-    // Create directory for the assembled file
-    $tempAssembledFilePath = storage_path('app/temp/' . $user->id);
-    if (!file_exists($tempAssembledFilePath)) {
-      mkdir($tempAssembledFilePath, 0777, true);
+      );
     }
 
     // Path to the final assembled file
     $uuid = Str::uuid();
     $extension = pathinfo($request->filename, PATHINFO_EXTENSION);
-    $finalFilePath = $tempAssembledFilePath . '/' . $uuid . '.' . $extension;
+    $finalFilePath = $user->id . '/' . $uuid . '.' . $extension;
+    $this->checkCreateFolder($user->id . '/', 'chunks_assembled');
+    $finalFilePath = storage_path('app/private/chunks_assembled/' . $finalFilePath);
     $finalFileHandle = fopen($finalFilePath, 'wb');
 
+  
     // Get all chunks in proper order and concatenate them
     $chunks = ChunkUpload::where('upload_session_id', $session->id)
       ->orderBy('chunk_index', 'asc')
       ->get();
 
     foreach ($chunks as $chunk) {
-      $chunkFilePath = storage_path('app/' . $chunk->chunk_path);
-      $chunkContent = file_get_contents($chunkFilePath);
-      fwrite($finalFileHandle, $chunkContent);
-
-      // Clean up the chunk file after it's been used
-      unlink($chunkFilePath);
+      $chunkFilePath = $chunk->chunk_path;
+      fwrite($finalFileHandle, Storage::disk('chunks')->get($chunkFilePath));
+      Storage::disk('chunks')->delete($chunkFilePath);
     }
+
+    $chunkDirectory = $user->id . '/' . $request->upload_id;
+    Storage::disk('chunks')->deleteDirectory($chunkDirectory);
 
     fclose($finalFileHandle);
 
@@ -241,7 +197,7 @@ class UploadsController extends Controller
       'name' => $request->filename,
       'type' => $session->filetype ?? 'unknown',
       'size' => $session->filesize,
-      'temp_path' => 'temp/' . $user->id . '/' . $uuid . '.' . $extension
+      'temp_path' => $user->id . '/' . $uuid . '.' . $extension
     ]);
 
     // If recipients are provided, process them
@@ -270,18 +226,15 @@ class UploadsController extends Controller
     $session->chunks()->delete();
     $session->delete();
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Upload finalized',
-      'data' => [
-        'file' => $file
-      ]
+    return $this->success([
+      'file' => $file
     ]);
   }
 
   /**
    * Create a share from uploaded chunks
    */
+  
   public function createShareFromChunks(Request $request)
   {
     $validator = Validator::make($request->all(), [
@@ -294,13 +247,7 @@ class UploadsController extends Controller
     ]);
 
     if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
+      return $this->validationError(['errors' => $validator->errors()]);
     }
 
     $maxExpiryTime = Setting::where('key', 'max_expiry_time')->first()->value;
@@ -310,34 +257,22 @@ class UploadsController extends Controller
       $now = Carbon::now();
 
       if ($now->diffInDays($expiryDate) > $maxExpiryTime) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Expiry date is too long',
-          'data' => [
-            'max_expiry_time' => $maxExpiryTime
-          ]
-        ], 400);
+        return $this->error('Expiry date is too long', 400, [
+          'max_expiry_time' => $maxExpiryTime
+        ]);
       }
     }
 
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return $this->unauthorised();
     }
 
     // Generate a unique long ID for the share
-    $longId = app('App\Http\Controllers\SharesController')->generateLongId();
+    $longId = $this->generateLongId();
 
     // Create the share destination directory
-    $sharePath = $user->id . '/' . $longId;
-    $completePath = storage_path('app/shares/' .  $sharePath);
-
-    if (!file_exists($completePath)) {
-      mkdir($completePath, 0777, true);
-    }
+    $completePath = $user->id . '/' . $longId;
 
     // Calculate total size of all files
     $totalSize = 0;
@@ -347,15 +282,19 @@ class UploadsController extends Controller
       $totalSize += $file->size;
     }
 
+    $maxFileSize = Setting::where('key', 'max_file_size')->first()->value;
+    if ($totalSize > $maxFileSize) {
+      return $this->error('File size is too large', 400, [
+        'max_file_size' => $maxFileSize
+      ]);
+    }
+
     $password = $request->password;
     $passwordConfirm = $request->password_confirm;
 
     if ($password) {
       if ($password !== $passwordConfirm) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Password confirmation does not match'
-        ], 400);
+        return $this->error('Password confirmation does not match', 400);
       }
     }
 
@@ -365,7 +304,7 @@ class UploadsController extends Controller
       'description' => $request->description,
       'expires_at' => $expiryDate,
       'user_id' => $user->id,
-      'path' => $sharePath,
+      'path' => $completePath,
       'long_id' => $longId,
       'size' => $totalSize,
       'file_count' => $fileCount,
@@ -376,18 +315,14 @@ class UploadsController extends Controller
     // Associate files with the share and move from temp to share directory
     foreach ($files as $file) {
       // Move file from temp to share directory
-      $sourcePath = storage_path('app/' . $file->temp_path);
+      $sourcePath = storage_path('app/private/chunks_assembled/' . $file->temp_path);
       $originalPath = $request->filePaths[$file->id] ?? '';
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
       $destPath = $completePath . '/' . $originalPath;
-
-      if (!file_exists($destPath)) {
-        mkdir($destPath, 0777, true);
-      }
       
-      rename($sourcePath, $destPath . '/' . $file->name);
-
+      Storage::disk('shares_staging')->putFileAs($destPath, $sourcePath, $file->name);
+      Storage::disk('chunks_assembled')->delete($file->temp_path);
       // Update file record
       $file->share_id = $share->id;
       $file->full_path = $originalPath;
@@ -419,6 +354,7 @@ class UploadsController extends Controller
       $user->delete();
 
       $cookie = cookie('refresh_token', '', 0, null, null, false, true);
+      //return a success response - don't use our response helper here like we usually would, as we need to set the cookie
       return response()->json([
         'status' => 'success',
         'message' => 'Share created',
@@ -434,12 +370,8 @@ class UploadsController extends Controller
       }
     }
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Share created',
-      'data' => [
-        'share' => $share
-      ]
+    return $this->success([
+      'share' => $share
     ]);
   }
 

@@ -47,6 +47,51 @@ return [
             'report' => false,
         ],
 
+        'chunks' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/chunks'),
+            'throw' => true,
+            'report' => true,
+            'serve' => false,
+        ],
+
+        'chunks_assembled' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/chunks_assembled'),
+            'throw' => false,
+            'report' => false,
+            'serve' => false,
+        ],
+
+        'shares_staging' => [
+            'driver' => 'local',
+            'root' => storage_path('app/shares_staging'),
+            'throw' => true,
+            'report' => true,
+            'serve' => false,
+        ],
+
+        'shares' => [
+            'driver' => 'local',
+            'root' => storage_path('app/shares'),
+            'throw' => true,
+            'report' => true,
+            'serve' => true,
+        ],
+
+        // 'shares' => [
+        //     'driver' => 's3',
+        //     'key' => env('AWS_ACCESS_KEY_ID'),
+        //     'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        //     'region' => env('AWS_DEFAULT_REGION'),
+        //     'bucket' => env('AWS_BUCKET'),
+        //     'url' => env('AWS_URL'),
+        //     'endpoint' => env('AWS_ENDPOINT'),
+        //     'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+        //     'throw' => true,
+        //     'report' => true,
+        // ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -56,8 +101,8 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
-            'report' => false,
+            'throw' => true,
+            'report' => true,
         ],
 
     ],

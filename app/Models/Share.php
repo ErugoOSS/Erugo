@@ -8,6 +8,8 @@ use App\Models\Setting;
 use App\Mail\shareDeletedWarningMail;
 use App\Jobs\sendEmail;
 use App\Services\SettingsService;
+use Illuminate\Support\Facades\Storage;
+
 class Share extends Model
 {
 
@@ -43,6 +45,20 @@ class Share extends Model
     'user_id',
   ];
 
+  //when creating a share, set the disk_id to the default disk
+  protected static function boot()
+  {
+    parent::boot();
+    static::creating(function ($share) {
+      $defaultDisk = Disk::where('use_for_shares', true)->first();
+      if ($defaultDisk) {
+        $share->disk_id = $defaultDisk->id;
+      } else {
+        $share->disk_id = null;
+      }
+    });
+  }
+
   public function files()
   {
     return $this->hasMany(File::class);
@@ -61,6 +77,11 @@ class Share extends Model
   public function invite()
   {
     return $this->belongsTo(ReverseShareInvite::class, 'invite_id');
+  }
+
+  public function disk()
+  {
+    return $this->belongsTo(Disk::class);
   }
 
   function getExpiredAttribute()
@@ -90,6 +111,26 @@ class Share extends Model
     return $this->status == 'deleted';
   }
 
+  function getShareDiskAttribute()
+  {
+    if ($this->disk_id) {
+      return Storage::build([
+        'driver' => $this->disk->driver,
+        'key' => $this->disk->key,
+        'secret' => $this->disk->secret,
+        'region' => $this->disk->region,
+        'bucket' => $this->disk->bucket,
+        'url' => $this->disk->url,
+        'endpoint' => $this->disk->endpoint,
+        'use_path_style_endpoint' => $this->disk->use_path_style_endpoint,
+        'root' => $this->disk->root,
+      ]);
+    }
+
+    return Storage::disk('shares');
+  }
+
+
   public function scopeReadyForCleaning($query)
   {
     $cleanFilesAfterDays = Setting::where('key', 'clean_files_after_days')->first();
@@ -114,23 +155,9 @@ class Share extends Model
   {
     try {
       $filePath = $this->path;
-      $completePath = storage_path('app/shares/' . $filePath);
 
-      if (is_dir($completePath)) {
-        //delete all files in the directory
-        $files = glob($completePath . '/*');
-        foreach ($files as $file) {
-          unlink($file);
-        }
-        //delete the directory
-        rmdir($completePath);
-      } else {
-      }
-      //or is it a zip file?
-      if (is_file($completePath . '.zip')) {
-        unlink($completePath . '.zip');
-      } else {
-      }
+
+      $this->shareDisk->deleteDirectory($filePath);
 
       $this->status = 'deleted';
       $this->save();

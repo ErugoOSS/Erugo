@@ -15,11 +15,11 @@ use App\Jobs\sendEmail;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Crypt;
-
+use App\Traits\ApiResponder;
 
 class AuthController extends Controller
 {
-
+    use ApiResponder;
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -28,13 +28,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'data' => [
-                    'errors' => $validator->errors()
-                ]
-            ], 422);
+            return $this->validationError($validator->errors());
         }
 
         $credentials = $request->only('email', 'password');
@@ -52,20 +46,14 @@ class AuthController extends Controller
         //grab the token from refresh_token cookie
         $refreshToken = request()->cookie('refresh_token');
         if (!$refreshToken) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
+            return $this->unauthorised();
         }
 
         //get the user from the token
         $user = Auth::setToken($refreshToken)->user();
 
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
+            return $this->unauthorised();
         }
 
         return $this->respondWithToken($user);
@@ -138,7 +126,7 @@ class AuthController extends Controller
         $invite->markAsUsed();
 
         //invalidate the token
-        auth()->invalidate();
+        Auth::invalidate();
 
         return $this->respondWithToken($user);
     }

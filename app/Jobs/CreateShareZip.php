@@ -6,10 +6,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CreateShareZip implements ShouldQueue
 {
   use Queueable;
+
+  public $timeout = 30000;
 
   /**
    * Create a new job instance.
@@ -25,7 +28,6 @@ class CreateShareZip implements ShouldQueue
   public function handle(): void
   {
 
-
     if ($this->share->user_id) {
       $user_folder = $this->share->user_id;
     } else {
@@ -33,30 +35,28 @@ class CreateShareZip implements ShouldQueue
       $user_folder = explode('/', $this->share->path)[0];
     }
 
-    //just check that we've not already created the zip file
-    $zipPath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id . '.zip');
-    if (file_exists($zipPath)) {
-      return;
-    }
-
-    //if there is only one file just leave it alone and set the status to ready
-    if ($this->share->file_count == 1) {
-      $this->share->status = 'ready';
-      $this->share->save();
-      return;
-    }
+    $zipPath = storage_path('app/shares_staging/' . $user_folder . '/' . $this->share->long_id . '.zip');
 
     try {
-      $sourcePath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id);
+      $sourcePath = storage_path('app/shares_staging/' . $user_folder . '/' . $this->share->long_id);
       $this->createZipFromDirectory($sourcePath, $zipPath);
-      $this->share->status = 'ready';
+      $this->share->status = 'moving';
       $this->share->save();
       $this->removeDirectory($sourcePath);
+      $this->moveZipToFinalLocation($zipPath);
+      $this->share->status = 'ready';
+      $this->share->save();
     } catch (\Exception $e) {
       $this->share->status = 'failed';
       $this->share->save();
       Log::error('Error creating share zip: ' . $e->getMessage());
     }
+  }
+
+  private function moveZipToFinalLocation($zipPath)
+  {
+    $this->share->shareDisk->putFileAs($this->share->path, $zipPath, $this->share->long_id . '.zip');
+    unlink($zipPath);
   }
 
   function createZipFromDirectory($sourcePath, $zipPath)
