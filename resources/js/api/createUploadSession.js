@@ -1,6 +1,6 @@
 import { fetchWithAuth } from './fetchWithAuth'
-import { store } from '../store'
 import { getApiUrl } from '../utils'
+import { addJsonHeader } from './lib/addJsonHeader'
 
 const apiUrl = getApiUrl()
 
@@ -11,9 +11,7 @@ const createUploadSession = async (file, uploadId, totalChunks) => {
   const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-session`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${store.jwt}`
+      ...addJsonHeader()
     },
     body: JSON.stringify({
       upload_id: uploadId,

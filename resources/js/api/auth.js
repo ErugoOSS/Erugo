@@ -1,5 +1,5 @@
 import { getApiUrl } from '../utils'
-import { addJsonHeader } from './addJsonHeader'
+import { addJsonHeader } from './lib/addJsonHeader'
 import { jwtDecode } from 'jwt-decode'
 import { store } from '../store'
 import debounce from '../debounce'

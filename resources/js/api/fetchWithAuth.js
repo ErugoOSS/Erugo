@@ -1,4 +1,4 @@
-import { addAuthHeader } from './addAuthHeader'
+import { addAuthHeader } from './lib/addAuthHeader'
 
 // Wrapper for fetch that handles auth refresh
 export const fetchWithAuth = async (url, options = {}) => {

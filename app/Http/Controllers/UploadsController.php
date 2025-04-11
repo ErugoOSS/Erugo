@@ -282,13 +282,6 @@ class UploadsController extends Controller
       $totalSize += $file->size;
     }
 
-    $maxFileSize = Setting::where('key', 'max_file_size')->first()->value;
-    if ($totalSize > $maxFileSize) {
-      return $this->error('File size is too large', 400, [
-        'max_file_size' => $maxFileSize
-      ]);
-    }
-
     $password = $request->password;
     $passwordConfirm = $request->password_confirm;
 

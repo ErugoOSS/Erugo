@@ -1,5 +1,5 @@
 import { fetchWithAuth } from './fetchWithAuth'
-import { addJsonHeader } from './addJsonHeader'
+import { addJsonHeader } from './lib/addJsonHeader'
 import { getApiUrl } from '../utils'
 import { store } from '../store'
 
