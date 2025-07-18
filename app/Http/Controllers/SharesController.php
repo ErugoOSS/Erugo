@@ -375,10 +375,10 @@ class SharesController extends Controller
       $filename = $sharePath . '.zip';
       \Log::info('looking for: ' . $filename);
       //does the file exist?
-      if (file_exists($filename)) {
+      if (Storage::fileExists($filename)) {
         $this->createDownloadRecord($share);
 
-        return response()->download($filename, $share->name . '.zip');
+        return Storage::download($filename, $share->name . '.zip');
       } else {
         //something went wrong, show the failed view
         return view('shares.failed', [

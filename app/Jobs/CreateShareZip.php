@@ -6,6 +6,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use STS\ZipStream\Facades\Zip;
+use ZipArchive;
 
 class CreateShareZip implements ShouldQueue
 {
@@ -34,8 +38,8 @@ class CreateShareZip implements ShouldQueue
     }
 
     //just check that we've not already created the zip file
-    $zipPath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id . '.zip');
-    if (file_exists($zipPath)) {
+    $zipPath = $user_folder . '/' . $this->share->long_id . '.zip';
+    if (Storage::directoryExists($zipPath)) {
       return;
     }
 
@@ -47,7 +51,7 @@ class CreateShareZip implements ShouldQueue
     }
 
     try {
-      $sourcePath = storage_path('app/shares/' . $user_folder . '/' . $this->share->long_id);
+      $sourcePath = $user_folder . '/' . $this->share->long_id;
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();
@@ -64,67 +68,32 @@ class CreateShareZip implements ShouldQueue
 
     // Ensure the zip directory exists
     $zipDir = dirname($zipPath);
-    if (!is_dir($zipDir)) {
-      mkdir($zipDir, 0755, true);
+    $fileName = basename($zipPath);
+    if (!Storage::directoryExists($zipDir)) {
+        Storage::makeDirectory($zipDir);
     }
 
-    // Build the zip command to zip the entire directory
-    $zipCommand = sprintf(
-      'zip -r %s %s',
-      escapeshellarg($zipPath),
-      escapeshellarg('.')  // '.' represents current directory after we chdir
-    );
-
-    // Change to the source directory
-    $currentDir = getcwd();
-    chdir($sourcePath);
-
-    // Execute the command
-    $output = [];
-    $returnCode = 0;
-    exec($zipCommand . ' 2>&1', $output, $returnCode);
-
-    // Change back to original directory
-    chdir($currentDir);
-
-    //did it work?
-    if ($returnCode !== 0) {
-      throw new \Exception('Failed to create zip file: ' . implode("\n", $output));
+    $disk = config('filesystems.default');
+    $zip = Zip::create($fileName);
+    foreach (Storage::files($sourcePath, true) as $file) {
+        $localPath = Str::replaceFirst($sourcePath . '/', '', $file);
+        $zip->addFromDisk($disk, $file, $localPath);
     }
-
-    //check the zip file is valid
-    if (!file_exists($zipPath)) {
-      throw new \Exception('The zip operation completed but the zip file was not created');
-    }
-
-    //check the zip file is not empty
-    if (filesize($zipPath) === 0) {
-      throw new \Exception('The zip operation completed but the zip file was empty');
-    }
+    $zip->saveToDisk($disk, $zipDir);
 
     return true;
   }
 
   private function removeDirectory($dir)
   {
-    if (!file_exists($dir)) {
+    if (!Storage::exists($dir)) {
       return true;
     }
 
-    if (!is_dir($dir)) {
-      return unlink($dir);
+    if (Storage::fileExists($dir)) {
+      return Storage::delete($dir);
     }
 
-    foreach (scandir($dir) as $item) {
-      if ($item == '.' || $item == '..') {
-        continue;
-      }
-
-      if (!$this->removeDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
-        return false;
-      }
-    }
-
-    return rmdir($dir);
+    Storage::deleteDirectory($dir);
   }
 }

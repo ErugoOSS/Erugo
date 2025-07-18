@@ -23,6 +23,7 @@
         "rcrowe/twigbridge": "^0.14.3",
         "socialiteproviders/authentik": "^5.2",
         "socialiteproviders/microsoft-azure": "^5.2",
+        "stechstudio/laravel-zipstream": "^5.5",
         "web-auth/webauthn-lib": "^5.1"
     },
     "require-dev": {
