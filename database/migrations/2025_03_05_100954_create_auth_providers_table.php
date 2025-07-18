@@ -20,6 +20,15 @@ return new class extends Migration
             $table->boolean('allow_registration')->default(false);
             $table->timestamps();
         });
+
+        Schema::table('user_auth_provider', function (Blueprint $table) {
+            $table->foreignId('auth_provider_id')->constrained()->onDelete('cascade');
+
+            // Ensure a user can only link to a provider once
+            $table->unique(['user_id', 'auth_provider_id']);
+            // Ensure provider_user_id is unique per auth_provider_id
+            $table->unique(['auth_provider_id', 'provider_user_id']);
+        });
     }
 
     /**
@@ -27,6 +36,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('user_auth_provider', function (Blueprint $table) {
+
+            // Ensure a user can only link to a provider once
+            $table->dropUnique(['user_id', 'auth_provider_id']);
+            // Ensure provider_user_id is unique per auth_provider_id
+            $table->dropUnique(['auth_provider_id', 'provider_user_id']);
+
+            $table->dropConstrainedForeignId('auth_provider_id');
+        });
+
         Schema::dropIfExists('auth_providers');
     }
 };
