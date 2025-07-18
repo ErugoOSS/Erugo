@@ -16,11 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SettingsSeeder::class,
+            ThemesSeeder::class,
         ]);
-
-        // load themes.sql from the root of the project
-        $sql = file_get_contents(base_path('themes.sql'));
-        //run the query, ignore errors
-        DB::unprepared($sql);
     }
 }

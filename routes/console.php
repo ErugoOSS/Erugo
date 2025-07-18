@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\exportThemes;
 use Illuminate\Support\Facades\Schedule;
 use App\Jobs\cleanExpiredShares;
 use App\Jobs\maintainDb;
@@ -51,3 +52,7 @@ Artisan::command('update-legacy-share-paths', function () {
 Artisan::command('back-up-database', function () {
     backUpDatabase::dispatch();
 })->purpose('Back up the database');
+
+Artisan::command('export-themes', function () {
+    exportThemes::dispatchSync();
+})->purpose('Export themes');
