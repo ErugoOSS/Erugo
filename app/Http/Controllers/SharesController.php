@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Share;
@@ -96,11 +97,9 @@ class SharesController extends Controller
     }
 
     $sharePath = $user->id . '/' . $longId;
-    $completePath = storage_path('app/shares/' .  $sharePath);
-    
     //create the directory if it doesn't exist
-    if (!file_exists($completePath)) {
-      mkdir($completePath, 0777, true);
+    if (!Storage::directoryExists($sharePath)) {
+        Storage::createDirectory($sharePath);
     }
 
     $shareData = [
@@ -133,7 +132,7 @@ class SharesController extends Controller
       $originalPath = $request->file_paths[$index];
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
-      $file->move($completePath . '/' . $originalPath, $file->getClientOriginalName());
+      $file->storeAs($sharePath, $file->getClientOriginalName());
       $file->dbFile->full_path = $originalPath;
       $file->dbFile->save();
     }
@@ -349,15 +348,15 @@ class SharesController extends Controller
       return redirect()->to('/shares/' . $shareId);
     }
 
-    $sharePath = storage_path('app/shares/' . $share->path);
+    $sharePath = $share->path;
 
     //if there is only one file, download it directly
     if ($share->file_count == 1) {
-      if (file_exists($sharePath . '/' . $share->files[0]->name)) {
+      if (Storage::exists($sharePath . '/' . $share->files[0]->name)) {
 
         $this->createDownloadRecord($share);
 
-        return response()->download($sharePath . '/' . $share->files[0]->name);
+        return Storage::download($sharePath . '/' . $share->files[0]->name);
       } else {
         return redirect()->to('/shares/' . $shareId);
       }
