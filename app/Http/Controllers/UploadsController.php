@@ -333,10 +333,8 @@ class UploadsController extends Controller
 
     // Create the share destination directory
     $sharePath = $user->id . '/' . $longId;
-    $completePath = storage_path('app/shares/' .  $sharePath);
-
-    if (!file_exists($completePath)) {
-      mkdir($completePath, 0777, true);
+    if (!Storage::directoryExists($sharePath)) {
+      Storage::makeDirectory($sharePath);
     }
 
     // Calculate total size of all files
@@ -380,13 +378,14 @@ class UploadsController extends Controller
       $originalPath = $request->filePaths[$file->id] ?? '';
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
-      $destPath = $completePath . '/' . $originalPath;
+      $destPath = $sharePath . '/' . $originalPath;
 
-      if (!file_exists($destPath)) {
-        mkdir($destPath, 0777, true);
+      if (!Storage::directoryExists($destPath)) {
+        Storage::makeDirectory($destPath);
       }
-      
-      rename($sourcePath, $destPath . '/' . $file->name);
+
+      Storage::writeStream($destPath . '/' . $file->name, fopen($sourcePath, 'rb'));
+      unlink($sourcePath);
 
       // Update file record
       $file->share_id = $share->id;

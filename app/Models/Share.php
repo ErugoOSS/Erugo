@@ -8,6 +8,8 @@ use App\Models\Setting;
 use App\Mail\shareDeletedWarningMail;
 use App\Jobs\sendEmail;
 use App\Services\SettingsService;
+use Illuminate\Support\Facades\Storage;
+
 class Share extends Model
 {
 
@@ -114,22 +116,14 @@ class Share extends Model
   {
     try {
       $filePath = $this->path;
-      $completePath = storage_path('app/shares/' . $filePath);
 
-      if (is_dir($completePath)) {
-        //delete all files in the directory
-        $files = glob($completePath . '/*');
-        foreach ($files as $file) {
-          unlink($file);
-        }
-        //delete the directory
-        rmdir($completePath);
-      } else {
+      if (Storage::directoryExists($filePath)) {
+          Storage::deleteDirectory($filePath);
       }
+
       //or is it a zip file?
-      if (is_file($completePath . '.zip')) {
-        unlink($completePath . '.zip');
-      } else {
+      if (Storage::fileExists($filePath . '.zip')) {
+          Storage::delete($filePath . '.zip');
       }
 
       $this->status = 'deleted';
