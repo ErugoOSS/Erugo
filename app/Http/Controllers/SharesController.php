@@ -352,11 +352,18 @@ class SharesController extends Controller
 
     //if there is only one file, download it directly
     if ($share->file_count == 1) {
-      if (Storage::exists($sharePath . '/' . $share->files[0]->name)) {
-
+      $filename = $sharePath . '/' . $share->files[0]->name;
+      if (Storage::exists($filename)) {
         $this->createDownloadRecord($share);
 
-        return Storage::download($sharePath . '/' . $share->files[0]->name);
+        if (Storage::getDefaultDriver() === 's3') {
+            $downloadUrl = Storage::temporaryUrl($filename, now()->addMinute(), [
+                'ResponseContentDisposition' => 'attachment',
+            ]);
+            return redirect()->to($downloadUrl);
+        }
+
+        return Storage::download($filename);
       } else {
         return redirect()->to('/shares/' . $shareId);
       }
@@ -377,6 +384,14 @@ class SharesController extends Controller
       //does the file exist?
       if (Storage::fileExists($filename)) {
         $this->createDownloadRecord($share);
+
+        if (Storage::getDefaultDriver() === 's3') {
+          $downloadUrl = Storage::temporaryUrl($filename, now()->addMinute(), [
+              'ResponseContentDisposition' => 'attachment; filename="' . str_replace('%', '', Str::ascii($share->name . '.zip')) .'"',
+            ]);
+
+          return redirect()->to($downloadUrl);
+        }
 
         return Storage::download($filename, $share->name . '.zip');
       } else {
