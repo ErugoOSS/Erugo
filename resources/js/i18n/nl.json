@@ -142,7 +142,7 @@
       },
       "myShares": {
         "create": "Gedeelde link aanmaken",
-        "pruneExpired": "Vervallen aandelen verwijderen"
+        "pruneExpired": "Vervallen overdrachten verwijderen"
       },
       "system": {
         "save": "Bewaar systeem instellingen"
@@ -153,7 +153,7 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je je verlopen aandelen wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+      "pruneExpiredShares": "Weet je zeker dat je je verlopen overdrachten wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
     },
     "description": {
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
@@ -184,16 +184,16 @@
       "success": "Sjablonen succesvol opgeslagen"
     },
     "error": {
-      "pruneExpiredShares": "Mislukt bij het plannen van verlopen aandelen voor verwijdering!",
-      "shareExpired": "Aandeel niet verlopen",
-      "shareExtended": "Niet gelukt om aandeel uit te breiden"
+      "pruneExpiredShares": "Mislukt bij het plannen van verlopen overdracht voor verwijdering!",
+      "shareExpired": "Overdracht niet verlopen",
+      "shareExtended": "Niet gelukt om overdracht uit te breiden"
     },
     "help": {
       "auth_provider": {
         "title": "Auth provider informatie"
       },
       "downloadLimit": {
-        "description": "Je kunt de downloadlimiet voor elk aandeel instellen door op het getal aan de rechterkant te klikken en de nieuwe limiet in te voeren. Wis het vakje om de limiet te verwijderen.",
+        "description": "Je kunt de downloadlimiet voor elke overdracht instellen door op het getal aan de rechterkant te klikken en de nieuwe limiet in te voeren. Wis het vakje om de limiet te verwijderen.",
         "description2": "Wijzigingen worden automatisch opgeslagen wanneer je buiten het vakje klikt.",
         "title": "Limiethulp downloaden"
       }
@@ -201,8 +201,8 @@
     "invite": {
       "message": "Bericht (optioneel)"
     },
-    "loading": "Aandelen laden...",
-    "noShares": "Je hebt geen aandelen. Waarom maak je er geen?",
+    "loading": "Overdrachten laden...",
+    "noShares": "Je hebt geen overdrachten. Waarom maak je er geen?",
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
@@ -218,16 +218,16 @@
       "remove_password": "Wachtwoord verwijderen"
     },
     "success": {
-      "pruneExpiredShares": "Vervallen aandelen zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
-      "shareExpired": "Aandeel verlopen",
-      "shareExtended": "Aandeel uitgebreid"
+      "pruneExpiredShares": "Vervallen overdrachten zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
+      "shareExpired": "Overdracht verlopen",
+      "shareExtended": "Overdracht uitgebreid"
     },
     "system": {
       "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
       "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
       "allow_direct_uploads": "Directe uploadmodus toestaan",
       "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
-      "allow_reverse_shares": "Aandelen met terugloop toestaan",
+      "allow_reverse_shares": "Omgekeerde overdrachten toestaan",
       "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om reverse share verzoeken te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
       "application_name": "Naam toepassing",
       "application_name_description": "Pas de weergegeven naam van je applicatie aan die wordt weergegeven in titelbalken, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
@@ -284,7 +284,7 @@
       "max_share_size_description": "Stel de maximale grootte in van een gedeeld bestand die een gebruiker kan aanmaken. De waarde is in megabytes of gigabytes.",
       "provider_trust_warning": "Waarschuwing: Auth Provider Vertrouwen",
       "provider_trust_warning_description": "Zorg ervoor dat je alleen auth providers configureert en inschakelt die je vertrouwt. Authenticatieproviders hebben verhoogde toegangsrechten tot je applicatie en gebruikersgegevens. Het toevoegen van niet-vertrouwde of gecompromitteerde providers kan leiden tot onbevoegde toegang, gegevenslekken of accountovername.",
-      "reverse_shares": "Omgekeerde Aandelen",
+      "reverse_shares": "Omgekeerde Overdracht",
       "select_auth_provider": "Selecteer een auth provider",
       "share_deleted_emails": "\"Deel verwijderde\" e-mails",
       "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun links permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
@@ -294,10 +294,10 @@
       "share_downloaded_emails_description": "Stel link-eigenaars op de hoogte wanneer hun gedeelde content voor het eerst wordt gedownload. Dit helpt gebruikers bij te houden wanneer ontvangers toegang krijgen tot hun gedeelde bestanden.",
       "share_expired_warning_emails": "\"Waarschuwingsmails \"Delen verlopen",
       "share_expired_warning_emails_description": "Waarschuw gebruikers wanneer hun links de vervaldatum hebben bereikt en niet langer toegankelijk zijn voor ontvangers. Helpt gebruikers zich bewust te blijven van hun deelstatus.",
-      "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen aandelen",
+      "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen overdracht",
       "share_expiry_warning_emails_description": "Stuur proactieve meldingen naar gebruikers wanneer hun links bijna verlopen. Dit geeft hen de mogelijkheid om de toegang te verlengen als dat nodig is.",
       "shares": "Gedeelde Bestanden",
-      "show_deleted_shares": "Verwijderde aandelen weergeven",
+      "show_deleted_shares": "Verwijderde overdrachten weergeven",
       "show_language_selector": "Taalkeuze tonen",
       "show_language_selector_description": "Schakel de zichtbaarheid van het taalkeuzemenu in de rechterbovenhoek van de applicatie in. Als deze optie is ingeschakeld, kunnen gebruikers snel schakelen tussen de beschikbare interfacetalen.",
       "smtp": "SMTP",
@@ -426,7 +426,7 @@
       "count": "{value, plural, one {# bestand} other {# bestanden}}",
       "including": "inclusief:"
     },
-    "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
+    "not_found": "De overdracht dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
     "passwordProtected": "Wachtwoord beveiligd"
   },
@@ -440,7 +440,7 @@
       "chunked": "Modus voor gebundeld uploaden",
       "direct": "Directe uploadmodus"
     },
-    "expiry_label": "Aandeel vervalt in {value} {unit} (verandering)",
+    "expiry_label": "Overdracht vervalt in {value} {unit} (verandering)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "De vervaltijd die je hebt opgegeven overschrijdt de maximumlimiet. We hebben het automatisch aangepast naar de langst toegestane periode.",
     "expiry_unit": {
