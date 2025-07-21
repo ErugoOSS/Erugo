@@ -2,15 +2,15 @@
   "Add Files": "Bestanden toevoegen",
   "Add Folders": "Mappen toevoegen",
   "Add Recipient": "Ontvanger Toevoegen",
-  "Message to share recipients (optional)": "Bericht om te delen naar ontvanger (OPTIONEEL)",
+  "Message to share recipients (optional)": "Bericht om bestanden te delen naar ontvanger (OPTIONEEL)",
   "No files added yet": "Nog geen bestanden toegevoegd",
   "No recipients": "Geen ontvangers",
-  "Powered by": "Aangedreven door",
-  "Reverse Share": "Omgekeerd delen",
+  "Powered by": "Ontwikkeld door",
+  "Reverse Share": "Verzoek delen & uploaden bestanden",
   "Share Name": "Naam",
   "Share URL": "Gedeelde link",
   "We'll provide you with a link instead": {
-    "": "Wij zullen jou een link sturen"
+    "": "Wij zullen je een link sturen"
   },
   "auth": {
     "back_to_login": "Terug naar aanmelden",
@@ -26,7 +26,7 @@
     "forgot_password_create_password_description": "Voer uw nieuw wachtwoord in. Beide wachtwoorden moeten overeenkomen",
     "guest_warning": "Bestanden die je uploadt via het formulier aan de linkerkant worden direct gedeeld met de persoon die je heeft uitgenodigd.",
     "invalid_email_or_password": "Inloggen mislukt",
-    "invite_accepted": "Uitnodiging voor omgekeerd delen geaccepteerd. Je kunt nu bestanden uploaden.",
+    "invite_accepted": "Uitnodiging voor verzoek delen bestanden geaccepteerd. Je kunt nu bestanden uploaden.",
     "login": "Inloggen",
     "login_successful": "Succesvol ingelogd",
     "login_with": "Inloggen met",
@@ -47,7 +47,7 @@
     "welcome": "Welkom"
   },
   "button": {
-    "reverse_share_invite": "Een verzoek tot omgekeerd delen maken",
+    "reverse_share_invite": "Een verzoek tot delen & uploaden bestanden maken",
     "reverse_share_invite_send": "Aanvraag versturen",
     "share": {
       "password_protect": "Wachtwoordbeveiliging"
@@ -75,8 +75,8 @@
   },
   "processing_uploaded_files": "Verwerken van geüploade bestanden",
   "reverse_invite_send": {
-    "error": "Kan uitnodiging voor omgekeerd delen niet verzenden",
-    "success": "Uitnodiging voor omgekeerd delen verzonden!"
+    "error": "Kan uitnodiging voor delen & uploaden bestanden niet verzenden",
+    "success": "Uitnodiging voor delen & uploaden bestanden verzonden!"
   },
   "settings": {
     "account": {
@@ -102,7 +102,7 @@
       "background_slideshow_speed_off": "uitschakelen",
       "delete": "Verwijder",
       "delete_theme": "Thema verwijderen",
-      "delete_theme_description": "Verwijder het geselecteerde thema. Hierdoor wordt het verwijderd uit de lijst met thema's en kunt u het niet langer gebruiken. Het is niet mogelijk om het actieve thema of gebundelde thema's te verwijderen.",
+      "delete_theme_description": "Verwijder het geselecteerde thema. Hierdoor wordt het verwijderd uit de lijst met thema's en kunt je het niet langer gebruiken. Het is niet mogelijk om het actieve thema of gebundelde thema's te verwijderen.",
       "download": "Downloaden",
       "download_theme": "Thema downloaden",
       "download_theme_description": "Download het geselecteerde thema als een JSON-bestand. Dit kan worden gebruikt om een nieuw thema te maken of een bestaand thema te wijzigen.",
@@ -110,7 +110,7 @@
       "in_seconds": "seconden",
       "install_custom_theme": "Een aangepast thema installeren\n",
       "install_custom_theme_description": "Installeer een aangepast thema vanuit een JSON-bestand.\n\nDit kan een thema zijn dat je zelf hebt aangepast of gemaakt, of een thema dat je hebt gedownload.",
-      "install_custom_theme_description_2": "Als u een thema downloadt van het web, zorg er dan voor dat u de bron vertrouwt en controleer het thema op kwaadaardige code voordat u het installeert.",
+      "install_custom_theme_description_2": "Als je een thema downloadt van het web, zorg er dan voor dat je de bron vertrouwt en controleer het thema op kwaadaardige code voordat je het installeert.",
       "install_theme": "Thema installeren",
       "logo": "Logo",
       "logo_description": "Geef je bedrijfslogo in PNG-formaat weer in de linkerbovenhoek. Stel de gewenste breedte in pixels in - de hoogte wordt automatisch aangepast om de beeldverhouding te behouden. Gebruik een bronafbeelding die minstens zo breed is als je schermbreedte om kwaliteit te garanderen.",
@@ -120,8 +120,8 @@
       "select_theme": "Thema Selecteren",
       "select_theme_description": "Kies uit een reeks kant-en-klare thema's of een thema dat je zelf hebt geïnstalleerd.",
       "settings_saved": "Branding instellingen succesvol opgeslagen",
-      "show_powered_by": "Toon Aangedreven door Erugo",
-      "show_powered_by_description": "Toon of verberg de \"Aangedreven door Erugo\" tekst onderaan de pagina. Deze tekst zorgt ervoor dat Erugo ontdekt wordt door gebruikers en helpt ons te groeien, je kunt het echter verbergen als je dat wilt.\n",
+      "show_powered_by": "Toon Ontwikkeld door Erugo",
+      "show_powered_by_description": "Toon of verberg de \"Ontwikkeld door Erugo\" tekst onderaan de pagina. Deze tekst zorgt ervoor dat Erugo ontdekt wordt door gebruikers en helpt ons te groeien, je kunt het echter verbergen als je dat wilt.\n",
       "theme": "Thema's",
       "theme_description": "Kies uit een reeks kant-en-klare thema's of een thema dat je zelf hebt geïnstalleerd.",
       "theme_file": "Thema Bestand",
@@ -141,8 +141,8 @@
         "save": "Profielwijzigingen opslaan"
       },
       "myShares": {
-        "create": "Gedeelde link aanmaken",
-        "pruneExpired": "Vervallen overdrachten verwijderen"
+        "create": "Gedeelde bestanden aanmaken",
+        "pruneExpired": "Vervallen gedeelde bestanden verwijderen"
       },
       "system": {
         "save": "Bewaar systeem instellingen"
@@ -153,13 +153,13 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je je verlopen overdrachten wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+      "pruneExpiredShares": "Weet je zeker dat je je verlopen gedeelde bestanden wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
     },
     "description": {
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
       "emailTemplates": "E-mailsjablonen beheren",
       "myProfile": "Beheer je profiel",
-      "myShares": "Beheer je gedeelde links.",
+      "myShares": "Beheer je gedeelde bestanden.",
       "system": "Beheer het gedrag van je Erugo instantie.",
       "users": "Beheer je gebruikers."
     },
@@ -176,33 +176,33 @@
         "action_text": "Tekst actieknop",
         "action_url": "Actie URL",
         "content": "Inhoud bericht",
-        "fallbackText": "Fallback link beschrijvingstekst",
-        "fallbackTextDescription": "Voor e-mailclients die actieknoppen niet goed kunnen weergeven, voegen we een terugvallink toe onderaan de e-mail. Gebruik deze optie om de tekst aan te passen die boven deze terugvallink verschijnt, zodat ontvangers begrijpen wat het doel ervan is.",
+        "fallbackText": "Backup link beschrijvingstekst",
+        "fallbackTextDescription": "Voor e-mailclients die actieknoppen niet goed kunnen weergeven, voegen we een backup link toe onderaan de e-mail. Gebruik deze optie om de tekst aan te passen die boven deze backup link verschijnt, zodat ontvangers begrijpen wat het doel ervan is.",
         "header": "Inhoud koptekst",
         "subject": "Onderwerp"
       },
       "success": "Sjablonen succesvol opgeslagen"
     },
     "error": {
-      "pruneExpiredShares": "Mislukt bij het plannen van verlopen overdracht voor verwijdering!",
-      "shareExpired": "Overdracht niet verlopen",
-      "shareExtended": "Niet gelukt om overdracht uit te breiden"
+      "pruneExpiredShares": "Mislukt bij het plannen van verlopen gedeelde bestanden voor verwijdering!",
+      "shareExpired": "Gedeelde bestanden niet verlopen",
+      "shareExtended": "Niet gelukt om gedeelde bestanden te verlengen"
     },
     "help": {
       "auth_provider": {
         "title": "Auth provider informatie"
       },
       "downloadLimit": {
-        "description": "Je kunt de downloadlimiet voor elke overdracht instellen door op het getal aan de rechterkant te klikken en de nieuwe limiet in te voeren. Wis het vakje om de limiet te verwijderen.",
+        "description": "Je kunt de downloadlimiet voor elke gedeeld bestand instellen door op het getal aan de rechterkant te klikken en de nieuwe limiet in te voeren. Wis het vakje om de limiet te verwijderen.",
         "description2": "Wijzigingen worden automatisch opgeslagen wanneer je buiten het vakje klikt.",
-        "title": "Limiethulp downloaden"
+        "title": "Limiet hulp downloaden"
       }
     },
     "invite": {
       "message": "Bericht (optioneel)"
     },
-    "loading": "Overdrachten laden...",
-    "noShares": "Je hebt geen overdrachten. Waarom maak je er geen?",
+    "loading": "Gedeelde bestanden laden...",
+    "noShares": "Je hebt geen gedeelde bestanden. Waarom maak je er geen?",
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
@@ -213,22 +213,22 @@
     "settingsSavedSuccessfully": "Instellingen succesvol opgeslagen",
     "share": {
       "password": "Wachtwoord delen",
-      "password_confirm": "Wachtwoord gedeelde link bevestigen",
-      "password_protect_description": "Maak een wachtwoord aan voor je gedeelde link. Iedereen die dit bestand downloadt, heeft dit wachtwoord nodig om toegang te krijgen. Let op: Na het aanmaken wordt dit wachtwoord versleuteld en kunnen we het niet voor je achterhalen. Zorg ervoor dat je het op een veilige locatie opslaat.",
+      "password_confirm": "Wachtwoord gedeelde bestanden bevestigen",
+      "password_protect_description": "Maak een wachtwoord aan voor je gedeelde bestanden. Iedereen die dit bestand downloadt, heeft dit wachtwoord nodig om toegang te krijgen. Let op: Na het aanmaken wordt dit wachtwoord versleuteld en kunnen we het niet voor je achterhalen. Zorg ervoor dat je het op een veilige locatie opslaat.",
       "remove_password": "Wachtwoord verwijderen"
     },
     "success": {
-      "pruneExpiredShares": "Vervallen overdrachten zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
-      "shareExpired": "Overdracht verlopen",
-      "shareExtended": "Overdracht uitgebreid"
+      "pruneExpiredShares": "Vervallen gedeelde bestanden zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
+      "shareExpired": "Gedeelde bestanden verlopen",
+      "shareExtended": "Gedeelde bestanden uitgebreid"
     },
     "system": {
       "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
-      "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
+      "allow_chunked_uploads_description": "De modus opgedeelde bestands upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Opgedeelde bestanden uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om gedeelde bestanden handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
       "allow_direct_uploads": "Directe uploadmodus toestaan",
       "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
-      "allow_reverse_shares": "Omgekeerde overdrachten toestaan",
-      "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om reverse share verzoeken te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
+      "allow_reverse_shares": "Verzoek delen & uploaden bestanden toestaan",
+      "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om verzoek delen & uploaden bestanden te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
       "application_name": "Naam toepassing",
       "application_name_description": "Pas de weergegeven naam van je applicatie aan die wordt weergegeven in titelbalken, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
       "application_url": "URL toepassing",
@@ -247,25 +247,25 @@
       "callback_url": "Callback URL",
       "callback_url_description": "Gebruik de callback URL in de configuratie van je identity provider.",
       "chunked": "Opgedeeld",
-      "chunked_uploads_disabled_but_default": "U hebt de standaard uploadmodus ingesteld op gebundeld, maar gebundelde uploads zijn uitgeschakeld!",
+      "chunked_uploads_disabled_but_default": "Je hebt de standaard uploadmodus ingesteld op gebundeld, maar gebundelde uploads zijn uitgeschakeld!",
       "clean_files_after": "Bestanden opschonen na",
-      "clean_files_after_description": "Hoe lang nadat een gedeelde link is verlopen worden de bestanden verwijderd uit het systeem.",
+      "clean_files_after_description": "Hoe lang nadat gedeelde bestanden zijn verlopen worden de bestanden verwijderd uit het systeem.",
       "days": "Dagen",
       "default_expiry_time": "Standaard verlooptijd",
       "default_language": "Standaard Taal",
       "default_language_description": "Stel de primaire taal in die standaard wordt gebruikt in de interface van de applicatie voor alle gebruikers. Individuele gebruikers kunnen deze instelling overschrijven met hun persoonlijke voorkeuren.",
       "default_upload_mode": "Standaard uploadmodus",
-      "default_upload_mode_description": "Stel in welke modus standaard moet worden geselecteerd. Gebruikers kunnen dit wijzigen bij het aanmaken van een share als je meer dan één methode hebt ingeschakeld.",
+      "default_upload_mode_description": "Stel in welke modus standaard moet worden geselecteerd. Gebruikers kunnen dit wijzigen bij het aanmaken van een gedeeld bestand als je meer dan één methode hebt ingeschakeld.",
       "delete_auth_provider": "Deze provider verwijderen",
       "direct": "Direct",
-      "direct_uploads_disabled_but_default": "U hebt de standaard uploadmodus ingesteld op direct, maar direct uploaden is uitgeschakeld!",
+      "direct_uploads_disabled_but_default": "Je hebt de standaard uploadmodus ingesteld op direct, maar direct uploaden is uitgeschakeld!",
       "disabled": "Uitgeschakeld",
       "emails": "Meldingen",
-      "enable_share_deleted_emails": "Delen van verwijderde links e-mails inschakelen",
-      "enable_share_deletion_warning_emails": "Waarschuwingse-mails voor het verwijderen van links inschakelen",
+      "enable_share_deleted_emails": "Delen van verwijderde gedeelde bestanden e-mails inschakelen",
+      "enable_share_deletion_warning_emails": "Waarschuwingse-mails voor het verwijderen van gedeelde bestanden inschakelen",
       "enable_share_downloaded_emails": "Gedownloade e-mails delen inschakelen",
-      "enable_share_expired_warning_emails": "Verlopen link e-mails inschakelen",
-      "enable_share_expiry_warning_emails": "Waarschuwingsmails voor bijna aflopende links inschakelen",
+      "enable_share_expired_warning_emails": "Verlopen gedeelde bestanden e-mails inschakelen",
+      "enable_share_expiry_warning_emails": "Waarschuwingsmails voor bijna aflopende gedeelde bestanden inschakelen",
       "enabled": "Ingeschakeld",
       "general": "Algemeen",
       "languages": {
@@ -279,25 +279,25 @@
       "login_message": "Inlogbericht",
       "login_message_description": "Voeg een aangepast bericht of mededeling toe die wordt weergegeven op het inlogscherm. Dit kan worden gebruikt voor welkomstberichten, belangrijke meldingen of tijdelijke mededelingen.",
       "max_expiry_time": "Maximale verlooptijd",
-      "max_expiry_time_description": "Stel het maximum aantal dagen in dat een gebruiker kan selecteren voor het verlopen van gedeelde links bij het aanmaken. Hou dit vak leeg om een onbeperkte verlooptijd in te stellen.",
+      "max_expiry_time_description": "Stel het maximum aantal dagen in dat een gebruiker kan selecteren voor het verlopen van gedeelde bestanden bij het aanmaken. Hou dit vak leeg om een onbeperkte verlooptijd in te stellen.",
       "max_share_size": "Maximale bestandsgrootte",
       "max_share_size_description": "Stel de maximale grootte in van een gedeeld bestand die een gebruiker kan aanmaken. De waarde is in megabytes of gigabytes.",
       "provider_trust_warning": "Waarschuwing: Auth Provider Vertrouwen",
       "provider_trust_warning_description": "Zorg ervoor dat je alleen auth providers configureert en inschakelt die je vertrouwt. Authenticatieproviders hebben verhoogde toegangsrechten tot je applicatie en gebruikersgegevens. Het toevoegen van niet-vertrouwde of gecompromitteerde providers kan leiden tot onbevoegde toegang, gegevenslekken of accountovername.",
-      "reverse_shares": "Omgekeerde Overdracht",
+      "reverse_shares": "Verzoeken delen & uploaden bestanden",
       "select_auth_provider": "Selecteer een auth provider",
       "share_deleted_emails": "\"Deel verwijderde\" e-mails",
-      "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun links permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
+      "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun gedeelde bestanden permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
       "share_deletion_warning_emails": "\"Waarschuwingsmails \"Delen verwijderen",
-      "share_deletion_warning_emails_description": "Laat gebruikers van tevoren weten wanneer hun verlopen links definitief verwijderd moeten worden. Dit geeft hen een laatste kans om belangrijke inhoud te bewaren.",
+      "share_deletion_warning_emails_description": "Laat gebruikers van tevoren weten wanneer hun verlopen gedeelde bestanden definitief verwijderd moeten worden. Dit geeft hen een laatste kans om belangrijke inhoud te bewaren.",
       "share_downloaded_emails": "\"E-mails \"Gedownload delen",
-      "share_downloaded_emails_description": "Stel link-eigenaars op de hoogte wanneer hun gedeelde content voor het eerst wordt gedownload. Dit helpt gebruikers bij te houden wanneer ontvangers toegang krijgen tot hun gedeelde bestanden.",
+      "share_downloaded_emails_description": "Stel gedeelde bestanden eigenaren op de hoogte wanneer hun gedeelde content voor het eerst wordt gedownload. Dit helpt gebruikers bij te houden wanneer ontvangers toegang krijgen tot hun gedeelde bestanden.",
       "share_expired_warning_emails": "\"Waarschuwingsmails \"Delen verlopen",
-      "share_expired_warning_emails_description": "Waarschuw gebruikers wanneer hun links de vervaldatum hebben bereikt en niet langer toegankelijk zijn voor ontvangers. Helpt gebruikers zich bewust te blijven van hun deelstatus.",
-      "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen overdracht",
-      "share_expiry_warning_emails_description": "Stuur proactieve meldingen naar gebruikers wanneer hun links bijna verlopen. Dit geeft hen de mogelijkheid om de toegang te verlengen als dat nodig is.",
+      "share_expired_warning_emails_description": "Waarschuw gebruikers wanneer hun gedeelde bestanden de vervaldatum hebben bereikt en niet langer toegankelijk zijn voor ontvangers. Helpt gebruikers zich bewust te blijven van hun deelstatus.",
+      "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen gedeelde bestanden",
+      "share_expiry_warning_emails_description": "Stuur proactieve meldingen naar gebruikers wanneer hun gedeelde bestanden bijna verlopen. Dit geeft hen de mogelijkheid om de toegang te verlengen als dat nodig is.",
       "shares": "Gedeelde Bestanden",
-      "show_deleted_shares": "Verwijderde overdrachten weergeven",
+      "show_deleted_shares": "Verwijderde gedeelde bestanden weergeven",
       "show_language_selector": "Taalkeuze tonen",
       "show_language_selector_description": "Schakel de zichtbaarheid van het taalkeuzemenu in de rechterbovenhoek van de applicatie in. Als deze optie is ingeschakeld, kunnen gebruikers snel schakelen tussen de beschikbare interfacetalen.",
       "smtp": "SMTP",
@@ -330,10 +330,10 @@
       "linked_accounts": "Gekoppelde accounts",
       "manage": "Beheer",
       "myProfile": "Mijn profiel",
-      "myShares": "Mijn Gedeelde Links",
-      "reverse_invite": "Aanvraag omgekeerd delen aanmaken",
+      "myShares": "Mijn Gedeelde Bestanden",
+      "reverse_invite": "Aanvraag delen & uploaden aanmaken",
       "share": {
-        "password_protect": "Gedeelde link beveiligen met een wachtwoord"
+        "password_protect": "Gedeelde bestanden beveiligen met een wachtwoord"
       },
       "system": "Systeem Instellingen",
       "users": "Gebruikers",
@@ -413,20 +413,20 @@
     "deletes": "Verwijderd",
     "download": {
       "invalid_password": "Wachtwoord delen is ongeldig",
-      "password_required": "Je moet het wachtwoord invoeren om deze share te downloaden.",
+      "password_required": "Je moet het wachtwoord invoeren om deze gedeelde bestanden te downloaden.",
       "password_required_short": "Wachtwoord invoeren"
     },
     "download_limit_reached": "Download limiet bereikt",
-    "download_limit_reached.message": "De share die je probeert te downloaden heeft zijn downloadlimiet bereikt. Vraag de maker van de share om de downloadlimiet te verhogen.",
+    "download_limit_reached.message": "De gedeelde bestanden die je probeert te downloaden heeft zijn downloadlimiet bereikt. Vraag de maker van de gedeelde bestanden om de downloadlimiet te verhogen.",
     "expired": "Link verlopen",
-    "expired.message": "De share die u probeert te downloaden is verlopen. Vraag de maker van de share om een nieuwe share aan te maken.",
+    "expired.message": "Het gedeelde bestand dat je probeert te downloaden is verlopen. Vraag de maker van de link om een nieuwe link aan te maken.",
     "expires": "Verloopt op",
     "expires.in": "Verloopt in {days} {days, plural, one {dag} other {dagen}}, {hours} {hours, plural, one {uur} other {uren}}, {minutes} {minutes, plural, one {minuut} other {minuten}}",
     "files": {
       "count": "{value, plural, one {# bestand} other {# bestanden}}",
       "including": "inclusief:"
     },
-    "not_found": "De overdracht dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
+    "not_found": "Het gedeelde bestand dat je zoekt is niet gevonden. Mogelijk moet je inloggen om het te zien.",
     "passwordNotProtected": "Open",
     "passwordProtected": "Wachtwoord beveiligd"
   },
@@ -440,7 +440,7 @@
       "chunked": "Modus voor gebundeld uploaden",
       "direct": "Directe uploadmodus"
     },
-    "expiry_label": "Overdracht vervalt in {value} {unit} (verandering)",
+    "expiry_label": "Gedeeld bestand vervalt in {value} {unit} (verandering)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "De vervaltijd die je hebt opgegeven overschrijdt de maximumlimiet. We hebben het automatisch aangepast naar de langst toegestane periode.",
     "expiry_unit": {
@@ -449,7 +449,7 @@
       "weeks": "Week(en)",
       "years": "Jaar/jaren"
     },
-    "guest_share_created": "Hartelijk dank! Je bestanden zijn succesvol verzonden. Over enkele ogenblikken wordt u uitgelogd.",
+    "guest_share_created": "Hartelijk dank! Je bestanden zijn succesvol verzonden. Over enkele ogenblikken wordt je uitgelogd.",
     "password_confirmation_required": "Wachtwoordbevestiging vereist",
     "password_mismatch": "Wachtwoorden komen niet overeen",
     "password_required": "Wachtwoord is nodig om delen te beveiligen",
