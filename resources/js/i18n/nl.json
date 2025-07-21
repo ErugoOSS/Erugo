@@ -102,7 +102,7 @@
       "background_slideshow_speed_off": "uitschakelen",
       "delete": "Verwijder",
       "delete_theme": "Thema verwijderen",
-      "delete_theme_description": "Verwijder het geselecteerde thema. Hierdoor wordt het verwijderd uit de lijst met thema's en kunt je het niet langer gebruiken. Het is niet mogelijk om het actieve thema of gebundelde thema's te verwijderen.",
+      "delete_theme_description": "Verwijder het geselecteerde thema. Hierdoor wordt het verwijderd uit de lijst met thema's en kun je het niet langer gebruiken. Het is niet mogelijk om het actieve thema of gebundelde thema's te verwijderen.",
       "download": "Downloaden",
       "download_theme": "Thema downloaden",
       "download_theme_description": "Download het geselecteerde thema als een JSON-bestand. Dit kan worden gebruikt om een nieuw thema te maken of een bestaand thema te wijzigen.",
