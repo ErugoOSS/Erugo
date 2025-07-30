@@ -440,7 +440,7 @@
       "chunked": "Modus voor gebundeld uploaden",
       "direct": "Directe uploadmodus"
     },
-    "expiry_label": "Gedeeld bestand vervalt in {value} {unit} (verandering)",
+    "expiry_label": "Gedeeld bestand vervalt over {value} {unit} (aanpassen)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "De vervaltijd die je hebt opgegeven overschrijdt de maximumlimiet. We hebben het automatisch aangepast naar de langst toegestane periode.",
     "expiry_unit": {
