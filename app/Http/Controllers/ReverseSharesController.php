@@ -63,10 +63,10 @@ class ReverseSharesController extends Controller
                 'password' => Hash::make(Str::random(20)), //set a random password so the user can't login
                 'is_guest' => true
             ]);
-
-            $token = $token = auth()->tokenById($guestUser->id);
-            $encryptedToken = Crypt::encryptString($token);
         }
+
+        $token = $token = auth()->tokenById($guestUser->id);
+        $encryptedToken = Crypt::encryptString($token);
 
         $invite = ReverseShareInvite::create([
             'user_id' => $user->id,
