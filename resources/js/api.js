@@ -1,8 +1,9 @@
-import { getApiUrl } from './utils'
+import { getApiUrl, getTusdUrl } from './utils'
 import { store, uploadController } from './store'
 import { jwtDecode } from 'jwt-decode'
 import { useToast } from 'vue-toastification'
 import debounce from './debounce'
+import * as tus from 'tus-js-client'
 
 const apiUrl = getApiUrl()
 const toast = useToast()
@@ -431,66 +432,6 @@ export const deleteBackgroundImage = async (file) => {
 }
 
 // Share Methods
-export const createShare = async (files, name, description, recipients, uploadId, expiryDate, password, passwordConfirm, onProgress) => {
-  const formData = new FormData()
-  files.forEach((file) => {
-    formData.append('files[]', file)
-    formData.append('file_paths[]', file.fullPath)
-  })
-  formData.append('name', name)
-  formData.append('description', description)
-  formData.append('upload_id', uploadId)
-  formData.append('expiry_date', expiryDate.toISOString())
-  if (password) {
-    formData.append('password', password)
-  }
-  if (passwordConfirm) {
-    formData.append('password_confirm', passwordConfirm)
-  }
-  if (recipients.length > 0) {
-    recipients.forEach((recipient, index) => {
-      formData.append(`recipients[${index}][name]`, recipient.name)
-      formData.append(`recipients[${index}][email]`, recipient.email)
-    })
-  }
-
-  const xhr = new XMLHttpRequest()
-
-  xhr.upload.onprogress = (event) => {
-    if (event.lengthComputable) {
-      const percentageComplete = Math.round((event.loaded * 100) / event.total)
-      onProgress({
-        percentage: percentageComplete,
-        uploadedBytes: event.loaded,
-        totalBytes: event.total
-      })
-    }
-  }
-
-  xhr.open('POST', `${apiUrl}/api/shares`, true)
-  xhr.setRequestHeader('Accept', 'application/json')
-  xhr.setRequestHeader('Authorization', `Bearer ${store.jwt}`)
-
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const response = JSON.parse(xhr.responseText)
-    }
-  }
-
-  xhr.send(formData)
-
-  return new Promise((resolve, reject) => {
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        resolve(JSON.parse(xhr.responseText))
-      } else {
-        reject(new Error(xhr.responseText))
-      }
-    }
-    xhr.onerror = () => reject(new Error('Network Error'))
-  })
-}
-
 export const getMyShares = async (showDeletedShares = false) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares?show_deleted=${showDeletedShares}`, {
     method: 'GET',
@@ -859,174 +800,133 @@ const passwordChangeRequired = () => {
 const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
 
 /**
- * Uploads a file in chunks to the server
+ * Upload a single file using tus protocol
  * @param {File} file - The file to upload
- * @param {string} uploadId - Unique ID for this upload
+ * @param {Function} onProgress - Progress callback function
+ * @param {Function} onComplete - Complete callback function (receives upload URL)
+ * @param {Function} onError - Error callback function
+ * @returns {tus.Upload} - The tus upload instance (can be used for pause/resume/abort)
+ */
+export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
+  const startUpload = (skipResume = false) => {
+    const upload = new tus.Upload(file, {
+      endpoint: getTusdUrl(),
+      retryDelays: [0, 1000, 3000, 5000],
+      chunkSize: 20 * 1024 * 1024, // 20MB chunks
+      metadata: {
+        filename: file.name,
+        filetype: file.type || 'application/octet-stream'
+      },
+      headers: {
+        Authorization: `Bearer ${store.jwt}`
+      },
+      onError: (error) => {
+        console.error('tus upload error:', error)
+        onError(error)
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        const percentage = Math.round((bytesUploaded / bytesTotal) * 100)
+        onProgress({
+          percentage,
+          uploadedBytes: bytesUploaded,
+          totalBytes: bytesTotal
+        })
+      },
+      onSuccess: () => {
+        // Extract upload ID from the URL (last part of the path)
+        const uploadUrl = upload.url
+        const uploadId = uploadUrl.split('/').pop()
+        onComplete({
+          uploadId,
+          uploadUrl,
+          filename: file.name,
+          filesize: file.size,
+          filetype: file.type
+        })
+      }
+    })
+
+    if (skipResume) {
+      // Start fresh without checking for previous uploads
+      upload.start()
+    } else {
+      // Check for previous uploads to resume
+      upload.findPreviousUploads().then(async (previousUploads) => {
+        if (previousUploads.length > 0) {
+          const previousUpload = previousUploads[0]
+          // Extract upload ID from the previous upload URL
+          const previousUploadId = previousUpload.uploadUrl.split('/').pop()
+
+          // Verify with our backend that this upload session still exists
+          // If the file was already used to create a share, the session will be gone
+          try {
+            const response = await fetch(`${apiUrl}/api/uploads/verify/${previousUploadId}`, {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${store.jwt}`
+              }
+            })
+
+            if (response.ok) {
+              // Upload session exists in our backend, safe to resume
+              console.log('Resuming previous upload:', previousUploadId)
+              upload.resumeFromPreviousUpload(previousUpload)
+            } else {
+              // Upload session doesn't exist (file was already shared), start fresh
+              console.log('Previous upload no longer valid, starting fresh')
+              // Clear the stale fingerprint from localStorage
+              clearTusFingerprint(previousUpload.uploadUrl)
+            }
+          } catch (e) {
+            // If verification fails, be safe and start fresh
+            console.warn('Could not verify previous upload, starting fresh:', e)
+            clearTusFingerprint(previousUpload.uploadUrl)
+          }
+        }
+        upload.start()
+      })
+    }
+
+    return upload
+  }
+
+  return startUpload(false)
+}
+
+/**
+ * Clear a stale tus fingerprint from localStorage
+ */
+const clearTusFingerprint = (uploadUrl) => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('tus::')) {
+        const value = localStorage.getItem(key)
+        // The value is a JSON string containing the uploadUrl
+        if (value && value.includes(uploadUrl)) {
+          localStorage.removeItem(key)
+          console.log('Cleared stale tus fingerprint:', key)
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Could not clear stale tus fingerprint:', e)
+  }
+}
+
+/**
+ * Uploads multiple files using tus protocol
+ * @param {Array} files - Array of files to upload
+ * @param {string} uploadId - Unique ID for this upload batch
  * @param {string} shareName - Name of the share
  * @param {string} shareDescription - Description of the share
  * @param {Array} recipients - Recipients for the share
+ * @param {Date} expiryDate - Expiry date for the share
+ * @param {string} password - Optional password for the share
+ * @param {string} passwordConfirm - Password confirmation
  * @param {Function} onProgress - Progress callback function
  * @param {Function} onComplete - Complete callback function
  * @param {Function} onError - Error callback function
- */
-export const uploadFileInChunks = async (
-  file,
-  uploadId,
-  shareName,
-  shareDescription,
-  recipients,
-  onProgress,
-  onComplete,
-  onError
-) => {
-  // Configuration
-  const chunkSize = 1024 * 1024 * 20 // 20MB chunks
-  const totalChunks = Math.ceil(file.size / chunkSize)
-  let currentChunk = 0
-  let totalUploaded = 0
-
-  // Create upload session first
-  try {
-    await createUploadSession(file, uploadId, totalChunks)
-  } catch (error) {
-    onError(error)
-    return
-  }
-
-  // Process chunks
-  const processChunk = async () => {
-    if (currentChunk >= totalChunks) {
-      // All chunks uploaded, finalize the upload
-      try {
-        const result = await finalizeUpload(uploadId, file.name, shareName, shareDescription, recipients)
-        onComplete(result)
-      } catch (error) {
-        onError(error)
-      }
-      return
-    }
-
-    if (uploadController.pause) {
-      //we're paused so hold fire for 1 second and try again
-      setTimeout(processChunk, 1000)
-      return
-    }
-
-    const start = currentChunk * chunkSize
-    const end = Math.min(file.size, start + chunkSize)
-    const chunk = file.slice(start, end)
-
-    try {
-      await uploadChunk(chunk, uploadId, currentChunk, totalChunks, file.name)
-
-      // Update progress
-      totalUploaded += chunk.size
-      onProgress({
-        percentage: Math.round((totalUploaded / file.size) * 100),
-        uploadedBytes: totalUploaded,
-        totalBytes: file.size,
-        currentChunk,
-        totalChunks
-      })
-
-      // Process next chunk
-      currentChunk++
-      processChunk()
-    } catch (error) {
-      // Retry logic could be implemented here
-      onError(error)
-    }
-  }
-
-  // Start processing chunks
-  processChunk()
-}
-
-/**
- * Creates an upload session on the server
- */
-const createUploadSession = async (file, uploadId, totalChunks) => {
-  const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-session`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${store.jwt}`
-    },
-    body: JSON.stringify({
-      upload_id: uploadId,
-      filename: file.name,
-      filesize: file.size,
-      filetype: file.type,
-      total_chunks: totalChunks
-    })
-  })
-
-  if (!response.ok) {
-    const data = await response.json()
-    throw new Error(data.message || 'Failed to create upload session')
-  }
-
-  return await response.json()
-}
-
-/**
- * Uploads a single chunk to the server
- */
-const uploadChunk = async (chunk, uploadId, chunkIndex, totalChunks, filename) => {
-  const formData = new FormData()
-  formData.append('chunk', chunk, filename)
-  formData.append('upload_id', uploadId)
-  formData.append('chunk_index', chunkIndex)
-  formData.append('total_chunks', totalChunks)
-
-  const response = await fetchWithAuth(`${apiUrl}/api/uploads/chunk`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${store.jwt}`
-    },
-    body: formData
-  })
-
-  if (!response.ok) {
-    const data = await response.json()
-    throw new Error(data.message || 'Failed to upload chunk')
-  }
-
-  return await response.json()
-}
-
-/**
- * Finalizes a chunked upload on the server
- */
-const finalizeUpload = async (uploadId, filename, shareName, shareDescription, recipients) => {
-  const response = await fetchWithAuth(`${apiUrl}/api/uploads/finalize`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${store.jwt}`
-    },
-    body: JSON.stringify({
-      upload_id: uploadId,
-      filename: filename,
-      name: shareName,
-      description: shareDescription,
-      recipients: recipients
-    })
-  })
-
-  if (!response.ok) {
-    const data = await response.json()
-    throw new Error(data.message || 'Failed to finalize upload')
-  }
-
-  return await response.json()
-}
-
-/**
- * Uploads multiple files in chunks
- * This is a wrapper for uploadFileInChunks that handles multiple files
  */
 export const uploadFilesInChunks = async (
   files,
@@ -1043,61 +943,83 @@ export const uploadFilesInChunks = async (
 ) => {
   const totalSize = files.reduce((total, file) => total + file.size, 0)
   let uploadedSize = 0
-
   const results = []
+  const uploads = [] // Store upload instances for pause/resume
 
   // Process each file sequentially
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
-    const fileUploadId = `${uploadId}_file${i}`
 
-    await new Promise((resolve) => {
-      uploadFileInChunks(
-        file,
-        fileUploadId,
-        shareName,
-        shareDescription,
-        recipients,
-        (progress) => {
-          // Calculate overall progress
-          const fileTotalUploaded = (progress.percentage / 100) * file.size
-          const overallPercentage = Math.round(((uploadedSize + fileTotalUploaded) / totalSize) * 100)
-
-          onProgress({
-            percentage: overallPercentage,
-            uploadedBytes: uploadedSize + progress.uploadedBytes,
-            totalBytes: totalSize,
-            currentFile: i + 1,
-            totalFiles: files.length,
-            currentFileName: file.name
-          })
-        },
-        (result) => {
-          result.fullPath = file.fullPath
-          results.push(result)
-          console.log('result', results)
-          uploadedSize += file.size
-          resolve()
-        },
-        (error) => {
-          onError(error)
-          resolve() // Continue with next file even if this one fails
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const checkPause = () => {
+          if (uploadController.pause) {
+            // Pause all active uploads
+            uploads.forEach((u) => u.abort())
+            setTimeout(checkPause, 1000)
+            return true
+          }
+          return false
         }
-      )
-    })
+
+        if (checkPause()) {
+          // Wait for unpause before starting
+          const waitForUnpause = setInterval(() => {
+            if (!uploadController.pause) {
+              clearInterval(waitForUnpause)
+              startUpload()
+            }
+          }, 1000)
+          return
+        }
+
+        const startUpload = () => {
+          const upload = uploadFileWithTus(
+            file,
+            (progress) => {
+              // Calculate overall progress
+              const fileTotalUploaded = (progress.percentage / 100) * file.size
+              const overallPercentage = Math.round(((uploadedSize + fileTotalUploaded) / totalSize) * 100)
+
+              onProgress({
+                percentage: overallPercentage,
+                uploadedBytes: uploadedSize + progress.uploadedBytes,
+                totalBytes: totalSize,
+                currentFile: i + 1,
+                totalFiles: files.length,
+                currentFileName: file.name
+              })
+            },
+            (uploadResult) => {
+              uploadResult.fullPath = file.fullPath
+              resolve(uploadResult)
+            },
+            (error) => {
+              reject(error)
+            }
+          )
+          uploads.push(upload)
+        }
+
+        startUpload()
+      })
+
+      results.push(result)
+      uploadedSize += file.size
+    } catch (error) {
+      onError(error)
+      return // Stop on first error
+    }
   }
 
   // All files have been uploaded, now create the share
   try {
-
     const filePaths = {}
     results.forEach((r) => {
-      console.log('r', r)
-      filePaths[r.data.file.id] = r.fullPath
+      filePaths[r.uploadId] = r.fullPath
     })
-    console.log('filePaths', filePaths)
 
-    const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-chunks`, {
+    const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1109,7 +1031,7 @@ export const uploadFilesInChunks = async (
         name: shareName,
         description: shareDescription,
         recipients: recipients,
-        fileInfo: results.map((r) => r.data.file.id),
+        uploadIds: results.map((r) => r.uploadId),
         filePaths: filePaths,
         expiry_date: expiryDate,
         password: password,
@@ -1119,7 +1041,7 @@ export const uploadFilesInChunks = async (
 
     if (!response.ok) {
       const data = await response.json()
-      throw new Error(data.message || 'Failed to create share from chunks')
+      throw new Error(data.message || 'Failed to create share from uploads')
     }
 
     const data = await response.json()

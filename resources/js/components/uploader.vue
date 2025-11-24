@@ -13,14 +13,12 @@ import {
   Plus,
   Pause,
   Play,
-  Boxes,
-  Box,
   Clock9,
   Lock,
   LockOpen
 } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, simpleUUID } from '../utils'
-import { createShare, getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
+import { getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
 import Recipient from './recipient.vue'
 import { uploadController } from '../store'
 import { domData } from '../domData'
@@ -47,11 +45,6 @@ const currentFileIndex = ref(0)
 const totalFiles = ref(0)
 const currentChunk = ref(0)
 const totalChunks = ref(0)
-const uploadSettings = ref({
-  uploadMode: domData().default_upload_mode,
-  allowDirectUploads: domData().allow_direct_uploads,
-  allowChunkedUploads: domData().allow_chunked_uploads
-})
 const expiryValue = ref(domData().default_expiry_time)
 const expiryUnit = ref('days')
 const maxExpiryTime = ref(domData().max_expiry_time)
@@ -76,26 +69,6 @@ onMounted(async () => {
   //grab the max share size from the health check
   const health = await getHealth()
   maxShareSize.value = health.max_share_size
-
-  //grab the upload mode from local storage
-  const savedUploadMode = localStorage.getItem('uploadMode')
-  if (savedUploadMode) {
-    if (savedUploadMode === 'chunked') {
-      if (uploadSettings.value.allowChunkedUploads) {
-        uploadSettings.value.uploadMode = 'chunked'
-      } else {
-        uploadSettings.value.uploadMode = 'direct'
-      }
-    }
-
-    if (savedUploadMode === 'direct') {
-      if (uploadSettings.value.allowDirectUploads) {
-        uploadSettings.value.uploadMode = 'direct'
-      } else {
-        uploadSettings.value.uploadMode = 'chunked'
-      }
-    }
-  }
 })
 
 const showFilePicker = () => {
@@ -274,15 +247,7 @@ const uploadFiles = async () => {
   //before we try uploading lets just check we're logged in still
   await getMyProfile()
 
-  if (uploadSettings.value.uploadMode === 'chunked') {
-    await doChunkedUpload(uploadId)
-    return
-  } else if (uploadSettings.value.uploadMode === 'direct') {
-    await doDirectUpload(uploadId)
-    return
-  }
-
-  alert(t.value('upload.upload_mode_not_supported'))
+  await doTusUpload(uploadId)
 }
 
 const calculateExpiryDate = () => {
@@ -311,7 +276,7 @@ const multiplierFromUnit = (unit) => {
   }
 }
 
-const doChunkedUpload = async (uploadId) => {
+const doTusUpload = async (uploadId) => {
   let pageTitleAtStart = document.title
 
   try {
@@ -371,47 +336,6 @@ const doChunkedUpload = async (uploadId) => {
     alert(`Upload failed: ${error.message}`)
     currentlyUploading.value = false
     resetUploadState()
-  }
-}
-
-const doDirectUpload = async (uploadId) => {
-  let pageTitleAtStart = document.title
-  try {
-    const share = await createShare(
-      uploadBasket.value,
-      shareName.value,
-      shareDescription.value,
-      recipients.value,
-      uploadId,
-      calculateExpiryDate(),
-      sharePassword.value,
-      sharePasswordConfirm.value,
-      (progress) => {
-        uploadProgress.value = progress.percentage
-        uploadedBytes.value = progress.uploadedBytes
-        totalBytes.value = progress.totalBytes
-        document.title = `${Math.round(progress.percentage)}%`
-      }
-    )
-    document.title = pageTitleAtStart
-    if (store.isGuest()) {
-      thankGuestForUpload()
-    } else {
-      showSharePanel(createShareURL(share.data.share.long_id))
-    }
-    uploadBasket.value = []
-    shareName.value = ''
-    shareDescription.value = ''
-  } catch (error) {
-    console.error('Upload error:', error)
-    alert(`Upload failed: ${error.message}`)
-  } finally {
-    currentlyUploading.value = false
-    setTimeout(() => {
-      uploadProgress.value = 0
-      uploadedBytes.value = 0
-      totalBytes.value = 0
-    }, 1000)
   }
 }
 
@@ -476,12 +400,6 @@ const togglePause = () => {
   } else {
     uploadController.resumeUpload()
   }
-}
-
-const swapUploadMode = () => {
-  uploadSettings.value.uploadMode = uploadSettings.value.uploadMode === 'chunked' ? 'direct' : 'chunked'
-  localStorage.setItem('uploadMode', uploadSettings.value.uploadMode)
-  toast.success(t.value('uploader.upload_mode_swapped', { value: uploadSettings.value.uploadMode }))
 }
 
 const showExpirySettings = ref(false)
@@ -732,7 +650,7 @@ const filesByDirectory = computed(() => {
         <div class="progress-bar">
           <div class="progress-bar-fill" :style="{ width: `${uploadProgress}%` }"></div>
         </div>
-        <div class="pause-button" @click="togglePause" v-if="uploadSettings.uploadMode === 'chunked'">
+        <div class="pause-button" @click="togglePause">
           <Pause v-if="!isPaused" />
           <Play v-else />
         </div>
@@ -745,9 +663,6 @@ const filesByDirectory = computed(() => {
             </div>
             <div v-if="currentFileName" class="progress-bar-text-sub">
               {{ $t('File') }}: {{ currentFileIndex }} / {{ totalFiles }} - {{ currentFileName }}
-            </div>
-            <div v-if="totalChunks > 0" class="progress-bar-text-sub">
-              {{ $t('Chunk') }}: {{ currentChunk }} / {{ totalChunks }}
             </div>
           </template>
           <template v-else>
@@ -885,35 +800,6 @@ const filesByDirectory = computed(() => {
             </template>
             <template v-if="uploadBasket.length === 0">{{ $t('No files added yet') }}</template>
           </button>
-        </div>
-
-        <div class="col-auto" v-if="uploadSettings.allowChunkedUploads && uploadSettings.allowDirectUploads">
-          <div class="upload-modes">
-            <div class="upload-mode" v-if="uploadSettings.uploadMode === 'chunked'">
-              <button class="icon-only secondary" :title="$t('uploader.current_mode.chunked')" @click="swapUploadMode">
-                <Boxes />
-              </button>
-            </div>
-            <div class="upload-mode" v-if="uploadSettings.uploadMode === 'direct'">
-              <button class="icon-only secondary" :title="$t('uploader.current_mode.direct')" @click="swapUploadMode">
-                <Box />
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="col-auto" v-else>
-          <div class="upload-mode">
-            <div
-              class="svg-container"
-              :title="$t('uploader.current_mode.chunked')"
-              v-if="uploadSettings.uploadMode === 'chunked'"
-            >
-              <Boxes />
-            </div>
-            <div class="svg-container" :title="$t('uploader.current_mode.direct')" v-else>
-              <Box />
-            </div>
-          </div>
         </div>
 
         <div class="ps-0 col-auto">

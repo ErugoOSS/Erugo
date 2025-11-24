@@ -24,6 +24,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-vue-next": "^0.474.0",
     "mitt": "^3.0.1",
+    "tus-js-client": "^4.3.1",
     "vue": "^3.5.13",
     "vue-codemirror": "^6.1.1",
     "vue-color-kit": "^1.0.6",

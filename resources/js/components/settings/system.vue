@@ -146,22 +146,6 @@ const saveSettings = async () => {
 }
 
 const shareSettingsLookOk = () => {
-  if (settings.value.allow_chunked_uploads == false && settings.allow_direct_uploads == false) {
-    toast.error(t.value('settings.system.atLeastOneUploadMode'))
-    return false
-  }
-
-  //check that the selected upload mode is enabled
-  if (settings.value.default_upload_mode == 'direct' && settings.value.allow_direct_uploads == false) {
-    toast.error(t.value('settings.system.direct_uploads_disabled_but_default'))
-    return false
-  }
-
-  if (settings.value.default_upload_mode == 'chunked' && settings.value.allow_chunked_uploads == false) {
-    toast.error(t.value('settings.system.chunked_uploads_disabled_but_default'))
-    return false
-  }
-
   return true
 }
 
@@ -425,29 +409,6 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
-                <h6 class="mt-3 mb-3">{{ $t('settings.system.upload_modes') }}</h6>
-                <div class="setting-group-body-item">
-                  <div class="checkbox-container">
-                    <input type="checkbox" id="allow_direct_uploads" v-model="settings.allow_direct_uploads" />
-                    <label for="allow_direct_uploads">{{ $t('settings.system.allow_direct_uploads') }}</label>
-                  </div>
-                </div>
-
-                <div class="setting-group-body-item">
-                  <div class="checkbox-container">
-                    <input type="checkbox" id="allow_chunked_uploads" v-model="settings.allow_chunked_uploads" />
-                    <label for="allow_chunked_uploads">{{ $t('settings.system.allow_chunked_uploads') }}</label>
-                  </div>
-                </div>
-
-                <div class="setting-group-body-item">
-                  <label for="default_upload_mode">{{ $t('settings.system.default_upload_mode') }}</label>
-                  <select id="default_upload_mode" v-model="settings.default_upload_mode">
-                    <option value="direct">{{ $t('settings.system.direct') }}</option>
-                    <option value="chunked">{{ $t('settings.system.chunked') }}</option>
-                  </select>
-                </div>
-
                 <h6 class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
@@ -467,12 +428,6 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.max_share_size_description') }}</p>
               <h6>{{ $t('settings.system.clean_files_after') }}</h6>
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
-              <h6>{{ $t('settings.system.allow_direct_uploads') }}</h6>
-              <p>{{ $t('settings.system.allow_direct_uploads_description') }}</p>
-              <h6>{{ $t('settings.system.allow_chunked_uploads') }}</h6>
-              <p>{{ $t('settings.system.allow_chunked_uploads_description') }}</p>
-              <h6>{{ $t('settings.system.default_upload_mode') }}</h6>
-              <p>{{ $t('settings.system.default_upload_mode_description') }}</p>
               <h6>{{ $t('settings.system.allow_reverse_shares') }}</h6>
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
             </div>

@@ -21,6 +21,17 @@ services:
             - '.:/var/www/html'
         networks:
             - sail
+    tusd:
+        image: tusproject/tusd:latest
+        command: -hooks-http http://laravel.test/api/tusd-hooks -upload-dir /data -base-path /files/
+        volumes:
+            - './storage/app/uploads:/data'
+        ports:
+            - '${TUSD_PORT:-1080}:8080'
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
 networks:
     sail:
         driver: bridge

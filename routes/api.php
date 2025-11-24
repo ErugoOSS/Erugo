@@ -9,13 +9,13 @@ use App\Http\Middleware\NoUsersMiddleware as NoUsers;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharesController;
 use App\Http\Controllers\BackgroundsController;
-use App\Http\Middleware\maxRequestSize;
 use App\Services\SettingsService;
 use App\Http\Controllers\ThemesController;
 use App\Http\Controllers\AuthProvidersController;
 use App\Http\Controllers\UploadsController;
 use App\Http\Controllers\ReverseSharesController;
 use App\Http\Controllers\EmailTemplatesController;
+use App\Http\Controllers\TusdHooksController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -95,10 +95,6 @@ Route::group([], function ($router) {
 
     //manage shares [auth]
     Route::group(['prefix' => 'shares', 'middleware' => ['auth']], function ($router) {
-
-        //create a new share
-        Route::post('/', [SharesController::class, 'create'])->name('shares.create')
-            ->middleware(maxRequestSize::class);
         //get my shares
         Route::get('/', [SharesController::class, 'myShares'])->name('shares.myShares');
 
@@ -170,19 +166,13 @@ Route::group([], function ($router) {
 });
 
 
-// Chunked upload routes
+// tusd webhook handler (called by tusd server, not authenticated via middleware)
+Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');
+
+// Upload routes (now using tusd for actual uploads)
 Route::group(['prefix' => 'uploads', 'middleware' => ['auth']], function ($router) {
-    // Create an upload session
-    Route::post('/create-session', [UploadsController::class, 'createSession'])->name('uploads.createSession');
-
-    // Upload a chunk
-    Route::post('/chunk', [UploadsController::class, 'uploadChunk'])
-        ->name('uploads.chunk')
-        ->middleware(maxRequestSize::class);
-
-    // Finalize an upload
-    Route::post('/finalize', [UploadsController::class, 'finalizeUpload'])->name('uploads.finalize');
-
-    // Create a share from chunks
-    Route::post('/create-share-from-chunks', [UploadsController::class, 'createShareFromChunks'])->name('uploads.createShareFromChunks');
+    // Verify if an upload session is still valid (for tus resume functionality)
+    Route::get('/verify/{uploadId}', [UploadsController::class, 'verifyUpload'])->name('uploads.verify');
+    // Create a share from uploaded files (after tusd uploads complete)
+    Route::post('/create-share-from-uploads', [UploadsController::class, 'createShareFromUploads'])->name('uploads.createShareFromUploads');
 });

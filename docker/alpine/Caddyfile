@@ -2,7 +2,12 @@
 :80 {
     root * /var/www/html/public
 
-		# Handle static files first
+    # Proxy tusd uploads
+    handle /files/* {
+        reverse_proxy tusd:1080
+    }
+
+    # Handle static files first
     file_server {
         index index.php
     }

@@ -54,6 +54,17 @@ const getApiUrl = () => {
   return window.location.origin 
 }
 
+const getTusdUrl = () => {
+  // In development, tusd runs on port 1080 directly
+  // In production, tusd is proxied through Caddy at /files/
+  if (import.meta.env.DEV) {
+    // Development: use tusd directly on port 1080
+    return `${window.location.protocol}//${window.location.hostname}:1080/files/`
+  }
+  // Production: use the /files/ path which is proxied to tusd
+  return `${window.location.origin}/files/`
+}
+
 const niceFileName = name => {
   const nameWithoutExt = name.split('.').slice(0, -1).join('.')
   const ext = name.split('.').pop()
@@ -104,4 +115,4 @@ const convertToRealType = value => {
   return value
 }
 
-export { niceFileSize, niceFileType, niceExpirationDate, timeUntilExpiration, getApiUrl, simpleUUID, niceFileName, niceDate, niceString, niceNumber, mapSettings }
+export { niceFileSize, niceFileType, niceExpirationDate, timeUntilExpiration, getApiUrl, getTusdUrl, simpleUUID, niceFileName, niceDate, niceString, niceNumber, mapSettings }
