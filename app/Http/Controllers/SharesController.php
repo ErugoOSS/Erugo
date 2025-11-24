@@ -20,6 +20,7 @@ use App\Jobs\sendEmail;
 use App\Services\SettingsService;
 use App\Jobs\cleanSpecificShares;
 use Illuminate\Support\Facades\Hash;
+use App\Utils\FileHelper;
 
 class SharesController extends Controller
 {
@@ -116,10 +117,13 @@ class SharesController extends Controller
     ];
     $share = Share::create($shareData);
     foreach ($files as $file) {
+      $originalFilename = $file->getClientOriginalName();
+      $sanitizedFilename = FileHelper::sanitizeFilename($originalFilename);
 
       $fileData = [
         'share_id' => $share->id,
-        'name' => $file->getClientOriginalName(),
+        'name' => $sanitizedFilename,
+        'original_name' => $originalFilename,
         'type' => $file->getMimeType(),
         'size' => $file->getSize()
       ];
@@ -133,7 +137,10 @@ class SharesController extends Controller
       $originalPath = $request->file_paths[$index];
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
-      $file->move($completePath . '/' . $originalPath, $file->getClientOriginalName());
+      
+      // Use the sanitized filename from the database for file operations
+      $sanitizedFilename = $file->dbFile->name;
+      $file->move($completePath . '/' . $originalPath, $sanitizedFilename);
       $file->dbFile->full_path = $originalPath;
       $file->dbFile->save();
     }
@@ -273,7 +280,7 @@ class SharesController extends Controller
       'files' => $share->files->map(function ($file) {
         return [
           'id' => $file->id,
-          'name' => $file->name,
+          'name' => $file->display_name, // Show original filename to users
           'size' => $file->size,
           'type' => $file->type,
           'full_path' => $file->full_path,

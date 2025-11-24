@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+
 use App\Models\Share;
 use App\Models\File;
 use App\Models\UploadSession;
@@ -16,7 +16,9 @@ use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Utils\FileHelper;
 
 class UploadsController extends Controller
 {
@@ -122,6 +124,7 @@ class UploadsController extends Controller
     // Get the chunk file
     $chunk = $request->file('chunk');
     $chunkIndex = $request->chunk_index;
+    $chunkSize = $chunk->getSize(); // Get size before moving
 
     // Store the chunk file
     $chunkPath = 'chunks/' . $user->id . '/' . $request->upload_id . '/' . $chunkIndex;
@@ -131,7 +134,7 @@ class UploadsController extends Controller
     ChunkUpload::create([
       'upload_session_id' => $session->id,
       'chunk_index' => $chunkIndex,
-      'chunk_size' => $chunk->getSize(),
+      'chunk_size' => $chunkSize,
       'chunk_path' => $chunkPath,
     ]);
 
@@ -236,9 +239,14 @@ class UploadsController extends Controller
 
     fclose($finalFileHandle);
 
+    // Sanitize the filename for secure storage while preserving original for display
+    $originalFilename = $request->filename;
+    $sanitizedFilename = FileHelper::sanitizeFilename($originalFilename);
+
     // Create a file record in the database
     $file = File::create([
-      'name' => $request->filename,
+      'name' => $sanitizedFilename,
+      'original_name' => $originalFilename,
       'type' => $session->filetype ?? 'unknown',
       'size' => $session->filesize,
       'temp_path' => 'temp/' . $user->id . '/' . $uuid . '.' . $extension
@@ -386,7 +394,10 @@ class UploadsController extends Controller
         mkdir($destPath, 0777, true);
       }
       
-      rename($sourcePath, $destPath . '/' . $file->name);
+      // Use sanitized filename from database for file operations (security requirement 2.2, 2.4)
+      // The file->name field already contains the sanitized filename from the finalizeUpload method
+      $sanitizedFilename = $file->name;
+      rename($sourcePath, $destPath . '/' . $sanitizedFilename);
 
       // Update file record
       $file->share_id = $share->id;

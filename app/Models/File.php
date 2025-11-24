@@ -8,6 +8,7 @@ class File extends Model
 {
     protected $fillable = [
         'name',
+        'original_name',
         'size',
         'type',
         'share_id',
@@ -22,6 +23,14 @@ class File extends Model
     public function user()
     {
         return $this->share->user();
+    }
+
+    /**
+     * Get the display name for the file (original name if available, otherwise sanitized name)
+     */
+    public function getDisplayNameAttribute()
+    {
+        return $this->original_name ?? $this->name;
     }
 
 }

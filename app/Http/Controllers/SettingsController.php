@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Utils\FileHelper;
 class SettingsController extends Controller
 {
     public function write(Request $request)
@@ -110,14 +111,20 @@ class SettingsController extends Controller
         ]);
 
         $logo = $request->file('logo');
-        $filename = $logo->getClientOriginalName();
-        Storage::disk('public')->put($filename, file_get_contents($logo));
+        $originalFilename = $logo->getClientOriginalName();
+        
+        // Sanitize the filename to prevent path traversal attacks
+        $sanitizedFilename = FileHelper::sanitizeFilename($originalFilename);
+        
+        // Store the logo using the sanitized filename
+        Storage::disk('public')->put($sanitizedFilename, file_get_contents($logo));
 
         return response()->json([
             'status' => 'success',
             'message' => 'Logo updated successfully',
             'data' => [
-                'logo' => $setting,
+                'filename' => $sanitizedFilename,
+                'original_filename' => $originalFilename,
             ]
         ]);
     }

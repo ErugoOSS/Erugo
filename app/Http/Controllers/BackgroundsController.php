@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Validator;
+use App\Utils\FileHelper;
 
 class BackgroundsController extends Controller
 {
@@ -79,8 +80,19 @@ class BackgroundsController extends Controller
 
     public function delete($file)
     {
+        // Validate path parameter to prevent path traversal attacks
+        if (!FileHelper::validatePathParameter($file)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid filename',
+            ], 400);
+        }
+        
+        // Use basename as additional protection
+        $safeFile = basename($file);
+        
         //check if the file exists
-        if (!Storage::disk('public')->exists('backgrounds/' . $file)) {
+        if (!Storage::disk('public')->exists('backgrounds/' . $safeFile)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Background image not found',
@@ -89,11 +101,11 @@ class BackgroundsController extends Controller
         //delete the file
         try {
             //delete the image itsself
-            Storage::disk('public')->delete('backgrounds/' . $file);
+            Storage::disk('public')->delete('backgrounds/' . $safeFile);
             //delete the cached image
-            Storage::disk('public')->delete('backgrounds/cache/' . $file);
+            Storage::disk('public')->delete('backgrounds/cache/' . $safeFile);
             //delete the cached thumbs
-            Storage::disk('public')->delete('backgrounds/cache/thumbs/' . $file);
+            Storage::disk('public')->delete('backgrounds/cache/thumbs/' . $safeFile);
 
             return response()->json([
                 'status' => 'success',
@@ -109,14 +121,21 @@ class BackgroundsController extends Controller
 
     public function use($file)
     {
+        // Validate path parameter to prevent path traversal attacks
+        if (!FileHelper::validatePathParameter($file)) {
+            abort(400, 'Invalid filename');
+        }
+        
+        // Use basename as additional protection
+        $safeFile = basename($file);
 
         //do we have a cached version of the image?
-        $cachedPath = Storage::disk('public')->path('backgrounds/cache/' . $file);
+        $cachedPath = Storage::disk('public')->path('backgrounds/cache/' . $safeFile);
         if (file_exists($cachedPath)) {
             return response()->file($cachedPath);
         }
 
-        $fullPath = Storage::disk('public')->path('backgrounds/' . $file);
+        $fullPath = Storage::disk('public')->path('backgrounds/' . $safeFile);
         //check the file exists
         if (!file_exists($fullPath)) {
             abort(404);
@@ -128,21 +147,28 @@ class BackgroundsController extends Controller
         $encoded = $image->toJpeg(95);
 
         //save the encoded image to the public/backgrounds/cache folder
-        Storage::disk('public')->put('backgrounds/cache/' . $file, $encoded);
+        Storage::disk('public')->put('backgrounds/cache/' . $safeFile, $encoded);
 
         return response($encoded)->header('Content-Type', 'image/webp');
     }
 
     public function useThumb($file)
     {
+        // Validate path parameter to prevent path traversal attacks
+        if (!FileHelper::validatePathParameter($file)) {
+            abort(400, 'Invalid filename');
+        }
+        
+        // Use basename as additional protection
+        $safeFile = basename($file);
 
         //do we have a cached version of the image?
-        $cachedPath = Storage::disk('public')->path('backgrounds/cache/thumbs/' . $file);
+        $cachedPath = Storage::disk('public')->path('backgrounds/cache/thumbs/' . $safeFile);
         if (file_exists($cachedPath)) {
             return response()->file($cachedPath);
         }
 
-        $fullPath = Storage::disk('public')->path('backgrounds/' . $file);
+        $fullPath = Storage::disk('public')->path('backgrounds/' . $safeFile);
         if (!file_exists($fullPath)) {
             abort(404);
         }
@@ -152,7 +178,7 @@ class BackgroundsController extends Controller
         $encoded = $image->toWebp(80);
 
         //save the encoded image to the public/backgrounds/cache folder
-        Storage::disk('public')->put('backgrounds/cache/thumbs/' . $file, $encoded);
+        Storage::disk('public')->put('backgrounds/cache/thumbs/' . $safeFile, $encoded);
 
         return response($encoded)->header('Content-Type', 'image/webp');
     }
