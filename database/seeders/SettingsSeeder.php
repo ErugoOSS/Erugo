@@ -312,6 +312,72 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
 
+            // share URL generation settings
+            [
+                'key' => 'share_url_mode',
+                'value' => 'haiku',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_random_length',
+                'value' => '16',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_random_lowercase',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_random_uppercase',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_random_numbers',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_random_special',
+                'value' => 'false',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_prefix',
+                'value' => '',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_shortcode_length',
+                'value' => '6',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+
             //email subjects
             [
                 'key' => 'email_subject_accountCreatedMail.twig',

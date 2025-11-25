@@ -364,17 +364,103 @@ class SharesController extends Controller
 
   public function generateLongId()
   {
+    $settingsService = new SettingsService();
+    $mode = $settingsService->get('share_url_mode') ?? 'haiku';
+
     $maxAttempts = 10;
     $attempts = 0;
-    $id = Haikunator::haikunate() . '-' . Haikunator::haikunate();
+
+    $id = $this->generateIdByMode($mode, $settingsService);
     while (Share::where('long_id', $id)->exists() && $attempts < $maxAttempts) {
-      $id = Haikunator::haikunate() . '-' . Haikunator::haikunate();
+      $id = $this->generateIdByMode($mode, $settingsService);
       $attempts++;
     }
+
     if ($attempts >= $maxAttempts) {
       throw new \Exception('Unable to generate unique long_id after ' . $maxAttempts . ' attempts');
     }
+
     return $id;
+  }
+
+  private function generateIdByMode(string $mode, SettingsService $settingsService): string
+  {
+    $prefix = $settingsService->get('share_url_prefix') ?? '';
+    $prefix = trim($prefix);
+    
+    $baseId = match ($mode) {
+      'random' => $this->generateRandomId($settingsService),
+      'uuid' => $this->generateUuidId(),
+      'shortcode' => $this->generateShortcodeId($settingsService),
+      default => $this->generateHaikuId(),
+    };
+
+    if (!empty($prefix)) {
+      return $prefix . '-' . $baseId;
+    }
+
+    return $baseId;
+  }
+
+  private function generateHaikuId(): string
+  {
+    return Haikunator::haikunate() . '-' . Haikunator::haikunate();
+  }
+
+  private function generateRandomId(SettingsService $settingsService): string
+  {
+    $length = (int) ($settingsService->get('share_url_random_length') ?? 16);
+    $useLowercase = $settingsService->get('share_url_random_lowercase') === 'true';
+    $useUppercase = $settingsService->get('share_url_random_uppercase') === 'true';
+    $useNumbers = $settingsService->get('share_url_random_numbers') === 'true';
+    $useSpecial = $settingsService->get('share_url_random_special') === 'true';
+
+    $characters = '';
+    if ($useLowercase) {
+      $characters .= 'abcdefghijklmnopqrstuvwxyz';
+    }
+    if ($useUppercase) {
+      $characters .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    }
+    if ($useNumbers) {
+      $characters .= '0123456789';
+    }
+    if ($useSpecial) {
+      $characters .= '-_';
+    }
+
+    // Fallback to lowercase if no character sets selected
+    if (empty($characters)) {
+      $characters = 'abcdefghijklmnopqrstuvwxyz';
+    }
+
+    $result = '';
+    $charactersLength = strlen($characters);
+    for ($i = 0; $i < $length; $i++) {
+      $result .= $characters[random_int(0, $charactersLength - 1)];
+    }
+
+    return $result;
+  }
+
+  private function generateShortcodeId(SettingsService $settingsService): string
+  {
+    $length = (int) ($settingsService->get('share_url_shortcode_length') ?? 6);
+    // Use URL-safe characters, excluding ambiguous ones (0, O, l, 1, I)
+    $characters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    
+    $result = '';
+    $charactersLength = strlen($characters);
+    for ($i = 0; $i < $length; $i++) {
+      $result .= $characters[random_int(0, $charactersLength - 1)];
+    }
+
+    return $result;
+  }
+
+  private function generateUuidId(): string
+  {
+    return (string) \Illuminate\Support\Str::uuid();
   }
 
   private function getSettings()

@@ -50,6 +50,14 @@ const settings = ref({
   max_share_size: '',
   max_share_size_unit: '',
   clean_files_after_days: '',
+  share_url_mode: 'haiku',
+  share_url_random_length: '16',
+  share_url_random_lowercase: 'true',
+  share_url_random_uppercase: 'true',
+  share_url_random_numbers: 'true',
+  share_url_random_special: 'false',
+  share_url_prefix: '',
+  share_url_shortcode_length: '6',
   emails_share_downloaded_enabled: '',
   smtp_host: '',
   smtp_port: '',
@@ -417,6 +425,72 @@ const handleDeleteAuthProvider = async (id) => {
                   </div>
                 </div>
 
+                <h6 class="mt-3 mb-3">{{ $t('settings.system.share_url_generation') }}</h6>
+                <div class="setting-group-body-item">
+                  <label for="share_url_mode">{{ $t('settings.system.share_url_mode') }}</label>
+                  <select id="share_url_mode" v-model="settings.share_url_mode">
+                    <option value="haiku">{{ $t('settings.system.share_url_mode_haiku') }}</option>
+                    <option value="random">{{ $t('settings.system.share_url_mode_random') }}</option>
+                    <option value="shortcode">{{ $t('settings.system.share_url_mode_shortcode') }}</option>
+                    <option value="uuid">{{ $t('settings.system.share_url_mode_uuid') }}</option>
+                  </select>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <label for="share_url_prefix">{{ $t('settings.system.share_url_prefix') }}</label>
+                  <input
+                    type="text"
+                    id="share_url_prefix"
+                    v-model="settings.share_url_prefix"
+                    :placeholder="$t('settings.system.share_url_prefix_placeholder')"
+                  />
+                </div>
+
+                <div v-if="settings.share_url_mode === 'random'" class="random-url-settings">
+                  <div class="setting-group-body-item">
+                    <label for="share_url_random_length">{{ $t('settings.system.share_url_random_length') }}</label>
+                    <input
+                      type="number"
+                      id="share_url_random_length"
+                      v-model="settings.share_url_random_length"
+                      min="8"
+                      max="64"
+                    />
+                  </div>
+                  <div class="setting-group-body-item pt-4">
+                    <label>{{ $t('settings.system.share_url_random_characters') }}</label>
+                    <div class="checkbox-container pt-3">
+                      <input type="checkbox" id="share_url_random_lowercase" v-model="settings.share_url_random_lowercase" />
+                      <label for="share_url_random_lowercase">{{ $t('settings.system.share_url_random_lowercase') }}</label>
+                    </div>
+                    <div class="checkbox-container">
+                      <input type="checkbox" id="share_url_random_uppercase" v-model="settings.share_url_random_uppercase" />
+                      <label for="share_url_random_uppercase">{{ $t('settings.system.share_url_random_uppercase') }}</label>
+                    </div>
+                    <div class="checkbox-container">
+                      <input type="checkbox" id="share_url_random_numbers" v-model="settings.share_url_random_numbers" />
+                      <label for="share_url_random_numbers">{{ $t('settings.system.share_url_random_numbers') }}</label>
+                    </div>
+                    <div class="checkbox-container">
+                      <input type="checkbox" id="share_url_random_special" v-model="settings.share_url_random_special" />
+                      <label for="share_url_random_special">{{ $t('settings.system.share_url_random_special') }}</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="settings.share_url_mode === 'shortcode'" class="shortcode-url-settings">
+                  <div class="setting-group-body-item">
+                    <label for="share_url_shortcode_length">{{ $t('settings.system.share_url_shortcode_length') }}</label>
+                    <input
+                      type="number"
+                      id="share_url_shortcode_length"
+                      v-model="settings.share_url_shortcode_length"
+                      min="4"
+                      max="12"
+                    />
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -430,6 +504,10 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
               <h6>{{ $t('settings.system.allow_reverse_shares') }}</h6>
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
+              <h6>{{ $t('settings.system.share_url_mode') }}</h6>
+              <p>{{ $t('settings.system.share_url_mode_description') }}</p>
+              <h6>{{ $t('settings.system.share_url_prefix') }}</h6>
+              <p>{{ $t('settings.system.share_url_prefix_description') }}</p>
             </div>
           </div>
         </div>

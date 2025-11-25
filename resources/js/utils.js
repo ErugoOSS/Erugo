@@ -105,8 +105,10 @@ const convertToRealType = value => {
   if (value === 'null') return null
   //real null
   if (value === null) return null
-  //number
-  if (!isNaN(value)) return parseFloat(value)
+  //empty string - return as-is (don't convert to number)
+  if (value === '') return value
+  //number (check for non-empty string that is numeric)
+  if (!isNaN(value) && value.trim() !== '') return parseFloat(value)
   //array
   if (value.startsWith('[') && value.endsWith(']') && value.includes(',')) return JSON.parse(value)
   //object
