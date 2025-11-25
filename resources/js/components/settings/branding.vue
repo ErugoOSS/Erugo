@@ -379,8 +379,8 @@ defineExpose({
 
                   <FileInput
                     v-model="newBackgroundImage"
-                    accept="image/png, image/jpeg, image/webp"
-                    :label="$t('settings.branding.upload_background_image')"
+                    accept="image/png, image/jpeg, image/webp, video/mp4, video/webm"
+                    :label="$t('settings.branding.upload_background')"
                     class="mt-3 mb-4"
                   />
 
