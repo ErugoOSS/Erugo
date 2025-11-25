@@ -54,6 +54,7 @@ class AuthProvidersController extends Controller
         'provider_name' => $class::getName(),
         'provider_description' => $class::getDescription(),
         'enabled' => $authProvider->enabled == "true",
+        'allow_registration' => (bool) $authProvider->allow_registration,
         'class' => $authProvider->provider_class,
         'provider_config' => $authProvider->provider_config,
         'icon' => $class::getIcon(),
@@ -197,6 +198,7 @@ class AuthProvidersController extends Controller
       $authProvider->provider_class = $provider['class'];
       $authProvider->provider_config = $provider['provider_config'];
       $authProvider->enabled = $provider['enabled'];
+      $authProvider->allow_registration = $provider['allow_registration'] ?? false;
       $authProvider->uuid = $provider['uuid'];
       $authProvider->save();
 
@@ -207,7 +209,8 @@ class AuthProvidersController extends Controller
     $authProvider->update([
       'name' => $provider['name'],
       'provider_config' => $provider['provider_config'],
-      'enabled' => $provider['enabled']
+      'enabled' => $provider['enabled'],
+      'allow_registration' => $provider['allow_registration'] ?? false
     ]);
 
     return $authProvider;

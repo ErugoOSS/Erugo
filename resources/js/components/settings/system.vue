@@ -748,6 +748,17 @@ const handleDeleteAuthProvider = async (id) => {
                               {{ $t('settings.system.auth_provider_enabled') }}
                             </label>
                           </div>
+                          <div class="checkbox-container">
+                            <input
+                              type="checkbox"
+                              :id="`auth_provider_allow_registration_${authProvider.id}`"
+                              v-model="authProvider.allow_registration"
+                              :disabled="onLocalhost"
+                            />
+                            <label :for="`auth_provider_allow_registration_${authProvider.id}`">
+                              {{ $t('settings.system.auth_provider_allow_registration') }}
+                            </label>
+                          </div>
                         </div>
                         <div class="col-auto" v-if="authProvider.information_url">
                           <a :href="authProvider.information_url" target="_blank" class="provider-info-link">
@@ -850,6 +861,8 @@ const handleDeleteAuthProvider = async (id) => {
             <div class="section-help">
               <h6>{{ $t('settings.system.auth_providers') }}</h6>
               <p>{{ $t('settings.system.auth_providers_description') }}</p>
+              <h6>{{ $t('settings.system.auth_provider_allow_registration') }}</h6>
+              <p>{{ $t('settings.system.auth_provider_allow_registration_description') }}</p>
               <h6>{{ $t('settings.system.provider_trust_warning') }}</h6>
               <p>{{ $t('settings.system.provider_trust_warning_description') }}</p>
             </div>

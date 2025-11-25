@@ -649,6 +649,7 @@ export const bulkUpdateAuthProviders = async (providers) => {
       provider_config: provider.provider_config,
       class: provider.class,
       enabled: provider.enabled,
+      allow_registration: provider.allow_registration,
       uuid: provider.uuid
     }))
   }

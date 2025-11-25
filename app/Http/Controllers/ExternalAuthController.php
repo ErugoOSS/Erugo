@@ -259,7 +259,7 @@ class ExternalAuthController extends Controller
     }
 
     /**
-     * Login with email (and link account if found)
+     * Login with email (and link account if found) or create new user if allow_registration is enabled
      *
      * @param AuthProvider $provider The provider model
      * @param AuthProviderUser $authProviderUser The user from the provider
@@ -267,12 +267,24 @@ class ExternalAuthController extends Controller
      */
     private function loginWithEmail($provider, $authProviderUser)
     {
-        if (!$provider->trust_email) {
-            return redirect('/')->with('error', 'Account not found. Please check that you have linked your account to this provider.');
+        $user = null;
+
+        // If trust_email is enabled, try to find a user with the same email
+        if ($provider->trust_email) {
+            $user = User::where('email', $authProviderUser->email)->first();
         }
 
-        $user = User::where('email', $authProviderUser->email)->first();
+        // If no user found and allow_registration is enabled, create a new user
+        if (!$user && $provider->allow_registration) {
+            // Check if email is already taken (even if trust_email is off)
+            $existingUser = User::where('email', $authProviderUser->email)->first();
+            if ($existingUser) {
+                return redirect('/')->with('error', 'An account with this email already exists. Please link your account to this provider from your profile settings.');
+            }
+            $user = $this->createUserFromProvider($authProviderUser);
+        }
 
+        // If still no user, return error
         if (!$user) {
             return redirect('/')->with('error', 'Account not found. Please check that you have linked your account to this provider.');
         }
@@ -291,6 +303,25 @@ class ExternalAuthController extends Controller
         $this->linkProviderToUser($user, $provider, $authProviderUser);
 
         return $this->createAuthCookieAndRedirect($user);
+    }
+
+    /**
+     * Create a new user from auth provider data
+     *
+     * @param AuthProviderUser $authProviderUser The user data from the provider
+     * @return User The newly created user
+     */
+    private function createUserFromProvider($authProviderUser)
+    {
+        return User::create([
+            'name' => $authProviderUser->name,
+            'email' => $authProviderUser->email,
+            'password' => bcrypt(bin2hex(random_bytes(32))), // Random password since they'll use SSO
+            'admin' => false,
+            'active' => true,
+            'must_change_password' => false,
+            'is_guest' => false
+        ]);
     }
 
     /**

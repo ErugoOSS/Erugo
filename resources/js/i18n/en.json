@@ -239,6 +239,8 @@
       "auth_provider_config_client_secret": "Client Secret",
       "auth_provider_config_tenant": "Tenant ID",
       "auth_provider_enabled": "Enable",
+      "auth_provider_allow_registration": "Allow self-registration",
+      "auth_provider_allow_registration_description": "When enabled, users who authenticate with this provider but don't have an existing account will have one created for them automatically. Only enable this for trusted identity providers.",
       "auth_provider_name": "Provider Name",
       "auth_provider_type": "Provider type",
       "auth_providers": "Auth providers",
