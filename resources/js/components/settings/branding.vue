@@ -396,7 +396,7 @@ defineExpose({
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('logo-settings')">
               <Image />
-              {{ $t('settings.branding.logo') }}
+              {{ $t('settings.branding.logo_and_favicon') }}
             </a>
           </li>
 
@@ -492,7 +492,7 @@ defineExpose({
               <div class="setting-group-header">
                 <h3>
                   <Image />
-                  {{ $t('settings.branding.logo') }}
+                  {{ $t('settings.branding.logo_and_favicon') }}
                 </h3>
               </div>
 
