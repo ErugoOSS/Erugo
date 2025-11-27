@@ -77,6 +77,10 @@ Route::group([], function ($router) {
         //create or update a setting
         Route::put('/', [SettingsController::class, 'write'])->name('settings.write');
         Route::post('/logo', [SettingsController::class, 'writeLogo'])->name('settings.writeLogo');
+        //favicon management
+        Route::post('/favicon', [SettingsController::class, 'writeFavicon'])->name('settings.writeFavicon');
+        Route::delete('/favicon', [SettingsController::class, 'deleteFavicon'])->name('settings.deleteFavicon');
+        Route::get('/favicon/status', [SettingsController::class, 'hasFavicon'])->name('settings.hasFavicon');
         //list background images
         Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
         //upload a background image
@@ -163,6 +167,9 @@ Route::group([], function ($router) {
     Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
     Route::get('/backgrounds/{file}/thumb', [BackgroundsController::class, 'useThumb'])->name('backgrounds.useThumb');
     Route::get('/backgrounds/{file}', [BackgroundsController::class, 'use'])->name('backgrounds.use');
+
+    //serve favicon [public]
+    Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
 
 

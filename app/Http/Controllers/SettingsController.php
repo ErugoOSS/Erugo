@@ -128,4 +128,98 @@ class SettingsController extends Controller
             ]
         ]);
     }
+
+    public function writeFavicon(Request $request)
+    {
+        $request->validate([
+            'favicon' => 'required|file|mimes:png,svg|max:1024',
+        ]);
+
+        $favicon = $request->file('favicon');
+        $extension = strtolower($favicon->getClientOriginalExtension());
+        
+        // Always store as favicon.png or favicon.svg
+        $filename = 'favicon.' . $extension;
+        
+        // Delete any existing favicon files first
+        if (Storage::disk('public')->exists('favicon.png')) {
+            Storage::disk('public')->delete('favicon.png');
+        }
+        if (Storage::disk('public')->exists('favicon.svg')) {
+            Storage::disk('public')->delete('favicon.svg');
+        }
+        
+        // Store the new favicon
+        Storage::disk('public')->put($filename, file_get_contents($favicon));
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Favicon updated successfully',
+            'data' => [
+                'filename' => $filename,
+            ]
+        ]);
+    }
+
+    public function deleteFavicon()
+    {
+        $deleted = false;
+        
+        if (Storage::disk('public')->exists('favicon.png')) {
+            Storage::disk('public')->delete('favicon.png');
+            $deleted = true;
+        }
+        if (Storage::disk('public')->exists('favicon.svg')) {
+            Storage::disk('public')->delete('favicon.svg');
+            $deleted = true;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $deleted ? 'Favicon deleted successfully' : 'No custom favicon to delete',
+        ]);
+    }
+
+    public function getFavicon()
+    {
+        // Check for custom favicon (PNG first, then SVG)
+        if (Storage::disk('public')->exists('favicon.png')) {
+            $path = Storage::disk('public')->path('favicon.png');
+            return response()->file($path, ['Content-Type' => 'image/png']);
+        }
+        
+        if (Storage::disk('public')->exists('favicon.svg')) {
+            $path = Storage::disk('public')->path('favicon.svg');
+            return response()->file($path, ['Content-Type' => 'image/svg+xml']);
+        }
+        
+        // Fall back to default icon.svg
+        $defaultPath = public_path('icon.svg');
+        if (file_exists($defaultPath)) {
+            return response()->file($defaultPath, ['Content-Type' => 'image/svg+xml']);
+        }
+        
+        abort(404);
+    }
+
+    public function hasFavicon()
+    {
+        $hasCustomFavicon = Storage::disk('public')->exists('favicon.png') || 
+                           Storage::disk('public')->exists('favicon.svg');
+        
+        $filename = null;
+        if (Storage::disk('public')->exists('favicon.png')) {
+            $filename = 'favicon.png';
+        } elseif (Storage::disk('public')->exists('favicon.svg')) {
+            $filename = 'favicon.svg';
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'has_custom_favicon' => $hasCustomFavicon,
+                'filename' => $filename,
+            ]
+        ]);
+    }
 }

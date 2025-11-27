@@ -375,6 +375,46 @@ export const saveLogo = async (logoFile) => {
   return data.data
 }
 
+export const saveFavicon = async (faviconFile) => {
+  const formData = new FormData()
+  formData.append('favicon', faviconFile)
+
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/favicon`, {
+    method: 'POST',
+    body: formData
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const deleteFavicon = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/favicon`, {
+    method: 'DELETE'
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getFaviconStatus = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/favicon/status`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const installCustomTheme = async (name, file) => {
   const formData = new FormData()
   formData.append('name', name)

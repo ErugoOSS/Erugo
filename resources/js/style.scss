@@ -554,6 +554,54 @@ body {
       }
     }
   }
+
+  .favicon-preview {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--input-border-color);
+    background: var(--input-background-color);
+    margin-bottom: 10px;
+
+    .favicon-img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .favicon-filename {
+      flex: 1;
+      font-size: 0.85rem;
+      color: var(--input-text-color);
+    }
+
+    .delete-favicon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--input-text-color);
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
 }
 
 .section-help {

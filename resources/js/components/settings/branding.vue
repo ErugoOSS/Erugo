@@ -8,6 +8,9 @@ import {
   getSettingsByGroup,
   saveSettingsById,
   saveLogo,
+  saveFavicon,
+  deleteFavicon,
+  getFaviconStatus,
   getBackgroundImages,
   saveBackgroundImage,
   deleteBackgroundImage,
@@ -41,6 +44,12 @@ const settings = ref({
   background_slideshow_speed: ''
 })
 
+const faviconStatus = ref({
+  has_custom_favicon: false,
+  filename: null
+})
+const newFavicon = ref(null)
+
 const newBackgroundImage = ref(null)
 const backgroundImages = ref([])
 
@@ -67,6 +76,15 @@ const loadSettings = async () => {
 
   loadBackgroundImages()
   loadThemes()
+  loadFaviconStatus()
+}
+
+const loadFaviconStatus = async () => {
+  try {
+    faviconStatus.value = await getFaviconStatus()
+  } catch (error) {
+    console.error('Failed to load favicon status', error)
+  }
 }
 
 const themes = ref(null)
@@ -177,6 +195,52 @@ watch(newBackgroundImage, async () => {
       })
   }
 })
+
+//watch newFavicon and upload it to the server
+watch(newFavicon, async () => {
+  if (newFavicon.value) {
+    saveFavicon(newFavicon.value)
+      .then((data) => {
+        loadFaviconStatus()
+        newFavicon.value = null
+        toast.success(t.value('settings.branding.favicon_uploaded'))
+        // Update the favicon in the browser
+        updateBrowserFavicon()
+      })
+      .catch((error) => {
+        toast.error(t.value('settings.branding.favicon_upload_failed'))
+      })
+  }
+})
+
+const handleDeleteFavicon = async () => {
+  const reallyDelete = confirm(t.value('settings.branding.confirm_delete_favicon'))
+  if (!reallyDelete) {
+    return
+  }
+  deleteFavicon()
+    .then((data) => {
+      loadFaviconStatus()
+      toast.success(t.value('settings.branding.favicon_deleted'))
+      // Update the favicon in the browser
+      updateBrowserFavicon()
+    })
+    .catch((error) => {
+      toast.error(t.value('settings.branding.favicon_delete_failed'))
+    })
+}
+
+const updateBrowserFavicon = () => {
+  // Find existing favicon link or create one
+  let link = document.querySelector("link[rel~='icon']")
+  if (!link) {
+    link = document.createElement('link')
+    link.rel = 'icon'
+    document.head.appendChild(link)
+  }
+  // Add timestamp to bust cache
+  link.href = `/api/favicon?t=${Date.now()}`
+}
 
 watch(backgroundImages, () => {
   if (backgroundImages.value.length === 0) {
@@ -394,17 +458,13 @@ defineExpose({
                       {{ $t('settings.branding.background_slideshow_speed') }}
                       <small>({{ $t('settings.branding.in_seconds') }})</small>
                   </label>
-                    <div class="row">
-                      <div class="col pe-1">
-                        <input type="number" v-model="settings.background_slideshow_speed" />
-                      </div>
-                      <div class="col-auto ps-1">
-                        <buttonWithMenu :items="backgroundSlideshowSpeedOptions" :secondary="false">
-                          <template #icon>
-                            <Clock8 />
-                          </template>
-                        </buttonWithMenu>
-                      </div>
+                    <div class="input-with-button">
+                      <input type="number" v-model="settings.background_slideshow_speed" />
+                      <buttonWithMenu :items="backgroundSlideshowSpeedOptions" :secondary="false">
+                        <template #icon>
+                          <Clock8 />
+                        </template>
+                      </buttonWithMenu>
                     </div>
                   </div>
                 </div>
@@ -449,6 +509,18 @@ defineExpose({
                   </label>
                   <input type="number" v-model="settings.logo_width" />
                 </div>
+
+                <div class="setting-group-body-item mt-4">
+                  <label for="faviconFile">{{ $t('settings.branding.favicon') }}</label>
+                  <div class="favicon-preview" v-if="faviconStatus.has_custom_favicon">
+                    <img :src="`/api/favicon?t=${Date.now()}`" alt="Current favicon" class="favicon-img" />
+                    <span class="favicon-filename">{{ faviconStatus.filename }}</span>
+                    <button class="delete-favicon" @click="handleDeleteFavicon" :title="$t('settings.branding.delete_favicon')">
+                      <X />
+                    </button>
+                  </div>
+                  <FileInput v-model="newFavicon" accept="image/png, image/svg+xml" :label="$t('settings.branding.upload_favicon')" />
+                </div>
               </div>
             </div>
           </div>
@@ -457,6 +529,10 @@ defineExpose({
               <h6>{{ $t('settings.branding.logo') }}</h6>
               <p>
                 {{ $t('settings.branding.logo_description') }}
+              </p>
+              <h6>{{ $t('settings.branding.favicon') }}</h6>
+              <p>
+                {{ $t('settings.branding.favicon_description') }}
               </p>
             </div>
           </div>
