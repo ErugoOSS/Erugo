@@ -61,6 +61,7 @@ const settings = ref({
   emails_share_downloaded_enabled: '',
   smtp_host: '',
   smtp_port: '',
+  smtp_encryption: 'tls',
   smtp_username: '',
   smtp_password: '',
   smtp_sender_name: '',
@@ -630,6 +631,14 @@ const handleDeleteAuthProvider = async (id) => {
                   <input type="number" id="smtp_port" v-model="settings.smtp_port" />
                 </div>
                 <div class="setting-group-body-item">
+                  <label for="smtp_encryption">{{ $t('settings.system.smtp_encryption') }}</label>
+                  <select id="smtp_encryption" v-model="settings.smtp_encryption">
+                    <option value="tls">TLS</option>
+                    <option value="ssl">SSL</option>
+                    <option value="">{{ $t('settings.system.smtp_encryption_none') }}</option>
+                  </select>
+                </div>
+                <div class="setting-group-body-item">
                   <label for="smtp_username">{{ $t('settings.system.smtp_username') }}</label>
                   <input type="text" id="smtp_username" v-model="settings.smtp_username" />
                 </div>
@@ -655,6 +664,9 @@ const handleDeleteAuthProvider = async (id) => {
 
               <h6>{{ $t('settings.system.smtp_port') }}</h6>
               <p>{{ $t('settings.system.smtp_port_description') }}</p>
+
+              <h6>{{ $t('settings.system.smtp_encryption') }}</h6>
+              <p>{{ $t('settings.system.smtp_encryption_description') }}</p>
 
               <h6>{{ $t('settings.system.smtp_username') }}</h6>
               <p>{{ $t('settings.system.smtp_username_description') }}</p>
