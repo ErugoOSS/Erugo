@@ -32,11 +32,14 @@ if [ ! -f /var/www/html/storage/.setup-lock ]; then
     echo "[First time setup] Copying storage skeleton contents..."
     rm -rf /var/www/html/storage/*
     cp -r /var/www/html/storage_skell/* /var/www/html/storage/
-    chown -R erugo:erugo /var/www/html/storage
     touch /var/www/html/storage/.setup-lock
 else
     echo "Setup already completed, skipping..."
 fi
+
+# Always ensure correct permissions on storage directory
+echo "Setting storage permissions..."
+chown -R erugo:erugo /var/www/html/storage
 
 # Make sure php-fpm run directory exists and has correct permissions
 mkdir -p /run/php
@@ -112,6 +115,15 @@ su-exec erugo php artisan clear-compiled
 
 echo "Updating legacy share paths..."
 su-exec erugo php artisan update-legacy-share-paths
+
+# Migrate backgrounds from storage to public directory
+if [ -d /var/www/html/storage/app/public/backgrounds ] && [ "$(ls -A /var/www/html/storage/app/public/backgrounds 2>/dev/null)" ]; then
+    echo "Migrating backgrounds to public directory..."
+    mkdir -p /var/www/html/public/backgrounds
+    cp -rn /var/www/html/storage/app/public/backgrounds/* /var/www/html/public/backgrounds/ 2>/dev/null || true
+    chown -R erugo:erugo /var/www/html/public/backgrounds
+    echo "Backgrounds migration complete."
+fi
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

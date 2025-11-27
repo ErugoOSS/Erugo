@@ -12,7 +12,8 @@ import {
   Plus,
   EllipsisVertical,
   Bomb,
-  Mail
+  Mail,
+  HelpCircle
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -137,6 +138,10 @@ const setShowDeletedShares = (value) => {
   localStorage.setItem('showDeletedShares', value)
   mySharesPanel.value.setShowDeletedShares(value)
 }
+
+const goToHelp = () => {
+  window.open('https://new.erugo.app/docs/configuration/', '_blank')
+}
 </script>
 
 <template>
@@ -150,6 +155,9 @@ const setShowDeletedShares = (value) => {
             <span v-html="getSettingsTitle()" />
           </span>
         </h1>
+        <button class="settings-help-button icon-only" @click="goToHelp">
+          <HelpCircle />
+        </button>
         <button class="close-settings-button icon-only" @click="closeSettings">
           <CircleX />
         </button>
@@ -429,7 +437,7 @@ const setShowDeletedShares = (value) => {
 
 .settings-header {
   background: var(--panel-header-background-color);
-  border-radius: 5px 5px 0 0;
+  // border-radius: 5px 5px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -476,7 +484,7 @@ const setShowDeletedShares = (value) => {
 
     h2 {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 400;
       color: var(--tabs-tab-text-color);
       margin: 0;
       display: flex;

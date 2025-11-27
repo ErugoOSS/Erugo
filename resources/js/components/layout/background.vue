@@ -70,7 +70,7 @@ const changeBackground = () => {
           loop
           muted
           playsinline
-          :src="`/api/backgrounds/${file}`"
+          :src="`/backgrounds/${file}`"
         ></video>
       </div>
       <!-- Image backgrounds - always in DOM, toggle active class -->
@@ -78,7 +78,7 @@ const changeBackground = () => {
         v-else-if="!isVideo(file)"
         class="backgrounds-item"
         :class="{ active: isActive(index) }"
-        :style="{ backgroundImage: `url(/api/backgrounds/${file})` }"
+        :style="{ backgroundImage: `url(/backgrounds/${file})` }"
       ></div>
     </template>
   </div>

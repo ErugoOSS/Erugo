@@ -93,6 +93,14 @@ button.close-settings-button {
   z-index: 102;
 }
 
+.settings-help-button {
+  display: flex;
+  position: absolute;
+  top: 15px;
+  right: 70px;
+  z-index: 102;
+}
+
 .button-outside-label {
   position: relative;
   display: flex;

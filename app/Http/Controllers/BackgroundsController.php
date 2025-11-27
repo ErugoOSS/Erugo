@@ -8,6 +8,7 @@ use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Validator;
 use App\Utils\FileHelper;
+use App\Models\Setting;
 
 class BackgroundsController extends Controller
 {
@@ -38,7 +39,7 @@ class BackgroundsController extends Controller
     public function list()
     {
         //find all the files in the public/backgrounds folder
-        $files = Storage::disk('public')->files('backgrounds');
+        $files = Storage::disk('backgrounds')->files('');
 
         //keep only the files that are images or videos
         $files = array_filter($files, function ($file) {
@@ -46,7 +47,7 @@ class BackgroundsController extends Controller
         });
 
         $files = array_map(function ($file) {
-            return rawurlencode(str_replace(['backgrounds/', '/backgrounds/'], '', $file));
+            return rawurlencode(basename($file));
         }, $files);
 
         $files = array_values($files);
@@ -81,7 +82,7 @@ class BackgroundsController extends Controller
             $fileName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $safeFilename = basename($fileName);
-            $file->storeAs('backgrounds', $safeFilename, 'public');
+            $file->storeAs('', $safeFilename, 'backgrounds');
 
             return response()->json([
                 'status' => 'success',
@@ -112,7 +113,7 @@ class BackgroundsController extends Controller
         $safeFile = basename($file);
         
         //check if the file exists
-        if (!Storage::disk('public')->exists('backgrounds/' . $safeFile)) {
+        if (!Storage::disk('backgrounds')->exists($safeFile)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Background image not found',
@@ -121,12 +122,23 @@ class BackgroundsController extends Controller
         //delete the file
         try {
             //delete the file itself
-            Storage::disk('public')->delete('backgrounds/' . $safeFile);
+            Storage::disk('backgrounds')->delete($safeFile);
             //delete the cached file (for images)
-            Storage::disk('public')->delete('backgrounds/cache/' . $safeFile);
+            Storage::disk('backgrounds')->delete('cache/' . $safeFile);
             //delete the cached thumbs (now always .webp)
             $thumbFilename = pathinfo($safeFile, PATHINFO_FILENAME) . '.webp';
-            Storage::disk('public')->delete('backgrounds/cache/thumbs/' . $thumbFilename);
+            Storage::disk('backgrounds')->delete('cache/thumbs/' . $thumbFilename);
+
+            // Check if there are any remaining background files
+            $remainingFiles = array_filter(
+                Storage::disk('backgrounds')->files(''),
+                fn($file) => $this->isValidBackground($file)
+            );
+
+            // If no backgrounds remain, automatically disable use_my_backgrounds
+            if (empty($remainingFiles)) {
+                Setting::where('key', 'use_my_backgrounds')->update(['value' => false]);
+            }
 
             return response()->json([
                 'status' => 'success',
@@ -150,21 +162,19 @@ class BackgroundsController extends Controller
         // Use basename as additional protection
         $safeFile = basename($file);
 
-        $fullPath = Storage::disk('public')->path('backgrounds/' . $safeFile);
+        $fullPath = Storage::disk('backgrounds')->path($safeFile);
         //check the file exists
         if (!file_exists($fullPath)) {
             abort(404);
         }
 
-        // For videos, serve directly without processing
+        // For videos, use streamDownload with range support for efficient delivery
         if ($this->isVideo($safeFile)) {
-            $extension = strtolower(pathinfo($safeFile, PATHINFO_EXTENSION));
-            $mimeType = $extension === 'webm' ? 'video/webm' : 'video/mp4';
-            return response()->file($fullPath, ['Content-Type' => $mimeType]);
+            return $this->streamVideo($fullPath, $safeFile);
         }
 
         // For images, use caching and scaling
-        $cachedPath = Storage::disk('public')->path('backgrounds/cache/' . $safeFile);
+        $cachedPath = Storage::disk('backgrounds')->path('cache/' . $safeFile);
         if (file_exists($cachedPath)) {
             return response()->file($cachedPath);
         }
@@ -176,7 +186,7 @@ class BackgroundsController extends Controller
         $encoded = $image->toJpeg(95);
 
         //save the encoded image to the public/backgrounds/cache folder
-        Storage::disk('public')->put('backgrounds/cache/' . $safeFile, $encoded);
+        Storage::disk('backgrounds')->put('cache/' . $safeFile, $encoded);
 
         return response($encoded)->header('Content-Type', 'image/webp');
     }
@@ -193,14 +203,14 @@ class BackgroundsController extends Controller
 
         // For thumbnails, we always use .webp extension for the cached file
         $thumbFilename = pathinfo($safeFile, PATHINFO_FILENAME) . '.webp';
-        $cachedPath = Storage::disk('public')->path('backgrounds/cache/thumbs/' . $thumbFilename);
+        $cachedPath = Storage::disk('backgrounds')->path('cache/thumbs/' . $thumbFilename);
         
         // Check if we have a cached version
         if (file_exists($cachedPath)) {
             return response()->file($cachedPath, ['Content-Type' => 'image/webp']);
         }
 
-        $fullPath = Storage::disk('public')->path('backgrounds/' . $safeFile);
+        $fullPath = Storage::disk('backgrounds')->path($safeFile);
         if (!file_exists($fullPath)) {
             abort(404);
         }
@@ -221,9 +231,70 @@ class BackgroundsController extends Controller
         $encoded = $image->toWebp(80);
 
         //save the encoded image to the public/backgrounds/cache folder
-        Storage::disk('public')->put('backgrounds/cache/thumbs/' . $thumbFilename, $encoded);
+        Storage::disk('backgrounds')->put('cache/thumbs/' . $thumbFilename, $encoded);
 
         return response($encoded)->header('Content-Type', 'image/webp');
+    }
+
+    private function streamVideo(string $fullPath, string $filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $mimeType = $extension === 'webm' ? 'video/webm' : 'video/mp4';
+        $fileSize = filesize($fullPath);
+        
+        $headers = [
+            'Content-Type' => $mimeType,
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'public, max-age=86400',
+        ];
+
+        // Check for range request
+        $range = request()->header('Range');
+        
+        if ($range) {
+            // Parse the range header
+            preg_match('/bytes=(\d+)-(\d*)/', $range, $matches);
+            $start = intval($matches[1]);
+            $end = isset($matches[2]) && $matches[2] !== '' ? intval($matches[2]) : $fileSize - 1;
+            
+            // Ensure valid range
+            if ($start > $end || $start >= $fileSize) {
+                return response('', 416)->header('Content-Range', "bytes */$fileSize");
+            }
+            
+            $length = $end - $start + 1;
+            
+            $headers['Content-Range'] = "bytes $start-$end/$fileSize";
+            $headers['Content-Length'] = $length;
+            
+            return response()->stream(function () use ($fullPath, $start, $length) {
+                $stream = fopen($fullPath, 'rb');
+                fseek($stream, $start);
+                $remaining = $length;
+                $bufferSize = 8192;
+                
+                while ($remaining > 0 && !feof($stream)) {
+                    $readSize = min($bufferSize, $remaining);
+                    echo fread($stream, $readSize);
+                    $remaining -= $readSize;
+                    flush();
+                }
+                
+                fclose($stream);
+            }, 206, $headers);
+        }
+        
+        // No range request - serve entire file
+        $headers['Content-Length'] = $fileSize;
+        
+        return response()->stream(function () use ($fullPath) {
+            $stream = fopen($fullPath, 'rb');
+            while (!feof($stream)) {
+                echo fread($stream, 8192);
+                flush();
+            }
+            fclose($stream);
+        }, 200, $headers);
     }
 
     private function generateVideoThumbnail(string $videoPath, string $outputPath): void

@@ -180,7 +180,7 @@ watch(newBackgroundImage, async () => {
 
 watch(backgroundImages, () => {
   if (backgroundImages.value.length === 0) {
-    useMyBackgrounds.value = false
+    settings.value.use_my_backgrounds = false
   }
 })
 

@@ -2,6 +2,11 @@
 :80 {
     root * /var/www/html/public
 
+    # Allow large file uploads (500MB)
+    request_body {
+        max_size 500MB
+    }
+
     # Enable Gzip compression
     encode gzip
     
@@ -26,13 +31,16 @@
 
     # Cache static assets
     @static {
-        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.mp4 *.webm *.webp
     }
     header @static Cache-Control "public, max-age=31536000, immutable"
 
     # Proxy tusd uploads - must be handled before Laravel catches it
     handle /files/* {
-        reverse_proxy tusd:1080
+        reverse_proxy tusd:8080 {
+            header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {header.X-Forwarded-Host}
+        }
     }
 
     # Handle everything else with Laravel

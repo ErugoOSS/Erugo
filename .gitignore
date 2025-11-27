@@ -3,6 +3,8 @@
 /public/build
 /public/hot
 /public/storage
+/public/backgrounds/*
+!/public/backgrounds/.gitkeep
 /storage/*.key
 /storage/pail
 /storage/templates/*

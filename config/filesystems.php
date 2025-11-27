@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        'backgrounds' => [
+            'driver' => 'local',
+            'root' => public_path('backgrounds'),
+            'url' => env('APP_URL').'/backgrounds',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
