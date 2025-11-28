@@ -165,6 +165,7 @@
       "emailTemplates": "Gerir modelos de correio eletrónico",
       "myProfile": "Gerir o seu perfil.",
       "myShares": "Gerir as suas Partilhas",
+      "stats": "O seu sistema Erugo em resumo",
       "system": "Gerir o comportamento da Erugo.",
       "users": "Gerir os seus utilizadores."
     },
@@ -360,6 +361,7 @@
       "share": {
         "password_protect": "Proteger a partilha com palavra-passe"
       },
+      "stats": "Estatísticas do sistema",
       "system": "Definições de Sistema",
       "users": "Utilizadores",
       "users.edit": "Editar {name}"

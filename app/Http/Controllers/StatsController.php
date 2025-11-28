@@ -50,6 +50,11 @@ class StatsController extends Controller
         // Calculate used storage from shares table
         $usedBytes = Share::where('status', '!=', 'deleted')->sum('size');
         
+        // If the shares directory doesn't exist, use the app directory or create it
+        if (!file_exists($storagePath)) {
+            $storagePath = storage_path('app');
+        }
+        
         // Get disk space info
         $totalDiskSpace = disk_total_space($storagePath);
         $freeDiskSpace = disk_free_space($storagePath);

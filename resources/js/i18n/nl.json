@@ -165,6 +165,7 @@
       "emailTemplates": "E-mailsjablonen beheren",
       "myProfile": "Beheer je profiel",
       "myShares": "Beheer je gedeelde links.",
+      "stats": "Uw Erugo systeem in één oogopslag",
       "system": "Beheer het gedrag van je Erugo instantie.",
       "users": "Beheer je gebruikers."
     },
@@ -360,6 +361,7 @@
       "share": {
         "password_protect": "Gedeelde link beveiligen met een wachtwoord"
       },
+      "stats": "Systeemgegevens",
       "system": "Systeem Instellingen",
       "users": "Gebruikers",
       "users.edit": "Bewerk {name}"

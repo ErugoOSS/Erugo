@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getUsers, createUser, deleteUser, updateUser } from '../../api'
-import { UserPen, Trash, UserPlus, CircleX, UserRoundCheck } from 'lucide-vue-next'
+import { ref, onMounted, defineEmits } from 'vue'
+import { getUsers, createUser, deleteUser, updateUser, forceResetPassword } from '../../api'
+import { UserPen, Trash, UserPlus, CircleX, UserRoundCheck, FolderOpen, KeyRound } from 'lucide-vue-next'
 import { store } from '../../store'
 import { useToast } from 'vue-toastification'
 import { niceDate } from '../../utils'
@@ -9,6 +9,8 @@ import { niceDate } from '../../utils'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
+
+const emit = defineEmits(['viewUserShares'])
 
 const toast = useToast()
 const users = ref([])
@@ -122,6 +124,29 @@ const getEmptyUser = () => {
     must_change_password: false
   }
 }
+
+const handleViewUserShares = (user) => {
+  emit('viewUserShares', user)
+}
+
+const handleForceResetPassword = (user) => {
+  if (user.id === store.userId) {
+    toast.error(t.value('settings.users.cannot_force_reset_own_password'))
+    return
+  }
+
+  if (confirm(t.value('settings.users.confirm_force_reset_password', { name: user.name }))) {
+    forceResetPassword(user.id).then(
+      (data) => {
+        loadUsers()
+        toast.success(t.value('settings.users.force_reset_password_success'))
+      },
+      (error) => {
+        toast.error(t.value('settings.users.force_reset_password_failed'))
+      }
+    )
+  }
+}
 </script>
 
 <template>
@@ -164,6 +189,14 @@ const getEmptyUser = () => {
             <button :disabled="user.id === store.userId" @click="handleEditUserClick(user)">
               <UserPen />
               {{ $t('settings.users.edit') }}
+            </button>
+            <button class="secondary" @click="handleViewUserShares(user)">
+              <FolderOpen />
+              {{ $t('settings.users.view_shares') }}
+            </button>
+            <button class="secondary" :disabled="user.id === store.userId" @click="handleForceResetPassword(user)">
+              <KeyRound />
+              {{ $t('settings.users.force_reset_password') }}
             </button>
             <button class="secondary" :disabled="user.id === store.userId" @click="handleDeleteUserClick(user.id)">
               <Trash />

@@ -33,13 +33,13 @@ const loading = ref(true)
 const selectedDays = ref(30)
 const refreshing = ref(false)
 
-const daysOptions = [
-  { label: '7 days', value: 7 },
-  { label: '14 days', value: 14 },
-  { label: '30 days', value: 30 },
-  { label: '60 days', value: 60 },
-  { label: '90 days', value: 90 }
-]
+const daysOptions = computed(() => [
+  { label: t.value('settings.stats.downloads.days_option', { days: 7 }), value: 7 },
+  { label: t.value('settings.stats.downloads.days_option', { days: 14 }), value: 14 },
+  { label: t.value('settings.stats.downloads.days_option', { days: 30 }), value: 30 },
+  { label: t.value('settings.stats.downloads.days_option', { days: 60 }), value: 60 },
+  { label: t.value('settings.stats.downloads.days_option', { days: 90 }), value: 90 }
+])
 
 const emit = defineEmits(['navItemClicked'])
 
@@ -56,7 +56,7 @@ const loadStats = async () => {
     loading.value = true
     stats.value = await getSystemStats(selectedDays.value)
   } catch (error) {
-    toast.error('Failed to load system stats')
+    toast.error(t.value('settings.stats.error_loading'))
     console.error(error)
   } finally {
     loading.value = false
@@ -117,40 +117,41 @@ const categoryColors = {
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('storage-stats')">
               <HardDrive />
-              Storage
+              {{ $t('settings.stats.nav.storage') }}
             </a>
           </li>
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('share-stats')">
               <Share2 />
-              Shares
+              {{ $t('settings.stats.nav.shares') }}
             </a>
           </li>
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('download-stats')">
               <Download />
-              Downloads
+              {{ $t('settings.stats.nav.downloads') }}
             </a>
           </li>
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('user-stats')">
               <Users />
-              Users
+              {{ $t('settings.stats.nav.users') }}
             </a>
           </li>
+          <!-- File Type Stats
           <li>
             <a href="#" @click.prevent="handleNavItemClicked('file-type-stats')">
               <FileType />
-              File Types
+              {{ $t('settings.stats.nav.file_types') }}
             </a>
-          </li>
+          </li> -->
         </ul>
       </div>
       <div class="col-12 col-md-10 pt-5">
         <!-- Loading State -->
         <div v-if="loading && !stats" class="loading-container">
           <RefreshCw class="spin" />
-          <p>Loading statistics...</p>
+          <p>{{ $t('settings.stats.loading') }}</p>
         </div>
 
         <template v-else-if="stats">
@@ -158,7 +159,7 @@ const categoryColors = {
           <div class="stats-header mb-4">
             <button class="refresh-btn" @click="refreshStats" :disabled="refreshing">
               <RefreshCw :class="{ spin: refreshing }" />
-              Refresh
+              {{ $t('settings.stats.refresh') }}
             </button>
           </div>
 
@@ -169,13 +170,13 @@ const categoryColors = {
                 <div class="setting-group-header">
                   <h3>
                     <HardDrive />
-                    Storage Overview
+                    {{ $t('settings.stats.storage.title') }}
                   </h3>
                 </div>
                 <div class="setting-group-body">
                   <div class="stats-grid">
                     <div class="stat-card large">
-                      <div class="stat-label">Disk Usage</div>
+                      <div class="stat-label">{{ $t('settings.stats.storage.disk_usage') }}</div>
                       <div class="progress-container">
                         <div class="progress-bar-wrapper">
                           <div 
@@ -185,12 +186,12 @@ const categoryColors = {
                           ></div>
                         </div>
                         <div class="progress-labels">
-                          <span>{{ stats.storage.disk_used_formatted }} used</span>
-                          <span>{{ stats.storage.disk_free_formatted }} free</span>
+                          <span>{{ stats.storage.disk_used_formatted }} {{ $t('settings.stats.storage.used') }}</span>
+                          <span>{{ stats.storage.disk_free_formatted }} {{ $t('settings.stats.storage.free') }}</span>
                         </div>
                       </div>
                       <div class="stat-value">{{ stats.storage.disk_usage_percent }}%</div>
-                      <div class="stat-sublabel">of {{ stats.storage.disk_total_formatted }}</div>
+                      <div class="stat-sublabel">{{ $t('settings.stats.storage.of') }} {{ stats.storage.disk_total_formatted }}</div>
                     </div>
 
                     <div class="stat-card">
@@ -199,8 +200,8 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.storage.used_formatted }}</div>
-                        <div class="stat-label">Share Storage</div>
-                        <div class="stat-sublabel">{{ stats.storage.shares_usage_percent }}% of disk</div>
+                        <div class="stat-label">{{ $t('settings.stats.storage.share_storage') }}</div>
+                        <div class="stat-sublabel">{{ stats.storage.shares_usage_percent }}% {{ $t('settings.stats.storage.of_disk') }}</div>
                       </div>
                     </div>
 
@@ -210,7 +211,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.storage.disk_free_formatted }}</div>
-                        <div class="stat-label">Available Space</div>
+                        <div class="stat-label">{{ $t('settings.stats.storage.available_space') }}</div>
                       </div>
                     </div>
                   </div>
@@ -219,10 +220,10 @@ const categoryColors = {
             </div>
             <div class="d-none d-lg-block col ps-0">
               <div class="section-help">
-                <h6>Storage Overview</h6>
-                <p>Monitor your server's disk usage and the space consumed by shares.</p>
-                <h6>Disk Usage</h6>
-                <p>Shows total disk space utilization. Consider cleaning up old shares if usage is high.</p>
+                <h6>{{ $t('settings.stats.help.storage_title') }}</h6>
+                <p>{{ $t('settings.stats.help.storage_description') }}</p>
+                <h6>{{ $t('settings.stats.help.disk_usage_title') }}</h6>
+                <p>{{ $t('settings.stats.help.disk_usage_description') }}</p>
               </div>
             </div>
           </div>
@@ -234,7 +235,7 @@ const categoryColors = {
                 <div class="setting-group-header">
                   <h3>
                     <Share2 />
-                    Share Statistics
+                    {{ $t('settings.stats.shares.title') }}
                   </h3>
                 </div>
                 <div class="setting-group-body">
@@ -245,7 +246,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.active }}</div>
-                        <div class="stat-label">Active Shares</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.active_shares') }}</div>
                       </div>
                     </div>
 
@@ -255,7 +256,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.expired }}</div>
-                        <div class="stat-label">Expired</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.expired') }}</div>
                       </div>
                     </div>
 
@@ -265,7 +266,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.deleted }}</div>
-                        <div class="stat-label">Deleted</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.deleted') }}</div>
                       </div>
                     </div>
 
@@ -275,7 +276,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.password_protected }}</div>
-                        <div class="stat-label">Protected</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.protected') }}</div>
                       </div>
                     </div>
                   </div>
@@ -287,7 +288,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.total }}</div>
-                        <div class="stat-label">Total Shares</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.total_shares') }}</div>
                       </div>
                     </div>
 
@@ -297,7 +298,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.recent_7_days }}</div>
-                        <div class="stat-label">Last 7 Days</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.last_7_days') }}</div>
                       </div>
                     </div>
 
@@ -307,8 +308,8 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.shares.total_files }}</div>
-                        <div class="stat-label">Total Files</div>
-                        <div class="stat-sublabel">~{{ stats.shares.avg_files_per_share }} per share</div>
+                        <div class="stat-label">{{ $t('settings.stats.shares.total_files') }}</div>
+                        <div class="stat-sublabel">~{{ stats.shares.avg_files_per_share }} {{ $t('settings.stats.shares.per_share') }}</div>
                       </div>
                     </div>
                   </div>
@@ -317,10 +318,10 @@ const categoryColors = {
             </div>
             <div class="d-none d-lg-block col ps-0">
               <div class="section-help">
-                <h6>Share Statistics</h6>
-                <p>Overview of all shares in the system, including their current status.</p>
-                <h6>Active vs Expired</h6>
-                <p>Active shares are accessible, while expired ones are pending deletion based on your cleanup settings.</p>
+                <h6>{{ $t('settings.stats.help.shares_title') }}</h6>
+                <p>{{ $t('settings.stats.help.shares_description') }}</p>
+                <h6>{{ $t('settings.stats.help.active_vs_expired_title') }}</h6>
+                <p>{{ $t('settings.stats.help.active_vs_expired_description') }}</p>
               </div>
             </div>
           </div>
@@ -332,12 +333,12 @@ const categoryColors = {
                 <div class="setting-group-header">
                   <h3>
                     <Download />
-                    Download Activity
+                    {{ $t('settings.stats.downloads.title') }}
                   </h3>
                 </div>
                 <div class="setting-group-body">
                   <div class="period-selector mb-4">
-                    <label>Time Period:</label>
+                    <label>{{ $t('settings.stats.downloads.time_period') }}</label>
                     <select v-model="selectedDays">
                       <option v-for="opt in daysOptions" :key="opt.value" :value="opt.value">
                         {{ opt.label }}
@@ -352,7 +353,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.downloads.total_in_period }}</div>
-                        <div class="stat-label">Downloads ({{ selectedDays }} days)</div>
+                        <div class="stat-label">{{ $t('settings.stats.downloads.downloads_in_period', { days: selectedDays }) }}</div>
                       </div>
                     </div>
 
@@ -362,7 +363,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.downloads.all_time }}</div>
-                        <div class="stat-label">All-Time Downloads</div>
+                        <div class="stat-label">{{ $t('settings.stats.downloads.all_time') }}</div>
                       </div>
                     </div>
 
@@ -372,21 +373,21 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.downloads.unique_downloaders }}</div>
-                        <div class="stat-label">Unique Downloaders</div>
+                        <div class="stat-label">{{ $t('settings.stats.downloads.unique_downloaders') }}</div>
                       </div>
                     </div>
                   </div>
 
                   <!-- Download Chart -->
                   <div class="download-chart mt-4" v-if="downloadChartData.length > 0">
-                    <h4>Downloads Over Time</h4>
+                    <h4>{{ $t('settings.stats.downloads.chart_title') }}</h4>
                     <div class="chart-container">
                       <div class="chart-bars">
                         <div 
                           v-for="(item, index) in downloadChartData" 
                           :key="index"
                           class="chart-bar-wrapper"
-                          :title="`${item.date}: ${item.count} downloads`"
+                          :title="`${item.date}: ${item.count} ${t('settings.stats.downloads.downloads')}`"
                         >
                           <div 
                             class="chart-bar"
@@ -404,7 +405,7 @@ const categoryColors = {
 
                   <!-- Top Downloads -->
                   <div class="top-downloads mt-4" v-if="stats.downloads.top_shares?.length > 0">
-                    <h4>Most Downloaded Shares</h4>
+                    <h4>{{ $t('settings.stats.downloads.top_shares') }}</h4>
                     <div class="top-list">
                       <div 
                         v-for="(share, index) in stats.downloads.top_shares" 
@@ -413,7 +414,7 @@ const categoryColors = {
                       >
                         <span class="rank">#{{ index + 1 }}</span>
                         <span class="name">{{ share.name || share.long_id }}</span>
-                        <span class="count">{{ share.download_count }} downloads</span>
+                        <span class="count">{{ share.download_count }} {{ $t('settings.stats.downloads.downloads') }}</span>
                       </div>
                     </div>
                   </div>
@@ -422,10 +423,10 @@ const categoryColors = {
             </div>
             <div class="d-none d-lg-block col ps-0">
               <div class="section-help">
-                <h6>Download Activity</h6>
-                <p>Track download activity across all shares over your selected time period.</p>
-                <h6>Unique Downloaders</h6>
-                <p>Count of unique IP addresses that have downloaded shares.</p>
+                <h6>{{ $t('settings.stats.help.downloads_title') }}</h6>
+                <p>{{ $t('settings.stats.help.downloads_description') }}</p>
+                <h6>{{ $t('settings.stats.help.unique_downloaders_title') }}</h6>
+                <p>{{ $t('settings.stats.help.unique_downloaders_description') }}</p>
               </div>
             </div>
           </div>
@@ -437,7 +438,7 @@ const categoryColors = {
                 <div class="setting-group-header">
                   <h3>
                     <Users />
-                    User Statistics
+                    {{ $t('settings.stats.users.title') }}
                   </h3>
                 </div>
                 <div class="setting-group-body">
@@ -448,7 +449,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.users.total }}</div>
-                        <div class="stat-label">Total Users</div>
+                        <div class="stat-label">{{ $t('settings.stats.users.total_users') }}</div>
                       </div>
                     </div>
 
@@ -458,7 +459,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.users.active }}</div>
-                        <div class="stat-label">Active</div>
+                        <div class="stat-label">{{ $t('settings.stats.users.active') }}</div>
                       </div>
                     </div>
 
@@ -468,7 +469,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.users.admins }}</div>
-                        <div class="stat-label">Admins</div>
+                        <div class="stat-label">{{ $t('settings.stats.users.admins') }}</div>
                       </div>
                     </div>
 
@@ -478,7 +479,7 @@ const categoryColors = {
                       </div>
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.users.guests }}</div>
-                        <div class="stat-label">Guests</div>
+                        <div class="stat-label">{{ $t('settings.stats.users.guests') }}</div>
                       </div>
                     </div>
                   </div>
@@ -489,13 +490,13 @@ const categoryColors = {
                     </div>
                     <div class="stat-content">
                       <div class="stat-value">{{ stats.users.with_shares }}</div>
-                      <div class="stat-label">Users with Shares</div>
+                      <div class="stat-label">{{ $t('settings.stats.users.with_shares') }}</div>
                     </div>
                   </div>
 
                   <!-- Top Users -->
                   <div class="top-users mt-4" v-if="stats.users.top_users?.length > 0">
-                    <h4>Most Active Users</h4>
+                    <h4>{{ $t('settings.stats.users.top_users') }}</h4>
                     <div class="top-list">
                       <div 
                         v-for="(user, index) in stats.users.top_users" 
@@ -504,7 +505,7 @@ const categoryColors = {
                       >
                         <span class="rank">#{{ index + 1 }}</span>
                         <span class="name">{{ user.name }}</span>
-                        <span class="count">{{ user.shares_count }} shares</span>
+                        <span class="count">{{ user.shares_count }} {{ $t('settings.stats.users.shares') }}</span>
                       </div>
                     </div>
                   </div>
@@ -513,22 +514,22 @@ const categoryColors = {
             </div>
             <div class="d-none d-lg-block col ps-0">
               <div class="section-help">
-                <h6>User Statistics</h6>
-                <p>Overview of user accounts and their activity levels.</p>
-                <h6>Guest Users</h6>
-                <p>Users created via reverse share invitations.</p>
+                <h6>{{ $t('settings.stats.help.users_title') }}</h6>
+                <p>{{ $t('settings.stats.help.users_description') }}</p>
+                <h6>{{ $t('settings.stats.help.guest_users_title') }}</h6>
+                <p>{{ $t('settings.stats.help.guest_users_description') }}</p>
               </div>
             </div>
           </div>
 
-          <!-- File Type Stats -->
+          <!-- File Type Stats 
           <div class="row mb-5">
             <div class="col-12 col-lg-8 pe-0 ps-0 ps-md-3">
               <div class="setting-group" id="file-type-stats">
                 <div class="setting-group-header">
                   <h3>
                     <FileType />
-                    File Type Distribution
+                    {{ $t('settings.stats.file_types.title') }}
                   </h3>
                 </div>
                 <div class="setting-group-body">
@@ -543,9 +544,9 @@ const categoryColors = {
                         <component :is="categoryIcons[category]" />
                       </div>
                       <div class="category-content">
-                        <div class="category-name">{{ category.charAt(0).toUpperCase() + category.slice(1) }}</div>
+                        <div class="category-name">{{ $t('settings.stats.file_types.categories.' + category) }}</div>
                         <div class="category-stats">
-                          <span class="count">{{ data.count }} files</span>
+                          <span class="count">{{ data.count }} {{ $t('settings.stats.file_types.files') }}</span>
                           <span class="size">{{ data.total_size_formatted }}</span>
                         </div>
                       </div>
@@ -565,13 +566,13 @@ const categoryColors = {
             </div>
             <div class="d-none d-lg-block col ps-0">
               <div class="section-help">
-                <h6>File Type Distribution</h6>
-                <p>Breakdown of files by category across all shares.</p>
-                <h6>Categories</h6>
-                <p>Files are grouped by type: images, documents, videos, audio, archives, code, and other.</p>
+                <h6>{{ $t('settings.stats.help.file_types_title') }}</h6>
+                <p>{{ $t('settings.stats.help.file_types_description') }}</p>
+                <h6>{{ $t('settings.stats.help.categories_title') }}</h6>
+                <p>{{ $t('settings.stats.help.categories_description') }}</p>
               </div>
             </div>
-          </div>
+          </div>-->
         </template>
       </div>
     </div>
@@ -644,7 +645,7 @@ const categoryColors = {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   
   &.four-col {
@@ -671,6 +672,7 @@ const categoryColors = {
     
     .stat-value {
       font-size: 1.5rem;
+      white-space: nowrap;
     }
   }
 }
@@ -737,6 +739,7 @@ const categoryColors = {
   font-weight: 700;
   color: var(--panel-text-color);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .stat-label {
@@ -842,6 +845,7 @@ const categoryColors = {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
   position: relative;
   min-width: 0;
@@ -873,7 +877,7 @@ const categoryColors = {
 
 .chart-label {
   position: absolute;
-  bottom: 0;
+  bottom: -20px;
   font-size: 0.65rem;
   color: var(--panel-text-color);
   opacity: 0.6;

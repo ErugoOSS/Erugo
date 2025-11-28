@@ -234,6 +234,46 @@ class SharesController extends Controller
     ]);
   }
 
+  public function allShares(Request $request)
+  {
+    $user = Auth::user();
+
+    if (!$user || !$user->admin) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Unauthorized'
+      ], 401);
+    }
+
+    $showDeleted = $request->input('show_deleted', false);
+    $userId = $request->input('user_id', null);
+
+    $shares = Share::orderBy('created_at', 'desc')->with(['files', 'user']);
+    
+    if ($showDeleted === 'false') {
+      $shares = $shares->where('status', '!=', 'deleted');
+    }
+    
+    if ($userId) {
+      $shares = $shares->where('user_id', $userId);
+    }
+    
+    $shares = $shares->get();
+    
+    return response()->json([
+      'status' => 'success',
+      'message' => 'All shares',
+      'data' => [
+        'shares' => $shares->map(function ($share) {
+          $formatted = $this->formatSharePrivate($share);
+          $formatted->user_name = $share->user ? $share->user->name : 'Unknown User';
+          $formatted->user_email = $share->user ? $share->user->email : '';
+          return $formatted;
+        })
+      ]
+    ]);
+  }
+
   public function expire($shareId)
   {
     $user = Auth::user();

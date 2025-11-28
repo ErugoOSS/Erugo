@@ -165,8 +165,99 @@
       "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
+      "allShares": "View and manage all shares from all users.",
+      "stats": "Your Erugo system at a glance",
       "system": "Manage the behaviour of your Erugo instance.",
       "users": "Manage Your Users."
+    },
+    "stats": {
+      "loading": "Loading statistics...",
+      "error_loading": "Failed to load system stats",
+      "refresh": "Refresh",
+      "nav": {
+        "storage": "Storage",
+        "shares": "Shares",
+        "downloads": "Downloads",
+        "users": "Users",
+        "file_types": "File Types"
+      },
+      "storage": {
+        "title": "Storage Overview",
+        "disk_usage": "Disk Usage",
+        "used": "used",
+        "free": "free",
+        "share_storage": "Share Storage",
+        "of_disk": "of disk",
+        "available_space": "Available Space",
+        "of": "of"
+      },
+      "shares": {
+        "title": "Share Statistics",
+        "active_shares": "Active Shares",
+        "expired": "Expired",
+        "deleted": "Deleted",
+        "protected": "Protected",
+        "total_shares": "Total Shares",
+        "last_7_days": "Last 7 Days",
+        "total_files": "Total Files",
+        "per_share": "per share"
+      },
+      "downloads": {
+        "title": "Download Activity",
+        "time_period": "Time Period:",
+        "days_option": "{days} days",
+        "downloads_in_period": "Downloads ({days} days)",
+        "all_time": "All-Time Downloads",
+        "unique_downloaders": "Unique Downloaders",
+        "chart_title": "Downloads Over Time",
+        "downloads": "downloads",
+        "top_shares": "Most Downloaded Shares"
+      },
+      "users": {
+        "title": "User Statistics",
+        "total_users": "Total Users",
+        "active": "Active",
+        "admins": "Admins",
+        "guests": "Guests",
+        "with_shares": "Users with Shares",
+        "top_users": "Most Active Users",
+        "shares": "shares"
+      },
+      "file_types": {
+        "title": "File Type Distribution",
+        "files": "files",
+        "categories": {
+          "images": "Images",
+          "documents": "Documents",
+          "videos": "Videos",
+          "audio": "Audio",
+          "archives": "Archives",
+          "code": "Code",
+          "other": "Other"
+        }
+      },
+      "help": {
+        "storage_title": "Storage Overview",
+        "storage_description": "Monitor your server's disk usage and the space consumed by shares.",
+        "disk_usage_title": "Disk Usage",
+        "disk_usage_description": "Shows total disk space utilization. Consider cleaning up old shares if usage is high.",
+        "shares_title": "Share Statistics",
+        "shares_description": "Overview of all shares in the system, including their current status.",
+        "active_vs_expired_title": "Active vs Expired",
+        "active_vs_expired_description": "Active shares are accessible, while expired ones are pending deletion based on your cleanup settings.",
+        "downloads_title": "Download Activity",
+        "downloads_description": "Track download activity across all shares over your selected time period.",
+        "unique_downloaders_title": "Unique Downloaders",
+        "unique_downloaders_description": "Count of unique IP addresses that have downloaded shares.",
+        "users_title": "User Statistics",
+        "users_description": "Overview of user accounts and their activity levels.",
+        "guest_users_title": "Guest Users",
+        "guest_users_description": "Users created via reverse share invitations.",
+        "file_types_title": "File Type Distribution",
+        "file_types_description": "Breakdown of files by category across all shares.",
+        "categories_title": "Categories",
+        "categories_description": "Files are grouped by type: images, documents, videos, audio, archives, code, and other."
+      }
     },
     "emailTemplates": {
       "accountCreated": "Account Created",
@@ -208,6 +299,12 @@
     },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
+    "allShares": {
+      "filterByUser": "Filter by user:",
+      "allUsers": "All Users",
+      "owner": "Owner",
+      "noShares": "No shares found."
+    },
     "provider": {
       "edit": "Edit",
       "view": "View"
@@ -356,10 +453,12 @@
       "manage": "Manage",
       "myProfile": "My Account",
       "myShares": "My Shares",
+      "allShares": "All Shares",
       "reverse_invite": "Create reverse share request",
       "share": {
         "password_protect": "Password protect share"
       },
+      "stats": "System Stats",
       "system": "System settings",
       "users": "Users",
       "users.edit": "Edit {name}"
@@ -411,6 +510,12 @@
       "user_created_successfully": "User created successfully",
       "user_deleted_successfully": "User was deleted successfully",
       "user_updated_successfully": "User updated successfully",
+      "view_shares": "View Shares",
+      "force_reset_password": "Reset Password",
+      "confirm_force_reset_password": "Are you sure you want to force reset the password for {name}? This will invalidate their current password and any active sessions. They will receive an email with a link to set a new password.",
+      "force_reset_password_success": "Password reset initiated. The user will receive an email to set a new password.",
+      "force_reset_password_failed": "Failed to force reset password",
+      "cannot_force_reset_own_password": "You cannot force reset your own password",
       "you": "You"
     }
   },

@@ -14,7 +14,8 @@ import {
   Bomb,
   Mail,
   HelpCircle,
-  BarChart3
+  BarChart3,
+  FolderOpen
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -24,6 +25,7 @@ import SystemStats from './settings/systemStats.vue'
 import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
+import AllShares from './settings/allShares.vue'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
 import { useTranslate } from '@tolgee/vue'
@@ -33,10 +35,12 @@ const { t } = useTranslate()
 //settings panels
 const usersPanel = ref(null)
 const mySharesPanel = ref(null)
+const allSharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
 
 const showDeletedShares = ref(false)
+const showDeletedSharesAll = ref(false)
 // Create refs for the tab contents
 const tabContents = ref({
   stats: ref(null),
@@ -44,7 +48,8 @@ const tabContents = ref({
   system: ref(null),
   users: ref(null),
   myProfile: ref(null),
-  myShares: ref(null)
+  myShares: ref(null),
+  allShares: ref(null)
 })
 
 onMounted(() => {
@@ -53,6 +58,10 @@ onMounted(() => {
   const showDeletedSharesSetting = localStorage.getItem('showDeletedShares')
   if (showDeletedSharesSetting) {
     showDeletedShares.value = showDeletedSharesSetting === 'true'
+  }
+  const showDeletedSharesAllSetting = localStorage.getItem('allSharesShowDeleted')
+  if (showDeletedSharesAllSetting) {
+    showDeletedSharesAll.value = showDeletedSharesAllSetting === 'true'
   }
 })
 
@@ -110,6 +119,7 @@ const getSettingsTitle = () => {
       users: 'Users',
       myProfile: 'My Profile',
       myShares: 'My Shares',
+      allShares: 'All Shares',
       emailTemplates: 'Email Templates'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
@@ -128,6 +138,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.myProfile')
     case 'myShares':
       return t.value('settings.title.myShares')
+    case 'allShares':
+      return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
     default:
@@ -145,8 +157,24 @@ const setShowDeletedShares = (value) => {
   mySharesPanel.value.setShowDeletedShares(value)
 }
 
+const setShowDeletedSharesAll = (value) => {
+  showDeletedSharesAll.value = value
+  localStorage.setItem('allSharesShowDeleted', value)
+  allSharesPanel.value.setShowDeletedShares(value)
+}
+
 const goToHelp = () => {
   window.open('https://new.erugo.app/docs/configuration/', '_blank')
+}
+
+const handleViewUserShares = (user) => {
+  setActiveTab('allShares')
+  // Use nextTick to ensure the component is mounted before setting the filter
+  setTimeout(() => {
+    if (allSharesPanel.value) {
+      allSharesPanel.value.setUserFilter(user.id)
+    }
+  }, 100)
 }
 </script>
 
@@ -223,6 +251,17 @@ const goToHelp = () => {
             <h2>
               <UsersIcon />
               {{ $t('settings.title.users') }}
+            </h2>
+          </div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'allShares' }"
+            @click="setActiveTab('allShares')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <FolderOpen />
+              {{ $t('settings.title.allShares') }}
             </h2>
           </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myShares' }" @click="setActiveTab('myShares')">
@@ -341,7 +380,36 @@ const goToHelp = () => {
                 </div>
               </div>
               <div class="tab-content-body">
-                <Users ref="usersPanel" v-if="store.settingsOpen" />
+                <Users ref="usersPanel" v-if="store.settingsOpen" @viewUserShares="handleViewUserShares" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'allShares'"
+              class="settings-tab-content"
+              ref="tabContents.allShares"
+              key="allShares"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <FolderOpen />
+                  <span>
+                    {{ $t('settings.title.allShares') }}
+                    <small>{{ $t('settings.description.allShares') }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <div class="checkbox-container pt-4">
+                        <input type="checkbox" id="show_deleted_shares_all" :checked="showDeletedSharesAll" @change="setShowDeletedSharesAll($event.target.checked)" />
+                        <label for="show_deleted_shares_all">{{ $t('settings.system.show_deleted_shares') }}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <AllShares ref="allSharesPanel" v-if="store.settingsOpen" />
               </div>
             </div>
             <div

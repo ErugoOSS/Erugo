@@ -291,6 +291,20 @@ export const deleteUser = async (id) => {
   return data.data
 }
 
+export const forceResetPassword = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/users/${id}/force-reset-password`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    return Promise.reject(data)
+  }
+  return data
+}
+
 // Settings Methods
 export const getSettingsByGroup = async (group) => {
   const response = await fetchWithAuth(`${apiUrl}/api/settings/group/${group}`, {
@@ -474,6 +488,24 @@ export const deleteBackgroundImage = async (file) => {
 // Share Methods
 export const getMyShares = async (showDeletedShares = false) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares?show_deleted=${showDeletedShares}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.shares
+}
+
+export const getAllShares = async (showDeletedShares = false, userId = null) => {
+  let url = `${apiUrl}/api/shares/all?show_deleted=${showDeletedShares}`
+  if (userId) {
+    url += `&user_id=${userId}`
+  }
+  const response = await fetchWithAuth(url, {
     method: 'GET',
     headers: {
       ...addJsonHeader()

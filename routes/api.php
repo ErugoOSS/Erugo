@@ -70,6 +70,9 @@ Route::group([], function ($router) {
 
         //delete a user
         Route::delete('/{id}', [UsersController::class, 'delete'])->name('users.delete');
+
+        //force reset a user's password
+        Route::post('/{id}/force-reset-password', [UsersController::class, 'forceResetPassword'])->name('users.forceResetPassword');
     });
 
 
@@ -119,6 +122,12 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+    });
+
+    //all shares [auth, admin]
+    Route::group(['prefix' => 'shares', 'middleware' => ['auth', Admin::class]], function ($router) {
+        //get all shares (admin only)
+        Route::get('/all', [SharesController::class, 'allShares'])->name('shares.allShares');
     });
 
     //manage themes [auth, admin]

@@ -297,6 +297,51 @@ class UsersController extends Controller
     }
   }
 
+  //force reset a user's password
+  public function forceResetPassword($id)
+  {
+    $currentUser = Auth::user();
+    $user = User::find($id);
+
+    if (!$user) {
+      return response()->json(
+        ['status' => 'error', 'message' => 'User not found'],
+        404
+      );
+    }
+
+    // Don't allow admins to force reset their own password through this endpoint
+    if ($currentUser->id === $user->id) {
+      return response()->json(
+        ['status' => 'error', 'message' => 'Cannot force reset your own password'],
+        400
+      );
+    }
+
+    try {
+      // Set a random password to invalidate the current one
+      $user->password = Hash::make(Str::random(64));
+      $user->must_change_password = true;
+      $user->remember_token = null;
+      $user->save();
+
+      // Send password reset email
+      $token = PasswordFacade::createToken($user);
+      sendEmail::dispatch($user->email, \App\Mail\passwordResetMail::class, ['token' => $token, 'user' => $user]);
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Password reset forced successfully. User will receive an email to set a new password.'
+      ]);
+    } catch (\Exception $e) {
+      \Log::error('Error forcing password reset for user ' . $user->id . ': ' . $e->getMessage());
+      return response()->json(
+        ['status' => 'error', 'message' => 'Failed to force password reset'],
+        500
+      );
+    }
+  }
+
 
   //create the first user
   public function createFirstUser(Request $request)

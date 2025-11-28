@@ -165,6 +165,7 @@
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre geteilten Dateien.",
+      "stats": "Ihr Erugo-System auf einen Blick",
       "system": "Verwalten Sie das Verhalten Ihrer Erugo-Instanz.",
       "users": "Verwalten Sie Ihre Benutzer."
     },
@@ -360,6 +361,7 @@
       "share": {
         "password_protect": "Freigabe mit Passwort schützen"
       },
+      "stats": "System-Statistiken",
       "system": "Systemeinstellungen",
       "users": "Benutzer",
       "users.edit": "Bearbeiten {name}"
