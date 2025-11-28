@@ -5,10 +5,10 @@
   "Message to share recipients (optional)": "Messaggio per i destinatari della condivisione (facoltativo)",
   "No files added yet": "Nessun file aggiunto",
   "No recipients": "Nessun destinatario",
-  "Powered by": "Offerto da",
-  "Reverse Share": "Azione inversa",
+  "Powered by": "Powered by",
+  "Reverse Share": "Condivisione inversa",
   "Share Name": "Nome Condivisione",
-  "Share URL": "URL per condivisione",
+  "Share URL": "URL della condivisione",
   "We'll provide you with a link instead": {
     "": "Vi forniremo invece un link"
   },
@@ -106,6 +106,8 @@
       "download": "Scaricare",
       "download_theme": "Scarica il tema",
       "download_theme_description": "Scarica il tema selezionato come file JSON. Questo può essere utilizzato per creare un nuovo tema o modificarne uno esistente.",
+      "favicon": "Favicon",
+      "favicon_description": "Caricare una favicon personalizzata per sostituire l'icona predefinita di erugo nella scheda del browser.",
       "in_pixels": "In pixel",
       "in_seconds": "secondi",
       "install_custom_theme": "Installare un tema personalizzato\n",
@@ -113,6 +115,7 @@
       "install_custom_theme_description_2": "Se scaricate un tema dal web, assicuratevi di fidarvi della fonte e di aver controllato la presenza di codice maligno prima di installarlo.",
       "install_theme": "Installare il tema",
       "logo": "Logo",
+      "logo_and_favicon": "Logo e Favicon",
       "logo_description": "Visualizzate il vostro logo aziendale in formato PNG nell'angolo in alto a sinistra. Impostare la larghezza desiderata in pixel; l'altezza si regolerà automaticamente per mantenere le proporzioni. Per garantire la qualità, utilizzare un'immagine di origine larga almeno quanto la larghezza del display.",
       "logo_image": "Immagine del logo",
       "logo_width": "Larghezza del logo",
@@ -124,15 +127,17 @@
       "show_powered_by_description": "Mostrare o nascondere il testo \"Powered by Erugo\" in fondo alla pagina. Questo testo permette a Erugo di essere scoperto dagli utenti e ci aiuta a crescere, tuttavia è possibile nasconderlo se lo si desidera.\n",
       "theme": "Temi",
       "theme_description": "Scegliete tra una serie di temi già pronti o tra quelli che avete installato.",
-      "theme_file": "File tematico",
+      "theme_file": "File del tema",
       "theme_name": "Nome del tema",
+      "upload_background": "Caricare un'immagine o un video di sfondo",
       "upload_background_image": "Caricare l'immagine di sfondo",
+      "upload_favicon": "favicon.svg",
       "use_my_backgrounds": "Usa i miei sfondi",
       "use_my_backgrounds_description": "Usa gli sfondi che hai caricato. Se non è selezionata, verranno utilizzati gli sfondi di Unsplash."
     },
     "button": {
       "branding": {
-        "save": "Salvare le impostazioni del marchio"
+        "save": "Salvare le impostazioni del branding"
       },
       "emailTemplates": {
         "save": "Salvare i modelli di e-mail"
@@ -142,7 +147,7 @@
       },
       "myShares": {
         "create": "Creare la condivisione",
-        "pruneExpired": "Cancellare le azioni scadute"
+        "pruneExpired": "Eliminare le condivisioni scadute"
       },
       "system": {
         "save": "Salvare le impostazioni del sistema"
@@ -153,13 +158,13 @@
     },
     "close": "Chiudere",
     "confirm": {
-      "pruneExpiredShares": "Siete sicuri di voler eliminare le vostre azioni scadute? Non è possibile annullare questa operazione."
+      "pruneExpiredShares": "Siete sicuri di voler eliminare le condivisioni  scadute? Non è possibile annullare questa operazione."
     },
     "description": {
-      "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete il vostro marchio.",
-      "emailTemplates": "Gestire i modelli di e-mail",
+      "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete le vostre personalizzazioni di branding.",
+      "emailTemplates": "Gestire i template di e-mail",
       "myProfile": "Gestire il proprio account.",
-      "myShares": "Gestire le azioni.",
+      "myShares": "Gestire le condivisioni.",
       "system": "Gestire il comportamento della vostra istanza Erugo.",
       "users": "Gestire gli utenti."
     },
@@ -168,9 +173,9 @@
       "accountCreatedDescription": "Inviato ai nuovi utenti quando l'amministratore crea il loro account. Contiene un link che consente all'utente di impostare la propria password.",
       "baseTemplate": "Modello base",
       "baseTemplateDescription": "Controlla il modello di base da cui ereditano tutti gli altri modelli.",
-      "error": "Impossibile caricare i modelli di e-mail",
+      "error": "Impossibile caricare i template di e-mail",
       "error_loading_templates": "Non è riuscito a caricare i modelli",
-      "error_saving_templates": "Impossibile salvare i modelli",
+      "error_saving_templates": "Impossibile salvare i template",
       "passwordReset": "Ripristino della password",
       "sections": {
         "action_text": "Testo del pulsante di azione",
@@ -184,8 +189,8 @@
       "success": "Modelli salvati con successo"
     },
     "error": {
-      "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle azioni scadute!",
-      "shareExpired": "Azione non scaduta",
+      "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle condivisioni scadute!",
+      "shareExpired": "Condivisione non scaduta",
       "shareExtended": "Impossibile estendere la quota"
     },
     "help": {
@@ -201,8 +206,8 @@
     "invite": {
       "message": "Messaggio (facoltativo)"
     },
-    "loading": "Caricamento delle azioni...",
-    "noShares": "Non avete azioni. Perché non crearne una?",
+    "loading": "Caricamento delle condivisioni...",
+    "noShares": "Non sono presenti condivisioni. Creane una!",
     "provider": {
       "edit": "Modifica",
       "view": "Vista"
@@ -218,7 +223,7 @@
       "remove_password": "Rimuovere la password"
     },
     "success": {
-      "pruneExpiredShares": "Le azioni scadute sono state programmate per l'eliminazione e verranno elaborate in background.",
+      "pruneExpiredShares": "Le condivisioni scadute sono state contrassegnate per l'eliminazione e verranno elaborate in background.",
       "shareExpired": "Quota scaduta",
       "shareExtended": "Quota estesa"
     },
@@ -227,10 +232,10 @@
       "allow_chunked_uploads_description": "La modalità Chunked upload suddivide i file in segmenti più piccoli che vengono trasferiti in sequenza. Sebbene sia leggermente più lento del caricamento diretto per i file più piccoli, questo metodo offre maggiore stabilità e affidabilità durante il trasferimento di file di grandi dimensioni. I caricamenti chunked supportano il monitoraggio dell'avanzamento e consentono agli utenti di sospendere e riprendere manualmente i trasferimenti, il che li rende ideali per i file di dimensioni superiori a 100 MB o quando si utilizzano connessioni di rete instabili.",
       "allow_direct_uploads": "Consentire la modalità di caricamento diretto",
       "allow_direct_uploads_description": "La modalità di caricamento diretto trasmette i file in un'unica richiesta ininterrotta. Sebbene questo metodo offra la velocità di trasferimento più elevata per la maggior parte dei file, i file estremamente grandi possono causare problemi di stabilità o timeout. Per ottenere prestazioni ottimali con file di dimensioni superiori a 100 MB, l'opzione migliore è rappresentata dal caricamento a pezzi.",
-      "allow_reverse_shares": "Consentire le azioni inverse",
+      "allow_reverse_shares": "Consentire le condivisioni inverse",
       "allow_reverse_shares_description": "Determina se gli utenti registrati devono avere il permesso di inviare richieste di condivisione inversa. Queste richieste forniscono a persone esterne un pass per il caricamento una tantum, consentendo loro di consegnare i file direttamente all'utente registrato che ha avviato la richiesta.\n\n\n\n\n",
       "application_name": "Nome dell'applicazione",
-      "application_name_description": "Personalizzate il nome visualizzato dell'applicazione che appare nelle barre del titolo, nelle finestre di dialogo e in altri elementi dell'interfaccia. Questo aiuta a mantenere un branding coerente in tutta l'esperienza dell'utente.",
+      "application_name_description": "Personalizzate il nome visualizzato dell'applicazione che appare nella barra del titolo, nelle finestre di dialogo e in altri elementi dell'interfaccia. Questo aiuta a mantenere un branding coerente in tutta l'esperienza dell'utente.",
       "application_url": "URL dell'applicazione",
       "application_url_description": "L'URL di base dell'applicazione. Viene utilizzato per creare collegamenti cliccabili nelle e-mail di notifica, consentendo agli utenti di tornare direttamente a pagine specifiche dell'applicazione.",
       "auth": "Autorizzazione",
@@ -246,7 +251,7 @@
       "auth_providers_description_localhost": "La configurazione dell'autenticazione esterna non è disponibile su localhost. I provider OAuth richiedono un nome di dominio completamente qualificato (FQDN) per funzionare correttamente. Per configurare queste impostazioni, accedere a Erugo attraverso un dominio registrato.",
       "callback_url": "URL di richiamo",
       "callback_url_description": "Utilizzare l'URL di callback fornito nella configurazione del provider di identità.",
-      "chunked": "Tritato",
+      "chunked": "Chunked",
       "chunked_uploads_disabled_but_default": "Avete impostato la modalità di caricamento predefinita su chunked, ma i caricamenti chunked sono disabilitati!",
       "clean_files_after": "Pulire i file dopo",
       "clean_files_after_description": "Quanto tempo dopo la scadenza di una condivisione prima che i file vengano eliminati dal sistema.",
@@ -286,7 +291,7 @@
       "provider_trust_warning_description": "Assicurarsi di configurare e abilitare solo i provider di autenticazione di cui ci si fida. I provider di autenticazione hanno privilegi di accesso elevati all'applicazione e ai dati degli utenti. L'aggiunta di provider non affidabili o compromessi potrebbe portare ad accessi non autorizzati, violazioni dei dati o acquisizione di account.",
       "reverse_shares": "Azioni inverse",
       "select_auth_provider": "Selezionare un provider di autenticazione",
-      "share_deleted_emails": "\"Email \"Condividi cancellate",
+      "share_deleted_emails": "\"Email\" Condividi cancellate ",
       "share_deleted_emails_description": "Notifica agli utenti quando le loro condivisioni sono state eliminate definitivamente dal sistema. Questo conferma il completamento del ciclo di vita dei contenuti ai fini della sicurezza e della conformità.",
       "share_deletion_warning_emails": "\"Email di avviso di \"cancellazione della condivisione",
       "share_deletion_warning_emails_description": "Avvisate in anticipo gli utenti quando le loro condivisioni scadute sono programmate per l'eliminazione definitiva. In questo modo gli utenti hanno un'ultima possibilità di salvare i contenuti importanti.",
@@ -296,11 +301,31 @@
       "share_expired_warning_emails_description": "Avvisare gli utenti quando le loro condivisioni hanno raggiunto la data di scadenza e non sono più accessibili ai destinatari. Aiuta gli utenti a mantenere la consapevolezza del loro stato di condivisione.",
       "share_expiry_warning_emails": "\"Email di avviso di \"scadenza delle azioni",
       "share_expiry_warning_emails_description": "Inviate notifiche proattive agli utenti quando le loro azioni si stanno avvicinando alla scadenza. In questo modo hanno la possibilità di estendere l'accesso, se necessario.",
+      "share_url_generation": "Generazione dell'URL di condivisione",
+      "share_url_mode": "Modalità di generazione dell'URL",
+      "share_url_mode_description": "Scegliete come generare gli URL di condivisione. Haiku crea combinazioni di parole memorabili, Random genera una stringa configurabile, Shortcode crea codici compatti in stile YouTube e UUID crea identificatori unici standard.",
+      "share_url_mode_haiku": "Stile Haiku classico",
+      "share_url_mode_random": "Stringa casuale",
+      "share_url_mode_shortcode": "Codice breve",
+      "share_url_mode_uuid": "UUID",
+      "share_url_prefix": "Prefisso URL",
+      "share_url_prefix_description": "Prefisso opzionale aggiunto a tutti gli URL di condivisione per il branding (ad esempio, \"acme\" produce \"acme-autumn-breeze\"). Lasciare vuoto per non avere un prefisso.",
+      "share_url_prefix_placeholder": "sh:",
+      "share_url_random_characters": "Caratteri consentiti",
+      "share_url_random_length": "Lunghezza della stringa casuale",
+      "share_url_random_lowercase": "Minuscole a-z",
+      "share_url_random_numbers": "numeri 0-9",
+      "share_url_random_special": "Caratteri speciali",
+      "share_url_random_uppercase": "Maiuscole A-Z",
+      "share_url_shortcode_length": "Lunghezza del codice breve",
       "shares": "Azioni",
       "show_deleted_shares": "Mostra le azioni eliminate",
       "show_language_selector": "Mostra il selettore della lingua",
       "show_language_selector_description": "Alterna la visibilità della tendina di selezione della lingua nell'angolo in alto a destra dell'applicazione. Se attivata, gli utenti possono passare rapidamente da una lingua all'altra dell'interfaccia.",
       "smtp": "SMTP",
+      "smtp_encryption": "Crittografia SMTP",
+      "smtp_encryption_description": "Se il server richiede TLS, SSL o nessuna crittografia.",
+      "smtp_encryption_none": "Nessuno",
       "smtp_host": "Host SMTP",
       "smtp_host_description": "L'indirizzo del server per il servizio di posta elettronica in uscita. Viene utilizzato per inviare notifiche e altre e-mail di sistema agli utenti.",
       "smtp_password": "Password SMTP",
@@ -325,12 +350,12 @@
       "name": "Nome"
     },
     "title": {
-      "branding": "Marchio e interfaccia utente",
-      "emailTemplates": "Modelli di e-mail",
-      "linked_accounts": "Conti collegati",
+      "branding": "Branding ed interfaccia utente ",
+      "emailTemplates": "Template di email",
+      "linked_accounts": "Account collegati",
       "manage": "Gestire",
       "myProfile": "Il mio account",
-      "myShares": "Le mie azioni",
+      "myShares": "Le mie condivisioni",
       "reverse_invite": "Creare una richiesta di condivisione inversa",
       "share": {
         "password_protect": "Protezione con password della condivisione"
@@ -340,7 +365,7 @@
       "users.edit": "Modifica {name}"
     },
     "users": {
-      "account": "Tipo di conto",
+      "account": "Tipo di account",
       "actions": "Azioni",
       "active": "Attivo",
       "add": "Aggiungi utente",
@@ -363,9 +388,9 @@
       "id": "ID",
       "leave_blank_to_keep_same_password": "Lasciare vuoto per mantenere la stessa password.",
       "link_provider_confirm": "Collegare davvero il proprio account a questo provider?",
-      "linked": "Conto collegato",
+      "linked": "Account collegato",
       "name": "Nome",
-      "not_linked": "Conto non collegato",
+      "not_linked": "Account non collegato ",
       "password": "Nuova password",
       "password_confirmation": "Conferma la nuova password",
       "password_confirmation_mismatch": "La password e la conferma della password devono corrispondere",
@@ -430,14 +455,14 @@
     "passwordNotProtected": "Aperto",
     "passwordProtected": "Protetto da password"
   },
-  "total_size": "Peso totale",
+  "total_size": "Dimensione totale",
   "upload": {
     "files": "{value, plural, other {Caricare # file}}",
     "upload_mode_not_supported": "Non è stata selezionata alcuna modalità di caricamento valida! Non sappiamo cosa suggerire perché questo non dovrebbe essere possibile."
   },
   "uploader": {
     "current_mode": {
-      "chunked": "Modalità di caricamento a pezzi",
+      "chunked": "Modalità di caricamento chunked",
       "direct": "Modalità di caricamento diretto"
     },
     "expiry_label": "L'azione scadrà nel {value} {unit} (modifica)",

@@ -106,6 +106,8 @@
       "download": "Downloaden",
       "download_theme": "Thema downloaden",
       "download_theme_description": "Download het geselecteerde thema als een JSON-bestand. Dit kan worden gebruikt om een nieuw thema te maken of een bestaand thema te wijzigen.",
+      "favicon": "Favicon",
+      "favicon_description": "Upload een aangepast favicon om het standaard erugo-pictogram in het browsertabblad te vervangen.",
       "in_pixels": "In pixels",
       "in_seconds": "seconden",
       "install_custom_theme": "Een aangepast thema installeren\n",
@@ -113,6 +115,7 @@
       "install_custom_theme_description_2": "Als u een thema downloadt van het web, zorg er dan voor dat u de bron vertrouwt en controleer het thema op kwaadaardige code voordat u het installeert.",
       "install_theme": "Thema installeren",
       "logo": "Logo",
+      "logo_and_favicon": "Logo & Favicon",
       "logo_description": "Geef je bedrijfslogo in PNG-formaat weer in de linkerbovenhoek. Stel de gewenste breedte in pixels in - de hoogte wordt automatisch aangepast om de beeldverhouding te behouden. Gebruik een bronafbeelding die minstens zo breed is als je schermbreedte om kwaliteit te garanderen.",
       "logo_image": "Logo afbeelding",
       "logo_width": "Logo Breedte",
@@ -124,9 +127,11 @@
       "show_powered_by_description": "Toon of verberg de \"Aangedreven door Erugo\" tekst onderaan de pagina. Deze tekst zorgt ervoor dat Erugo ontdekt wordt door gebruikers en helpt ons te groeien, je kunt het echter verbergen als je dat wilt.\n",
       "theme": "Thema's",
       "theme_description": "Kies uit een reeks kant-en-klare thema's of een thema dat je zelf hebt geïnstalleerd.",
-      "theme_file": "Thema Bestand",
+      "theme_file": "Themabestanden",
       "theme_name": "Themanaam",
+      "upload_background": "Upload een achtergrondafbeelding of -video",
       "upload_background_image": "Upload achtergrondafbeelding",
+      "upload_favicon": "favicon.svg",
       "use_my_backgrounds": "Mijn achtergronden gebruiken",
       "use_my_backgrounds_description": "Gebruik de achtergronden die je hebt geüpload. Als dit vakje niet is aangevinkt, worden de achtergronden van Unsplash gebruikt."
     },
@@ -153,7 +158,7 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je je verlopen aandelen wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
     },
     "description": {
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
@@ -168,9 +173,9 @@
       "accountCreatedDescription": "Wordt verstuurd naar nieuwe gebruikers wanneer een beheerder hun account aanmaakt. Bevat een link waarmee de gebruiker zijn wachtwoord kan instellen.",
       "baseTemplate": "Basis sjabloon",
       "baseTemplateDescription": "Bepaalt het basissjabloon waarvan alle andere sjablonen erven.",
-      "error": "Mislukt bij het laden van e-mailsjablonen",
+      "error": "Kan geen e-mailsjablonen uploaden",
       "error_loading_templates": "Sjablonen niet geladen",
-      "error_saving_templates": "Opslaan van sjablonen mislukt",
+      "error_saving_templates": "Sjablonen kunnen niet worden opgeslagen",
       "passwordReset": "Wachtwoord opnieuw instellen",
       "sections": {
         "action_text": "Tekst actieknop",
@@ -184,8 +189,8 @@
       "success": "Sjablonen succesvol opgeslagen"
     },
     "error": {
-      "pruneExpiredShares": "Mislukt bij het plannen van verlopen aandelen voor verwijdering!",
-      "shareExpired": "Aandeel niet verlopen",
+      "pruneExpiredShares": "Kan verwijdering van verlopen aandelen niet plannen!",
+      "shareExpired": "Delen niet verlopen",
       "shareExtended": "Niet gelukt om aandeel uit te breiden"
     },
     "help": {
@@ -201,8 +206,8 @@
     "invite": {
       "message": "Bericht (optioneel)"
     },
-    "loading": "Aandelen laden...",
-    "noShares": "Je hebt geen aandelen. Waarom maak je er geen?",
+    "loading": "Aandelen uploaden...",
+    "noShares": "Er zijn geen aandelen. Maak er een!",
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
@@ -218,7 +223,7 @@
       "remove_password": "Wachtwoord verwijderen"
     },
     "success": {
-      "pruneExpiredShares": "Vervallen aandelen zijn gepland voor verwijdering en worden op de achtergrond verwerkt.",
+      "pruneExpiredShares": "Vervallen aandelen zijn gemarkeerd voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
       "shareExtended": "Aandeel uitgebreid"
     },
@@ -227,10 +232,10 @@
       "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
       "allow_direct_uploads": "Directe uploadmodus toestaan",
       "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
-      "allow_reverse_shares": "Aandelen met terugloop toestaan",
+      "allow_reverse_shares": "Delen in omgekeerde richting toestaan",
       "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om reverse share verzoeken te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
       "application_name": "Naam toepassing",
-      "application_name_description": "Pas de weergegeven naam van je applicatie aan die wordt weergegeven in titelbalken, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
+      "application_name_description": "Pas de weergavenaam van de applicatie aan die wordt weergegeven in de titelbalk, dialoogvensters en andere interface-elementen. Dit helpt om een consistente merknaam te behouden voor de hele gebruikerservaring.",
       "application_url": "URL toepassing",
       "application_url_description": "De basis-URL van je applicatie. Deze wordt gebruikt om klikbare koppelingen te maken in notificatie-e-mails, zodat gebruikers direct terug kunnen navigeren naar specifieke pagina's binnen de applicatie.",
       "auth": "Auth",
@@ -286,7 +291,7 @@
       "provider_trust_warning_description": "Zorg ervoor dat je alleen auth providers configureert en inschakelt die je vertrouwt. Authenticatieproviders hebben verhoogde toegangsrechten tot je applicatie en gebruikersgegevens. Het toevoegen van niet-vertrouwde of gecompromitteerde providers kan leiden tot onbevoegde toegang, gegevenslekken of accountovername.",
       "reverse_shares": "Omgekeerde Aandelen",
       "select_auth_provider": "Selecteer een auth provider",
-      "share_deleted_emails": "\"Deel verwijderde\" e-mails",
+      "share_deleted_emails": "\"E-mail\" Aandeel verwijderd",
       "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun links permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
       "share_deletion_warning_emails": "\"Waarschuwingsmails \"Delen verwijderen",
       "share_deletion_warning_emails_description": "Laat gebruikers van tevoren weten wanneer hun verlopen links definitief verwijderd moeten worden. Dit geeft hen een laatste kans om belangrijke inhoud te bewaren.",
@@ -296,11 +301,31 @@
       "share_expired_warning_emails_description": "Waarschuw gebruikers wanneer hun links de vervaldatum hebben bereikt en niet langer toegankelijk zijn voor ontvangers. Helpt gebruikers zich bewust te blijven van hun deelstatus.",
       "share_expiry_warning_emails": "\"Waarschuwingsmails \"Vervallen aandelen",
       "share_expiry_warning_emails_description": "Stuur proactieve meldingen naar gebruikers wanneer hun links bijna verlopen. Dit geeft hen de mogelijkheid om de toegang te verlengen als dat nodig is.",
+      "share_url_generation": "URL delen genereren",
+      "share_url_mode": "Modus URL genereren",
+      "share_url_mode_description": "Kies hoe gedeelde URL's worden gegenereerd. Haiku creëert gedenkwaardige woordcombinaties, Random genereert een configureerbare string, Shortcode creëert compacte codes in YouTube-stijl en UUID creëert standaard unieke identifiers.",
+      "share_url_mode_haiku": "Klassieke haiku-stijl",
+      "share_url_mode_random": "Willekeurige snaar",
+      "share_url_mode_shortcode": "Verkorte code",
+      "share_url_mode_uuid": "UUID",
+      "share_url_prefix": "URL voorvoegsel",
+      "share_url_prefix_description": "Optioneel voorvoegsel toegevoegd aan alle gedeelde URL's voor branding (bijv. 'acme' produceert 'acme-autumn-breeze'). Laat leeg voor geen voorvoegsel.",
+      "share_url_prefix_placeholder": "sh:",
+      "share_url_random_characters": "Toegestane tekens",
+      "share_url_random_length": "Willekeurige tekenreekslengte",
+      "share_url_random_lowercase": "Kleine letters a-z",
+      "share_url_random_numbers": "nummers 0-9",
+      "share_url_random_special": "Speciale tekens",
+      "share_url_random_uppercase": "Hoofdletters A-Z",
+      "share_url_shortcode_length": "Lengte korte code",
       "shares": "Gedeelde Bestanden",
       "show_deleted_shares": "Verwijderde aandelen weergeven",
       "show_language_selector": "Taalkeuze tonen",
       "show_language_selector_description": "Schakel de zichtbaarheid van het taalkeuzemenu in de rechterbovenhoek van de applicatie in. Als deze optie is ingeschakeld, kunnen gebruikers snel schakelen tussen de beschikbare interfacetalen.",
       "smtp": "SMTP",
+      "smtp_encryption": "SMTP-codering",
+      "smtp_encryption_description": "Of je server TLS of SSL of geen encryptie vereist.",
+      "smtp_encryption_none": "Geen",
       "smtp_host": "SMTP Host",
       "smtp_host_description": "Het serveradres voor uw uitgaande e-mailservice. Dit wordt gebruikt om meldingen en andere systeem e-mails naar gebruikers te sturen.",
       "smtp_password": "SMTP wachtwoord",
@@ -326,8 +351,8 @@
     },
     "title": {
       "branding": "Branding & UI",
-      "emailTemplates": "Sjablonen voor e-mail",
-      "linked_accounts": "Gekoppelde accounts",
+      "emailTemplates": "E-mail sjablonen",
+      "linked_accounts": "Verwante accounts",
       "manage": "Beheer",
       "myProfile": "Mijn profiel",
       "myShares": "Mijn Gedeelde Links",
@@ -363,7 +388,7 @@
       "id": "ID",
       "leave_blank_to_keep_same_password": "Laat leeg om hetzelfde wachtwoord te behouden.",
       "link_provider_confirm": "Ben je zeker voor je account te linken aan deze provider?",
-      "linked": "Gekoppelde account",
+      "linked": "Gekoppeld account",
       "name": "Naam",
       "not_linked": "Account niet gekoppeld",
       "password": "Nieuw wachtwoord",
@@ -437,7 +462,7 @@
   },
   "uploader": {
     "current_mode": {
-      "chunked": "Modus voor gebundeld uploaden",
+      "chunked": "Modus voor gebundeld laden",
       "direct": "Directe uploadmodus"
     },
     "expiry_label": "Aandeel vervalt in {value} {unit} (verandering)",

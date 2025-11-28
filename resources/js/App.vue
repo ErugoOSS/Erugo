@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 
+
 //components
 import LanguageSelector from './components/languageSelector.vue'
 import Uploader from './components/uploader.vue'
@@ -156,7 +157,7 @@ const openReverseShareInvite = () => {
       <!-- version info: shows if show_powered_by is true -->
       <div class="powered-by" v-if="showPoweredBy">
         {{ $t('Powered by') }}
-        <a href="https://github.com/deanward/erugo">Erugo</a>
+        <a href="https://erugo.app"><img :src="'/icon.svg'" alt="Erugo" class="erugo-icon" /> Erugo</a>
       </div>
       <!-- main menu: shows if user is logged in -->
       <div class="main-menu" v-if="store.isLoggedIn()">
@@ -190,3 +191,13 @@ const openReverseShareInvite = () => {
     <ReverseInvite ref="reverseInvite" v-if="allowReverseShares && !store.isGuest() && store.isLoggedIn()" />
   </TolgeeProvider>
 </template>
+
+
+<style scoped>
+.erugo-icon {
+  width: 20px;
+  height: 20px;
+  margin-top: -5px;
+  margin-left: -5px;
+}
+</style>

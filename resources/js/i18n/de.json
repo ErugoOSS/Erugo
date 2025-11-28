@@ -6,7 +6,7 @@
   "No files added yet": "Noch keine Dateien hinzugefügt",
   "No recipients": "Keine Empfänger",
   "Powered by": "Powered by",
-  "Reverse Share": "Umgekehrte Aktie",
+  "Reverse Share": "Umgekehrte Aufteilung",
   "Share Name": "Name der Freigabe",
   "Share URL": "URL teilen",
   "We'll provide you with a link instead": {
@@ -106,6 +106,8 @@
       "download": "Herunterladen",
       "download_theme": "Theme herunterladen",
       "download_theme_description": "Laden Sie das ausgewählte Theme als JSON-Datei herunter. Damit können Sie ein neues Theme erstellen oder ein bestehendes Theme ändern.",
+      "favicon": "Favicon",
+      "favicon_description": "Laden Sie ein benutzerdefiniertes Favicon hoch, um das standardmäßige erugo-Symbol in der Browser-Registerkarte zu ersetzen.",
       "in_pixels": "In Pixel",
       "in_seconds": "Sekunden",
       "install_custom_theme": "Installieren Sie ein benutzerdefiniertes Theme\n",
@@ -113,6 +115,7 @@
       "install_custom_theme_description_2": "Wenn Sie ein Theme aus dem Internet herunterladen, stellen Sie bitte sicher, dass Sie der Quelle vertrauen und das Theme vor der Installation auf bösartigen Code überprüft haben.",
       "install_theme": "Theme installieren",
       "logo": "Logo",
+      "logo_and_favicon": "Logo & Favicon",
       "logo_description": "Zeigen Sie Ihr Firmenlogo im PNG-Format in der oberen linken Ecke an. Legen Sie die gewünschte Breite in Pixeln fest - die Höhe wird automatisch angepasst, um das Seitenverhältnis beizubehalten. Verwenden Sie ein Quellbild, das mindestens so breit ist wie Ihre Anzeigebreite, um die Qualität zu gewährleisten.",
       "logo_image": "Logo-Bild",
       "logo_width": "Logo Breite",
@@ -126,13 +129,15 @@
       "theme_description": "Wählen Sie aus einer Reihe von vorgefertigten Themes oder einem von Ihnen installierten Theme.",
       "theme_file": "Theme-Datei",
       "theme_name": "Theme Name",
+      "upload_background": "Hintergrundbild oder Video hochladen",
       "upload_background_image": "Hintergrundbild hochladen",
+      "upload_favicon": "favicon.svg",
       "use_my_backgrounds": "Meine Hintergründe verwenden",
       "use_my_backgrounds_description": "Verwenden Sie die Hintergründe, die Sie hochgeladen haben. Wenn nicht markiert, werden Unsplash-Hintergründe verwendet."
     },
     "button": {
       "branding": {
-        "save": "Branding-Einstellungen speichern"
+        "save": "Speichern der Branding-Einstellungen"
       },
       "emailTemplates": {
         "save": "E-Mail-Vorlagen speichern"
@@ -156,7 +161,7 @@
       "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden."
     },
     "description": {
-      "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihr eigenes Branding hinzu.",
+      "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihre eigenen Branding-Anpassungen hinzu.",
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre geteilten Dateien.",
@@ -168,9 +173,9 @@
       "accountCreatedDescription": "Wird an neue Benutzer gesendet, wenn ein Administrator ihr Konto erstellt. Enthält einen Link, über den der Benutzer sein Passwort festlegen kann.",
       "baseTemplate": "Basis-Vorlage",
       "baseTemplateDescription": "Steuert die Basisvorlage, von der alle anderen Vorlagen erben.",
-      "error": "E-Mail-Vorlagen konnten nicht geladen werden",
+      "error": "E-Mail-Vorlagen können nicht hochgeladen werden",
       "error_loading_templates": "Vorlagen konnten nicht geladen werden",
-      "error_saving_templates": "Vorlagen konnten nicht gespeichert werden",
+      "error_saving_templates": "Vorlagen können nicht gespeichert werden",
       "passwordReset": "Passwort zurücksetzen",
       "sections": {
         "action_text": "Text der Aktionsschaltfläche",
@@ -227,10 +232,10 @@
       "allow_chunked_uploads_description": "Der Chunked-Upload-Modus unterteilt Dateien in kleinere Segmente, die nacheinander übertragen werden. Diese Methode ist zwar bei kleineren Dateien etwas langsamer als der direkte Upload, bietet aber bei der Übertragung großer Dateien mehr Stabilität und Zuverlässigkeit. Chunked Uploads unterstützen die Verfolgung des Fortschritts und ermöglichen es dem Benutzer, die Übertragung manuell anzuhalten und fortzusetzen. Dies ist ideal für Dateien über 100 MB oder bei instabilen Netzwerkverbindungen.",
       "allow_direct_uploads": "Direkten Upload-Modus zulassen",
       "allow_direct_uploads_description": "Beim direkten Upload werden die Dateien in einer einzigen, ununterbrochenen Anfrage übertragen. Während diese Methode für die meisten Dateien die schnellsten Übertragungsgeschwindigkeiten bietet, kann es bei extrem großen Dateien zu Stabilitätsproblemen oder Timeouts kommen. Für eine optimale Leistung bei Dateien, die größer als 100 MB sind, ist der Upload in Teilen die bessere Option.",
-      "allow_reverse_shares": "Umgekehrte Aktien zulassen",
+      "allow_reverse_shares": "Umgekehrtes Teilen zulassen",
       "allow_reverse_shares_description": "Legt fest, ob Ihre registrierten Benutzer die Erlaubnis haben sollen, umgekehrte Freigabeanforderungen zu senden. Diese Anfragen geben externen Personen einen einmaligen Upload-Pass, der es ihnen ermöglicht, Dateien direkt an den registrierten Benutzer zu liefern, der die Anfrage initiiert hat.\n\n\n\n\n",
       "application_name": "Name der Anwendung",
-      "application_name_description": "Passen Sie den angezeigten Namen Ihrer Anwendung an, der in Titelleisten, Dialogfeldern und anderen Oberflächenelementen erscheint. Dies trägt dazu bei, ein konsistentes Branding in der gesamten Benutzerumgebung zu erhalten.",
+      "application_name_description": "Passen Sie den Anzeigenamen der Anwendung an, der in der Titelleiste, in Dialogfeldern und anderen Oberflächenelementen erscheint. Dies trägt dazu bei, ein konsistentes Branding während der gesamten Benutzererfahrung zu erhalten.",
       "application_url": "URL der Anwendung",
       "application_url_description": "Die Basis-URL Ihrer Anwendung. Sie wird verwendet, um anklickbare Links in Benachrichtigungs-E-Mails zu erstellen, die es den Benutzern ermöglichen, direkt zu bestimmten Seiten innerhalb der Anwendung zu navigieren.",
       "auth": "Auth",
@@ -296,11 +301,31 @@
       "share_expired_warning_emails_description": "Benachrichtigung der Nutzer, wenn ihre Freigaben ihr Verfallsdatum erreicht haben und für die Empfänger nicht mehr zugänglich sind. Hilft den Benutzern, ihren Freigabestatus im Auge zu behalten.",
       "share_expiry_warning_emails": "Warn-E-Mails bei bald ablaufenden Freigaben",
       "share_expiry_warning_emails_description": "Senden Sie proaktive Benachrichtigungen an Nutzer, wenn ihre geteilten Dateien bald ablaufen. Dies gibt ihnen die Möglichkeit, den Zugang bei Bedarf zu verlängern.",
+      "share_url_generation": "URL-Generierung freigeben",
+      "share_url_mode": "URL-Erzeugungsmodus",
+      "share_url_mode_description": "Wählen Sie, wie Freigabe-URLs generiert werden sollen. Haiku erzeugt einprägsame Wortkombinationen, Random eine konfigurierbare Zeichenfolge, Shortcode kompakte Codes im YouTube-Stil und UUID eindeutige Standardbezeichner.",
+      "share_url_mode_haiku": "Klassischer Haiku-Stil",
+      "share_url_mode_random": "Zufällige Zeichenfolge",
+      "share_url_mode_shortcode": "Kurzer Code",
+      "share_url_mode_uuid": "UUID",
+      "share_url_prefix": "URL-Präfix",
+      "share_url_prefix_description": "Optionales Präfix, das allen Freigabe-URLs zur Markenbildung hinzugefügt wird (z. B. \"acme\" ergibt \"acme-autumn-breeze\"). Leer lassen für kein Präfix.",
+      "share_url_prefix_placeholder": "sh:",
+      "share_url_random_characters": "Erlaubte Zeichen",
+      "share_url_random_length": "Zufällige Stringlänge",
+      "share_url_random_lowercase": "Kleinbuchstaben a-z",
+      "share_url_random_numbers": "Zahlen 0-9",
+      "share_url_random_special": "Besondere Zeichen",
+      "share_url_random_uppercase": "Großbuchstaben A-Z",
+      "share_url_shortcode_length": "Länge des Kurzcodes",
       "shares": "Geteilte Dateien",
       "show_deleted_shares": "Zeige gelöschte Freigaben",
       "show_language_selector": "Sprachauswahl anzeigen",
       "show_language_selector_description": "Schalten Sie die Sichtbarkeit des Sprachauswahl-Dropdowns in der oberen rechten Ecke der Anwendung um. Wenn es aktiviert ist, können Benutzer schnell zwischen den verfügbaren Sprachen der Benutzeroberfläche wechseln.",
       "smtp": "SMTP",
+      "smtp_encryption": "SMTP-Verschlüsselung",
+      "smtp_encryption_description": "Ob Ihr Server TLS oder SSL oder keine Verschlüsselung benötigt.",
+      "smtp_encryption_none": "Keine",
       "smtp_host": "SMTP-Host",
       "smtp_host_description": "Die Serveradresse für Ihren ausgehenden E-Mail-Dienst. Sie wird verwendet, um Benachrichtigungen und andere System-E-Mails an Benutzer zu senden.",
       "smtp_password": "SMTP-Passwort",
@@ -327,7 +352,7 @@
     "title": {
       "branding": "Branding & Benutzeroberfläche",
       "emailTemplates": "E-Mail-Vorlagen",
-      "linked_accounts": "Verknüpfte Konten",
+      "linked_accounts": "Verwandte Konten",
       "manage": "Verwalten Sie",
       "myProfile": "Mein Konto",
       "myShares": "Meine Freigaben",
@@ -437,7 +462,7 @@
   },
   "uploader": {
     "current_mode": {
-      "chunked": "Chunked-Upload-Modus",
+      "chunked": "Chunked-Loading-Modus",
       "direct": "Direkter Upload-Modus"
     },
     "expiry_label": "Die Aktie verfällt am {value} {unit} (Änderung)",

@@ -113,6 +113,7 @@
       "install_custom_theme_description_2": "Si vous téléchargez un thème à partir du web, assurez-vous que vous avez confiance en la source et que vous avez vérifié que le thème ne contient pas de code malveillant avant de l'installer.",
       "install_theme": "Installer le thème",
       "logo": "Logo",
+      "logo_and_favicon": "Logo",
       "logo_description": "Affichez le logo de votre entreprise au format PNG dans le coin supérieur gauche. Définissez la largeur souhaitée en pixels - la hauteur s'ajustera automatiquement pour maintenir le rapport hauteur/largeur. Utilisez une image source dont la largeur est au moins égale à la largeur d'affichage pour garantir la qualité.",
       "logo_image": "Image du logo",
       "logo_width": "Largeur du logo",
@@ -212,7 +213,7 @@
     },
     "settingsSavedSuccessfully": "Paramètres enregistrés avec succès",
     "share": {
-      "password": "Partager le mot de passe",
+      "password": "Mot de passe du partage",
       "password_confirm": "Confirmer le mot de passe du partage",
       "password_protect_description": "Créez un mot de passe pour votre partage. Toute personne téléchargeant ce partage aura besoin de ce mot de passe pour y accéder. Remarque : après sa création, ce mot de passe sera crypté et nous ne pourrons pas le récupérer pour vous. Veillez à le sauvegarder dans un endroit sûr.",
       "remove_password": "Supprimer le mot de passe"
