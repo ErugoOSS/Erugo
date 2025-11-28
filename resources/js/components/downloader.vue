@@ -171,7 +171,12 @@ const filesByDirectory = computed(() => {
         }}
       </div>
       <div class="share-files-list">
-        <directory-item :structure="filesByDirectory" :is-root="true" :read-only="true" />
+        <directory-item 
+          :structure="filesByDirectory" 
+          :is-root="true" 
+          :read-only="true" 
+          :share-code="downloadShareCode"
+        />
       </div>
       <div class="share-message mt-3" v-if="share.description">
         <h6>{{ $t('message.from', { name: splitFullName(share.user.name) }) }}</h6>

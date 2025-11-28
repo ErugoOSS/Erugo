@@ -88,6 +88,11 @@
       "name": "Mijn volledige naam",
       "unlink": "Ontkoppelen"
     },
+    "allShares": {
+      "allUsers": "Alle gebruikers",
+      "filterByUser": "Filter op gebruiker",
+      "noShares": "Er zijn geen aandelen om te laten zien"
+    },
     "authProvidersSavedSuccessfully": "Auth providers succesvol opgeslagen",
     "branding": {
       "background_images": "Achtergrondafbeeldingen",
@@ -161,6 +166,7 @@
       "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
     },
     "description": {
+      "allShares": "Aandelen van alle gebruikers bekijken en beheren",
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
       "emailTemplates": "E-mailsjablonen beheren",
       "myProfile": "Beheer je profiel",
@@ -222,6 +228,95 @@
       "password_confirm": "Wachtwoord gedeelde link bevestigen",
       "password_protect_description": "Maak een wachtwoord aan voor je gedeelde link. Iedereen die dit bestand downloadt, heeft dit wachtwoord nodig om toegang te krijgen. Let op: Na het aanmaken wordt dit wachtwoord versleuteld en kunnen we het niet voor je achterhalen. Zorg ervoor dat je het op een veilige locatie opslaat.",
       "remove_password": "Wachtwoord verwijderen"
+    },
+    "stats": {
+      "downloads": {
+        "all_time": "Downloads aller tijden",
+        "chart_title": "Downloads in de loop der tijd",
+        "days_option": "{days} dagen",
+        "downloads": "downloads",
+        "downloads_in_period": "Downloads ({days} dagen)",
+        "time_period": "Periode:",
+        "title": "Activiteit downloaden",
+        "top_shares": "Meest gedownloade aandelen",
+        "unique_downloaders": "Unieke downloaders"
+      },
+      "error_loading": "Kan systeemstatistieken niet laden",
+      "file_types": {
+        "categories": {
+          "archives": "Archief",
+          "audio": "Audio",
+          "code": "Code",
+          "documents": "Documenten",
+          "images": "Afbeeldingen",
+          "other": "Andere",
+          "videos": "Video's"
+        },
+        "files": "bestanden",
+        "title": "Bestandstype Distributie"
+      },
+      "help": {
+        "active_vs_expired_description": "Actieve shares zijn toegankelijk, terwijl verlopen shares in afwachting zijn van verwijdering op basis van je opruiminstellingen.",
+        "active_vs_expired_title": "Actief vs Verlopen",
+        "categories_description": "Bestanden zijn gegroepeerd op type: afbeeldingen, documenten, video's, audio, archieven, code en overige.",
+        "categories_title": "Categorieën",
+        "disk_usage_description": "Toont het totale gebruik van schijfruimte. Overweeg om oude shares op te ruimen als het gebruik hoog is.",
+        "disk_usage_title": "Schijfgebruik",
+        "downloads_description": "Volg de downloadactiviteit van alle aandelen over de door jou geselecteerde periode.",
+        "downloads_title": "Activiteit downloaden",
+        "file_types_description": "Indeling van bestanden per categorie op alle shares.",
+        "file_types_title": "Bestandstype Distributie",
+        "guest_users_description": "Gebruikers die zijn aangemaakt via omgekeerde uitnodigingen voor delen.",
+        "guest_users_title": "Gastgebruikers",
+        "shares_description": "Overzicht van alle aandelen in het systeem, inclusief hun huidige status.",
+        "shares_title": "Statistieken delen",
+        "storage_description": "Controleer het schijfgebruik van je server en de ruimte die shares innemen.",
+        "storage_title": "Overzicht opslag",
+        "unique_downloaders_description": "Aantal unieke IP-adressen die aandelen hebben gedownload.",
+        "unique_downloaders_title": "Unieke downloaders",
+        "users_description": "Overzicht van gebruikersaccounts en hun activiteitsniveaus.",
+        "users_title": "Gebruikersstatistieken"
+      },
+      "loading": "Statistieken worden geladen...",
+      "nav": {
+        "downloads": "Downloads",
+        "file_types": "Bestandstypen",
+        "shares": "Gedeelde Bestanden",
+        "storage": "Opslag",
+        "users": "Gebruikers"
+      },
+      "refresh": "Vernieuw",
+      "shares": {
+        "active_shares": "Actieve aandelen",
+        "deleted": "Verwijderd",
+        "expired": "Verlopen",
+        "last_7_days": "Laatste 7 dagen",
+        "per_share": "per aandeel",
+        "protected": "Beschermd",
+        "title": "Statistieken delen",
+        "total_files": "Totaal Bestanden",
+        "total_shares": "Totaal aandelen"
+      },
+      "storage": {
+        "available_space": "Beschikbare ruimte",
+        "disk_usage": "Schijfgebruik",
+        "free": "gratis",
+        "of": "van",
+        "of_disk": "van schijf",
+        "share_storage": "Opslag delen",
+        "title": "Overzicht opslag",
+        "used": "tweedehands"
+      },
+      "users": {
+        "active": "Actief",
+        "admins": "Admins",
+        "guests": "Gasten",
+        "shares": "aandelen",
+        "title": "Gebruikersstatistieken",
+        "top_users": "Meest actieve gebruikers",
+        "total_users": "Totaal gebruikers",
+        "with_shares": "Gebruikers met aandelen"
+      }
     },
     "success": {
       "pruneExpiredShares": "Vervallen aandelen zijn gemarkeerd voor verwijdering en worden op de achtergrond verwerkt.",
@@ -351,6 +446,7 @@
       "name": "Naam"
     },
     "title": {
+      "allShares": "Alle Aandelen",
       "branding": "Branding & UI",
       "emailTemplates": "E-mail sjablonen",
       "linked_accounts": "Verwante accounts",
@@ -387,6 +483,7 @@
       "failed_to_create_user": "Gebruiker niet aangemaakt",
       "failed_to_delete_user": "Gebruiker niet verwijderd",
       "failed_to_update_user": "Gebruiker kon niet worden bijgewerkt",
+      "force_reset_password": "Wachtwoord opnieuw instellen",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Laat leeg om hetzelfde wachtwoord te behouden.",
       "link_provider_confirm": "Ben je zeker voor je account te linken aan deze provider?",
@@ -413,6 +510,7 @@
       "user_created_successfully": "Gebruiker succesvol aangemaakt",
       "user_deleted_successfully": "Gebruiker is succesvol verwijderd",
       "user_updated_successfully": "Gebruiker succesvol bijgewerkt",
+      "view_shares": "Aandelen bekijken",
       "you": "U"
     }
   },

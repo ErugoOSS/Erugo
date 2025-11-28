@@ -218,6 +218,24 @@
       "password_protect_description": "Créez un mot de passe pour votre partage. Toute personne téléchargeant ce partage aura besoin de ce mot de passe pour y accéder. Remarque : après sa création, ce mot de passe sera crypté et nous ne pourrons pas le récupérer pour vous. Veillez à le sauvegarder dans un endroit sûr.",
       "remove_password": "Supprimer le mot de passe"
     },
+    "stats": {
+      "file_types": {
+        "categories": {
+          "other": "Autres"
+        }
+      },
+      "nav": {
+        "downloads": "Téléchargements",
+        "shares": "Partage",
+        "users": "Utilisateurs"
+      },
+      "shares": {
+        "deleted": "Supprimé"
+      },
+      "users": {
+        "active": "Actif"
+      }
+    },
     "success": {
       "pruneExpiredShares": "Les partages expirés ont été programmées pour être supprimées et seront traités en arrière-plan.",
       "shareExpired": "Partage expiré",

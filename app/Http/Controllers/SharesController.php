@@ -158,7 +158,7 @@ class SharesController extends Controller
 
         $this->createDownloadRecord($share);
 
-        return response()->download($sharePath . '/' . $share->files[0]->name);
+        return response()->download($sharePath . '/' . $share->files[0]->name, $share->files[0]->display_name);
       } else {
         return redirect()->to('/shares/' . $shareId);
       }
@@ -202,6 +202,137 @@ class SharesController extends Controller
     return view('shares.failed', [
       'share' => $share,
       'settings' => $this->getSettings()
+    ]);
+  }
+
+  /**
+   * Download a specific file from a multi-file share
+   * The filepath can include nested directories (e.g., "folder/subfolder/file.txt")
+   */
+  public function downloadFile($shareId, $filepath)
+  {
+    $share = Share::where('long_id', $shareId)->with('files')->first();
+    if (!$share) {
+      return response()->json(['error' => 'Share not found'], 404);
+    }
+
+    if ($share->password) {
+      $password = request()->input('password');
+      if (!$password) {
+        return response()->json(['error' => 'Password required'], 401);
+      }
+      if (!Hash::check($password, $share->password)) {
+        return response()->json(['error' => 'Invalid password'], 401);
+      }
+    }
+
+    if ($share->expires_at < Carbon::now()) {
+      return response()->json(['error' => 'Share expired'], 410);
+    }
+
+    if ($share->download_limit != null && $share->download_count >= $share->download_limit) {
+      return response()->json(['error' => 'Download limit reached'], 410);
+    }
+
+    if (!$this->checkShareAccess($share)) {
+      return response()->json(['error' => 'Access denied'], 403);
+    }
+
+    // Decode the filepath (it may be URL encoded)
+    $filepath = urldecode($filepath);
+
+    // For single file shares, check if the requested file matches
+    if ($share->file_count == 1) {
+      $file = $share->files[0];
+      $expectedPath = $file->full_path ? $file->full_path . '/' . $file->display_name : $file->display_name;
+      
+      if ($filepath === $expectedPath || $filepath === $file->display_name) {
+        $sharePath = storage_path('app/shares/' . $share->path);
+        $filePath = $sharePath . '/' . $file->name;
+        
+        if (file_exists($filePath)) {
+          $this->createDownloadRecord($share);
+          return response()->download($filePath, $file->display_name);
+        }
+      }
+      return response()->json(['error' => 'File not found'], 404);
+    }
+
+    // For multi-file shares, we need to extract from the zip
+    if ($share->status !== 'ready') {
+      return response()->json(['error' => 'Share is not ready'], 400);
+    }
+
+    $sharePath = storage_path('app/shares/' . $share->path);
+    $zipPath = $sharePath . '.zip';
+
+    if (!file_exists($zipPath)) {
+      return response()->json(['error' => 'Archive not found'], 404);
+    }
+
+    // Find the file in the share's file list to validate it exists
+    $foundFile = null;
+    foreach ($share->files as $file) {
+      $expectedPath = $file->full_path ? $file->full_path . '/' . $file->display_name : $file->display_name;
+      if ($filepath === $expectedPath || $filepath === $file->display_name) {
+        $foundFile = $file;
+        break;
+      }
+    }
+
+    if (!$foundFile) {
+      return response()->json(['error' => 'File not found in share'], 404);
+    }
+
+    // Build the path as it exists in the zip (using sanitized name)
+    $zipFilePath = $foundFile->full_path ? $foundFile->full_path . '/' . $foundFile->name : $foundFile->name;
+
+    // Open the zip and stream the file
+    $zip = new \ZipArchive();
+    if ($zip->open($zipPath) !== true) {
+      return response()->json(['error' => 'Failed to open archive'], 500);
+    }
+
+    // Try to find the file in the zip
+    $fileIndex = $zip->locateName($zipFilePath);
+    if ($fileIndex === false) {
+      // Try without the path prefix (zip might have different structure)
+      $fileIndex = $zip->locateName($foundFile->name);
+    }
+
+    if ($fileIndex === false) {
+      $zip->close();
+      return response()->json(['error' => 'File not found in archive'], 404);
+    }
+
+    // Get file stats
+    $stat = $zip->statIndex($fileIndex);
+    $fileSize = $stat['size'];
+
+    // Get the stream
+    $stream = $zip->getStream($zip->getNameIndex($fileIndex));
+    if (!$stream) {
+      $zip->close();
+      return response()->json(['error' => 'Failed to read file from archive'], 500);
+    }
+
+    $this->createDownloadRecord($share);
+
+    // Determine content type
+    $mimeType = $foundFile->type ?? 'application/octet-stream';
+
+    // Stream the response
+    return response()->stream(function () use ($stream, $zip) {
+      while (!feof($stream)) {
+        echo fread($stream, 8192);
+        flush();
+      }
+      fclose($stream);
+      $zip->close();
+    }, 200, [
+      'Content-Type' => $mimeType,
+      'Content-Disposition' => 'attachment; filename="' . $foundFile->display_name . '"',
+      'Content-Length' => $fileSize,
     ]);
   }
 

@@ -177,6 +177,11 @@ Route::group([], function ($router) {
 
     //download shares [public]
     Route::any('/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
+    
+    //download specific file from share [public] - filepath can include nested directories
+    Route::get('/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
+        ->where('filepath', '.*')
+        ->name('shares.downloadFile');
 
     //use background image [public]
     Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');

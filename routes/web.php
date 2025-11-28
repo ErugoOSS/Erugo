@@ -74,13 +74,49 @@ Route::get('/reset-password/{token}', function ($token) {
     return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
 });
 
-Route::get('/shares/{share}', function () {
+Route::get('/shares/{share}', function ($shareId) {
+    // Detect CLI tools (curl, wget, etc.) and serve file directly
+    $userAgent = request()->userAgent() ?? '';
+    $cliPatterns = [
+        '/^curl\//i',
+        '/^wget\//i',
+        '/^libcurl/i',
+        '/^Wget/i',
+        '/^HTTPie\//i',
+    ];
+    
+    $isCli = false;
+    foreach ($cliPatterns as $pattern) {
+        if (preg_match($pattern, $userAgent)) {
+            $isCli = true;
+            break;
+        }
+    }
+    
+    if ($isCli) {
+        // Serve file directly (curl uses Content-Disposition with -OJ flag)
+        $controller = app(\App\Http\Controllers\SharesController::class);
+        return $controller->download($shareId);
+    }
+
     $indexedSettings = getSettings();
 
     $theme = Theme::where('active', true)->first();
 
     return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
 });
+
+// Direct download route with filename in URL (for wget compatibility - wget uses URL path for filename)
+Route::get('/shares/{share}/{filename}', function ($shareId, $filename) {
+    $controller = app(\App\Http\Controllers\SharesController::class);
+    return $controller->download($shareId);
+})->where('filename', '[^/]+'); // Only match single filename, not paths
+
+// Download specific file from a multi-file share (supports nested paths)
+Route::get('/shares/{share}/file/{filepath}', function ($shareId, $filepath) {
+    $controller = app(\App\Http\Controllers\SharesController::class);
+    return $controller->downloadFile($shareId, $filepath);
+})->where('filepath', '.*');
 
 
 Route::get('/get-logo', function () {

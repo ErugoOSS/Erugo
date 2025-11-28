@@ -88,6 +88,11 @@
       "name": "Mein vollständiger Name",
       "unlink": "Unlink"
     },
+    "allShares": {
+      "allUsers": "Alle Benutzer",
+      "filterByUser": "Filter nach Benutzer",
+      "noShares": "Es gibt keine Aktien zu zeigen"
+    },
     "authProvidersSavedSuccessfully": "Auth-Provider erfolgreich gespeichert",
     "branding": {
       "background_images": "Hintergrundbilder",
@@ -161,6 +166,7 @@
       "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden."
     },
     "description": {
+      "allShares": "Anzeigen und Verwalten von Freigaben durch alle Benutzer",
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihre eigenen Branding-Anpassungen hinzu.",
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
@@ -222,6 +228,95 @@
       "password_confirm": "Freigabepasswort bestätigen",
       "password_protect_description": "Erstellen Sie ein Passwort für Ihre Freigabe. Jeder, der diese Freigabe herunterlädt, benötigt dieses Passwort, um darauf zuzugreifen. Bitte beachten Sie: Nach der Erstellung wird dieses Kennwort verschlüsselt und wir können es nicht für Sie abrufen. Speichern Sie es daher an einem sicheren Ort.",
       "remove_password": "Passwort entfernen"
+    },
+    "stats": {
+      "downloads": {
+        "all_time": "All-Time Downloads",
+        "chart_title": "Downloads im Laufe der Zeit",
+        "days_option": "{days} Tage",
+        "downloads": "Downloads",
+        "downloads_in_period": "Downloads ({days} Tage)",
+        "time_period": "Zeitspanne:",
+        "title": "Aktivität herunterladen",
+        "top_shares": "Meist heruntergeladene Aktien",
+        "unique_downloaders": "Einzigartige Downloader"
+      },
+      "error_loading": "Systemstatistiken konnten nicht geladen werden",
+      "file_types": {
+        "categories": {
+          "archives": "Archiv",
+          "audio": "Audio",
+          "code": "Code",
+          "documents": "Dokumente",
+          "images": "Bilder",
+          "other": "Andere",
+          "videos": "Videos"
+        },
+        "files": "Dateien",
+        "title": "Dateityp Verteilung"
+      },
+      "help": {
+        "active_vs_expired_description": "Aktive Freigaben sind zugänglich, während abgelaufene Freigaben gemäß Ihren Bereinigungseinstellungen zum Löschen anstehen.",
+        "active_vs_expired_title": "Aktiv vs. Abgelaufen",
+        "categories_description": "Die Dateien sind nach Typ gruppiert: Bilder, Dokumente, Videos, Audio, Archive, Code und andere.",
+        "categories_title": "Kategorien",
+        "disk_usage_description": "Zeigt die gesamte Speicherplatznutzung an. Erwägen Sie, alte Freigaben zu bereinigen, wenn die Nutzung hoch ist.",
+        "disk_usage_title": "Nutzung der Festplatte",
+        "downloads_description": "Verfolgen Sie die Download-Aktivität für alle Freigaben über den von Ihnen gewählten Zeitraum.",
+        "downloads_title": "Aktivität herunterladen",
+        "file_types_description": "Aufschlüsselung der Dateien nach Kategorie über alle Freigaben hinweg.",
+        "file_types_title": "Dateityp Verteilung",
+        "guest_users_description": "Benutzer, die über umgekehrte Einladungen zur gemeinsamen Nutzung erstellt wurden.",
+        "guest_users_title": "Gast-Benutzer",
+        "shares_description": "Übersicht über alle Aktien im System, einschließlich ihres aktuellen Status.",
+        "shares_title": "Statistik teilen",
+        "storage_description": "Überwachen Sie die Festplattennutzung Ihres Servers und den von den Freigaben verbrauchten Speicherplatz.",
+        "storage_title": "Überblick über die Speicherung",
+        "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Aktien heruntergeladen haben.",
+        "unique_downloaders_title": "Einzigartige Downloader",
+        "users_description": "Überblick über die Benutzerkonten und deren Aktivitätsniveau.",
+        "users_title": "Benutzer-Statistik"
+      },
+      "loading": "Laden der Statistiken...",
+      "nav": {
+        "downloads": "Herunterladen",
+        "file_types": "Datei-Typen",
+        "shares": "Geteilte Dateien",
+        "storage": "Lagerung",
+        "users": "Benutzer"
+      },
+      "refresh": "Auffrischen",
+      "shares": {
+        "active_shares": "Aktive Aktien",
+        "deleted": "Gelöscht",
+        "expired": "Abgelaufen",
+        "last_7_days": "Letzte 7 Tage",
+        "per_share": "pro Aktie",
+        "protected": "Geschützt",
+        "title": "Statistik teilen",
+        "total_files": "Dateien insgesamt",
+        "total_shares": "Anteile insgesamt"
+      },
+      "storage": {
+        "available_space": "Verfügbarer Platz",
+        "disk_usage": "Nutzung der Festplatte",
+        "free": "kostenlos",
+        "of": "von",
+        "of_disk": "der Scheibe",
+        "share_storage": "Speicher teilen",
+        "title": "Überblick über die Speicherung",
+        "used": "gebraucht"
+      },
+      "users": {
+        "active": "Aktiv",
+        "admins": "Admins",
+        "guests": "Gäste",
+        "shares": "Aktien",
+        "title": "Benutzer-Statistik",
+        "top_users": "Aktivste Benutzer",
+        "total_users": "Benutzer insgesamt",
+        "with_shares": "Benutzer mit Anteilen"
+      }
     },
     "success": {
       "pruneExpiredShares": "Abgelaufene geteilten Dateien sind zur Löschung vorgesehen und werden im Hintergrund verarbeitet.",
@@ -351,6 +446,7 @@
       "name": "Name"
     },
     "title": {
+      "allShares": "Alle Aktien",
       "branding": "Branding & Benutzeroberfläche",
       "emailTemplates": "E-Mail-Vorlagen",
       "linked_accounts": "Verwandte Konten",
@@ -387,6 +483,7 @@
       "failed_to_create_user": "Benutzer konnte nicht erstellt werden",
       "failed_to_delete_user": "Benutzer konnte nicht gelöscht werden",
       "failed_to_update_user": "Benutzer konnte nicht aktualisiert werden",
+      "force_reset_password": "Passwort zurücksetzen",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Leer lassen, um dasselbe Passwort beizubehalten.",
       "link_provider_confirm": "Möchten Sie Ihr Konto wirklich mit diesem Anbieter verknüpfen?",
@@ -413,6 +510,7 @@
       "user_created_successfully": "Benutzer erfolgreich angelegt",
       "user_deleted_successfully": "Benutzer wurde erfolgreich gelöscht",
       "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
+      "view_shares": "Aktien ansehen",
       "you": "Sie"
     }
   },

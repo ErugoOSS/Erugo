@@ -27,6 +27,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
+import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
 import { useTranslate } from '@tolgee/vue'
@@ -42,6 +43,8 @@ const systemSettings = ref(null)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
+const allSharesUsers = ref([])
+const selectedUserId = ref(null)
 // Create refs for the tab contents
 const tabContents = ref({
   stats: ref(null),
@@ -78,6 +81,9 @@ const clickOutside = (e) => {
 
 const setActiveTab = (tab) => {
   activeTab.value = tab
+  if (tab === 'allShares' && allSharesUsers.value.length === 0) {
+    loadAllSharesUsers()
+  }
 }
 
 const getInitialTab = () => {
@@ -173,9 +179,26 @@ const handleViewUserShares = (user) => {
   // Use nextTick to ensure the component is mounted before setting the filter
   setTimeout(() => {
     if (allSharesPanel.value) {
+      selectedUserId.value = user.id
       allSharesPanel.value.setUserFilter(user.id)
     }
   }, 100)
+}
+
+const loadAllSharesUsers = async () => {
+  try {
+    const data = await getUsers()
+    allSharesUsers.value = data.users || []
+  } catch (error) {
+    console.error('Failed to load users', error)
+  }
+}
+
+const handleUserFilterChange = (event) => {
+  selectedUserId.value = event.target.value || null
+  if (allSharesPanel.value) {
+    allSharesPanel.value.setUserFilter(selectedUserId.value)
+  }
 }
 </script>
 
@@ -411,6 +434,14 @@ const handleViewUserShares = (user) => {
                         <input type="checkbox" id="show_deleted_shares_all" :checked="showDeletedSharesAll" @change="setShowDeletedSharesAll($event.target.checked)" />
                         <label for="show_deleted_shares_all">{{ $t('settings.system.show_deleted_shares') }}</label>
                       </div>
+                    </div>
+                    <div class="col-auto">
+                      <select id="user-filter-all" class="user-filter-select" @change="handleUserFilterChange" :value="selectedUserId || ''">
+                        <option value="">{{ $t('settings.allShares.allUsers') }}</option>
+                        <option v-for="user in allSharesUsers" :key="user.id" :value="user.id">
+                          {{ user.name }} ({{ user.email }})
+                        </option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -707,5 +738,22 @@ const handleViewUserShares = (user) => {
 
 .fade-enter-active {
   z-index: 1;
+}
+
+.user-filter-select {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--panel-section-background-color-alt);
+  background: var(--panel-section-background-color-alt);
+  color: var(--panel-section-text-color);
+  font-size: 0.9rem;
+  min-width: 200px;
+  cursor: pointer;
+  margin-top: 16px;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--button-primary-background-color);
+  }
 }
 </style>

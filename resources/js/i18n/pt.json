@@ -88,6 +88,11 @@
       "name": "O meu nome completo",
       "unlink": "Desassociar"
     },
+    "allShares": {
+      "allUsers": "Todos os utilizadores",
+      "filterByUser": "Filtrar por utilizador",
+      "noShares": "Não há acções para mostrar"
+    },
     "authProvidersSavedSuccessfully": "Fornecedores de autenticação alterados com sucesso",
     "branding": {
       "background_images": "Imagens de Fundo",
@@ -161,6 +166,7 @@
       "pruneExpiredShares": "Tem a certeza de que pretende eliminar as suas transferências expiradas? Não as poderá recuperar."
     },
     "description": {
+      "allShares": "Ver e gerir as partilhas de todos os utilizadores",
       "branding": "Personalizar a interface de utilizador da Erugo e adicionar a sua marca.",
       "emailTemplates": "Gerir modelos de correio eletrónico",
       "myProfile": "Gerir o seu perfil.",
@@ -222,6 +228,95 @@
       "password_confirm": "Confirmar a palavra-passe de partilha",
       "password_protect_description": "Crie uma palavra-passe para a sua partilha. Qualquer pessoa que descarregue esta partilha necessitará desta palavra-passe para aceder à mesma. Nota: Após a criação, esta palavra-passe será encriptada e não será possível recuperá-la. Certifique-se de que a guarda num local seguro.",
       "remove_password": "Remover a palavra-passe"
+    },
+    "stats": {
+      "downloads": {
+        "all_time": "Downloads de todos os tempos",
+        "chart_title": "Downloads ao longo do tempo",
+        "days_option": "{days} dias",
+        "downloads": "descarregamentos",
+        "downloads_in_period": "Descargas ({days} dias)",
+        "time_period": "Período de tempo:",
+        "title": "Descarregar atividade",
+        "top_shares": "Acções mais descarregadas",
+        "unique_downloaders": "Descarregadores únicos"
+      },
+      "error_loading": "Falha ao carregar as estatísticas do sistema",
+      "file_types": {
+        "categories": {
+          "archives": "Arquivos",
+          "audio": "Áudio",
+          "code": "Código",
+          "documents": "Documentos",
+          "images": "Imagens",
+          "other": "Outras",
+          "videos": "Vídeos"
+        },
+        "files": "ficheiros",
+        "title": "Distribuição do tipo de ficheiro"
+      },
+      "help": {
+        "active_vs_expired_description": "As partilhas activas estão acessíveis, enquanto as expiradas estão pendentes de eliminação com base nas suas definições de limpeza.",
+        "active_vs_expired_title": "Ativo vs Expirado",
+        "categories_description": "Os ficheiros são agrupados por tipo: imagens, documentos, vídeos, áudio, arquivos, código e outros.",
+        "categories_title": "Categorias",
+        "disk_usage_description": "Mostra a utilização total do espaço em disco. Considere a limpeza de partilhas antigas se a utilização for elevada.",
+        "disk_usage_title": "Utilização do disco",
+        "downloads_description": "Acompanhe a atividade de transferência em todas as acções durante o período de tempo selecionado.",
+        "downloads_title": "Descarregar atividade",
+        "file_types_description": "Repartição dos ficheiros por categoria em todas as partilhas.",
+        "file_types_title": "Distribuição do tipo de ficheiro",
+        "guest_users_description": "Utilizadores criados através de convites de partilha inversa.",
+        "guest_users_title": "Utilizadores convidados",
+        "shares_description": "Visão geral de todas as acções no sistema, incluindo o seu estado atual.",
+        "shares_title": "Partilhar estatísticas",
+        "storage_description": "Monitorize a utilização do disco do seu servidor e o espaço consumido pelas partilhas.",
+        "storage_title": "Visão geral do armazenamento",
+        "unique_downloaders_description": "Contagem de endereços IP únicos que descarregaram partilhas.",
+        "unique_downloaders_title": "Descarregadores únicos",
+        "users_description": "Visão geral das contas de utilizador e dos seus níveis de atividade.",
+        "users_title": "Estatísticas dos utilizadores"
+      },
+      "loading": "A carregar estatísticas...",
+      "nav": {
+        "downloads": "Descarregamentos",
+        "file_types": "Tipos de ficheiros",
+        "shares": "Partilhas",
+        "storage": "Armazenamento",
+        "users": "Utilizadores"
+      },
+      "refresh": "Atualizar",
+      "shares": {
+        "active_shares": "Acções Activas",
+        "deleted": "Eliminado",
+        "expired": "Expirado",
+        "last_7_days": "Últimos 7 dias",
+        "per_share": "por ação",
+        "protected": "Protegido",
+        "title": "Partilhar estatísticas",
+        "total_files": "Total de ficheiros",
+        "total_shares": "Total de acções"
+      },
+      "storage": {
+        "available_space": "Espaço disponível",
+        "disk_usage": "Utilização do disco",
+        "free": "livre",
+        "of": "de",
+        "of_disk": "do disco",
+        "share_storage": "Partilhar armazenamento",
+        "title": "Visão geral do armazenamento",
+        "used": "utilizado"
+      },
+      "users": {
+        "active": "Ativar",
+        "admins": "Administradores",
+        "guests": "Convidados",
+        "shares": "acções",
+        "title": "Estatísticas dos utilizadores",
+        "top_users": "Utilizadores mais activos",
+        "total_users": "Total de utilizadores",
+        "with_shares": "Utilizadores com acções"
+      }
     },
     "success": {
       "pruneExpiredShares": "As transferências expiradas foram agendadas para eliminação e serão processadas em segundo plano.",
@@ -351,6 +446,7 @@
       "name": "Nome"
     },
     "title": {
+      "allShares": "Todas as acções",
       "branding": "Marca & Interface",
       "emailTemplates": "Modelos de correio eletrónico",
       "linked_accounts": "Contas Conectadas",
@@ -387,6 +483,7 @@
       "failed_to_create_user": "Falha ao criar o utilizador",
       "failed_to_delete_user": "Falha ao eliminar o utilizador",
       "failed_to_update_user": "Falha ao atualizar o utilizador",
+      "force_reset_password": "Repor a palavra-passe",
       "id": "Identificação",
       "leave_blank_to_keep_same_password": "Deixar vazio para manter a mesma palavra passe.",
       "link_provider_confirm": "Deseja realmente associar a sua conta a este fornecedor?",
@@ -413,6 +510,7 @@
       "user_created_successfully": "Utilizador criado com sucesso",
       "user_deleted_successfully": "Utilizador eliminado com sucesso",
       "user_updated_successfully": "Utilizador atualizado com sucesso",
+      "view_shares": "Ver acções",
       "you": "Você"
     }
   },

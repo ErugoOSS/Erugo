@@ -82,6 +82,16 @@ const editUserFormClickOutside = (event) => {
   }
 }
 
+const resetPasswordFormActive = ref(false)
+const resetPasswordUser = ref(null)
+
+const resetPasswordFormClickOutside = (event) => {
+  if (!event.target.closest('.user-form')) {
+    resetPasswordFormActive.value = false
+    resetPasswordUser.value = null
+  }
+}
+
 const saveUser = () => {
   errors.value = {}
 
@@ -135,17 +145,24 @@ const handleForceResetPassword = (user) => {
     return
   }
 
-  if (confirm(t.value('settings.users.confirm_force_reset_password', { name: user.name }))) {
-    forceResetPassword(user.id).then(
-      (data) => {
-        loadUsers()
-        toast.success(t.value('settings.users.force_reset_password_success'))
-      },
-      (error) => {
-        toast.error(t.value('settings.users.force_reset_password_failed'))
-      }
-    )
-  }
+  resetPasswordUser.value = user
+  resetPasswordFormActive.value = true
+}
+
+const confirmForceResetPassword = () => {
+  if (!resetPasswordUser.value) return
+
+  forceResetPassword(resetPasswordUser.value.id).then(
+    (data) => {
+      loadUsers()
+      toast.success(t.value('settings.users.force_reset_password_success'))
+      resetPasswordFormActive.value = false
+      resetPasswordUser.value = null
+    },
+    (error) => {
+      toast.error(t.value('settings.users.force_reset_password_failed'))
+    }
+  )
 }
 </script>
 
@@ -298,7 +315,7 @@ const handleForceResetPassword = (user) => {
           :class="{ error: errors.name }"
         />
         <div class="error-message" v-if="errors.name">
-          {{ errors.name }}
+          {{ errors.name }}c
         </div>
       </div>
 
@@ -318,6 +335,28 @@ const handleForceResetPassword = (user) => {
           {{ $t('settings.users.save_changes') }}
         </button>
         <button class="secondary close-button" @click="editUserFormActive = false">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-form-overlay" :class="{ active: resetPasswordFormActive }" @click="resetPasswordFormClickOutside">
+    <div class="user-form">
+      <h2>
+        <KeyRound />
+        {{ $t('settings.users.force_reset_password') }}
+      </h2>
+      <p v-if="resetPasswordUser">
+        {{ $t('settings.users.confirm_force_reset_password', { name: resetPasswordUser.name }) }}
+      </p>
+      <div class="button-bar">
+        <button @click="confirmForceResetPassword">
+          <KeyRound />
+          {{ $t('settings.users.force_reset_password') }}
+        </button>
+        <button class="secondary close-button" @click="resetPasswordFormActive = false; resetPasswordUser = null">
           <CircleX />
           {{ $t('settings.close') }}
         </button>

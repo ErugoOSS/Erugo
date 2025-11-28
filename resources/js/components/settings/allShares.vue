@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
-import { getAllShares, getUsers, expireShare, extendShare, setDownloadLimit } from '../../api'
+import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -9,8 +9,7 @@ import {
   MessageCircleQuestion,
   Rocket,
   Lock,
-  LockOpen,
-  Filter
+  LockOpen
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
@@ -27,24 +26,13 @@ const maxFilesToShow = 4
 const loadedShares = ref(false)
 
 const shares = ref([])
-const users = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
-  await loadUsers()
   loadShares()
 })
-
-const loadUsers = async () => {
-  try {
-    const data = await getUsers()
-    users.value = data.users || []
-  } catch (error) {
-    console.error('Failed to load users', error)
-  }
-}
 
 const loadShares = async () => {
   shares.value = await getAllShares(showDeletedShares.value, selectedUserId.value)
@@ -116,11 +104,6 @@ const setShowDeletedShares = (value) => {
   loadShares()
 }
 
-const handleUserFilterChange = (event) => {
-  selectedUserId.value = event.target.value || null
-  loadShares()
-}
-
 const setUserFilter = (userId) => {
   selectedUserId.value = userId
   loadShares()
@@ -143,19 +126,6 @@ defineExpose({
         {{ $t('settings.help.downloadLimit.description2') }}
       </p>
     </HelpTip>
-    
-    <div class="filters-container">
-      <div class="filter-group">
-        <Filter class="filter-icon" />
-        <label for="user-filter">{{ $t('settings.allShares.filterByUser') }}</label>
-        <select id="user-filter" @change="handleUserFilterChange" :value="selectedUserId || ''">
-          <option value="">{{ $t('settings.allShares.allUsers') }}</option>
-          <option v-for="user in users" :key="user.id" :value="user.id">
-            {{ user.name }} ({{ user.email }})
-          </option>
-        </select>
-      </div>
-    </div>
 
     <table v-if="shares.length > 0">
       <thead>
@@ -299,50 +269,6 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-.filters-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 15px 20px;
-  background: var(--panel-section-background-color);
-  border-bottom: 1px solid var(--panel-section-background-color-alt);
-  
-  .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    
-    .filter-icon {
-      width: 18px;
-      height: 18px;
-      color: var(--panel-section-text-color);
-      opacity: 0.7;
-    }
-    
-    label {
-      font-size: 0.9rem;
-      color: var(--panel-section-text-color);
-      font-weight: 500;
-    }
-    
-    select {
-      padding: 8px 12px;
-      border-radius: 5px;
-      border: 1px solid var(--panel-section-background-color-alt);
-      background: var(--panel-section-background-color-alt);
-      color: var(--panel-section-text-color);
-      font-size: 0.9rem;
-      min-width: 200px;
-      cursor: pointer;
-      
-      &:focus {
-        outline: none;
-        border-color: var(--button-primary-background-color);
-      }
-    }
-  }
-}
-
 .owner-info {
   display: flex;
   flex-direction: column;

@@ -88,6 +88,11 @@
       "name": "Il mio nome completo",
       "unlink": "Unlink"
     },
+    "allShares": {
+      "allUsers": "Tutti gli utenti",
+      "filterByUser": "Filtrare per utente",
+      "noShares": "Non ci sono azioni da mostrare"
+    },
     "authProvidersSavedSuccessfully": "Fornitori di autorizzazioni salvati con successo",
     "branding": {
       "background_images": "Immagini di sfondo",
@@ -161,6 +166,7 @@
       "pruneExpiredShares": "Siete sicuri di voler eliminare le condivisioni  scadute? Non è possibile annullare questa operazione."
     },
     "description": {
+      "allShares": "Visualizzare e gestire le condivisioni di tutti gli utenti",
       "branding": "Personalizzate l'interfaccia utente della vostra istanza Erugo e aggiungete le vostre personalizzazioni di branding.",
       "emailTemplates": "Gestire i template di e-mail",
       "myProfile": "Gestire il proprio account.",
@@ -222,6 +228,95 @@
       "password_confirm": "Confermare la password di condivisione",
       "password_protect_description": "Creare una password per la condivisione. Chiunque scarichi questa condivisione avrà bisogno di questa password per accedervi. Nota bene: dopo la creazione, la password sarà crittografata e non sarà possibile recuperarla. Assicuratevi di salvarla in un luogo sicuro.",
       "remove_password": "Rimuovere la password"
+    },
+    "stats": {
+      "downloads": {
+        "all_time": "Download di tutti i tempi",
+        "chart_title": "Download nel tempo",
+        "days_option": "{days} giorni",
+        "downloads": "Scaricamento",
+        "downloads_in_period": "Download ({days} giorni)",
+        "time_period": "Periodo di tempo:",
+        "title": "Scarica l'attività",
+        "top_shares": "Le azioni più scaricate",
+        "unique_downloaders": "Scaricatori unici"
+      },
+      "error_loading": "Impossibile caricare le statistiche di sistema",
+      "file_types": {
+        "categories": {
+          "archives": "Archivio",
+          "audio": "Audio",
+          "code": "Codice",
+          "documents": "Documenti",
+          "images": "Immagini",
+          "other": "Altro",
+          "videos": "Video"
+        },
+        "files": "file",
+        "title": "Tipo di file Distribuzione"
+      },
+      "help": {
+        "active_vs_expired_description": "Le condivisioni attive sono accessibili, mentre quelle scadute sono in attesa di essere eliminate in base alle impostazioni di pulizia.",
+        "active_vs_expired_title": "Attivo vs. Scaduto",
+        "categories_description": "I file sono raggruppati per tipo: immagini, documenti, video, audio, archivi, codice e altro.",
+        "categories_title": "Categorie",
+        "disk_usage_description": "Mostra l'utilizzo totale dello spazio su disco. Considerate la possibilità di ripulire le vecchie condivisioni se l'utilizzo è elevato.",
+        "disk_usage_title": "Utilizzo del disco",
+        "downloads_description": "Traccia l'attività di download di tutte le azioni nel periodo di tempo selezionato.",
+        "downloads_title": "Scarica l'attività",
+        "file_types_description": "Ripartizione dei file per categoria in tutte le condivisioni.",
+        "file_types_title": "Tipo di file Distribuzione",
+        "guest_users_description": "Utenti creati tramite inviti di condivisione inversa.",
+        "guest_users_title": "Utenti ospiti",
+        "shares_description": "Panoramica di tutte le azioni presenti nel sistema, compreso il loro stato attuale.",
+        "shares_title": "Statistiche di condivisione",
+        "storage_description": "Monitorare l'utilizzo del disco del server e lo spazio consumato dalle condivisioni.",
+        "storage_title": "Panoramica sull'archiviazione",
+        "unique_downloaders_description": "Conteggio degli indirizzi IP unici che hanno scaricato le azioni.",
+        "unique_downloaders_title": "Scaricatori unici",
+        "users_description": "Panoramica degli account utente e dei loro livelli di attività.",
+        "users_title": "Statistiche degli utenti"
+      },
+      "loading": "Caricamento delle statistiche...",
+      "nav": {
+        "downloads": "Download",
+        "file_types": "Tipi di file",
+        "shares": "Azioni",
+        "storage": "Immagazzinamento",
+        "users": "Utenti"
+      },
+      "refresh": "Aggiornare",
+      "shares": {
+        "active_shares": "Azioni attive",
+        "deleted": "Soppresso",
+        "expired": "Scaduto",
+        "last_7_days": "Ultimi 7 giorni",
+        "per_share": "per azione",
+        "protected": "Protetto",
+        "title": "Statistiche di condivisione",
+        "total_files": "Totale file",
+        "total_shares": "Totale azioni"
+      },
+      "storage": {
+        "available_space": "Spazio disponibile",
+        "disk_usage": "Utilizzo del disco",
+        "free": "libero",
+        "of": "di",
+        "of_disk": "del disco",
+        "share_storage": "Condividere lo stoccaggio",
+        "title": "Panoramica sull'archiviazione",
+        "used": "usato"
+      },
+      "users": {
+        "active": "Attivo",
+        "admins": "Amministratori",
+        "guests": "Ospiti",
+        "shares": "azioni",
+        "title": "Statistiche degli utenti",
+        "top_users": "Utenti più attivi",
+        "total_users": "Utenti totali",
+        "with_shares": "Utenti con azioni"
+      }
     },
     "success": {
       "pruneExpiredShares": "Le condivisioni scadute sono state contrassegnate per l'eliminazione e verranno elaborate in background.",
@@ -351,6 +446,7 @@
       "name": "Nome"
     },
     "title": {
+      "allShares": "Tutte le azioni",
       "branding": "Branding ed interfaccia utente ",
       "emailTemplates": "Template di email",
       "linked_accounts": "Account collegati",
@@ -387,6 +483,7 @@
       "failed_to_create_user": "Impossibile creare l'utente",
       "failed_to_delete_user": "Non è stato possibile eliminare l'utente",
       "failed_to_update_user": "Impossibile aggiornare l'utente",
+      "force_reset_password": "Reimpostare la password",
       "id": "ID",
       "leave_blank_to_keep_same_password": "Lasciare vuoto per mantenere la stessa password.",
       "link_provider_confirm": "Collegare davvero il proprio account a questo provider?",
@@ -413,6 +510,7 @@
       "user_created_successfully": "Utente creato con successo",
       "user_deleted_successfully": "L'utente è stato eliminato con successo",
       "user_updated_successfully": "Utente aggiornato con successo",
+      "view_shares": "Visualizza le azioni",
       "you": "Tu"
     }
   },
