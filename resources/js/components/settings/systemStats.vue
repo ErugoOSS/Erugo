@@ -73,6 +73,11 @@ const handleNavItemClicked = (item) => {
   emit('navItemClicked', item)
 }
 
+//define exposed methods
+defineExpose({
+  refreshStats
+})
+
 // Chart data for downloads
 const downloadChartData = computed(() => {
   if (!stats.value?.downloads?.by_day) return []
@@ -155,14 +160,6 @@ const categoryColors = {
         </div>
 
         <template v-else-if="stats">
-          <!-- Refresh Button -->
-          <div class="stats-header mb-4">
-            <button class="refresh-btn" @click="refreshStats" :disabled="refreshing">
-              <RefreshCw :class="{ spin: refreshing }" />
-              {{ $t('settings.stats.refresh') }}
-            </button>
-          </div>
-
           <!-- Storage Stats -->
           <div class="row mb-5">
             <div class="col-12 col-lg-8 pe-0 ps-0 ps-md-3">
@@ -607,40 +604,6 @@ const categoryColors = {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-.stats-header {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 12px;
-}
-
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--panel-section-background-color);
-  border: 1px solid var(--input-border-color);
-  border-radius: 6px;
-  color: var(--panel-text-color);
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  
-  &:hover:not(:disabled) {
-    background: var(--panel-section-background-color-alt);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .stats-grid {

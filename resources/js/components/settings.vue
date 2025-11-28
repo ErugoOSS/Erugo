@@ -15,7 +15,8 @@ import {
   Mail,
   HelpCircle,
   BarChart3,
-  FolderOpen
+  FolderOpen,
+  RefreshCw
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -288,6 +289,12 @@ const handleViewUserShares = (user) => {
                     <small>{{ $t('settings.description.stats') || 'Monitor system usage and activity' }}</small>
                   </span>
                 </h2>
+                <div class="user-actions">
+                  <button @click="$refs['systemStats'].refreshStats()">
+                    <RefreshCw />
+                    {{ $t('settings.stats.refresh') }}
+                  </button>
+                </div>
               </div>
               <div class="tab-content-body">
                 <SystemStats
