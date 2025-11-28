@@ -803,6 +803,21 @@ export const getEmailTemplates = async () => {
   return data.data.templates
 }
 
+// System Stats Methods
+export const getSystemStats = async (days = 30) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/stats?days=${days}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const updateEmailTemplates = async (templates) => {
   const response = await fetchWithAuth(`${apiUrl}/api/email-templates`, {
     method: 'PUT',

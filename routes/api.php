@@ -16,6 +16,7 @@ use App\Http\Controllers\UploadsController;
 use App\Http\Controllers\ReverseSharesController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\TusdHooksController;
+use App\Http\Controllers\StatsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -87,6 +88,11 @@ Route::group([], function ($router) {
         Route::post('/backgrounds', [BackgroundsController::class, 'upload'])->name('backgrounds.upload');
         //delete a background image
         Route::delete('/backgrounds/{file}', [BackgroundsController::class, 'delete'])->name('backgrounds.delete');
+    });
+
+    //system stats [auth, admin]
+    Route::group(['prefix' => 'stats', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/', [StatsController::class, 'getStats'])->name('stats.get');
     });
 
     //read settings [auth]

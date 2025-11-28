@@ -13,12 +13,14 @@ import {
   EllipsisVertical,
   Bomb,
   Mail,
-  HelpCircle
+  HelpCircle,
+  BarChart3
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
 import BrandingSettings from './settings/branding.vue'
 import SystemSettings from './settings/system.vue'
+import SystemStats from './settings/systemStats.vue'
 import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
@@ -37,6 +39,7 @@ const systemSettings = ref(null)
 const showDeletedShares = ref(false)
 // Create refs for the tab contents
 const tabContents = ref({
+  stats: ref(null),
   branding: ref(null),
   system: ref(null),
   users: ref(null),
@@ -101,6 +104,7 @@ const getSettingsTitle = () => {
   if (!t.value) {
     // Fallback if translation function is not ready
     const fallbackTitles = {
+      stats: 'System Stats',
       branding: 'Branding',
       system: 'System',
       users: 'Users',
@@ -112,6 +116,8 @@ const getSettingsTitle = () => {
   }
 
   switch (activeTab.value) {
+    case 'stats':
+      return t.value('settings.title.stats') || 'System Stats'
     case 'branding':
       return t.value('settings.title.branding')
     case 'system':
@@ -164,6 +170,17 @@ const goToHelp = () => {
       </div>
       <div class="settings-tabs-wrapper">
         <div class="settings-tabs-container">
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'stats' }"
+            @click="setActiveTab('stats')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <BarChart3 />
+              {{ $t('settings.title.stats') || 'Stats' }}
+            </h2>
+          </div>
           <div
             class="settings-tab"
             :class="{ active: activeTab === 'branding' }"
@@ -223,7 +240,25 @@ const goToHelp = () => {
         </div>
         <div class="settings-tabs-content-container">
           <Transition name="fade">
-            <div v-if="activeTab === 'branding'" class="settings-tab-content" ref="tabContents.branding" key="branding">
+            <div v-if="activeTab === 'stats'" class="settings-tab-content" ref="tabContents.stats" key="stats">
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <BarChart3 />
+                  <span>
+                    {{ $t('settings.title.stats') || 'System Stats' }}
+                    <small>{{ $t('settings.description.stats') || 'Monitor system usage and activity' }}</small>
+                  </span>
+                </h2>
+              </div>
+              <div class="tab-content-body">
+                <SystemStats
+                  ref="systemStats"
+                  v-if="store.settingsOpen"
+                  @navItemClicked="handleNavItemClicked"
+                />
+              </div>
+            </div>
+            <div v-else-if="activeTab === 'branding'" class="settings-tab-content" ref="tabContents.branding" key="branding">
               <div class="tab-content-header">
                 <h2 class="d-none d-md-flex">
                   <Palette />
