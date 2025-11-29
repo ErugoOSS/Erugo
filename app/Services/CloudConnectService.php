@@ -1,0 +1,648 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Setting;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
+use Exception;
+
+class CloudConnectService
+{
+    protected SettingsService $settingsService;
+    protected string $apiUrl;
+
+    public function __construct(SettingsService $settingsService)
+    {
+        $this->settingsService = $settingsService;
+        $this->apiUrl = $this->getSetting('cloud_connect_api_url') ?? 'https://api.erugo.cloud/v1';
+    }
+
+    /**
+     * Check if the container has the required capabilities for WireGuard
+     */
+    public function checkCapabilities(): array
+    {
+        $hasNetAdmin = false;
+        $hasTunDevice = false;
+        $hasWgTools = false;
+        $errors = [];
+
+        // Check for /dev/net/tun
+        if (file_exists('/dev/net/tun')) {
+            $hasTunDevice = true;
+        } else {
+            $errors[] = 'TUN device not available. Add "devices: [/dev/net/tun:/dev/net/tun]" to your docker-compose.yml';
+        }
+
+        // Check for wg command
+        $wgPath = trim(shell_exec('which wg 2>/dev/null') ?? '');
+        if (!empty($wgPath)) {
+            $hasWgTools = true;
+        } else {
+            $errors[] = 'WireGuard tools not installed in container';
+        }
+
+        // Check for NET_ADMIN capability
+        // We check CapBnd (bounding set) because the container has the capability,
+        // even if the current process (running as non-root) doesn't have it in CapEff.
+        // We'll use sudo for actual WireGuard commands.
+        
+        // Method 1: Check /proc/self/status for CapBnd (bounding set)
+        $capBndLine = shell_exec('grep "^CapBnd:" /proc/self/status 2>/dev/null');
+        if ($capBndLine) {
+            // Parse the hex capability mask
+            $capHex = trim(str_replace('CapBnd:', '', $capBndLine));
+            $capInt = hexdec($capHex);
+            // CAP_NET_ADMIN is bit 12 (value 4096 = 0x1000)
+            if ($capInt & (1 << 12)) {
+                $hasNetAdmin = true;
+            }
+        }
+        
+        // Method 2: Also check CapEff in case we're running as root
+        if (!$hasNetAdmin) {
+            $capEffLine = shell_exec('grep "^CapEff:" /proc/self/status 2>/dev/null');
+            if ($capEffLine) {
+                $capHex = trim(str_replace('CapEff:', '', $capEffLine));
+                $capInt = hexdec($capHex);
+                if ($capInt & (1 << 12)) {
+                    $hasNetAdmin = true;
+                }
+            }
+        }
+        
+        // Method 3: Try running a command with sudo to verify we can actually use NET_ADMIN
+        if (!$hasNetAdmin && $hasWgTools && $hasTunDevice) {
+            $testResult = shell_exec('sudo -n ip link add wg-test type wireguard 2>&1');
+            if ($testResult === null || strpos($testResult, 'Operation not permitted') === false) {
+                $hasNetAdmin = true;
+                shell_exec('sudo -n ip link delete wg-test 2>/dev/null');
+            }
+        }
+        
+        if (!$hasNetAdmin) {
+            $errors[] = 'NET_ADMIN capability not available. Add "cap_add: [NET_ADMIN]" to your docker-compose.yml';
+        }
+
+        return [
+            'capable' => $hasNetAdmin && $hasTunDevice && $hasWgTools,
+            'has_net_admin' => $hasNetAdmin,
+            'has_tun_device' => $hasTunDevice,
+            'has_wg_tools' => $hasWgTools,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Get the current connection status
+     */
+    public function getStatus(): array
+    {
+        $capabilities = $this->checkCapabilities();
+        $isLoggedIn = !empty($this->getSetting('cloud_connect_access_token'));
+        $hasInstance = !empty($this->getSetting('cloud_connect_instance_id'));
+        
+        // Check actual WireGuard interface status (using sudo)
+        $tunnelActive = false;
+        if ($capabilities['capable']) {
+            $wgShow = shell_exec('sudo wg show wg0 2>/dev/null');
+            $tunnelActive = !empty($wgShow) && strpos($wgShow, 'interface: wg0') !== false;
+        }
+
+        $status = $this->getSetting('cloud_connect_status') ?? 'disconnected';
+        
+        // Sync status with actual tunnel state
+        if ($tunnelActive && $status !== 'connected') {
+            $this->setSetting('cloud_connect_status', 'connected');
+            $status = 'connected';
+        } elseif (!$tunnelActive && $status === 'connected') {
+            $this->setSetting('cloud_connect_status', 'disconnected');
+            $status = 'disconnected';
+        }
+
+        return [
+            'capabilities' => $capabilities,
+            'is_logged_in' => $isLoggedIn,
+            'has_instance' => $hasInstance,
+            'status' => $status,
+            'tunnel_active' => $tunnelActive,
+            'subdomain' => $this->getSetting('cloud_connect_subdomain'),
+            'full_domain' => $this->getSetting('cloud_connect_full_domain'),
+            'tunnel_ip' => $this->getSetting('cloud_connect_tunnel_ip'),
+            'user_email' => $this->getSetting('cloud_connect_user_email'),
+            'subscription_status' => $this->getSetting('cloud_connect_subscription_status'),
+            'subscription_plan' => $this->getSetting('cloud_connect_subscription_plan'),
+            'account_status' => $this->getSetting('cloud_connect_account_status'),
+            'last_error' => $this->getSetting('cloud_connect_last_error'),
+            'instance_id' => $this->getSetting('cloud_connect_instance_id'),
+        ];
+    }
+
+    /**
+     * Register a new account with the cloud service
+     */
+    public function register(array $data): array
+    {
+        $response = Http::post("{$this->apiUrl}/auth/register", [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'password_confirmation' => $data['password_confirmation'],
+            'accept_terms' => $data['accept_terms'] ?? true,
+            'accept_privacy' => $data['accept_privacy'] ?? true,
+            'accept_marketing' => $data['accept_marketing'] ?? false,
+            'erugo_version' => config('app.version', '1.0.0'),
+        ]);
+
+        if (!$response->successful()) {
+            $error = $response->json('error.message') ?? 'Registration failed';
+            throw new Exception($error);
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Login to the cloud service
+     */
+    public function login(string $email, string $password): array
+    {
+        $response = Http::post("{$this->apiUrl}/auth/login", [
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        if (!$response->successful()) {
+            $error = $response->json('error.message') ?? 'Login failed';
+            throw new Exception($error);
+        }
+
+        $data = $response->json();
+
+        // Store tokens
+        $this->setEncryptedSetting('cloud_connect_access_token', $data['access_token']);
+        $this->setEncryptedSetting('cloud_connect_refresh_token', $data['refresh_token']);
+        $this->setSetting('cloud_connect_token_expires_at', time() + ($data['expires_in'] ?? 900));
+        $this->setSetting('cloud_connect_user_email', $data['user']['email'] ?? $email);
+        $this->setSetting('cloud_connect_subscription_status', $data['user']['subscription_status'] ?? 'none');
+        $this->setSetting('cloud_connect_subscription_plan', $data['user']['subscription_plan'] ?? null);
+        $this->setSetting('cloud_connect_account_status', $data['user']['status'] ?? null);
+
+        return $data;
+    }
+
+    /**
+     * Resend verification email
+     */
+    public function resendVerificationEmail(): array
+    {
+        return $this->apiRequest('POST', '/auth/resend-verification');
+    }
+
+    /**
+     * Refresh the access token
+     */
+    public function refreshToken(): bool
+    {
+        $refreshToken = $this->getEncryptedSetting('cloud_connect_refresh_token');
+        if (empty($refreshToken)) {
+            return false;
+        }
+
+        try {
+            $response = Http::post("{$this->apiUrl}/auth/refresh", [
+                'refresh_token' => $refreshToken,
+            ]);
+
+            if (!$response->successful()) {
+                // Token refresh failed, clear auth state
+                $this->clearAuthState();
+                return false;
+            }
+
+            $data = $response->json();
+            $this->setEncryptedSetting('cloud_connect_access_token', $data['access_token']);
+            $this->setSetting('cloud_connect_token_expires_at', time() + ($data['expires_in'] ?? 900));
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Cloud Connect token refresh failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Make an authenticated API request
+     */
+    protected function apiRequest(string $method, string $endpoint, array $data = [], bool $useInstanceToken = false): array
+    {
+        $token = $useInstanceToken
+            ? $this->getEncryptedSetting('cloud_connect_instance_token')
+            : $this->getEncryptedSetting('cloud_connect_access_token');
+
+        if (empty($token)) {
+            throw new Exception('Not authenticated');
+        }
+
+        // Check if access token needs refresh (not for instance tokens)
+        if (!$useInstanceToken) {
+            $expiresAt = (int) $this->getSetting('cloud_connect_token_expires_at');
+            if ($expiresAt && time() >= $expiresAt - 60) {
+                if (!$this->refreshToken()) {
+                    throw new Exception('Session expired. Please login again.');
+                }
+                $token = $this->getEncryptedSetting('cloud_connect_access_token');
+            }
+        }
+
+        $request = Http::withToken($token);
+
+        $response = match (strtoupper($method)) {
+            'GET' => $request->get("{$this->apiUrl}{$endpoint}", $data),
+            'POST' => $request->post("{$this->apiUrl}{$endpoint}", $data),
+            'PATCH' => $request->patch("{$this->apiUrl}{$endpoint}", $data),
+            'DELETE' => $request->delete("{$this->apiUrl}{$endpoint}"),
+            default => throw new Exception("Unsupported HTTP method: {$method}"),
+        };
+
+        if (!$response->successful()) {
+            $error = $response->json('error.message') ?? "API request failed: {$response->status()}";
+            throw new Exception($error);
+        }
+
+        return $response->json() ?? [];
+    }
+
+    /**
+     * Get subscription status
+     */
+    public function getSubscription(): array
+    {
+        $data = $this->apiRequest('GET', '/billing/subscription');
+        
+        // Update local cache
+        $this->setSetting('cloud_connect_subscription_status', $data['status'] ?? 'none');
+        $this->setSetting('cloud_connect_subscription_plan', $data['plan'] ?? null);
+
+        return $data;
+    }
+
+    /**
+     * Create a checkout session
+     */
+    public function createCheckout(string $plan): array
+    {
+        return $this->apiRequest('POST', '/billing/checkout', [
+            'plan' => $plan,
+        ]);
+    }
+
+    /**
+     * Check subdomain availability
+     */
+    public function checkSubdomain(string $subdomain): array
+    {
+        return $this->apiRequest('GET', '/subdomains/check', [
+            'subdomain' => $subdomain,
+        ]);
+    }
+
+    /**
+     * Create a new instance
+     */
+    public function createInstance(string $name, string $subdomain): array
+    {
+        $data = $this->apiRequest('POST', '/instances', [
+            'name' => $name,
+            'subdomain' => $subdomain,
+        ]);
+
+        // Store instance details
+        $instance = $data['instance'] ?? [];
+        $credentials = $data['credentials'] ?? [];
+
+        $this->setSetting('cloud_connect_instance_id', $instance['id'] ?? null);
+        $this->setSetting('cloud_connect_subdomain', $instance['subdomain'] ?? null);
+        $this->setSetting('cloud_connect_full_domain', $instance['full_domain'] ?? null);
+        $this->setSetting('cloud_connect_tunnel_ip', $instance['tunnel_ip'] ?? null);
+        
+        if (!empty($credentials['instance_token'])) {
+            $this->setEncryptedSetting('cloud_connect_instance_token', $credentials['instance_token']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get list of instances
+     */
+    public function getInstances(): array
+    {
+        return $this->apiRequest('GET', '/instances');
+    }
+
+    /**
+     * Generate WireGuard keypair
+     */
+    public function generateWireGuardKeys(): array
+    {
+        // Generate private key
+        $privateKey = trim(shell_exec('wg genkey 2>/dev/null') ?? '');
+        if (empty($privateKey)) {
+            throw new Exception('Failed to generate WireGuard private key');
+        }
+
+        // Generate public key from private key
+        $publicKey = trim(shell_exec("echo '{$privateKey}' | wg pubkey 2>/dev/null") ?? '');
+        if (empty($publicKey)) {
+            throw new Exception('Failed to generate WireGuard public key');
+        }
+
+        // Store keys
+        $this->setEncryptedSetting('cloud_connect_private_key', $privateKey);
+        $this->setSetting('cloud_connect_public_key', $publicKey);
+
+        return [
+            'private_key' => $privateKey,
+            'public_key' => $publicKey,
+        ];
+    }
+
+    /**
+     * Register tunnel with cloud service and get config
+     */
+    public function registerTunnel(): array
+    {
+        // Ensure we have keys
+        $publicKey = $this->getSetting('cloud_connect_public_key');
+        if (empty($publicKey)) {
+            $keys = $this->generateWireGuardKeys();
+            $publicKey = $keys['public_key'];
+        }
+
+        // Register with cloud API using instance token
+        $data = $this->apiRequest('POST', '/tunnel/register', [
+            'public_key' => $publicKey,
+        ], true);
+
+        return $data;
+    }
+
+    /**
+     * Connect the tunnel
+     */
+    public function connect(): array
+    {
+        $capabilities = $this->checkCapabilities();
+        if (!$capabilities['capable']) {
+            throw new Exception('Container does not have required capabilities: ' . implode(', ', $capabilities['errors']));
+        }
+
+        // Get tunnel configuration from cloud
+        $tunnelData = $this->registerTunnel();
+        $tunnelConfig = $tunnelData['tunnel_config'] ?? [];
+        
+        if (empty($tunnelConfig)) {
+            throw new Exception('Failed to get tunnel configuration from cloud service');
+        }
+
+        // Get private key
+        $privateKey = $this->getEncryptedSetting('cloud_connect_private_key');
+        if (empty($privateKey)) {
+            throw new Exception('WireGuard private key not found');
+        }
+
+        // Build WireGuard config
+        $config = $this->buildWireGuardConfig($privateKey, $tunnelConfig);
+
+        // Write config file using sudo (required for /etc/wireguard)
+        $this->writeWireGuardConfig($config);
+
+        // Bring down existing tunnel if any
+        shell_exec('sudo wg-quick down wg0 2>/dev/null');
+
+        // Bring up tunnel
+        $output = shell_exec('sudo wg-quick up wg0 2>&1');
+        
+        // Verify tunnel is up
+        $wgShow = shell_exec('sudo wg show wg0 2>/dev/null');
+        if (empty($wgShow) || strpos($wgShow, 'interface: wg0') === false) {
+            $this->setSetting('cloud_connect_status', 'error');
+            $this->setSetting('cloud_connect_last_error', 'Failed to bring up WireGuard tunnel: ' . ($output ?? 'Unknown error'));
+            throw new Exception('Failed to bring up WireGuard tunnel: ' . ($output ?? 'Unknown error'));
+        }
+
+        // Update status
+        $this->setSetting('cloud_connect_status', 'connected');
+        $this->setSetting('cloud_connect_enabled', 'true');
+        $this->setSetting('cloud_connect_last_error', null);
+
+        // Update domain info from response
+        if (!empty($tunnelData['domains'])) {
+            $this->setSetting('cloud_connect_subdomain', $tunnelData['domains']['subdomain'] ?? null);
+        }
+
+        return [
+            'status' => 'connected',
+            'tunnel_config' => $tunnelConfig,
+            'domains' => $tunnelData['domains'] ?? [],
+        ];
+    }
+
+    /**
+     * Write WireGuard config file using sudo
+     */
+    protected function writeWireGuardConfig(string $config): void
+    {
+        // Create directory if needed
+        shell_exec('sudo mkdir -p /etc/wireguard 2>/dev/null');
+        
+        // Write config via sudo tee
+        $escapedConfig = escapeshellarg($config);
+        $result = shell_exec("echo {$escapedConfig} | sudo tee /etc/wireguard/wg0.conf > /dev/null 2>&1; echo $?");
+        
+        if (trim($result) !== '0') {
+            throw new Exception('Failed to write WireGuard configuration file');
+        }
+        
+        // Set permissions
+        shell_exec('sudo chmod 600 /etc/wireguard/wg0.conf 2>/dev/null');
+    }
+
+    /**
+     * Build WireGuard configuration file content
+     */
+    protected function buildWireGuardConfig(string $privateKey, array $tunnelConfig): string
+    {
+        $interface = $tunnelConfig['interface'] ?? [];
+        $peer = $tunnelConfig['peer'] ?? [];
+
+        $config = "[Interface]\n";
+        $config .= "PrivateKey = {$privateKey}\n";
+        $config .= "Address = " . ($interface['address'] ?? '10.100.0.2/32') . "\n";
+        $config .= "\n";
+        $config .= "[Peer]\n";
+        $config .= "PublicKey = " . ($peer['public_key'] ?? '') . "\n";
+        $config .= "Endpoint = " . ($peer['endpoint'] ?? '') . "\n";
+        $config .= "AllowedIPs = " . ($peer['allowed_ips'] ?? '10.100.0.0/24') . "\n";
+        $config .= "PersistentKeepalive = " . ($peer['persistent_keepalive'] ?? 25) . "\n";
+
+        return $config;
+    }
+
+    /**
+     * Disconnect the tunnel
+     */
+    public function disconnect(): array
+    {
+        // Notify cloud service
+        try {
+            $this->apiRequest('POST', '/tunnel/disconnect', [], true);
+        } catch (Exception $e) {
+            Log::warning('Failed to notify cloud of disconnect: ' . $e->getMessage());
+        }
+
+        // Bring down tunnel (using sudo)
+        shell_exec('sudo wg-quick down wg0 2>/dev/null');
+
+        // Update status
+        $this->setSetting('cloud_connect_status', 'disconnected');
+        $this->setSetting('cloud_connect_enabled', 'false');
+
+        return [
+            'status' => 'disconnected',
+        ];
+    }
+
+    /**
+     * Send heartbeat to cloud service
+     */
+    public function sendHeartbeat(): array
+    {
+        try {
+            $data = $this->apiRequest('POST', '/tunnel/heartbeat', [
+                'timestamp' => now()->toIso8601String(),
+            ], true);
+
+            return $data;
+        } catch (Exception $e) {
+            Log::error('Cloud Connect heartbeat failed: ' . $e->getMessage());
+            
+            // Try to reconnect if heartbeat fails
+            $this->setSetting('cloud_connect_status', 'reconnecting');
+            
+            throw $e;
+        }
+    }
+
+    /**
+     * Get tunnel status from cloud
+     */
+    public function getTunnelStatus(): array
+    {
+        return $this->apiRequest('GET', '/tunnel/status', [], true);
+    }
+
+    /**
+     * Logout and clear all cloud connect data
+     */
+    public function logout(): void
+    {
+        // Disconnect tunnel first
+        try {
+            $this->disconnect();
+        } catch (Exception $e) {
+            // Ignore disconnect errors during logout
+        }
+
+        $this->clearAuthState();
+        $this->clearInstanceState();
+    }
+
+    /**
+     * Clear authentication state
+     */
+    protected function clearAuthState(): void
+    {
+        $this->setSetting('cloud_connect_access_token', null);
+        $this->setSetting('cloud_connect_refresh_token', null);
+        $this->setSetting('cloud_connect_token_expires_at', null);
+        $this->setSetting('cloud_connect_user_email', null);
+        $this->setSetting('cloud_connect_subscription_status', null);
+        $this->setSetting('cloud_connect_subscription_plan', null);
+    }
+
+    /**
+     * Clear instance state
+     */
+    protected function clearInstanceState(): void
+    {
+        $this->setSetting('cloud_connect_instance_id', null);
+        $this->setSetting('cloud_connect_instance_token', null);
+        $this->setSetting('cloud_connect_subdomain', null);
+        $this->setSetting('cloud_connect_full_domain', null);
+        $this->setSetting('cloud_connect_tunnel_ip', null);
+        $this->setSetting('cloud_connect_private_key', null);
+        $this->setSetting('cloud_connect_public_key', null);
+        $this->setSetting('cloud_connect_status', 'disconnected');
+        $this->setSetting('cloud_connect_enabled', 'false');
+        $this->setSetting('cloud_connect_last_error', null);
+    }
+
+    /**
+     * Get a setting value
+     */
+    protected function getSetting(string $key): ?string
+    {
+        $setting = Setting::where('key', $key)->first();
+        return $setting?->value;
+    }
+
+    /**
+     * Set a setting value
+     */
+    protected function setSetting(string $key, ?string $value): void
+    {
+        Setting::updateOrCreate(
+            ['key' => $key],
+            [
+                'value' => $value,
+                'group' => 'system.cloud_connect',
+            ]
+        );
+    }
+
+    /**
+     * Get an encrypted setting value
+     */
+    protected function getEncryptedSetting(string $key): ?string
+    {
+        $value = $this->getSetting($key);
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (Exception $e) {
+            // If decryption fails, the value might not be encrypted
+            return $value;
+        }
+    }
+
+    /**
+     * Set an encrypted setting value
+     */
+    protected function setEncryptedSetting(string $key, ?string $value): void
+    {
+        if ($value === null) {
+            $this->setSetting($key, null);
+            return;
+        }
+
+        $this->setSetting($key, Crypt::encryptString($value));
+    }
+}
+

@@ -458,6 +458,144 @@ class SettingsSeeder extends Seeder
                 'group' => 'system.emails',
                 'created_at' => now(),
                 'updated_at' => now()
+            ],
+
+            // Cloud Connect settings
+            [
+                'key' => 'cloud_connect_enabled',
+                'value' => 'false',
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_api_url',
+                'value' => 'https://api.erugo.cloud/v1',
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_access_token',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_refresh_token',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_token_expires_at',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_instance_token',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_instance_id',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_private_key',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_public_key',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_status',
+                'value' => 'disconnected',
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_subdomain',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_full_domain',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_tunnel_ip',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_last_error',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_user_email',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_subscription_status',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'cloud_connect_subscription_plan',
+                'value' => null,
+                'previous_value' => null,
+                'group' => 'system.cloud_connect',
+                'created_at' => now(),
+                'updated_at' => now()
             ]
 
         ]);

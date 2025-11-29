@@ -65,6 +65,8 @@ RUN apk add --no-cache \
     zip \
     php83-fpm \
     caddy \
+    wireguard-tools \
+    iproute2 \
     && ln -s /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 

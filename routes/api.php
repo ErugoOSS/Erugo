@@ -17,6 +17,7 @@ use App\Http\Controllers\ReverseSharesController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\CloudConnectController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -154,6 +155,32 @@ Route::group([], function ($router) {
     Route::group(['prefix' => 'email-templates', 'middleware' => ['auth', Admin::class]], function ($router) {
         Route::get('/', [EmailTemplatesController::class, 'index'])->name('email-templates.index');
         Route::put('/', [EmailTemplatesController::class, 'update'])->name('email-templates.update');
+    });
+
+    //cloud connect [auth, admin]
+    Route::group(['prefix' => 'cloud-connect', 'middleware' => ['auth', Admin::class]], function ($router) {
+        // Status and capabilities
+        Route::get('/status', [CloudConnectController::class, 'status'])->name('cloud-connect.status');
+        
+        // Cloud account management
+        Route::post('/register', [CloudConnectController::class, 'register'])->name('cloud-connect.register');
+        Route::post('/login', [CloudConnectController::class, 'login'])->name('cloud-connect.login');
+        Route::post('/logout', [CloudConnectController::class, 'logout'])->name('cloud-connect.logout');
+        Route::post('/resend-verification', [CloudConnectController::class, 'resendVerification'])->name('cloud-connect.resendVerification');
+        
+        // Subscription management
+        Route::get('/subscription', [CloudConnectController::class, 'subscription'])->name('cloud-connect.subscription');
+        Route::post('/checkout', [CloudConnectController::class, 'checkout'])->name('cloud-connect.checkout');
+        
+        // Instance management
+        Route::get('/instances', [CloudConnectController::class, 'instances'])->name('cloud-connect.instances');
+        Route::post('/instances', [CloudConnectController::class, 'createInstance'])->name('cloud-connect.createInstance');
+        Route::get('/subdomains/check', [CloudConnectController::class, 'checkSubdomain'])->name('cloud-connect.checkSubdomain');
+        
+        // Tunnel management
+        Route::post('/connect', [CloudConnectController::class, 'connect'])->name('cloud-connect.connect');
+        Route::post('/disconnect', [CloudConnectController::class, 'disconnect'])->name('cloud-connect.disconnect');
+        Route::get('/tunnel-status', [CloudConnectController::class, 'tunnelStatus'])->name('cloud-connect.tunnelStatus');
     });
 
     //manage reverse shares [auth]

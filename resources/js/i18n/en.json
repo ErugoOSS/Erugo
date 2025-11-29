@@ -450,6 +450,7 @@
     "title": {
       "allShares": "All Shares",
       "branding": "Branding & UI",
+      "cloudConnect": "Cloud Connect",
       "emailTemplates": "Email templates",
       "linked_accounts": "Linked Accounts",
       "manage": "Manage",
@@ -463,6 +464,9 @@
       "system": "System settings",
       "users": "Users",
       "users.edit": "Edit {name}"
+    },
+    "description": {
+      "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing"
     },
     "users": {
       "account": "Account Type",
@@ -586,5 +590,129 @@
   },
   "uploading": {
     "files": "{value, plural, one {Uploading # file} other {Uploading # files}}"
+  },
+  "cloudConnect": {
+    "loading": "Loading Cloud Connect status...",
+    "errorLoadingStatus": "Failed to load Cloud Connect status",
+    "refresh": "Refresh",
+    "checkAgain": "Check Again",
+    "capabilitiesError": {
+      "title": "Container Not Ready",
+      "description": "Your Docker container is missing required capabilities for Cloud Connect. Please update your docker-compose.yml file.",
+      "howToFix": "How to fix this",
+      "addToCompose": "Add the following to your docker-compose.yml service configuration:"
+    },
+    "capabilities": {
+      "wireguardTools": "WireGuard Tools",
+      "tunDevice": "TUN Device",
+      "netAdmin": "NET_ADMIN Capability"
+    },
+    "auth": {
+      "title": "Connect to Erugo Cloud",
+      "description": "Sign in or create an account to connect your instance to Erugo Cloud for easy domain routing.",
+      "login": "Sign In",
+      "register": "Create Account",
+      "logout": "Sign Out",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "name": "Full Name",
+      "namePlaceholder": "Your name",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "acceptTerms": "I agree to the",
+      "termsLink": "Terms of Service",
+      "acceptPrivacy": "I agree to the",
+      "privacyLink": "Privacy Policy",
+      "acceptMarketing": "Send me product updates and news",
+      "loginButton": "Sign In",
+      "registerButton": "Create Account"
+    },
+    "loginSuccess": "Signed in successfully",
+    "loginFailed": "Sign in failed. Please check your credentials.",
+    "registerSuccess": "Account created successfully!",
+    "registerFailed": "Registration failed. Please try again.",
+    "logoutSuccess": "Signed out successfully",
+    "logoutFailed": "Sign out failed",
+    "passwordMismatch": "Passwords do not match",
+    "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
+    "emailVerification": {
+      "title": "Verify Your Email",
+      "description": "We've sent a verification email to your address. Please check your inbox and click the verification link to continue.",
+      "sentTo": "Verification email sent to",
+      "instructions": "What to do next",
+      "step1": "Check your email inbox (and spam folder)",
+      "step2": "Click the verification link in the email",
+      "step3": "Return here and click 'Check Status'",
+      "checkStatus": "Check Verification Status",
+      "verified": "Email verified! You can now continue.",
+      "stillPending": "Email not yet verified. Please check your inbox.",
+      "checkFailed": "Failed to check verification status",
+      "didntReceive": "Didn't receive the email?",
+      "resend": "Resend verification email",
+      "resent": "Verification email sent!",
+      "resendFailed": "Failed to resend verification email"
+    },
+    "subscription": {
+      "title": "Choose Your Plan",
+      "description": "Select a subscription plan to enable Cloud Connect for your instance.",
+      "loggedInAs": "Signed in as",
+      "month": "month",
+      "subscribe": "Subscribe Now",
+      "waitingForPayment": "Waiting for payment...",
+      "pollingNote": "Complete your payment in the new window. This page will update automatically.",
+      "stopWaiting": "Cancel",
+      "pro": {
+        "instances": "Up to {count} instances",
+        "subdomain": "Free subdomain",
+        "customDomain": "{count} custom domain",
+        "emailSupport": "Email support"
+      },
+      "business": {
+        "instances": "Up to {count} instances",
+        "subdomain": "Free subdomain",
+        "customDomains": "{count} custom domains",
+        "prioritySupport": "Priority support"
+      }
+    },
+    "checkoutOpened": "Checkout opened in a new tab",
+    "checkoutFailed": "Failed to create checkout session",
+    "subscriptionActive": "Subscription activated!",
+    "instance": {
+      "title": "Set Up Your Instance",
+      "description": "Choose a subdomain for your Erugo instance. This will be your public URL.",
+      "name": "Instance Name",
+      "namePlaceholder": "My Erugo Server",
+      "subdomain": "Subdomain",
+      "subdomainPlaceholder": "my-server",
+      "suggestions": "Available alternatives",
+      "create": "Create Instance"
+    },
+    "subdomainCheckFailed": "Failed to check subdomain availability",
+    "subdomainNotAvailable": "Please choose an available subdomain",
+    "instanceCreated": "Instance created successfully!",
+    "instanceCreateFailed": "Failed to create instance",
+    "ready": {
+      "title": "Ready to Connect",
+      "description": "Your instance is set up and ready to connect to Erugo Cloud.",
+      "connect": "Connect Now",
+      "connecting": "Connecting..."
+    },
+    "connected": "Tunnel connected successfully!",
+    "connectFailed": "Failed to connect tunnel",
+    "connected": {
+      "title": "Connected to Erugo Cloud",
+      "online": "Online",
+      "copyUrl": "Copy URL",
+      "subdomain": "Subdomain",
+      "tunnelIp": "Tunnel IP",
+      "subscription": "Subscription",
+      "disconnect": "Disconnect",
+      "disconnecting": "Disconnecting..."
+    },
+    "disconnected": "Tunnel disconnected",
+    "disconnectFailed": "Failed to disconnect tunnel",
+    "copyFailed": "Failed to copy to clipboard"
   }
 }

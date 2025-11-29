@@ -16,7 +16,8 @@ import {
   HelpCircle,
   BarChart3,
   FolderOpen,
-  RefreshCw
+  RefreshCw,
+  Cloud
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -27,6 +28,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
+import CloudConnect from './settings/cloudConnect.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
@@ -53,7 +55,8 @@ const tabContents = ref({
   users: ref(null),
   myProfile: ref(null),
   myShares: ref(null),
-  allShares: ref(null)
+  allShares: ref(null),
+  cloudConnect: ref(null)
 })
 
 onMounted(() => {
@@ -127,7 +130,8 @@ const getSettingsTitle = () => {
       myProfile: 'My Profile',
       myShares: 'My Shares',
       allShares: 'All Shares',
-      emailTemplates: 'Email Templates'
+      emailTemplates: 'Email Templates',
+      cloudConnect: 'Cloud Connect'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
@@ -149,6 +153,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
+    case 'cloudConnect':
+      return t.value('settings.title.cloudConnect') || 'Cloud Connect'
     default:
       return t.value('settings.title.erugo')
   }
@@ -264,6 +270,17 @@ const handleUserFilterChange = (event) => {
             <h2>
               <Mail />
               {{ $t('settings.title.emailTemplates') }}
+            </h2>
+          </div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'cloudConnect' }"
+            @click="setActiveTab('cloudConnect')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <Cloud />
+              {{ $t('settings.title.cloudConnect') || 'Cloud' }}
             </h2>
           </div>
           <div
@@ -390,6 +407,27 @@ const handleUserFilterChange = (event) => {
               </div>
               <div class="tab-content-body">
                 <EmailTemplates ref="emailTemplates" v-if="store.settingsOpen" @navItemClicked="handleNavItemClicked" />
+              </div>
+            </div>
+
+            <div v-else-if="activeTab === 'cloudConnect'" class="settings-tab-content" ref="tabContents.cloudConnect" key="cloudConnect">
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Cloud />
+                  <span>
+                    {{ $t('settings.title.cloudConnect') || 'Cloud Connect' }}
+                    <small>{{ $t('settings.description.cloudConnect') || 'Connect your instance to Erugo Cloud' }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <button @click="$refs['cloudConnectPanel'].refreshStatus()">
+                    <RefreshCw />
+                    {{ $t('cloudConnect.refresh') || 'Refresh' }}
+                  </button>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" />
               </div>
             </div>
 

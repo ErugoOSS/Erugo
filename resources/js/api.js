@@ -865,6 +865,192 @@ export const updateEmailTemplates = async (templates) => {
   return data.data
 }
 
+// Cloud Connect Methods
+export const getCloudConnectStatus = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/status`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const cloudConnectRegister = async (userData) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/register`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(userData)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const cloudConnectLogin = async (email, password) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/login`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ email, password })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const cloudConnectLogout = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/logout`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getCloudConnectSubscription = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subscription`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const createCloudConnectCheckout = async (plan) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/checkout`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ plan })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const checkCloudConnectSubdomain = async (subdomain) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subdomains/check?subdomain=${encodeURIComponent(subdomain)}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const getCloudConnectInstances = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const createCloudConnectInstance = async (name, subdomain) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ name, subdomain })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const connectCloudConnect = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/connect`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const disconnectCloudConnect = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/disconnect`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const resendCloudConnectVerification = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/resend-verification`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const getCloudConnectTunnelStatus = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/tunnel-status`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
 
 // Private functions
 const buildAuthSuccessData = (data) => {
