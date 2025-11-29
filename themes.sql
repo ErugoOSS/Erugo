@@ -14,6 +14,205 @@ INSERT
   )
 VALUES
   (
+    '34',
+    'Erugo 2026',
+    '{
+  "links": {
+    "default": "rgb(200, 80, 160)",
+    "hover": "rgb(220, 100, 180)",
+    "active": "rgb(240, 120, 200)",
+    "disabled": "rgba(190, 190, 190, 0.6)"
+  },
+  "buttons": {
+    "primary": {
+      "default": {
+        "background": "linear-gradient(135deg, rgb(91, 75, 158) 0%, rgb(200, 80, 160) 100%)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "hover": {
+        "background": "linear-gradient(135deg, rgb(107, 91, 174) 0%, rgb(216, 96, 176) 100%)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "active": {
+        "background": "linear-gradient(135deg, rgb(123, 107, 190) 0%, rgb(232, 112, 192) 100%)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "disabled": {
+        "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.5) 0%, rgba(200, 80, 160, 0.5) 100%)",
+        "text": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "secondary": {
+      "default": {
+        "background": "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 240, 252, 0.9) 100%)",
+        "text": "rgb(62, 65, 85)"
+      },
+      "hover": {
+        "background": "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(252, 245, 255, 1) 100%)",
+        "text": "rgb(62, 65, 85)"
+      },
+      "active": {
+        "background": "linear-gradient(135deg, rgba(252, 245, 255, 1) 0%, rgba(245, 235, 252, 1) 100%)",
+        "text": "rgb(62, 65, 85)"
+      },
+      "disabled": {
+        "background": "linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 240, 252, 0.5) 100%)",
+        "text": "rgba(62, 65, 85, 0.5)"
+      }
+    }
+  },
+  "uploader": {
+    "background": "linear-gradient(160deg, rgba(245, 238, 252, 0.95) 0%, rgba(235, 225, 248, 0.95) 100%)",
+    "text": "rgb(62, 65, 85)",
+    "header": {
+      "background": "linear-gradient(160deg, rgba(252, 248, 255, 0.8) 0%, rgba(245, 238, 252, 0.8) 100%)",
+      "text": "rgb(62, 65, 85)"
+    },
+    "item": {
+      "background": "linear-gradient(160deg, rgba(255, 255, 255, 0.9) 0%, rgba(252, 248, 255, 0.9) 100%)",
+      "text": "rgb(62, 65, 85)"
+    }
+  },
+  "panel": {
+    "background": "linear-gradient(150deg, rgb(248, 242, 255) 0%, rgb(238, 230, 250) 100%)",
+    "text": "rgb(62, 65, 85)",
+    "item": {
+      "background": "linear-gradient(150deg, rgb(242, 235, 252) 0%, rgb(232, 222, 248) 100%)",
+      "text": "rgb(62, 65, 85)",
+      "hover": {
+        "background": "linear-gradient(150deg, rgb(235, 225, 248) 0%, rgb(225, 212, 245) 100%)",
+        "text": "rgb(62, 65, 85)"
+      },
+      "action": {
+        "hover": {
+          "backgroundFrom": "rgba(235, 225, 248, 0.42)",
+          "backgroundTo": "rgba(225, 212, 245, 0.8)"
+        }
+      }
+    },
+    "header": {
+      "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.9) 0%, rgba(200, 80, 160, 0.9) 100%)",
+      "text": "rgb(255, 255, 255)"
+    },
+    "textAlt": "rgb(130, 115, 155)",
+    "subheader": {
+      "background": "linear-gradient(to bottom, rgb(238, 230, 250) 0%, rgb(228, 218, 245) 100%)",
+      "text": "rgb(62, 65, 85)"
+    },
+    "nav": {
+      "item": {
+        "background": "linear-gradient(150deg, rgb(242, 235, 252) 0%, rgb(232, 222, 248) 100%)",
+        "text": "rgb(62, 65, 85)",
+        "hover": {
+          "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.9) 0%, rgba(200, 80, 160, 0.9) 100%)",
+          "text": "rgb(255, 255, 255)"
+        }
+      }
+    },
+    "section": {
+      "background": "linear-gradient(150deg, rgb(242, 235, 252) 0%, rgb(232, 222, 248) 100%)",
+      "text": "rgb(62, 65, 85)",
+      "alt": {
+        "background": "linear-gradient(150deg, rgb(235, 225, 248) 0%, rgb(225, 212, 245) 100%)",
+        "text": "rgb(62, 65, 85)"
+      }
+    }
+  },
+  "tabs": {
+    "bar": {
+      "background": "linear-gradient(180deg, rgb(235, 225, 248) 0%, rgb(225, 212, 245) 100%)"
+    },
+    "tab": {
+      "background": "linear-gradient(180deg, rgb(228, 218, 245) 0%, rgb(218, 205, 240) 100%)",
+      "text": "rgb(82, 75, 110)",
+      "hover": {
+        "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.9) 0%, rgba(200, 80, 160, 0.9) 100%)",
+        "text": "rgb(255, 255, 255)"
+      },
+      "active": {
+        "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.9) 0%, rgba(200, 80, 160, 0.9) 100%)",
+        "text": "rgb(255, 255, 255)"
+      }
+    }
+  },
+  "table": {
+    "background": "linear-gradient(150deg, rgb(245, 240, 255) 0%, rgb(238, 230, 250) 100%)",
+    "text": "rgb(62, 65, 85)",
+    "header": {
+      "background": "linear-gradient(135deg, rgba(91, 75, 158, 0.95) 0%, rgba(200, 80, 160, 0.95) 100%)",
+      "text": "rgb(255, 255, 255)"
+    },
+    "row": {
+      "background": "linear-gradient(150deg, rgb(252, 248, 255) 0%, rgb(245, 240, 252) 100%)",
+      "text": "rgb(62, 65, 85)",
+      "alt": {
+        "background": "linear-gradient(150deg, rgb(245, 240, 255) 0%, rgb(238, 230, 250) 100%)",
+        "text": "rgb(62, 65, 85)"
+      }
+    }
+  },
+  "input": {
+    "background": "linear-gradient(150deg, rgb(255, 252, 255) 0%, rgb(252, 248, 255) 100%)",
+    "text": "rgb(62, 65, 85)",
+    "border": {
+      "default": "rgba(200, 180, 220, 0.8)",
+      "hover": "rgba(200, 80, 160, 0.6)",
+      "focus": "rgba(91, 75, 158, 0.8)"
+    },
+    "placeholder": "rgb(160, 145, 180)"
+  },
+  "checkbox": {
+    "background": "linear-gradient(150deg, rgb(255, 252, 255) 0%, rgb(252, 248, 255) 100%)",
+    "checked": {
+      "background": "linear-gradient(135deg, rgb(91, 75, 158) 0%, rgb(200, 80, 160) 100%)",
+      "check": "rgb(255, 255, 255)"
+    }
+  },
+  "label": {
+    "text": "rgb(62, 65, 85)"
+  },
+  "progressBar": {
+    "background": "linear-gradient(90deg, rgb(235, 225, 248) 0%, rgb(225, 212, 245) 100%)",
+    "fill": "linear-gradient(90deg, rgb(91, 75, 158) 0%, rgb(200, 80, 160) 100%)",
+    "text": "rgb(62, 65, 85)"
+  },
+  "overlay": {
+    "background": "linear-gradient(150deg, rgba(245, 240, 255, 0.85) 0%, rgba(238, 230, 250, 0.85) 100%)"
+  },
+  "scrollbars": {
+    "track": "rgba(235, 225, 248, 0.4)",
+    "thumb": "rgba(200, 80, 160, 0.5)",
+    "thumbHover": "rgba(91, 75, 158, 0.7)",
+    "width": "6px",
+    "borderRadius": "3px"
+  },
+  "dimensions": {
+    "button": {
+      "height": "50px",
+      "width": "100%",
+      "iconOnlyWidth": "50px",
+      "borderRadius": "12px"
+    },
+    "panel": {
+      "borderRadius": "16px"
+    },
+    "tabs": {
+      "borderRadius": "8px 8px 0 0"
+    },
+    "settings": {
+      "width": "100vw",
+      "height": "100vh"
+    }
+  }
+}
+',
+    '1',
+    '2025-11-29 00:00:00',
+    '2025-11-29 00:00:00',
+    'Light',
+    '1'
+  ),
+  (
     '10',
     'Erugo',
     '{
@@ -206,7 +405,7 @@ VALUES
   }
 }
 ',
-    '1',
+    '0',
     '2025-02-27 23:40:21',
     '2025-03-22 10:48:03',
     'Light',
