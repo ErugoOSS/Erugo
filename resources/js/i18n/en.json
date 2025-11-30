@@ -168,6 +168,7 @@
     "description": {
       "allShares": "View and manage shares by all users",
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
+      "cloudConnect": "Connect your instance to Erugo Connect for easy domain routing",
       "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
@@ -450,7 +451,7 @@
     "title": {
       "allShares": "All Shares",
       "branding": "Branding & UI",
-      "cloudConnect": "Cloud Connect",
+      "cloudConnect": "Erugo Connect",
       "emailTemplates": "Email templates",
       "linked_accounts": "Linked Accounts",
       "manage": "Manage",
@@ -464,9 +465,6 @@
       "system": "System settings",
       "users": "Users",
       "users.edit": "Edit {name}"
-    },
-    "description": {
-      "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing"
     },
     "users": {
       "account": "Account Type",
@@ -592,13 +590,13 @@
     "files": "{value, plural, one {Uploading # file} other {Uploading # files}}"
   },
   "cloudConnect": {
-    "loading": "Loading Cloud Connect status...",
-    "errorLoadingStatus": "Failed to load Cloud Connect status",
+    "loading": "Loading Erugo Connect status...",
+    "errorLoadingStatus": "Failed to load Erugo Connect status",
     "refresh": "Refresh",
     "checkAgain": "Check Again",
     "capabilitiesError": {
       "title": "Container Not Ready",
-      "description": "Your Docker container is missing required capabilities for Cloud Connect. Please update your docker-compose.yml file.",
+      "description": "Your Docker container is missing required capabilities for Erugo Connect. Please update your docker-compose.yml file.",
       "howToFix": "How to fix this",
       "addToCompose": "Add the following to your docker-compose.yml service configuration:"
     },
@@ -608,8 +606,8 @@
       "netAdmin": "NET_ADMIN Capability"
     },
     "auth": {
-      "title": "Connect to Erugo Cloud",
-      "description": "Sign in or create an account to connect your instance to Erugo Cloud for easy domain routing.",
+      "title": "Connect to Erugo Connect",
+      "description": "Sign in or create an account to connect your instance to Erugo Connect for easy domain routing.",
       "login": "Sign In",
       "register": "Create Account",
       "logout": "Sign Out",
@@ -627,7 +625,13 @@
       "privacyLink": "Privacy Policy",
       "acceptMarketing": "Send me product updates and news",
       "loginButton": "Sign In",
-      "registerButton": "Create Account"
+      "registerButton": "Create Account",
+      "loginDescription": "Sign in to your Erugo Connect account to manage your instance.",
+      "registerDescription": "Create a new Erugo Connect account to get started.",
+      "noAccount": "Don't have an account?",
+      "registerInstead": "Create one",
+      "haveAccount": "Already have an account?",
+      "loginInstead": "Sign in"
     },
     "loginSuccess": "Signed in successfully",
     "loginFailed": "Sign in failed. Please check your credentials.",
@@ -656,7 +660,7 @@
     },
     "subscription": {
       "title": "Choose Your Plan",
-      "description": "Select a subscription plan to enable Cloud Connect for your instance.",
+      "description": "Select a subscription plan to enable Erugo Connect for your instance.",
       "loggedInAs": "Signed in as",
       "month": "month",
       "subscribe": "Subscribe Now",
@@ -691,23 +695,37 @@
     },
     "subdomainCheckFailed": "Failed to check subdomain availability",
     "subdomainNotAvailable": "Please choose an available subdomain",
+    "subdomainOwnedByYou": "You already have an instance with this subdomain",
     "instanceCreated": "Instance created successfully!",
+    "instanceReclaimed": "Instance reclaimed successfully!",
     "instanceCreateFailed": "Failed to create instance",
+    "reclaimInstance": {
+      "title": "Reclaim Existing Instance?",
+      "message": "You already have an instance named \"{name}\" using this subdomain. Would you like to reclaim it? This will reset the instance and generate new credentials.",
+      "confirm": "Yes, Reclaim Instance",
+      "cancel": "Cancel"
+    },
     "ready": {
       "title": "Ready to Connect",
-      "description": "Your instance is set up and ready to connect to Erugo Cloud.",
+      "description": "Your instance is set up and ready to connect to Erugo Connect.",
       "connect": "Connect Now",
       "connecting": "Connecting..."
     },
-    "connected": "Tunnel connected successfully!",
+    "tunnelConnected": "Tunnel connected successfully!",
     "connectFailed": "Failed to connect tunnel",
     "connected": {
-      "title": "Connected to Erugo Cloud",
+      "title": "Connected to Erugo Connect",
       "online": "Online",
+      "offline": "Offline",
+      "reconnecting": "Reconnecting...",
       "copyUrl": "Copy URL",
       "subdomain": "Subdomain",
       "tunnelIp": "Tunnel IP",
       "subscription": "Subscription",
+      "lastHeartbeat": "Last Heartbeat",
+      "heartbeatNever": "Never",
+      "heartbeatAgo": "{time} ago",
+      "heartbeatFailed": "Last heartbeat failed",
       "disconnect": "Disconnect",
       "disconnecting": "Disconnecting..."
     },

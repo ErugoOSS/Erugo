@@ -17,7 +17,8 @@ import {
   BarChart3,
   FolderOpen,
   RefreshCw,
-  Cloud
+  Cloud,
+  LogOut
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -42,6 +43,8 @@ const mySharesPanel = ref(null)
 const allSharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
+const cloudConnectPanel = ref(null)
+const cloudConnectLoggedIn = ref(false)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
@@ -206,6 +209,16 @@ const handleUserFilterChange = (event) => {
     allSharesPanel.value.setUserFilter(selectedUserId.value)
   }
 }
+
+const handleCloudConnectLogout = () => {
+  if (cloudConnectPanel.value) {
+    cloudConnectPanel.value.handleLogout()
+  }
+}
+
+const updateCloudConnectLoginState = (isLoggedIn) => {
+  cloudConnectLoggedIn.value = isLoggedIn
+}
 </script>
 
 <template>
@@ -274,17 +287,6 @@ const handleUserFilterChange = (event) => {
           </div>
           <div
             class="settings-tab"
-            :class="{ active: activeTab === 'cloudConnect' }"
-            @click="setActiveTab('cloudConnect')"
-            v-if="store.isAdmin()"
-          >
-            <h2>
-              <Cloud />
-              {{ $t('settings.title.cloudConnect') || 'Cloud' }}
-            </h2>
-          </div>
-          <div
-            class="settings-tab"
             :class="{ active: activeTab === 'users' }"
             @click="setActiveTab('users')"
             v-if="store.isAdmin()"
@@ -315,6 +317,18 @@ const handleUserFilterChange = (event) => {
             <h2>
               <User />
               {{ $t('settings.title.myProfile') }}
+            </h2>
+          </div>
+          <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'cloudConnect' }"
+            @click="setActiveTab('cloudConnect')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <Cloud />
+              {{ $t('settings.title.cloudConnect') || 'Cloud' }}
             </h2>
           </div>
         </div>
@@ -415,19 +429,23 @@ const handleUserFilterChange = (event) => {
                 <h2 class="d-none d-md-flex">
                   <Cloud />
                   <span>
-                    {{ $t('settings.title.cloudConnect') || 'Cloud Connect' }}
-                    <small>{{ $t('settings.description.cloudConnect') || 'Connect your instance to Erugo Cloud' }}</small>
+                    {{ $t('settings.title.cloudConnect') || 'Erugo Connect' }}
+                    <small>{{ $t('settings.description.cloudConnect') || 'Connect your instance to Erugo Connect' }}</small>
                   </span>
                 </h2>
                 <div class="user-actions">
-                  <button @click="$refs['cloudConnectPanel'].refreshStatus()">
+                  <button @click="cloudConnectPanel.refreshStatus()">
                     <RefreshCw />
                     {{ $t('cloudConnect.refresh') || 'Refresh' }}
+                  </button>
+                  <button v-if="cloudConnectLoggedIn" class="secondary" @click="handleCloudConnectLogout">
+                    <LogOut />
+                    {{ $t('cloudConnect.auth.logout') || 'Sign Out' }}
                   </button>
                 </div>
               </div>
               <div class="tab-content-body">
-                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" />
+                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" />
               </div>
             </div>
 
@@ -653,6 +671,11 @@ const handleUserFilterChange = (event) => {
   padding-right: 20px;
   background: var(--tabs-bar-background-color);
   width: 100%;
+  
+  .settings-tab-spacer {
+    flex-grow: 1;
+  }
+  
   .settings-tab {
     background: var(--tabs-tab-background-color);
     margin-top: 10px;

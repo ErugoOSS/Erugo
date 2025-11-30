@@ -984,16 +984,28 @@ export const getCloudConnectInstances = async () => {
   return data.data
 }
 
-export const createCloudConnectInstance = async (name, subdomain) => {
+export const createCloudConnectInstance = async (name, subdomain, confirmReclaim = false) => {
+  const body = { name, subdomain }
+  if (confirmReclaim) {
+    body.confirm_reclaim = true
+  }
+  
   const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances`, {
     method: 'POST',
     headers: {
       ...addJsonHeader()
     },
-    body: JSON.stringify({ name, subdomain })
+    body: JSON.stringify(body)
   })
   const data = await response.json()
   if (!response.ok) {
+    // For SUBDOMAIN_OWNED_BY_USER errors, throw an error with the full data
+    if (data.code === 'SUBDOMAIN_OWNED_BY_USER') {
+      const error = new Error(data.message)
+      error.code = data.code
+      error.data = data.data
+      throw error
+    }
     throw new Error(data.message)
   }
   return data.data

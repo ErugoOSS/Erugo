@@ -219,20 +219,41 @@ class CloudConnectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'subdomain' => 'required|string|min:3|max:63|regex:/^[a-z0-9][a-z0-9-]*[a-z0-9]$/',
+            'confirm_reclaim' => 'sometimes|boolean',
         ]);
 
         try {
             $result = $this->cloudConnectService->createInstance(
                 $validated['name'],
-                $validated['subdomain']
+                $validated['subdomain'],
+                $validated['confirm_reclaim'] ?? false
             );
+
+            $statusCode = ($result['reclaimed'] ?? false) ? 200 : 201;
+            $message = ($result['reclaimed'] ?? false) ? 'Instance reclaimed successfully' : 'Instance created successfully';
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Instance created successfully',
+                'message' => $message,
                 'data' => $result,
-            ], 201);
+            ], $statusCode);
         } catch (Exception $e) {
+            // Check if this is a SUBDOMAIN_OWNED_BY_USER error (409 from API)
+            $errorData = json_decode($e->getMessage(), true);
+            if (is_array($errorData) && ($errorData['code'] ?? null) === 'SUBDOMAIN_OWNED_BY_USER') {
+                return response()->json([
+                    'status' => 'error',
+                    'code' => 'SUBDOMAIN_OWNED_BY_USER',
+                    'message' => $errorData['message'] ?? 'You already own an instance with this subdomain',
+                    'data' => [
+                        'subdomain' => $errorData['subdomain'] ?? $validated['subdomain'],
+                        'existing_instance_id' => $errorData['existing_instance_id'] ?? null,
+                        'existing_instance_name' => $errorData['existing_instance_name'] ?? null,
+                        'requires_confirmation' => true,
+                    ],
+                ], 409);
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),

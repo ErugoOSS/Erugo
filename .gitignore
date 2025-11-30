@@ -27,4 +27,7 @@ yarn-error.log
 /.zed
 .DS_Store
 database.sqlite
+database.sqlite-journal
+database.sqlite-shm
+database.sqlite-wal
 ISSUES_TODO.md

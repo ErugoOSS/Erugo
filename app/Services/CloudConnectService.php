@@ -148,6 +148,9 @@ class CloudConnectService
             'account_status' => $this->getSetting('cloud_connect_account_status'),
             'last_error' => $this->getSetting('cloud_connect_last_error'),
             'instance_id' => $this->getSetting('cloud_connect_instance_id'),
+            'last_heartbeat_at' => $this->getSetting('cloud_connect_last_heartbeat_at'),
+            'last_heartbeat_success' => $this->getSetting('cloud_connect_last_heartbeat_success') === 'true',
+            'last_heartbeat_error' => $this->getSetting('cloud_connect_last_heartbeat_error'),
         ];
     }
 
@@ -270,16 +273,33 @@ class CloudConnectService
 
         $request = Http::withToken($token);
 
+        // For POST/PATCH with empty data, send empty object {} instead of array []
+        $postData = empty($data) ? (object)[] : $data;
+        
         $response = match (strtoupper($method)) {
             'GET' => $request->get("{$this->apiUrl}{$endpoint}", $data),
-            'POST' => $request->post("{$this->apiUrl}{$endpoint}", $data),
-            'PATCH' => $request->patch("{$this->apiUrl}{$endpoint}", $data),
+            'POST' => $request->post("{$this->apiUrl}{$endpoint}", $postData),
+            'PATCH' => $request->patch("{$this->apiUrl}{$endpoint}", $postData),
             'DELETE' => $request->delete("{$this->apiUrl}{$endpoint}"),
             default => throw new Exception("Unsupported HTTP method: {$method}"),
         };
 
         if (!$response->successful()) {
-            $error = $response->json('error.message') ?? "API request failed: {$response->status()}";
+            $errorBody = $response->json();
+            
+            // Log full error details for debugging
+            Log::error('Cloud Connect API request failed', [
+                'endpoint' => $endpoint,
+                'status' => $response->status(),
+                'response' => $errorBody,
+            ]);
+            
+            // For 409 conflicts (like SUBDOMAIN_OWNED_BY_USER), pass through the full error structure
+            if ($response->status() === 409 && isset($errorBody['error']['code'])) {
+                throw new Exception(json_encode($errorBody['error']));
+            }
+            
+            $error = $errorBody['error']['message'] ?? "API request failed: {$response->status()}";
             throw new Exception($error);
         }
 
@@ -345,12 +365,18 @@ class CloudConnectService
     /**
      * Create a new instance
      */
-    public function createInstance(string $name, string $subdomain): array
+    public function createInstance(string $name, string $subdomain, bool $confirmReclaim = false): array
     {
-        $data = $this->apiRequest('POST', '/instances', [
+        $requestData = [
             'name' => $name,
             'subdomain' => $subdomain,
-        ]);
+        ];
+        
+        if ($confirmReclaim) {
+            $requestData['confirm_reclaim'] = true;
+        }
+        
+        $data = $this->apiRequest('POST', '/instances', $requestData);
 
         // Store instance details
         $instance = $data['instance'] ?? [];
@@ -477,6 +503,14 @@ class CloudConnectService
             $this->setSetting('cloud_connect_subdomain', $tunnelData['domains']['subdomain'] ?? null);
         }
 
+        // Send initial heartbeat immediately so UI shows as online
+        try {
+            $this->sendHeartbeat();
+        } catch (Exception $e) {
+            // Log but don't fail the connection if heartbeat fails
+            Log::warning('Initial heartbeat after connect failed: ' . $e->getMessage());
+        }
+
         return [
             'status' => 'connected',
             'tunnel_config' => $tunnelConfig,
@@ -555,15 +589,24 @@ class CloudConnectService
     public function sendHeartbeat(): array
     {
         try {
-            $data = $this->apiRequest('POST', '/tunnel/heartbeat', [
-                'timestamp' => now()->toIso8601String(),
-            ], true);
+            $data = $this->apiRequest('POST', '/tunnel/heartbeat', [], true);
+
+            // Record successful heartbeat
+            $this->setSetting('cloud_connect_last_heartbeat_at', now()->toIso8601String());
+            $this->setSetting('cloud_connect_last_heartbeat_success', 'true');
+            $this->setSetting('cloud_connect_last_heartbeat_error', null);
+            
+            Log::info('Cloud Connect heartbeat sent successfully');
 
             return $data;
         } catch (Exception $e) {
             Log::error('Cloud Connect heartbeat failed: ' . $e->getMessage());
             
-            // Try to reconnect if heartbeat fails
+            // Record failed heartbeat
+            $this->setSetting('cloud_connect_last_heartbeat_success', 'false');
+            $this->setSetting('cloud_connect_last_heartbeat_error', $e->getMessage());
+            
+            // Update status to indicate connection issue
             $this->setSetting('cloud_connect_status', 'reconnecting');
             
             throw $e;
