@@ -69,6 +69,7 @@ RUN apk add --no-cache \
     wireguard-tools \
     iproute2 \
     && ln -s /usr/bin/php83 /usr/bin/php \
+    && ln -s /sbin/ip /usr/bin/ip \
     && rm -rf /var/cache/apk/*
 
 # Create necessary directories
