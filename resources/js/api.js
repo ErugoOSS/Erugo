@@ -866,8 +866,11 @@ export const updateEmailTemplates = async (templates) => {
 }
 
 // Cloud Connect Methods
-export const getCloudConnectStatus = async () => {
-  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/status`, {
+export const getCloudConnectStatus = async (refresh = false) => {
+  const url = refresh
+    ? `${apiUrl}/api/cloud-connect/status?refresh=true`
+    : `${apiUrl}/api/cloud-connect/status`
+  const response = await fetchWithAuth(url, {
     method: 'GET',
     headers: {
       ...addJsonHeader()

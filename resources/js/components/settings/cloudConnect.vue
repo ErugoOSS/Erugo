@@ -109,10 +109,10 @@ onUnmounted(() => {
 })
 
 // Methods
-const loadStatus = async () => {
+const loadStatus = async (refresh = false) => {
   try {
     loading.value = true
-    status.value = await getCloudConnectStatus()
+    status.value = await getCloudConnectStatus(refresh)
     determineStep()
   } catch (error) {
     toast.error(t.value('cloudConnect.errorLoadingStatus'))
@@ -222,7 +222,7 @@ const handleLogout = async () => {
 const checkVerificationStatus = async () => {
   try {
     loading.value = true
-    await loadStatus()
+    await loadStatus(true) // Force refresh from API
     if (!needsEmailVerification.value) {
       toast.success(t.value('cloudConnect.emailVerification.verified'))
     } else {
@@ -380,7 +380,7 @@ const copyDomain = async () => {
 }
 
 const refreshStatus = async () => {
-  await loadStatus()
+  await loadStatus(true) // Force refresh from API
 }
 
 defineExpose({

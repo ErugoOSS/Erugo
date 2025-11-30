@@ -98,11 +98,22 @@ class CloudConnectService
     /**
      * Get the current connection status
      */
-    public function getStatus(): array
+    public function getStatus(bool $refreshProfile = false): array
     {
         $capabilities = $this->checkCapabilities();
         $isLoggedIn = !empty($this->getSetting('cloud_connect_access_token'));
         $hasInstance = !empty($this->getSetting('cloud_connect_instance_id'));
+        
+        // Fetch user profile from API if logged in and either:
+        // - account_status is missing, OR
+        // - refreshProfile is requested (e.g., user clicked "Check Again")
+        if ($isLoggedIn && ($refreshProfile || empty($this->getSetting('cloud_connect_account_status')))) {
+            try {
+                $this->getUserProfile();
+            } catch (Exception $e) {
+                // Ignore errors - we'll just return cached values
+            }
+        }
         
         // Check actual WireGuard interface status (using sudo)
         $tunnelActive = false;
@@ -188,7 +199,7 @@ class CloudConnectService
         $this->setSetting('cloud_connect_user_email', $data['user']['email'] ?? $email);
         $this->setSetting('cloud_connect_subscription_status', $data['user']['subscription_status'] ?? 'none');
         $this->setSetting('cloud_connect_subscription_plan', $data['user']['subscription_plan'] ?? null);
-        $this->setSetting('cloud_connect_account_status', $data['user']['status'] ?? null);
+        $this->setSetting('cloud_connect_account_status', $data['user']['account_status'] ?? $data['user']['status'] ?? null);
 
         return $data;
     }
@@ -285,6 +296,28 @@ class CloudConnectService
         // Update local cache
         $this->setSetting('cloud_connect_subscription_status', $data['status'] ?? 'none');
         $this->setSetting('cloud_connect_subscription_plan', $data['plan'] ?? null);
+        
+        // Also update account status if provided
+        if (isset($data['account_status'])) {
+            $this->setSetting('cloud_connect_account_status', $data['account_status']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get user profile from cloud API
+     */
+    public function getUserProfile(): array
+    {
+        $data = $this->apiRequest('GET', '/user');
+        
+        // The /user endpoint returns the user object directly (not wrapped in 'user' key)
+        $user = $data;
+        $this->setSetting('cloud_connect_user_email', $user['email'] ?? null);
+        $this->setSetting('cloud_connect_account_status', $user['account_status'] ?? $user['status'] ?? null);
+        $this->setSetting('cloud_connect_subscription_status', $user['subscription_status'] ?? 'none');
+        $this->setSetting('cloud_connect_subscription_plan', $user['subscription_plan'] ?? null);
 
         return $data;
     }

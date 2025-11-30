@@ -19,10 +19,12 @@ class CloudConnectController extends Controller
     /**
      * Get current cloud connect status and capabilities
      */
-    public function status(): JsonResponse
+    public function status(Request $request): JsonResponse
     {
         try {
-            $status = $this->cloudConnectService->getStatus();
+            // Pass refresh=true to force fetching latest profile from API
+            $refresh = $request->boolean('refresh', false);
+            $status = $this->cloudConnectService->getStatus($refresh);
 
             return response()->json([
                 'status' => 'success',

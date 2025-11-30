@@ -235,10 +235,90 @@
         }
       }
     },
-    "/auth/verify-email": {
+    "/auth/resend-verification": {
       "post": {
         "tags": ["Authentication"],
-        "summary": "Verify email with token",
+        "summary": "Resend verification email",
+        "description": "Resends the email verification link to the authenticated user. Only works if the email is not already verified.",
+        "operationId": "resendVerification",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Verification email sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Email is already verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Verify email via link (returns HTML page)",
+        "description": "Direct verification endpoint for email links. Returns an HTML page showing success or failure status.",
+        "operationId": "verifyEmailLink",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Email verification token from the verification email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verified successfully (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Verify email with token (JSON API)",
         "operationId": "verifyEmail",
         "requestBody": {
           "required": true,
@@ -378,6 +458,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Email verification required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -441,6 +531,16 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email verification required",
             "content": {
               "application/json": {
                 "schema": {
@@ -553,7 +653,7 @@
             }
           },
           "403": {
-            "description": "Instance limit exceeded",
+            "description": "Email verification required or instance limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -670,6 +770,16 @@
               }
             }
           },
+          "403": {
+            "description": "Email verification required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Instance not found",
             "content": {
@@ -721,6 +831,16 @@
               }
             }
           },
+          "403": {
+            "description": "Email verification required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Instance not found",
             "content": {
@@ -763,6 +883,16 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email verification required",
             "content": {
               "application/json": {
                 "schema": {
@@ -920,7 +1050,7 @@
             }
           },
           "403": {
-            "description": "Domain limit exceeded",
+            "description": "Email verification required or domain limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -997,6 +1127,16 @@
               }
             }
           },
+          "403": {
+            "description": "Email verification required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Instance or domain not found",
             "content": {
@@ -1040,6 +1180,16 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email verification required",
             "content": {
               "application/json": {
                 "schema": {
@@ -1399,6 +1549,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "account_status": {
+            "type": "string",
+            "enum": ["pending_email_verification", "active", "suspended"]
           },
           "subscription_status": {
             "type": "string",
@@ -1913,4 +2067,3 @@
     }
   }
 }
-
