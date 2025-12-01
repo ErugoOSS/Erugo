@@ -362,5 +362,221 @@ class CloudConnectController extends Controller
             ], 400);
         }
     }
+
+    /**
+     * Get user usage statistics
+     */
+    public function usage(): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->getUserUsage();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Update user profile
+     */
+    public function updateUser(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+        ]);
+
+        try {
+            $result = $this->cloudConnectService->updateUser($validated);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Request password reset email
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            $result = $this->cloudConnectService->forgotPassword($validated['email']);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'If an account exists with that email, a password reset link has been sent.',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            // Don't reveal if email exists or not
+            return response()->json([
+                'status' => 'success',
+                'message' => 'If an account exists with that email, a password reset link has been sent.',
+            ]);
+        }
+    }
+
+    /**
+     * Reset password with token
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'password' => 'required|string|min:8',
+            'password_confirmation' => 'required|string|same:password',
+        ]);
+
+        try {
+            $result = $this->cloudConnectService->resetPassword(
+                $validated['token'],
+                $validated['password'],
+                $validated['password_confirmation']
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Password reset successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Get a specific instance
+     */
+    public function getInstance(string $instanceId): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->getInstance($instanceId);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Update an instance
+     */
+    public function updateInstance(Request $request, string $instanceId): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'subdomain' => 'sometimes|string|min:3|max:63|regex:/^[a-z0-9][a-z0-9-]*[a-z0-9]$/',
+        ]);
+
+        try {
+            $result = $this->cloudConnectService->updateInstance($instanceId, $validated);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Instance updated successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Delete an instance
+     */
+    public function deleteInstance(string $instanceId): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->deleteInstance($instanceId);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Instance deleted successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Regenerate instance token
+     */
+    public function regenerateToken(string $instanceId): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->regenerateInstanceToken($instanceId);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Instance token regenerated successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Create billing portal session
+     */
+    public function billingPortal(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'return_url' => 'sometimes|string|url',
+        ]);
+
+        try {
+            // Default return URL to the current app URL
+            $returnUrl = $validated['return_url'] ?? config('app.url', url('/'));
+            $result = $this->cloudConnectService->createBillingPortal($returnUrl);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
 }
 

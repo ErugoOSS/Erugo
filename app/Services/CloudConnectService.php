@@ -361,6 +361,136 @@ class CloudConnectService
     }
 
     /**
+     * Create a billing portal session for subscription management
+     */
+    public function createBillingPortal(string $returnUrl): array
+    {
+        return $this->apiRequest('POST', '/billing/portal', [
+            'return_url' => $returnUrl,
+        ]);
+    }
+
+    /**
+     * Get user usage statistics
+     */
+    public function getUserUsage(): array
+    {
+        return $this->apiRequest('GET', '/user/usage');
+    }
+
+    /**
+     * Update user profile
+     */
+    public function updateUser(array $data): array
+    {
+        $result = $this->apiRequest('PATCH', '/user', $data);
+        
+        // Update local cache if name changed
+        if (isset($result['name'])) {
+            $this->setSetting('cloud_connect_user_name', $result['name']);
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Request password reset email (no auth required)
+     */
+    public function forgotPassword(string $email): array
+    {
+        $response = Http::post("{$this->apiUrl}/auth/forgot-password", [
+            'email' => $email,
+        ]);
+
+        if (!$response->successful()) {
+            $error = $response->json('error.message') ?? 'Failed to send reset email';
+            throw new Exception($error);
+        }
+
+        return $response->json() ?? ['message' => 'If an account exists, a reset email has been sent'];
+    }
+
+    /**
+     * Reset password with token (no auth required)
+     */
+    public function resetPassword(string $token, string $password, string $passwordConfirmation): array
+    {
+        $response = Http::post("{$this->apiUrl}/auth/reset-password", [
+            'token' => $token,
+            'password' => $password,
+            'password_confirmation' => $passwordConfirmation,
+        ]);
+
+        if (!$response->successful()) {
+            $error = $response->json('error.message') ?? 'Password reset failed';
+            throw new Exception($error);
+        }
+
+        return $response->json() ?? ['message' => 'Password reset successfully'];
+    }
+
+    /**
+     * Get a specific instance by ID
+     */
+    public function getInstance(string $instanceId): array
+    {
+        return $this->apiRequest('GET', "/instances/{$instanceId}");
+    }
+
+    /**
+     * Update an instance
+     */
+    public function updateInstance(string $instanceId, array $data): array
+    {
+        $result = $this->apiRequest('PATCH', "/instances/{$instanceId}", $data);
+        
+        // If updating the current connected instance, update local cache
+        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        if ($currentInstanceId === $instanceId) {
+            if (isset($result['subdomain'])) {
+                $this->setSetting('cloud_connect_subdomain', $result['subdomain']);
+            }
+            if (isset($result['full_domain'])) {
+                $this->setSetting('cloud_connect_full_domain', $result['full_domain']);
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Delete an instance
+     */
+    public function deleteInstance(string $instanceId): array
+    {
+        $this->apiRequest('DELETE', "/instances/{$instanceId}");
+        
+        // If deleting the current connected instance, clear local state
+        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        if ($currentInstanceId === $instanceId) {
+            $this->clearInstanceState();
+        }
+        
+        return ['message' => 'Instance deleted successfully'];
+    }
+
+    /**
+     * Regenerate instance token
+     */
+    public function regenerateInstanceToken(string $instanceId): array
+    {
+        $result = $this->apiRequest('POST', "/instances/{$instanceId}/regenerate-token");
+        
+        // If regenerating token for current instance, update local cache
+        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        if ($currentInstanceId === $instanceId && isset($result['instance_token'])) {
+            $this->setEncryptedSetting('cloud_connect_instance_token', $result['instance_token']);
+        }
+        
+        return $result;
+    }
+
+    /**
      * Check subdomain availability
      */
     public function checkSubdomain(string $subdomain): array

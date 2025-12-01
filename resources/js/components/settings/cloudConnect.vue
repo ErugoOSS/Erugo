@@ -20,7 +20,17 @@ import {
   Copy,
   Check,
   Mail,
-  CircleX
+  CircleX,
+  BarChart3,
+  Pencil,
+  Trash2,
+  Key,
+  User,
+  ArrowUpDown,
+  ArrowDown,
+  ArrowUp,
+  HardDrive,
+  X
 } from 'lucide-vue-next'
 import {
   getCloudConnectStatus,
@@ -34,7 +44,15 @@ import {
   createCloudConnectInstance,
   connectCloudConnect,
   disconnectCloudConnect,
-  resendCloudConnectVerification
+  resendCloudConnectVerification,
+  getCloudConnectUsage,
+  getCloudConnectInstances,
+  getCloudConnectInstance,
+  updateCloudConnectInstance,
+  deleteCloudConnectInstance,
+  regenerateCloudConnectInstanceToken,
+  createCloudConnectBillingPortal,
+  cloudConnectForgotPassword
 } from '../../api'
 import { useToast } from 'vue-toastification'
 import { useTranslate } from '@tolgee/vue'
@@ -88,6 +106,33 @@ const selectedPlan = ref(null)
 const plans = ref([])
 const loadingPlans = ref(false)
 const showPlanManagement = ref(false)
+
+// Usage data
+const usageData = ref(null)
+const loadingUsage = ref(false)
+
+// Instances management
+const instances = ref([])
+const loadingInstances = ref(false)
+const selectedInstance = ref(null)
+const showEditInstanceForm = ref(false)
+const showDeleteConfirm = ref(false)
+const showRegenerateTokenConfirm = ref(false)
+const editInstanceForm = ref({
+  name: '',
+  subdomain: ''
+})
+const editingInstanceSubdomain = ref(false)
+const regeneratedToken = ref(null)
+const showRegeneratedToken = ref(false)
+
+// Billing portal
+const loadingBillingPortal = ref(false)
+
+// Account settings
+const showForgotPasswordForm = ref(false)
+const forgotPasswordEmail = ref('')
+const sendingForgotPassword = ref(false)
 
 // Computed
 const canConnect = computed(() => {
@@ -629,6 +674,218 @@ const handleNavItemClicked = (item) => {
   emit('navItemClicked', item)
 }
 
+// Usage data methods
+const loadUsage = async () => {
+  try {
+    loadingUsage.value = true
+    usageData.value = await getCloudConnectUsage()
+  } catch (error) {
+    console.error('Failed to load usage:', error)
+  } finally {
+    loadingUsage.value = false
+  }
+}
+
+// Instances management methods
+const loadInstances = async () => {
+  try {
+    loadingInstances.value = true
+    const result = await getCloudConnectInstances()
+    instances.value = result.instances || []
+  } catch (error) {
+    console.error('Failed to load instances:', error)
+    toast.error(t.value('cloudConnect.instances.loadFailed'))
+  } finally {
+    loadingInstances.value = false
+  }
+}
+
+const openEditInstanceForm = (instance) => {
+  selectedInstance.value = instance
+  editInstanceForm.value = {
+    name: instance.name || '',
+    subdomain: instance.subdomain || ''
+  }
+  editingInstanceSubdomain.value = false
+  showEditInstanceForm.value = true
+}
+
+const closeEditInstanceForm = () => {
+  showEditInstanceForm.value = false
+  selectedInstance.value = null
+  editInstanceForm.value = { name: '', subdomain: '' }
+  editingInstanceSubdomain.value = false
+}
+
+const handleUpdateInstance = async () => {
+  if (!selectedInstance.value) return
+  
+  try {
+    loading.value = true
+    const updateData = { name: editInstanceForm.value.name }
+    
+    // Only include subdomain if it was changed
+    if (editingInstanceSubdomain.value && editInstanceForm.value.subdomain !== selectedInstance.value.subdomain) {
+      updateData.subdomain = editInstanceForm.value.subdomain
+    }
+    
+    await updateCloudConnectInstance(selectedInstance.value.id, updateData)
+    toast.success(t.value('cloudConnect.instances.updateSuccess'))
+    closeEditInstanceForm()
+    await loadInstances()
+    await loadStatus(true)
+  } catch (error) {
+    toast.error(error.message || t.value('cloudConnect.instances.updateFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const openDeleteConfirm = (instance) => {
+  selectedInstance.value = instance
+  showDeleteConfirm.value = true
+}
+
+const closeDeleteConfirm = () => {
+  showDeleteConfirm.value = false
+  selectedInstance.value = null
+}
+
+const handleDeleteInstance = async () => {
+  if (!selectedInstance.value) return
+  
+  try {
+    loading.value = true
+    await deleteCloudConnectInstance(selectedInstance.value.id)
+    toast.success(t.value('cloudConnect.instances.deleteSuccess'))
+    closeDeleteConfirm()
+    await loadInstances()
+    await loadStatus(true)
+  } catch (error) {
+    toast.error(error.message || t.value('cloudConnect.instances.deleteFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const openRegenerateTokenConfirm = (instance) => {
+  selectedInstance.value = instance
+  showRegenerateTokenConfirm.value = true
+}
+
+const closeRegenerateTokenConfirm = () => {
+  showRegenerateTokenConfirm.value = false
+  selectedInstance.value = null
+}
+
+const handleRegenerateToken = async () => {
+  if (!selectedInstance.value) return
+  
+  try {
+    loading.value = true
+    const result = await regenerateCloudConnectInstanceToken(selectedInstance.value.id)
+    regeneratedToken.value = result.instance_token
+    showRegenerateTokenConfirm.value = false
+    showRegeneratedToken.value = true
+    toast.success(t.value('cloudConnect.instances.tokenRegenerated'))
+  } catch (error) {
+    toast.error(error.message || t.value('cloudConnect.instances.tokenRegenerateFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const closeRegeneratedTokenModal = () => {
+  showRegeneratedToken.value = false
+  regeneratedToken.value = null
+  selectedInstance.value = null
+}
+
+const copyToken = async () => {
+  if (!regeneratedToken.value) return
+  try {
+    await navigator.clipboard.writeText(regeneratedToken.value)
+    toast.success(t.value('cloudConnect.instances.tokenCopied'))
+  } catch (error) {
+    toast.error(t.value('cloudConnect.copyFailed'))
+  }
+}
+
+// Billing portal methods
+const openBillingPortal = async () => {
+  try {
+    loadingBillingPortal.value = true
+    const result = await createCloudConnectBillingPortal(window.location.href)
+    window.open(result.portal_url, '_blank')
+  } catch (error) {
+    toast.error(error.message || t.value('cloudConnect.billing.portalFailed'))
+  } finally {
+    loadingBillingPortal.value = false
+  }
+}
+
+// Forgot password methods
+const openForgotPasswordForm = () => {
+  forgotPasswordEmail.value = status.value?.user_email || loginForm.value.email || ''
+  showForgotPasswordForm.value = true
+}
+
+const closeForgotPasswordForm = () => {
+  showForgotPasswordForm.value = false
+  forgotPasswordEmail.value = ''
+}
+
+const handleForgotPassword = async () => {
+  if (!forgotPasswordEmail.value) {
+    toast.error(t.value('cloudConnect.auth.emailRequired'))
+    return
+  }
+  
+  try {
+    sendingForgotPassword.value = true
+    await cloudConnectForgotPassword(forgotPasswordEmail.value)
+    toast.success(t.value('cloudConnect.auth.resetEmailSent'))
+    closeForgotPasswordForm()
+  } catch (error) {
+    // Still show success to not reveal if email exists
+    toast.success(t.value('cloudConnect.auth.resetEmailSent'))
+    closeForgotPasswordForm()
+  } finally {
+    sendingForgotPassword.value = false
+  }
+}
+
+// Helper functions
+const formatBytes = (bytes) => {
+  if (bytes === 0 || bytes === null || bytes === undefined) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  return new Date(dateString).toLocaleDateString()
+}
+
+const getInstanceStatusClass = (instance) => {
+  if (instance.status === 'online' || instance.status === 'connected') return 'online'
+  if (instance.status === 'offline' || instance.status === 'disconnected') return 'offline'
+  return ''
+}
+
+// Load data when logged in
+watch(() => status.value?.is_logged_in, async (isLoggedIn) => {
+  if (isLoggedIn) {
+    await loadUsage()
+    await loadInstances()
+  } else {
+    usageData.value = null
+    instances.value = []
+  }
+}, { immediate: true })
+
 defineExpose({
   refreshStatus,
   handleLogout
@@ -697,6 +954,12 @@ defineExpose({
             <a href="#" @click.prevent="handleNavItemClicked('status-section')">
               <component :is="isConnected ? Wifi : WifiOff" />
               {{ $t('cloudConnect.nav.status') }}
+            </a>
+          </li>
+          <li v-if="status?.is_logged_in">
+            <a href="#" @click.prevent="handleNavItemClicked('usage-section')">
+              <BarChart3 />
+              {{ $t('cloudConnect.nav.usage') || 'Usage' }}
             </a>
           </li>
           <li>
@@ -769,6 +1032,110 @@ defineExpose({
                       </a>
                     </span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Dashboard Section (visible when logged in) -->
+        <div v-if="status?.is_logged_in && !needsEmailVerification" class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="usage-section">
+              <div class="setting-group-header">
+                <h3>
+                  <BarChart3 />
+                  {{ $t('cloudConnect.nav.usage') || 'Usage' }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <div v-if="loadingUsage" class="loading-plans">
+                  <Loader2 class="spinner" />
+                  <span>{{ $t('cloudConnect.usage.loading') || 'Loading usage data...' }}</span>
+                </div>
+                
+                <div v-else-if="usageData" class="usage-dashboard">
+                  <!-- Instances Usage -->
+                  <div class="usage-card">
+                    <div class="usage-card-header">
+                      <Server />
+                      <span>{{ $t('cloudConnect.usage.instances') || 'Instances' }}</span>
+                    </div>
+                    <div class="usage-stats">
+                      <div class="usage-main">
+                        <span class="usage-current">{{ usageData.instances?.total || 0 }}</span>
+                        <span class="usage-separator">/</span>
+                        <span class="usage-max">{{ usageData.instances?.limit || '∞' }}</span>
+                      </div>
+                      <div class="usage-progress" v-if="usageData.instances?.limit">
+                        <div 
+                          class="usage-progress-bar" 
+                          :style="{ width: Math.min(100, (usageData.instances?.total / usageData.instances?.limit) * 100) + '%' }"
+                          :class="{ warning: usageData.instances?.total >= usageData.instances?.limit }"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Transfer Usage -->
+                  <div class="usage-card">
+                    <div class="usage-card-header">
+                      <ArrowUpDown />
+                      <span>{{ $t('cloudConnect.usage.transfer') || 'Transfer This Period' }}</span>
+                    </div>
+                    <div class="usage-stats">
+                      <div class="transfer-breakdown">
+                        <div class="transfer-item">
+                          <ArrowDown class="download" />
+                          <span class="transfer-label">{{ $t('cloudConnect.usage.in') || 'In' }}:</span>
+                          <span class="transfer-value">{{ formatBytes(usageData.transfer?.bytes_in) }}</span>
+                        </div>
+                        <div class="transfer-item">
+                          <ArrowUp class="upload" />
+                          <span class="transfer-label">{{ $t('cloudConnect.usage.out') || 'Out' }}:</span>
+                          <span class="transfer-value">{{ formatBytes(usageData.transfer?.bytes_out) }}</span>
+                        </div>
+                        <div class="transfer-item total">
+                          <HardDrive />
+                          <span class="transfer-label">{{ $t('cloudConnect.usage.total') || 'Total' }}:</span>
+                          <span class="transfer-value">{{ formatBytes(usageData.transfer?.bytes_total) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="usageData.transfer?.period_start" class="usage-period">
+                      {{ $t('cloudConnect.usage.periodStart') || 'Period started' }}: {{ formatDate(usageData.transfer?.period_start) }}
+                    </div>
+                  </div>
+
+                  <!-- Plan Limits -->
+                  <div v-if="usageData.plan" class="usage-card">
+                    <div class="usage-card-header">
+                      <CreditCard />
+                      <span>{{ $t('cloudConnect.usage.planLimits') || 'Plan Limits' }}</span>
+                    </div>
+                    <div class="plan-limits-list">
+                      <div class="plan-limit-item">
+                        <span class="limit-label">{{ $t('cloudConnect.usage.maxInstances') || 'Max Instances' }}:</span>
+                        <span class="limit-value">{{ usageData.plan.max_instances || '∞' }}</span>
+                      </div>
+                      <div v-if="usageData.plan.max_transfer_gb" class="plan-limit-item">
+                        <span class="limit-label">{{ $t('cloudConnect.usage.maxTransfer') || 'Max Transfer' }}:</span>
+                        <span class="limit-value">{{ usageData.plan.max_transfer_gb }} GB</span>
+                      </div>
+                      <div v-if="usageData.plan.max_bandwidth_mbps" class="plan-limit-item">
+                        <span class="limit-label">{{ $t('cloudConnect.usage.maxBandwidth') || 'Max Bandwidth' }}:</span>
+                        <span class="limit-value">{{ usageData.plan.max_bandwidth_mbps }} Mbps</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div v-else class="no-usage-data">
+                  <p>{{ $t('cloudConnect.usage.noData') || 'No usage data available' }}</p>
+                  <button @click="loadUsage" class="secondary">
+                    <RefreshCw />
+                    {{ $t('cloudConnect.refresh') || 'Refresh' }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -866,25 +1233,6 @@ defineExpose({
                 </h3>
               </div>
               <div class="setting-group-body">
-                <!-- Current Plan Info -->
-                <div v-if="currentPlan" class="current-plan-display">
-                  <div class="current-plan-header">
-                    <div class="plan-name-large">{{ currentPlan.display_name }}</div>
-                    <div v-if="currentPlan.price_cents" class="plan-price">
-                      ${{ Math.floor(currentPlan.price_cents / 100) }}/{{ $t('cloudConnect.subscription.month') }}
-                    </div>
-                    <div v-else class="plan-price free">{{ $t('cloudConnect.planManagement.free') }}</div>
-                  </div>
-                  <ul class="plan-features">
-                    <li>{{ $t('cloudConnect.subscription.instances', { count: currentPlan.max_instances }) }}</li>
-                    <li>{{ $t('cloudConnect.subscription.subdomain') }}</li>
-                    <li v-if="currentPlan.custom_domains_allowed">
-                      {{ $t('cloudConnect.subscription.customDomains', { count: currentPlan.max_domains_per_instance }) }}
-                    </li>
-                    <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
-                  </ul>
-                </div>
-                
                 <!-- No plan / Select plan -->
                 <div v-if="!hasActiveSubscription || !currentPlan">
                   <p>{{ $t('cloudConnect.subscription.description') }}</p>
@@ -914,11 +1262,27 @@ defineExpose({
                     </div>
                     <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
                     <ul>
-                      <li>{{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}</li>
+                      <li><Check class="list-icon included" />{{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}</li>
+                      <li>
+                        <Check class="list-icon included" />
+                        {{ plan.max_transfer_gb 
+                          ? ($t('cloudConnect.subscription.transfer', { count: plan.max_transfer_gb }) || `${plan.max_transfer_gb} GB transfer`) 
+                          : ($t('cloudConnect.subscription.transferUnlimited') || 'Unlimited transfer') }}
+                      </li>
+                      <li>
+                        <Check class="list-icon included" />
+                        {{ plan.max_bandwidth_mbps 
+                          ? ($t('cloudConnect.subscription.bandwidth', { count: plan.max_bandwidth_mbps }) || `${plan.max_bandwidth_mbps} Mbps bandwidth`) 
+                          : ($t('cloudConnect.subscription.bandwidthUnlimited') || 'Unlimited bandwidth') }}
+                      </li>
                       <li v-if="plan.custom_domains_allowed">
+                        <Check class="list-icon included" />
                         {{ $t('cloudConnect.subscription.customDomains', { count: plan.max_domains_per_instance }) }}
                       </li>
-                      <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
+                      <li v-else class="not-included">
+                        <X class="list-icon" />
+                        {{ $t('cloudConnect.subscription.noCustomDomains') }}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -937,6 +1301,23 @@ defineExpose({
                   {{ $t('cloudConnect.subscription.pollingNote') }}
                   <button @click="stopPolling" class="secondary">{{ $t('cloudConnect.subscription.stopWaiting') }}</button>
                 </p>
+                
+                <!-- Billing Portal Button -->
+                <div v-if="hasActiveSubscription && currentPlan" class="billing-portal-section">
+                  <hr class="section-divider" />
+                  <p class="billing-portal-description">
+                    {{ $t('cloudConnect.billing.portalDescription') || 'Manage your subscription, update payment methods, or view invoices in the billing portal.' }}
+                  </p>
+                  <button 
+                    @click="openBillingPortal" 
+                    class="secondary"
+                    :disabled="loadingBillingPortal"
+                  >
+                    <Loader2 v-if="loadingBillingPortal" class="spinner" />
+                    <ExternalLink v-else />
+                    {{ $t('cloudConnect.billing.openPortal') || 'Manage Subscription' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -953,23 +1334,80 @@ defineExpose({
                 </h3>
               </div>
               <div class="setting-group-body">
-                <!-- Has instance -->
-                <div v-if="status?.has_instance" class="instance-info-display">
-                  <div class="info-row">
-                    <span class="info-label">{{ $t('cloudConnect.instance.name') }}:</span>
-                    <span class="info-value">{{ instanceForm.name || 'My Erugo Server' }}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">{{ $t('cloudConnect.instance.subdomain') }}:</span>
-                    <span class="info-value">{{ status?.subdomain }}.erugo.cloud</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">{{ $t('cloudConnect.connected.tunnelIp') }}:</span>
-                    <span class="info-value">{{ status?.tunnel_ip }}</span>
+                <!-- Loading instances -->
+                <div v-if="loadingInstances" class="loading-plans">
+                  <Loader2 class="spinner" />
+                  <span>{{ $t('cloudConnect.instances.loading') || 'Loading instances...' }}</span>
+                </div>
+                
+                <!-- Instances list -->
+                <div v-else-if="instances.length > 0" class="instances-list">
+                  <div 
+                    v-for="instance in instances" 
+                    :key="instance.id"
+                    class="instance-card"
+                    :class="{ 
+                      current: instance.id === status?.instance_id,
+                      online: instance.status === 'online' || instance.status === 'connected',
+                      offline: instance.status === 'offline' || instance.status === 'disconnected'
+                    }"
+                  >
+                    <div class="instance-card-header">
+                      <div class="instance-name">
+                        <Server />
+                        <span>{{ instance.name || 'Unnamed Instance' }}</span>
+                        <span v-if="instance.id === status?.instance_id" class="current-badge">
+                          {{ $t('cloudConnect.instances.current') || 'Current' }}
+                        </span>
+                      </div>
+                      <div class="instance-status" :class="getInstanceStatusClass(instance)">
+                        <component :is="instance.status === 'online' || instance.status === 'connected' ? Wifi : WifiOff" />
+                        <span>{{ instance.status || 'unknown' }}</span>
+                      </div>
+                    </div>
+                    
+                    <div class="instance-card-body">
+                      <div class="instance-detail">
+                        <Globe />
+                        <span>{{ instance.full_domain || `${instance.subdomain}.erugo.cloud` }}</span>
+                      </div>
+                      <div v-if="instance.tunnel_ip" class="instance-detail">
+                        <span class="detail-label">{{ $t('cloudConnect.connected.tunnelIp') || 'Tunnel IP' }}:</span>
+                        <span>{{ instance.tunnel_ip }}</span>
+                      </div>
+                      <div v-if="instance.last_seen" class="instance-detail muted">
+                        <span class="detail-label">{{ $t('cloudConnect.instances.lastSeen') || 'Last seen' }}:</span>
+                        <span>{{ formatDate(instance.last_seen) }}</span>
+                      </div>
+                      
+                      <!-- Transfer stats if available -->
+                      <div v-if="instance.transfer" class="instance-transfer">
+                        <div class="transfer-mini">
+                          <ArrowDown class="download" />
+                          <span>{{ formatBytes(instance.transfer.bytes_in) }}</span>
+                        </div>
+                        <div class="transfer-mini">
+                          <ArrowUp class="upload" />
+                          <span>{{ formatBytes(instance.transfer.bytes_out) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="instance-card-actions">
+                      <button class="icon-only" @click="openEditInstanceForm(instance)" :title="$t('cloudConnect.instances.edit') || 'Edit'">
+                        <Pencil />
+                      </button>
+                      <button class="icon-only" @click="openRegenerateTokenConfirm(instance)" :title="$t('cloudConnect.instances.regenerateToken') || 'Regenerate Token'">
+                        <Key />
+                      </button>
+                      <button class="icon-only danger" @click="openDeleteConfirm(instance)" :title="$t('cloudConnect.instances.delete') || 'Delete'" :disabled="instances.length <= 1">
+                        <Trash2 />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
-                <!-- No instance - setup form -->
+                <!-- No instances - show create form -->
                 <div v-else>
                   <p>{{ $t('cloudConnect.instance.description') }}</p>
                   <form @submit.prevent="handleCreateInstance" class="instance-form">
@@ -1171,6 +1609,11 @@ defineExpose({
           {{ $t('cloudConnect.auth.registerInstead') }}
         </button>
       </p>
+      <p class="switch-form-text">
+        <button type="button" class="btn-text-inline" @click="openForgotPasswordForm">
+          {{ $t('cloudConnect.auth.forgotPassword') || 'Forgot your password?' }}
+        </button>
+      </p>
     </div>
   </div>
 
@@ -1358,6 +1801,175 @@ defineExpose({
         <button type="button" class="secondary close-button" @click="closePlanManagement">
           <CircleX />
           {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="auth-form-overlay" :class="{ active: showForgotPasswordForm }" @click.self="closeForgotPasswordForm">
+    <div class="auth-slide-form">
+      <h2>
+        <Mail />
+        {{ $t('cloudConnect.auth.forgotPasswordTitle') || 'Reset Password' }}
+      </h2>
+      <p>{{ $t('cloudConnect.auth.forgotPasswordDescription') || 'Enter your email address and we\'ll send you a link to reset your password.' }}</p>
+      <form @submit.prevent="handleForgotPassword">
+        <div class="input-container">
+          <label for="forgot-email">{{ $t('cloudConnect.auth.email') }}</label>
+          <input 
+            type="email" 
+            id="forgot-email" 
+            v-model="forgotPasswordEmail" 
+            required 
+            :placeholder="$t('cloudConnect.auth.emailPlaceholder')"
+          />
+        </div>
+        <div class="button-bar">
+          <button type="submit" :disabled="sendingForgotPassword">
+            <Loader2 v-if="sendingForgotPassword" class="spinner" />
+            <Mail v-else />
+            {{ $t('cloudConnect.auth.sendResetLink') || 'Send Reset Link' }}
+          </button>
+          <button type="button" class="secondary close-button" @click="closeForgotPasswordForm">
+            <CircleX />
+            {{ $t('settings.close') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Instance Modal -->
+  <div class="auth-form-overlay" :class="{ active: showEditInstanceForm }" @click.self="closeEditInstanceForm">
+    <div class="auth-slide-form">
+      <h2>
+        <Pencil />
+        {{ $t('cloudConnect.instances.editTitle') || 'Edit Instance' }}
+      </h2>
+      <form @submit.prevent="handleUpdateInstance">
+        <div class="input-container">
+          <label for="edit-instance-name">{{ $t('cloudConnect.instance.name') }}</label>
+          <input 
+            type="text" 
+            id="edit-instance-name" 
+            v-model="editInstanceForm.name" 
+            required 
+            :placeholder="$t('cloudConnect.instance.namePlaceholder')"
+          />
+        </div>
+        <div class="input-container">
+          <label for="edit-instance-subdomain">
+            {{ $t('cloudConnect.instance.subdomain') }}
+            <button type="button" class="btn-text-inline" @click="editingInstanceSubdomain = !editingInstanceSubdomain">
+              {{ editingInstanceSubdomain ? ($t('cloudConnect.instances.cancelSubdomainEdit') || 'Cancel') : ($t('cloudConnect.instances.editSubdomain') || 'Change') }}
+            </button>
+          </label>
+          <div class="subdomain-input">
+            <input 
+              type="text" 
+              id="edit-instance-subdomain" 
+              v-model="editInstanceForm.subdomain" 
+              :disabled="!editingInstanceSubdomain"
+              pattern="^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+              minlength="3"
+              maxlength="63"
+            />
+            <span class="subdomain-suffix">.erugo.cloud</span>
+          </div>
+          <p v-if="editingInstanceSubdomain" class="warning-text">
+            {{ $t('cloudConnect.instances.subdomainWarning') || 'Changing the subdomain will change your instance URL. You may need to reconnect.' }}
+          </p>
+        </div>
+        <div class="button-bar">
+          <button type="submit" :disabled="loading">
+            <Loader2 v-if="loading" class="spinner" />
+            <Check v-else />
+            {{ $t('cloudConnect.instances.save') || 'Save Changes' }}
+          </button>
+          <button type="button" class="secondary close-button" @click="closeEditInstanceForm">
+            <CircleX />
+            {{ $t('settings.close') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Instance Confirmation Modal -->
+  <div class="auth-form-overlay" :class="{ active: showDeleteConfirm }" @click.self="closeDeleteConfirm">
+    <div class="auth-slide-form danger-dialog">
+      <h2>
+        <Trash2 />
+        {{ $t('cloudConnect.instances.deleteTitle') || 'Delete Instance' }}
+      </h2>
+      <p class="danger-message">
+        {{ $t('cloudConnect.instances.deleteWarning') || 'Are you sure you want to delete this instance? This action cannot be undone.' }}
+      </p>
+      <div v-if="selectedInstance" class="instance-to-delete">
+        <strong>{{ selectedInstance.name }}</strong>
+        <span>{{ selectedInstance.full_domain || `${selectedInstance.subdomain}.erugo.cloud` }}</span>
+      </div>
+      <div class="button-bar">
+        <button type="button" class="danger" @click="handleDeleteInstance" :disabled="loading">
+          <Loader2 v-if="loading" class="spinner" />
+          <Trash2 v-else />
+          {{ $t('cloudConnect.instances.confirmDelete') || 'Delete Instance' }}
+        </button>
+        <button type="button" class="secondary close-button" @click="closeDeleteConfirm">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regenerate Token Confirmation Modal -->
+  <div class="auth-form-overlay" :class="{ active: showRegenerateTokenConfirm }" @click.self="closeRegenerateTokenConfirm">
+    <div class="auth-slide-form warning-dialog">
+      <h2>
+        <Key />
+        {{ $t('cloudConnect.instances.regenerateTokenTitle') || 'Regenerate Token' }}
+      </h2>
+      <p class="warning-message">
+        {{ $t('cloudConnect.instances.regenerateTokenWarning') || 'Regenerating the token will invalidate the current token. You will need to reconnect this instance.' }}
+      </p>
+      <div v-if="selectedInstance" class="instance-to-delete">
+        <strong>{{ selectedInstance.name }}</strong>
+        <span>{{ selectedInstance.full_domain || `${selectedInstance.subdomain}.erugo.cloud` }}</span>
+      </div>
+      <div class="button-bar">
+        <button type="button" @click="handleRegenerateToken" :disabled="loading">
+          <Loader2 v-if="loading" class="spinner" />
+          <Key v-else />
+          {{ $t('cloudConnect.instances.confirmRegenerate') || 'Regenerate Token' }}
+        </button>
+        <button type="button" class="secondary close-button" @click="closeRegenerateTokenConfirm">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regenerated Token Display Modal -->
+  <div class="auth-form-overlay" :class="{ active: showRegeneratedToken }" @click.self="closeRegeneratedTokenModal">
+    <div class="auth-slide-form">
+      <h2>
+        <CheckCircle />
+        {{ $t('cloudConnect.instances.tokenRegeneratedTitle') || 'New Token Generated' }}
+      </h2>
+      <p>{{ $t('cloudConnect.instances.tokenRegeneratedDescription') || 'Your new instance token is shown below. Make sure to copy it now - you won\'t be able to see it again!' }}</p>
+      <div class="token-display">
+        <code>{{ regeneratedToken }}</code>
+        <button type="button" class="icon-only" @click="copyToken" :title="$t('cloudConnect.instances.copyToken') || 'Copy Token'">
+          <Copy />
+        </button>
+      </div>
+      <div class="button-bar">
+        <button type="button" @click="closeRegeneratedTokenModal">
+          <Check />
+          {{ $t('cloudConnect.instances.done') || 'Done' }}
         </button>
       </div>
     </div>
@@ -2051,15 +2663,30 @@ defineExpose({
     list-style: none;
 
     li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 6px 0;
       font-size: 0.875rem;
       color: var(--panel-section-text-color);
       opacity: 0.8;
 
-      &::before {
-        content: '✓';
-        margin-right: 8px;
-        color: var(--color-success, #22c55e);
+      .list-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        
+        &.included {
+          color: var(--color-success, #22c55e);
+        }
+      }
+      
+      &.not-included {
+        opacity: 0.5;
+        
+        .list-icon {
+          color: var(--panel-section-text-color);
+        }
       }
     }
   }
@@ -2417,6 +3044,450 @@ defineExpose({
 
 .spinner {
   animation: spin 1s linear infinite;
+}
+
+// Usage Dashboard Styles
+.usage-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.usage-card {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 12px;
+  padding: 20px;
+  
+  .usage-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-weight: 500;
+    color: var(--panel-section-text-color);
+    
+    svg {
+      width: 20px;
+      height: 20px;
+      color: var(--button-primary-background-color);
+    }
+  }
+  
+  .usage-stats {
+    .usage-main {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 12px;
+      
+      .usage-current {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--button-primary-background-color);
+      }
+      
+      .usage-separator {
+        font-size: 1.5rem;
+        opacity: 0.5;
+      }
+      
+      .usage-max {
+        font-size: 1.5rem;
+        opacity: 0.7;
+      }
+    }
+    
+    .usage-progress {
+      height: 8px;
+      background: var(--panel-border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      
+      .usage-progress-bar {
+        height: 100%;
+        background: var(--button-primary-background-color);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        
+        &.warning {
+          background: var(--color-warning, #f59e0b);
+        }
+      }
+    }
+  }
+  
+  .transfer-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .transfer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      
+      svg {
+        width: 16px;
+        height: 16px;
+        
+        &.download {
+          color: var(--color-success, #22c55e);
+        }
+        
+        &.upload {
+          color: var(--color-info, #3b82f6);
+        }
+      }
+      
+      .transfer-label {
+        opacity: 0.7;
+      }
+      
+      .transfer-value {
+        font-weight: 500;
+        margin-left: auto;
+      }
+      
+      &.total {
+        padding-top: 8px;
+        border-top: 1px solid var(--panel-border-color);
+        font-weight: 500;
+      }
+    }
+  }
+  
+  .usage-period {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    text-align: right;
+  }
+  
+  .plan-limits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .plan-limit-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      
+      .limit-label {
+        opacity: 0.7;
+      }
+      
+      .limit-value {
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.no-usage-data {
+  text-align: center;
+  padding: 24px;
+  opacity: 0.7;
+  
+  p {
+    margin-bottom: 16px;
+  }
+}
+
+// Instances List Styles
+.instances-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.instance-card {
+  background: var(--panel-section-background-color-alt);
+  border: 2px solid var(--panel-border-color);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s;
+  
+  &.current {
+    border-color: var(--button-primary-background-color);
+  }
+  
+  &.online {
+    border-left: 4px solid var(--color-success, #22c55e);
+  }
+  
+  &.offline {
+    border-left: 4px solid var(--color-danger, #ef4444);
+  }
+  
+  .instance-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    .instance-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+        color: var(--button-primary-background-color);
+      }
+      
+      .current-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        background: var(--button-primary-background-color);
+        color: var(--button-primary-text-color);
+        border-radius: 4px;
+        font-weight: 500;
+      }
+    }
+    
+    .instance-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+      
+      &.online {
+        background: color-mix(in srgb, var(--color-success, #22c55e) 15%, transparent);
+        color: var(--color-success, #22c55e);
+      }
+      
+      &.offline {
+        background: color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
+        color: var(--color-danger, #ef4444);
+      }
+    }
+  }
+  
+  .instance-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .instance-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      
+      svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
+      }
+      
+      .detail-label {
+        opacity: 0.7;
+      }
+      
+      &.muted {
+        opacity: 0.6;
+        font-size: 0.8rem;
+      }
+    }
+    
+    .instance-transfer {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--panel-border-color);
+      
+      .transfer-mini {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+          
+          &.download {
+            color: var(--color-success, #22c55e);
+          }
+          
+          &.upload {
+            color: var(--color-info, #3b82f6);
+          }
+        }
+      }
+    }
+  }
+  
+  .instance-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--panel-border-color);
+    
+    button.icon-only {
+      padding: 8px;
+      background: transparent;
+      border: 1px solid var(--panel-border-color);
+      border-radius: 6px;
+      color: var(--panel-section-text-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+      
+      &:hover:not(:disabled) {
+        background: var(--panel-border-color);
+      }
+      
+      &.danger:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
+        border-color: var(--color-danger, #ef4444);
+        color: var(--color-danger, #ef4444);
+      }
+      
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// Billing Portal Section
+.billing-portal-section {
+  margin-top: 24px;
+  
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--panel-border-color);
+    margin: 0 0 16px 0;
+  }
+  
+  .billing-portal-description {
+    font-size: 0.875rem;
+    opacity: 0.8;
+    margin-bottom: 16px;
+  }
+}
+
+// Modal variations
+.danger-dialog {
+  h2 {
+    color: var(--color-danger, #ef4444);
+    
+    svg {
+      color: var(--color-danger, #ef4444);
+    }
+  }
+  
+  .danger-message {
+    text-align: center;
+    margin: 16px 0;
+    color: var(--panel-text-color);
+  }
+}
+
+.warning-dialog {
+  h2 {
+    color: var(--color-warning, #f59e0b);
+    
+    svg {
+      color: var(--color-warning, #f59e0b);
+    }
+  }
+  
+  .warning-message {
+    text-align: center;
+    margin: 16px 0;
+    color: var(--panel-text-color);
+  }
+}
+
+.instance-to-delete {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+  
+  strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  
+  span {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+}
+
+.token-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  
+  code {
+    flex: 1;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+    color: var(--button-primary-background-color);
+  }
+  
+  button.icon-only {
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--panel-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    &:hover {
+      background: var(--panel-border-color);
+    }
+  }
+}
+
+.warning-text {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-warning, #f59e0b);
+}
+
+button.danger {
+  background: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, #ef4444);
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger, #ef4444) 80%, black);
+  }
 }
 </style>
 

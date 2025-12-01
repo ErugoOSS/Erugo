@@ -168,15 +168,26 @@ Route::group([], function ($router) {
         Route::post('/login', [CloudConnectController::class, 'login'])->name('cloud-connect.login');
         Route::post('/logout', [CloudConnectController::class, 'logout'])->name('cloud-connect.logout');
         Route::post('/resend-verification', [CloudConnectController::class, 'resendVerification'])->name('cloud-connect.resendVerification');
+        Route::post('/forgot-password', [CloudConnectController::class, 'forgotPassword'])->name('cloud-connect.forgotPassword');
+        Route::post('/reset-password', [CloudConnectController::class, 'resetPassword'])->name('cloud-connect.resetPassword');
+        
+        // User profile and usage
+        Route::get('/usage', [CloudConnectController::class, 'usage'])->name('cloud-connect.usage');
+        Route::patch('/user', [CloudConnectController::class, 'updateUser'])->name('cloud-connect.updateUser');
         
         // Subscription management
         Route::get('/subscription', [CloudConnectController::class, 'subscription'])->name('cloud-connect.subscription');
         Route::get('/plans', [CloudConnectController::class, 'plans'])->name('cloud-connect.plans');
         Route::post('/checkout', [CloudConnectController::class, 'checkout'])->name('cloud-connect.checkout');
+        Route::post('/billing/portal', [CloudConnectController::class, 'billingPortal'])->name('cloud-connect.billingPortal');
         
         // Instance management
         Route::get('/instances', [CloudConnectController::class, 'instances'])->name('cloud-connect.instances');
         Route::post('/instances', [CloudConnectController::class, 'createInstance'])->name('cloud-connect.createInstance');
+        Route::get('/instances/{instanceId}', [CloudConnectController::class, 'getInstance'])->name('cloud-connect.getInstance');
+        Route::patch('/instances/{instanceId}', [CloudConnectController::class, 'updateInstance'])->name('cloud-connect.updateInstance');
+        Route::delete('/instances/{instanceId}', [CloudConnectController::class, 'deleteInstance'])->name('cloud-connect.deleteInstance');
+        Route::post('/instances/{instanceId}/regenerate-token', [CloudConnectController::class, 'regenerateToken'])->name('cloud-connect.regenerateToken');
         Route::get('/subdomains/check', [CloudConnectController::class, 'checkSubdomain'])->name('cloud-connect.checkSubdomain');
         
         // Tunnel management

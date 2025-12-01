@@ -1092,6 +1092,142 @@ export const getCloudConnectTunnelStatus = async () => {
   return data.data
 }
 
+export const getCloudConnectUsage = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/usage`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const updateCloudConnectUser = async (name) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/user`, {
+    method: 'PATCH',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ name })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const getCloudConnectInstance = async (instanceId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances/${instanceId}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const updateCloudConnectInstance = async (instanceId, updateData) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances/${instanceId}`, {
+    method: 'PATCH',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(updateData)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const deleteCloudConnectInstance = async (instanceId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances/${instanceId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const regenerateCloudConnectInstanceToken = async (instanceId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances/${instanceId}/regenerate-token`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const createCloudConnectBillingPortal = async (returnUrl = null) => {
+  const body = returnUrl ? { return_url: returnUrl } : {}
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/billing/portal`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(body)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const cloudConnectForgotPassword = async (email) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/forgot-password`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ email })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const cloudConnectResetPassword = async (token, password, passwordConfirmation) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/reset-password`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      token,
+      password,
+      password_confirmation: passwordConfirmation
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 // Private functions
 const buildAuthSuccessData = (data) => {
   const decoded = jwtDecode(data.data.access_token)
