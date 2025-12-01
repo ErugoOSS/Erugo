@@ -53,6 +53,135 @@
       "password_protect": "Passwortschutz"
     }
   },
+  "cloudConnect": {
+    "auth": {
+      "acceptMarketing": "Senden Sie mir Produkt-Updates und Neuigkeiten",
+      "acceptPrivacy": "Ich akzeptiere die",
+      "acceptTerms": "Ich akzeptiere die",
+      "confirmPassword": "Bestätigen Sie Ihr Passwort",
+      "confirmPasswordPlaceholder": "Bestätigen Sie Ihr Passwort",
+      "description": "Melden Sie sich an oder erstellen Sie ein Konto, um Ihre Instanz mit Erugo Connect für einfaches Domain-Routing zu verbinden.",
+      "email": "E-Mail Adresse",
+      "emailPlaceholder": "you@example.com",
+      "haveAccount": "Sie haben bereits ein Konto?",
+      "login": "Eintragen",
+      "loginButton": "Eintragen",
+      "loginDescription": "Melden Sie sich bei Ihrem Erugo Connect-Konto an, um Ihre Instanz zu verwalten.",
+      "loginInstead": "Eintragen",
+      "logout": "Abmelden",
+      "name": "Vollständiger Name",
+      "namePlaceholder": "Ihr Name",
+      "noAccount": "Sie haben noch kein Konto?",
+      "password": "Passwort",
+      "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
+      "privacyLink": "Datenschutzbestimmungen",
+      "register": "Konto erstellen",
+      "registerButton": "Konto erstellen",
+      "registerDescription": "Erstellen Sie ein neues Erugo Connect-Konto, um loszulegen.",
+      "registerInstead": "Eine erstellen",
+      "termsLink": "Bedingungen der Dienstleistung",
+      "title": "Verbindung zu Erugo Connect"
+    },
+    "capabilities": {
+      "netAdmin": "NET_ADMIN-Fähigkeit",
+      "tunDevice": "TUN-Gerät",
+      "wireguardTools": "WireGuard Werkzeuge"
+    },
+    "capabilitiesError": {
+      "addToCompose": "Fügen Sie Ihrer docker-compose.yml Dienstkonfiguration folgendes hinzu:",
+      "description": "Ihrem Docker-Container fehlen erforderliche Funktionen für Cloud Connect. Bitte aktualisieren Sie Ihre Datei docker-compose.yml.",
+      "howToFix": "Wie man das behebt",
+      "title": "Container nicht bereit"
+    },
+    "checkAgain": "Erneut prüfen",
+    "checkoutFailed": "Checkout-Sitzung konnte nicht erstellt werden",
+    "checkoutOpened": "Kasse wird in einer neuen Registerkarte geöffnet",
+    "connectFailed": "Verbindung zum Tunnel fehlgeschlagen",
+    "connected": {
+      "copyUrl": "URL kopieren",
+      "disconnect": "Trennen Sie die Verbindung",
+      "disconnecting": "Trennen der Verbindung...",
+      "online": "Online",
+      "subdomain": "Subdomain",
+      "subscription": "Abonnement",
+      "title": "Verbunden mit der Erugo Cloud",
+      "tunnelIp": "Tunnel-IP"
+    },
+    "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen",
+    "disconnectFailed": "Verbindung zum Tunnel konnte nicht getrennt werden",
+    "disconnected": "Tunnel abgekoppelt",
+    "emailVerification": {
+      "checkFailed": "Überprüfung des Verifizierungsstatus fehlgeschlagen",
+      "checkStatus": "Überprüfungsstatus prüfen",
+      "description": "Wir haben eine Bestätigungs-E-Mail an Ihre Adresse geschickt. Bitte überprüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink, um fortzufahren.",
+      "didntReceive": "Sie haben die E-Mail nicht erhalten?",
+      "instructions": "Was ist als nächstes zu tun?",
+      "resend": "Verifizierungs-E-Mail erneut senden",
+      "resendFailed": "Bestätigungs-E-Mail konnte nicht erneut gesendet werden",
+      "resent": "Verifizierungs-E-Mail gesendet!",
+      "sentTo": "Verifizierungs-E-Mail gesendet an",
+      "step1": "Überprüfen Sie Ihren E-Mail-Posteingang (und Ihren Spam-Ordner)",
+      "step2": "Klicken Sie auf den Verifizierungslink in der E-Mail",
+      "step3": "Kehren Sie hierher zurück und klicken Sie auf \"Status prüfen",
+      "stillPending": "E-Mail noch nicht verifiziert. Bitte überprüfen Sie Ihren Posteingang.",
+      "title": "Überprüfen Sie Ihre E-Mail",
+      "verified": "E-Mail verifiziert! Sie können jetzt fortfahren."
+    },
+    "errorLoadingStatus": "Cloud Connect-Status konnte nicht geladen werden",
+    "instance": {
+      "create": "Instanz erstellen",
+      "description": "Wählen Sie eine Subdomain für Ihre Erugo-Instanz. Dies wird Ihre öffentliche URL sein.",
+      "name": "Name der Instanz",
+      "namePlaceholder": "Mein Erugo-Server",
+      "subdomain": "Subdomain",
+      "subdomainPlaceholder": "mein-server",
+      "suggestions": "Verfügbare Alternativen",
+      "title": "Einrichten Ihrer Instanz"
+    },
+    "instanceCreateFailed": "Instanz konnte nicht erstellt werden",
+    "instanceCreated": "Instanz erfolgreich erstellt!",
+    "loading": "Laden des Cloud Connect-Status...",
+    "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
+    "loginSuccess": "Erfolgreich eingeloggt",
+    "logoutFailed": "Abmeldung fehlgeschlagen",
+    "logoutSuccess": "Erfolgreich abgemeldet",
+    "mustAcceptTerms": "Sie müssen die Allgemeinen Geschäftsbedingungen und die Datenschutzrichtlinie akzeptieren.",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "ready": {
+      "connect": "Jetzt verbinden",
+      "connecting": "Verbinden...",
+      "description": "Ihre Instanz ist eingerichtet und bereit, sich mit der Erugo Cloud zu verbinden.",
+      "title": "Bereit zum Verbinden"
+    },
+    "refresh": "Auffrischen",
+    "registerFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "registerSuccess": "Konto erfolgreich erstellt!",
+    "subdomainCheckFailed": "Überprüfung der Verfügbarkeit der Subdomain fehlgeschlagen",
+    "subdomainNotAvailable": "Bitte wählen Sie eine verfügbare Subdomain",
+    "subscription": {
+      "business": {
+        "customDomains": "{count} benutzerdefinierte Domänen",
+        "instances": "Bis zu {count} Instanzen",
+        "prioritySupport": "Vorrangige Unterstützung",
+        "subdomain": "Kostenlose Subdomain"
+      },
+      "description": "Wählen Sie einen Abonnementplan, um Cloud Connect für Ihre Instanz zu aktivieren.",
+      "loggedInAs": "Eingetragen als",
+      "month": "Monat",
+      "pollingNote": "Schließen Sie Ihre Zahlung in dem neuen Fenster ab. Diese Seite wird automatisch aktualisiert.",
+      "pro": {
+        "customDomain": "{count} benutzerdefinierte Domäne",
+        "emailSupport": "E-Mail-Unterstützung",
+        "instances": "Bis zu {count} Instanzen",
+        "subdomain": "Kostenlose Subdomain"
+      },
+      "stopWaiting": "Abbrechen",
+      "subscribe": "Jetzt abonnieren",
+      "title": "Wählen Sie Ihren Plan",
+      "waitingForPayment": "Ich warte auf die Bezahlung..."
+    },
+    "subscriptionActive": "Abonnement aktiviert!"
+  },
   "confirm_delete_user": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
   "download": {
     "files": "{value, plural, one {# Datei herunterladen} other {{value} Dateien herunterladen}}"
@@ -123,11 +252,7 @@
       "logo_and_favicon": "Logo & Favicon",
       "logo_description": "Zeigen Sie Ihr Firmenlogo im PNG-Format in der oberen linken Ecke an. Legen Sie die gewünschte Breite in Pixeln fest - die Höhe wird automatisch angepasst, um das Seitenverhältnis beizubehalten. Verwenden Sie ein Quellbild, das mindestens so breit ist wie Ihre Anzeigebreite, um die Qualität zu gewährleisten.",
       "logo_image": "Logo-Bild",
-      "logo_reset_failed": "Logo konnte nicht auf Standard zurückgesetzt werden",
-      "logo_reset_success": "Logo erfolgreich auf Standard zurückgesetzt",
       "logo_width": "Logo Breite",
-      "confirm_reset_logo": "Sind Sie sicher, dass Sie das Logo auf den Standard zurücksetzen möchten?",
-      "reset_logo_to_default": "Auf Standard zurücksetzen",
       "other_ui_settings": "Andere",
       "select_theme": "Theme auswählen",
       "select_theme_description": "Wählen Sie aus einer Reihe von vorgefertigten Themes oder einem von Ihnen installierten Theme.",
@@ -172,6 +297,7 @@
     "description": {
       "allShares": "Anzeigen und Verwalten von Freigaben durch alle Benutzer",
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihre eigenen Branding-Anpassungen hinzu.",
+      "cloudConnect": "Verbinden Sie Ihre Instanz mit der Erugo Cloud für einfaches Domain-Routing",
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre geteilten Dateien.",
@@ -454,6 +580,7 @@
     "title": {
       "allShares": "Alle Aktien",
       "branding": "Branding & Benutzeroberfläche",
+      "cloudConnect": "Erugo Verbinden",
       "emailTemplates": "E-Mail-Vorlagen",
       "linked_accounts": "Verwandte Konten",
       "manage": "Verwalten Sie",

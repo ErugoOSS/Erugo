@@ -53,6 +53,135 @@
       "password_protect": "Password protect"
     }
   },
+  "cloudConnect": {
+    "auth": {
+      "acceptMarketing": "Send me product updates and news",
+      "acceptPrivacy": "I agree to the",
+      "acceptTerms": "I agree to the",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "description": "Sign in or create an account to connect your instance to Erugo Connect for easy domain routing.",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "haveAccount": "Already have an account?",
+      "login": "Sign In",
+      "loginButton": "Sign In",
+      "loginDescription": "Sign in to your Erugo Connect account to manage your instance.",
+      "loginInstead": "Sign in",
+      "logout": "Sign Out",
+      "name": "Full Name",
+      "namePlaceholder": "Your name",
+      "noAccount": "Don't have an account?",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "privacyLink": "Privacy Policy",
+      "register": "Create Account",
+      "registerButton": "Create Account",
+      "registerDescription": "Create a new Erugo Connect account to get started.",
+      "registerInstead": "Create one",
+      "termsLink": "Terms of Service",
+      "title": "Connect to Erugo Connect"
+    },
+    "capabilities": {
+      "netAdmin": "NET_ADMIN Capability",
+      "tunDevice": "TUN Device",
+      "wireguardTools": "WireGuard Tools"
+    },
+    "capabilitiesError": {
+      "addToCompose": "Add the following to your docker-compose.yml service configuration:",
+      "description": "Your Docker container is missing required capabilities for Cloud Connect. Please update your docker-compose.yml file.",
+      "howToFix": "How to fix this",
+      "title": "Container Not Ready"
+    },
+    "checkAgain": "Check Again",
+    "checkoutFailed": "Failed to create checkout session",
+    "checkoutOpened": "Checkout opened in a new tab",
+    "connectFailed": "Failed to connect tunnel",
+    "connected": {
+      "copyUrl": "Copy URL",
+      "disconnect": "Disconnect",
+      "disconnecting": "Disconnecting...",
+      "online": "Online",
+      "subdomain": "Subdomain",
+      "subscription": "Subscription",
+      "title": "Connected to Erugo Cloud",
+      "tunnelIp": "Tunnel IP"
+    },
+    "copyFailed": "Failed to copy to clipboard",
+    "disconnectFailed": "Failed to disconnect tunnel",
+    "disconnected": "Tunnel disconnected",
+    "emailVerification": {
+      "checkFailed": "Failed to check verification status",
+      "checkStatus": "Check Verification Status",
+      "description": "We've sent a verification email to your address. Please check your inbox and click the verification link to continue.",
+      "didntReceive": "Didn't receive the email?",
+      "instructions": "What to do next",
+      "resend": "Resend verification email",
+      "resendFailed": "Failed to resend verification email",
+      "resent": "Verification email sent!",
+      "sentTo": "Verification email sent to",
+      "step1": "Check your email inbox (and spam folder)",
+      "step2": "Click the verification link in the email",
+      "step3": "Return here and click 'Check Status'",
+      "stillPending": "Email not yet verified. Please check your inbox.",
+      "title": "Verify Your Email",
+      "verified": "Email verified! You can now continue."
+    },
+    "errorLoadingStatus": "Failed to load Cloud Connect status",
+    "instance": {
+      "create": "Create Instance",
+      "description": "Choose a subdomain for your Erugo instance. This will be your public URL.",
+      "name": "Instance Name",
+      "namePlaceholder": "My Erugo Server",
+      "subdomain": "Subdomain",
+      "subdomainPlaceholder": "my-server",
+      "suggestions": "Available alternatives",
+      "title": "Set Up Your Instance"
+    },
+    "instanceCreateFailed": "Failed to create instance",
+    "instanceCreated": "Instance created successfully!",
+    "loading": "Loading Cloud Connect status...",
+    "loginFailed": "Sign in failed. Please check your credentials.",
+    "loginSuccess": "Signed in successfully",
+    "logoutFailed": "Sign out failed",
+    "logoutSuccess": "Signed out successfully",
+    "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
+    "passwordMismatch": "Passwords do not match",
+    "ready": {
+      "connect": "Connect Now",
+      "connecting": "Connecting...",
+      "description": "Your instance is set up and ready to connect to Erugo Cloud.",
+      "title": "Ready to Connect"
+    },
+    "refresh": "Refresh",
+    "registerFailed": "Registration failed. Please try again.",
+    "registerSuccess": "Account created successfully!",
+    "subdomainCheckFailed": "Failed to check subdomain availability",
+    "subdomainNotAvailable": "Please choose an available subdomain",
+    "subscription": {
+      "business": {
+        "customDomains": "{count} custom domains",
+        "instances": "Up to {count} instances",
+        "prioritySupport": "Priority support",
+        "subdomain": "Free subdomain"
+      },
+      "description": "Select a subscription plan to enable Cloud Connect for your instance.",
+      "loggedInAs": "Signed in as",
+      "month": "month",
+      "pollingNote": "Complete your payment in the new window. This page will update automatically.",
+      "pro": {
+        "customDomain": "{count} custom domain",
+        "emailSupport": "Email support",
+        "instances": "Up to {count} instances",
+        "subdomain": "Free subdomain"
+      },
+      "stopWaiting": "Cancel",
+      "subscribe": "Subscribe Now",
+      "title": "Choose Your Plan",
+      "waitingForPayment": "Waiting for payment..."
+    },
+    "subscriptionActive": "Subscription activated!"
+  },
   "confirm_delete_user": "Are you sure you want to delete this user?",
   "download": {
     "files": "{value, plural, one {Download # file} other {Download {value} files}}"
@@ -123,11 +252,7 @@
       "logo_and_favicon": "Logo & Favicon",
       "logo_description": "Display your company logo in PNG format in the top left corner. Set your desired width in pixels - height will adjust automatically to maintain aspect ratio. Use a source image at least as wide as your display width to ensure quality.",
       "logo_image": "Logo Image",
-      "logo_reset_failed": "Failed to reset logo to default",
-      "logo_reset_success": "Logo reset to default successfully",
       "logo_width": "Logo Width",
-      "confirm_reset_logo": "Are you sure you want to reset the logo to the default?",
-      "reset_logo_to_default": "Reset to default",
       "other_ui_settings": "Other",
       "select_theme": "Select Theme",
       "select_theme_description": "Select from a range of pre-made themes or one one that you have installed.",
@@ -172,7 +297,7 @@
     "description": {
       "allShares": "View and manage shares by all users",
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
-      "cloudConnect": "Connect your instance to Erugo Connect for easy domain routing",
+      "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing",
       "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
@@ -540,7 +665,7 @@
       "extend": "Extend"
     },
     "contains": {
-      "count": "{value, plural, one {Contains: # file} other {Contains: {value} files}}"
+      "count": "{value, plural, one {# file} other {{value} files}}"
     },
     "created": "Created",
     "data_loading": "Loading...",
@@ -592,149 +717,5 @@
   },
   "uploading": {
     "files": "{value, plural, one {Uploading # file} other {Uploading # files}}"
-  },
-  "cloudConnect": {
-    "loading": "Loading Erugo Connect status...",
-    "errorLoadingStatus": "Failed to load Erugo Connect status",
-    "refresh": "Refresh",
-    "checkAgain": "Check Again",
-    "capabilitiesError": {
-      "title": "Container Not Ready",
-      "description": "Your Docker container is missing required capabilities for Erugo Connect. Please update your docker-compose.yml file.",
-      "howToFix": "How to fix this",
-      "addToCompose": "Add the following to your docker-compose.yml service configuration:"
-    },
-    "capabilities": {
-      "wireguardTools": "WireGuard Tools",
-      "tunDevice": "TUN Device",
-      "netAdmin": "NET_ADMIN Capability"
-    },
-    "auth": {
-      "title": "Connect to Erugo Connect",
-      "description": "Sign in or create an account to connect your instance to Erugo Connect for easy domain routing.",
-      "login": "Sign In",
-      "register": "Create Account",
-      "logout": "Sign Out",
-      "email": "Email Address",
-      "emailPlaceholder": "you@example.com",
-      "password": "Password",
-      "passwordPlaceholder": "Enter your password",
-      "name": "Full Name",
-      "namePlaceholder": "Your name",
-      "confirmPassword": "Confirm Password",
-      "confirmPasswordPlaceholder": "Confirm your password",
-      "acceptTerms": "I agree to the",
-      "termsLink": "Terms of Service",
-      "acceptPrivacy": "I agree to the",
-      "privacyLink": "Privacy Policy",
-      "acceptMarketing": "Send me product updates and news",
-      "loginButton": "Sign In",
-      "registerButton": "Create Account",
-      "loginDescription": "Sign in to your Erugo Connect account to manage your instance.",
-      "registerDescription": "Create a new Erugo Connect account to get started.",
-      "noAccount": "Don't have an account?",
-      "registerInstead": "Create one",
-      "haveAccount": "Already have an account?",
-      "loginInstead": "Sign in"
-    },
-    "loginSuccess": "Signed in successfully",
-    "loginFailed": "Sign in failed. Please check your credentials.",
-    "registerSuccess": "Account created successfully!",
-    "registerFailed": "Registration failed. Please try again.",
-    "logoutSuccess": "Signed out successfully",
-    "logoutFailed": "Sign out failed",
-    "passwordMismatch": "Passwords do not match",
-    "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
-    "emailVerification": {
-      "title": "Verify Your Email",
-      "description": "We've sent a verification email to your address. Please check your inbox and click the verification link to continue.",
-      "sentTo": "Verification email sent to",
-      "instructions": "What to do next",
-      "step1": "Check your email inbox (and spam folder)",
-      "step2": "Click the verification link in the email",
-      "step3": "Return here and click 'Check Status'",
-      "checkStatus": "Check Verification Status",
-      "verified": "Email verified! You can now continue.",
-      "stillPending": "Email not yet verified. Please check your inbox.",
-      "checkFailed": "Failed to check verification status",
-      "didntReceive": "Didn't receive the email?",
-      "resend": "Resend verification email",
-      "resent": "Verification email sent!",
-      "resendFailed": "Failed to resend verification email"
-    },
-    "subscription": {
-      "title": "Choose Your Plan",
-      "description": "Select a subscription plan to enable Erugo Connect for your instance.",
-      "loggedInAs": "Signed in as",
-      "month": "month",
-      "subscribe": "Subscribe Now",
-      "waitingForPayment": "Waiting for payment...",
-      "pollingNote": "Complete your payment in the new window. This page will update automatically.",
-      "stopWaiting": "Cancel",
-      "pro": {
-        "instances": "Up to {count} instances",
-        "subdomain": "Free subdomain",
-        "customDomain": "{count} custom domain",
-        "emailSupport": "Email support"
-      },
-      "business": {
-        "instances": "Up to {count} instances",
-        "subdomain": "Free subdomain",
-        "customDomains": "{count} custom domains",
-        "prioritySupport": "Priority support"
-      }
-    },
-    "checkoutOpened": "Checkout opened in a new tab",
-    "checkoutFailed": "Failed to create checkout session",
-    "subscriptionActive": "Subscription activated!",
-    "instance": {
-      "title": "Set Up Your Instance",
-      "description": "Choose a subdomain for your Erugo instance. This will be your public URL.",
-      "name": "Instance Name",
-      "namePlaceholder": "My Erugo Server",
-      "subdomain": "Subdomain",
-      "subdomainPlaceholder": "my-server",
-      "suggestions": "Available alternatives",
-      "create": "Create Instance"
-    },
-    "subdomainCheckFailed": "Failed to check subdomain availability",
-    "subdomainNotAvailable": "Please choose an available subdomain",
-    "subdomainOwnedByYou": "You already have an instance with this subdomain",
-    "instanceCreated": "Instance created successfully!",
-    "instanceReclaimed": "Instance reclaimed successfully!",
-    "instanceCreateFailed": "Failed to create instance",
-    "reclaimInstance": {
-      "title": "Reclaim Existing Instance?",
-      "message": "You already have an instance named \"{name}\" using this subdomain. Would you like to reclaim it? This will reset the instance and generate new credentials.",
-      "confirm": "Yes, Reclaim Instance",
-      "cancel": "Cancel"
-    },
-    "ready": {
-      "title": "Ready to Connect",
-      "description": "Your instance is set up and ready to connect to Erugo Connect.",
-      "connect": "Connect Now",
-      "connecting": "Connecting..."
-    },
-    "tunnelConnected": "Tunnel connected successfully!",
-    "connectFailed": "Failed to connect tunnel",
-    "connected": {
-      "title": "Connected to Erugo Connect",
-      "online": "Online",
-      "offline": "Offline",
-      "reconnecting": "Reconnecting...",
-      "copyUrl": "Copy URL",
-      "subdomain": "Subdomain",
-      "tunnelIp": "Tunnel IP",
-      "subscription": "Subscription",
-      "lastHeartbeat": "Last Heartbeat",
-      "heartbeatNever": "Never",
-      "heartbeatAgo": "{time} ago",
-      "heartbeatFailed": "Last heartbeat failed",
-      "disconnect": "Disconnect",
-      "disconnecting": "Disconnecting..."
-    },
-    "disconnected": "Tunnel disconnected",
-    "disconnectFailed": "Failed to disconnect tunnel",
-    "copyFailed": "Failed to copy to clipboard"
   }
 }

@@ -53,6 +53,135 @@
       "password_protect": "Wachtwoordbeveiliging"
     }
   },
+  "cloudConnect": {
+    "auth": {
+      "acceptMarketing": "Stuur mij productupdates en nieuws",
+      "acceptPrivacy": "Ik ga akkoord met de",
+      "acceptTerms": "Ik ga akkoord met de",
+      "confirmPassword": "Wachtwoord bevestigen",
+      "confirmPasswordPlaceholder": "Bevestig je wachtwoord",
+      "description": "Log in of maak een account aan om uw instantie te verbinden met Erugo Connect voor eenvoudige domeinroutering.",
+      "email": "E-mailadres",
+      "emailPlaceholder": "you@example.com",
+      "haveAccount": "Heb je al een account?",
+      "login": "Aanmelden",
+      "loginButton": "Aanmelden",
+      "loginDescription": "Log in op je Erugo Connect account om je instantie te beheren.",
+      "loginInstead": "Aanmelden",
+      "logout": "Afmelden",
+      "name": "Volledige naam",
+      "namePlaceholder": "Uw naam",
+      "noAccount": "Heb je geen account?",
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Voer uw wachtwoord in",
+      "privacyLink": "Privacybeleid",
+      "register": "Account aanmaken",
+      "registerButton": "Account aanmaken",
+      "registerDescription": "Maak een nieuw Erugo Connect account aan om te beginnen.",
+      "registerInstead": "Maak een",
+      "termsLink": "Servicevoorwaarden",
+      "title": "Verbinding maken met Erugo Connect"
+    },
+    "capabilities": {
+      "netAdmin": "NET_ADMIN Mogelijkheid",
+      "tunDevice": "TUN-apparaat",
+      "wireguardTools": "WireGuard Gereedschap"
+    },
+    "capabilitiesError": {
+      "addToCompose": "Voeg het volgende toe aan je docker-compose.yml serviceconfiguratie:",
+      "description": "Uw Docker-container mist de vereiste mogelijkheden voor Cloud Connect. Werk je docker-compose.yml bestand bij.",
+      "howToFix": "Hoe dit op te lossen",
+      "title": "Container niet gereed"
+    },
+    "checkAgain": "Opnieuw controleren",
+    "checkoutFailed": "Mislukt om afrekensessie aan te maken",
+    "checkoutOpened": "Afrekenen geopend in een nieuw tabblad",
+    "connectFailed": "Verbinding met tunnel mislukt",
+    "connected": {
+      "copyUrl": "URL kopiëren",
+      "disconnect": "Ontkoppelen",
+      "disconnecting": "Loskoppelen...",
+      "online": "Online",
+      "subdomain": "Subdomein",
+      "subscription": "Abonnement",
+      "title": "Verbonden met Erugo Cloud",
+      "tunnelIp": "Tunnel IP"
+    },
+    "copyFailed": "Kopiëren naar klembord mislukt",
+    "disconnectFailed": "Ontkoppeling tunnel mislukt",
+    "disconnected": "Tunnel losgekoppeld",
+    "emailVerification": {
+      "checkFailed": "Verificatiestatus niet gecontroleerd",
+      "checkStatus": "Verificatiestatus controleren",
+      "description": "We hebben een verificatiemail naar je adres gestuurd. Controleer je inbox en klik op de verificatielink om verder te gaan.",
+      "didntReceive": "Heb je de e-mail niet ontvangen?",
+      "instructions": "Wat nu te doen",
+      "resend": "Verificatiemail opnieuw verzenden",
+      "resendFailed": "Verificatiemail niet opnieuw verzonden",
+      "resent": "Verificatie e-mail verzonden!",
+      "sentTo": "Verificatie-e-mail verzonden naar",
+      "step1": "Controleer uw e-mail inbox (en spam-map)",
+      "step2": "Klik op de verificatielink in de e-mail",
+      "step3": "Ga hier terug en klik op 'Status controleren",
+      "stillPending": "E-mail nog niet geverifieerd. Controleer uw inbox.",
+      "title": "Uw e-mail controleren",
+      "verified": "E-mail geverifieerd! Je kunt nu doorgaan."
+    },
+    "errorLoadingStatus": "Cloud Connect-status kon niet worden geladen",
+    "instance": {
+      "create": "Instantie maken",
+      "description": "Kies een subdomein voor je Erugo instantie. Dit wordt je publieke URL.",
+      "name": "Instance Naam",
+      "namePlaceholder": "Mijn Erugo-server",
+      "subdomain": "Subdomein",
+      "subdomainPlaceholder": "mijn-server",
+      "suggestions": "Beschikbare alternatieven",
+      "title": "Uw Instance instellen"
+    },
+    "instanceCreateFailed": "Instantie niet aangemaakt",
+    "instanceCreated": "Instance succesvol aangemaakt!",
+    "loading": "Cloud Connect status wordt geladen...",
+    "loginFailed": "Aanmelden mislukt. Controleer uw gegevens.",
+    "loginSuccess": "Succesvol aangemeld",
+    "logoutFailed": "Afmelden mislukt",
+    "logoutSuccess": "Succesvol afgemeld",
+    "mustAcceptTerms": "U moet de Servicevoorwaarden en het Privacybeleid accepteren",
+    "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "ready": {
+      "connect": "Nu verbinden",
+      "connecting": "Aansluiten...",
+      "description": "Uw instantie is ingesteld en klaar om verbinding te maken met Erugo Cloud.",
+      "title": "Klaar om aan te sluiten"
+    },
+    "refresh": "Vernieuw",
+    "registerFailed": "Registratie mislukt. Probeer het opnieuw.",
+    "registerSuccess": "Account succesvol aangemaakt!",
+    "subdomainCheckFailed": "De beschikbaarheid van het subdomein is niet gecontroleerd",
+    "subdomainNotAvailable": "Kies een beschikbaar subdomein",
+    "subscription": {
+      "business": {
+        "customDomains": "{count} aangepaste domeinen",
+        "instances": "Tot {count} instanties",
+        "prioritySupport": "Prioriteit ondersteuning",
+        "subdomain": "Gratis subdomein"
+      },
+      "description": "Selecteer een abonnement om Cloud Connect in te schakelen voor je instance.",
+      "loggedInAs": "Aangemeld als",
+      "month": "maand",
+      "pollingNote": "Voltooi je betaling in het nieuwe venster. Deze pagina wordt automatisch bijgewerkt.",
+      "pro": {
+        "customDomain": "{count} aangepast domein",
+        "emailSupport": "Ondersteuning per e-mail",
+        "instances": "Tot {count} instanties",
+        "subdomain": "Gratis subdomein"
+      },
+      "stopWaiting": "Annuleren",
+      "subscribe": "Nu abonneren",
+      "title": "Kies uw plan",
+      "waitingForPayment": "Wachten op betaling..."
+    },
+    "subscriptionActive": "Abonnement geactiveerd!"
+  },
   "confirm_delete_user": "Weet je zeker dat je deze gebruiker wilt verwijderen?",
   "download": {
     "files": "{value, plural, one {Dowload bestand} other {Download {value} bestanden}}"
@@ -123,11 +252,7 @@
       "logo_and_favicon": "Logo & Favicon",
       "logo_description": "Geef je bedrijfslogo in PNG-formaat weer in de linkerbovenhoek. Stel de gewenste breedte in pixels in - de hoogte wordt automatisch aangepast om de beeldverhouding te behouden. Gebruik een bronafbeelding die minstens zo breed is als je schermbreedte om kwaliteit te garanderen.",
       "logo_image": "Logo afbeelding",
-      "logo_reset_failed": "Kan logo niet herstellen naar standaard",
-      "logo_reset_success": "Logo succesvol hersteld naar standaard",
       "logo_width": "Logo Breedte",
-      "confirm_reset_logo": "Weet u zeker dat u het logo wilt herstellen naar de standaard?",
-      "reset_logo_to_default": "Herstellen naar standaard",
       "other_ui_settings": "Andere",
       "select_theme": "Thema Selecteren",
       "select_theme_description": "Kies uit een reeks kant-en-klare thema's of een thema dat je zelf hebt geïnstalleerd.",
@@ -172,6 +297,7 @@
     "description": {
       "allShares": "Aandelen van alle gebruikers bekijken en beheren",
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
+      "cloudConnect": "Verbind je instantie met Erugo Cloud voor eenvoudige domeinroutering",
       "emailTemplates": "E-mailsjablonen beheren",
       "myProfile": "Beheer je profiel",
       "myShares": "Beheer je gedeelde links.",
@@ -454,6 +580,7 @@
     "title": {
       "allShares": "Alle Aandelen",
       "branding": "Branding & UI",
+      "cloudConnect": "Erugo aansluiten",
       "emailTemplates": "E-mail sjablonen",
       "linked_accounts": "Verwante accounts",
       "manage": "Beheer",

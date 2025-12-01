@@ -53,6 +53,135 @@
       "password_protect": "Proteger com palavra-passe"
     }
   },
+  "cloudConnect": {
+    "auth": {
+      "acceptMarketing": "Enviar-me actualizações de produtos e notícias",
+      "acceptPrivacy": "Concordo com o",
+      "acceptTerms": "Concordo com o",
+      "confirmPassword": "Confirme a palavra-passe",
+      "confirmPasswordPlaceholder": "Confirmar a sua palavra-passe",
+      "description": "Inicie sessão ou crie uma conta para ligar a sua instância ao Erugo Connect para um fácil encaminhamento de domínios.",
+      "email": "Endereço de correio eletrónico",
+      "emailPlaceholder": "you@example.com",
+      "haveAccount": "Já tem uma conta?",
+      "login": "Iniciar sessão",
+      "loginButton": "Iniciar sessão",
+      "loginDescription": "Inicie sessão na sua conta Erugo Connect para gerir a sua instância.",
+      "loginInstead": "Iniciar sessão",
+      "logout": "Sair",
+      "name": "Nome Completo",
+      "namePlaceholder": "O seu nome",
+      "noAccount": "Não tem uma conta?",
+      "password": "Palavra passe",
+      "passwordPlaceholder": "Introduza a sua palavra-passe",
+      "privacyLink": "Política de privacidade",
+      "register": "Criar conta",
+      "registerButton": "Criar conta",
+      "registerDescription": "Crie uma nova conta Erugo Connect para começar.",
+      "registerInstead": "Criar um",
+      "termsLink": "Termos do serviço",
+      "title": "Ligar ao Erugo Connect"
+    },
+    "capabilities": {
+      "netAdmin": "Capacidade NET_ADMIN",
+      "tunDevice": "Dispositivo TUN",
+      "wireguardTools": "Ferramentas WireGuard"
+    },
+    "capabilitiesError": {
+      "addToCompose": "Adicione o seguinte à sua configuração de serviço docker-compose.yml:",
+      "description": "O seu contentor Docker não tem as capacidades necessárias para o Cloud Connect. Atualize seu arquivo docker-compose.yml.",
+      "howToFix": "Como corrigir isto",
+      "title": "Contentor não pronto"
+    },
+    "checkAgain": "Verificar novamente",
+    "checkoutFailed": "Falha ao criar a sessão de checkout",
+    "checkoutOpened": "Checkout aberto num novo separador",
+    "connectFailed": "Falha na ligação do túnel",
+    "connected": {
+      "copyUrl": "Copiar URL",
+      "disconnect": "Desligar",
+      "disconnecting": "Desligar...",
+      "online": "Em linha",
+      "subdomain": "Subdomínio",
+      "subscription": "Assinatura",
+      "title": "Ligado ao Erugo Cloud",
+      "tunnelIp": "IP do túnel"
+    },
+    "copyFailed": "Falha ao copiar para a área de transferência",
+    "disconnectFailed": "Falha ao desligar o túnel",
+    "disconnected": "Túnel desligado",
+    "emailVerification": {
+      "checkFailed": "Falha ao verificar o estado da verificação",
+      "checkStatus": "Verificar o estado da verificação",
+      "description": "Enviámos um e-mail de verificação para o seu endereço. Verifique a sua caixa de entrada e clique na ligação de verificação para continuar.",
+      "didntReceive": "Não recebeu a mensagem de correio eletrónico?",
+      "instructions": "O que fazer a seguir",
+      "resend": "Reenviar a mensagem de correio eletrónico de verificação",
+      "resendFailed": "Falha ao reenviar a mensagem de correio eletrónico de verificação",
+      "resent": "E-mail de verificação enviado!",
+      "sentTo": "Correio eletrónico de verificação enviado para",
+      "step1": "Verifique a sua caixa de correio eletrónico (e a pasta de spam)",
+      "step2": "Clicar na ligação de verificação contida na mensagem de correio eletrónico",
+      "step3": "Regressar aqui e clicar em \"Verificar estado",
+      "stillPending": "O correio eletrónico ainda não foi verificado. Por favor, verifique a sua caixa de entrada.",
+      "title": "Verificar o seu e-mail",
+      "verified": "E-mail verificado! Pode agora continuar."
+    },
+    "errorLoadingStatus": "Falha ao carregar o estado do Cloud Connect",
+    "instance": {
+      "create": "Criar instância",
+      "description": "Escolha um subdomínio para a sua instância Erugo. Este será o seu URL público.",
+      "name": "Nome da instância",
+      "namePlaceholder": "O meu servidor Erugo",
+      "subdomain": "Subdomínio",
+      "subdomainPlaceholder": "meu-servidor",
+      "suggestions": "Alternativas disponíveis",
+      "title": "Configurar a sua instância"
+    },
+    "instanceCreateFailed": "Falha ao criar a instância",
+    "instanceCreated": "Instância criada com sucesso!",
+    "loading": "Carregando o status do Cloud Connect...",
+    "loginFailed": "O registo falhou. Por favor, verifique as suas credenciais.",
+    "loginSuccess": "Registado com sucesso",
+    "logoutFailed": "O registo falhou",
+    "logoutSuccess": "Terminou a sessão com sucesso",
+    "mustAcceptTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade",
+    "passwordMismatch": "Palavras passe diferentes",
+    "ready": {
+      "connect": "Ligar agora",
+      "connecting": "Ligar...",
+      "description": "A sua instância está configurada e pronta para se ligar ao Erugo Cloud.",
+      "title": "Pronto para ligar"
+    },
+    "refresh": "Atualizar",
+    "registerFailed": "O registo falhou. Por favor, tente novamente.",
+    "registerSuccess": "Conta criada com sucesso!",
+    "subdomainCheckFailed": "Falha ao verificar a disponibilidade do subdomínio",
+    "subdomainNotAvailable": "Escolha um subdomínio disponível",
+    "subscription": {
+      "business": {
+        "customDomains": "{count} domínios personalizados",
+        "instances": "Até {count} instâncias",
+        "prioritySupport": "Apoio prioritário",
+        "subdomain": "Subdomínio gratuito"
+      },
+      "description": "Selecione um plano de subscrição para ativar o Cloud Connect para a sua instância.",
+      "loggedInAs": "Registado como",
+      "month": "mês",
+      "pollingNote": "Conclua o seu pagamento na nova janela. Esta página será actualizada automaticamente.",
+      "pro": {
+        "customDomain": "{count} domínio personalizado",
+        "emailSupport": "Apoio por correio eletrónico",
+        "instances": "Até {count} instâncias",
+        "subdomain": "Subdomínio gratuito"
+      },
+      "stopWaiting": "Cancelar",
+      "subscribe": "Subscrever agora",
+      "title": "Escolha o seu plano",
+      "waitingForPayment": "À espera do pagamento..."
+    },
+    "subscriptionActive": "Assinatura activada!"
+  },
   "confirm_delete_user": "Tem a certeza de que pretende eliminar este utilizador?",
   "download": {
     "files": "{value, plural, one {Descarregar # ficheiro} other {Descarregar {value} ficheiros} }"
@@ -123,11 +252,7 @@
       "logo_and_favicon": "Logotipo",
       "logo_description": "Apresente o seu logo de empresa em formato PNG no canto superior-esquerdo. Indique a largura em pixels - a altura ajustará automaticamente para manter o aspecto. Utilize uma imagem pelo menos tão larga quanto o seu monitor para garantir a qualidade.",
       "logo_image": "Imagem de Logotipo",
-      "logo_reset_failed": "Falha ao restaurar o logotipo padrão",
-      "logo_reset_success": "Logotipo restaurado para o padrão com sucesso",
       "logo_width": "Largura de Logotipo",
-      "confirm_reset_logo": "Tem certeza de que deseja restaurar o logotipo padrão?",
-      "reset_logo_to_default": "Restaurar padrão",
       "other_ui_settings": "Outras",
       "select_theme": "Escolha o Tema",
       "select_theme_description": "Escolha entre uma variedade de temas existentes ou um que tenha instalado.",
@@ -172,6 +297,7 @@
     "description": {
       "allShares": "Ver e gerir as partilhas de todos os utilizadores",
       "branding": "Personalizar a interface de utilizador da Erugo e adicionar a sua marca.",
+      "cloudConnect": "Ligue a sua instância ao Erugo Cloud para um fácil encaminhamento de domínios",
       "emailTemplates": "Gerir modelos de correio eletrónico",
       "myProfile": "Gerir o seu perfil.",
       "myShares": "Gerir as suas Partilhas",
@@ -454,6 +580,7 @@
     "title": {
       "allShares": "Todas as acções",
       "branding": "Marca & Interface",
+      "cloudConnect": "Erugo Connect",
       "emailTemplates": "Modelos de correio eletrónico",
       "linked_accounts": "Contas Conectadas",
       "manage": "Gerir",
