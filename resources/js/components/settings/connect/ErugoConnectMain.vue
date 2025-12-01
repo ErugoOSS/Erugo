@@ -40,6 +40,7 @@ import DeleteInstanceModal from './components/modals/DeleteInstanceModal.vue'
 import RegenerateTokenModal from './components/modals/RegenerateTokenModal.vue'
 import TokenDisplayModal from './components/modals/TokenDisplayModal.vue'
 import ReclaimInstanceModal from './components/modals/ReclaimInstanceModal.vue'
+import LinkInstanceModal from './components/modals/LinkInstanceModal.vue'
 
 const emit = defineEmits(['loginStateChanged', 'connectionStateChanged', 'connectingStateChanged', 'navItemClicked'])
 
@@ -127,6 +128,7 @@ const {
   showRegenerateTokenConfirm,
   regeneratedToken,
   showRegeneratedToken,
+  showLinkConfirm,
   checkingSubdomain,
   subdomainAvailable,
   subdomainSuggestions,
@@ -152,7 +154,10 @@ const {
   closeRegeneratedTokenModal,
   copyToken,
   getInstanceStatusClass,
-  resetSubdomainState
+  resetSubdomainState,
+  openLinkConfirm,
+  closeLinkConfirm,
+  handleLinkInstance
 } = useErugoInstances(async () => {
   await loadStatus(true)
 })
@@ -488,6 +493,7 @@ defineExpose({
                   @edit="openEditInstanceForm"
                   @regenerateToken="openRegenerateTokenConfirm"
                   @delete="openDeleteConfirm"
+                  @link="openLinkConfirm"
                 >
                   <template #empty>
                     <InstanceForm
@@ -585,6 +591,14 @@ defineExpose({
     @update:show="showReclaimConfirm = $event"
     @confirm="handleConfirmReclaim"
     @cancel="handleCancelReclaim"
+  />
+
+  <LinkInstanceModal
+    :show="showLinkConfirm"
+    :loading="instanceLoading"
+    :instance="selectedInstance"
+    @update:show="closeLinkConfirm"
+    @confirm="handleLinkInstance"
   />
 </template>
 

@@ -491,6 +491,39 @@ class CloudConnectService
     }
 
     /**
+     * Link an existing instance to this Erugo installation
+     * This regenerates the instance token and stores all instance details locally
+     */
+    public function linkInstance(string $instanceId): array
+    {
+        // First get the instance details
+        $instance = $this->apiRequest('GET', "/instances/{$instanceId}");
+        
+        // Regenerate the token to get a new one for this installation
+        $tokenResult = $this->apiRequest('POST', "/instances/{$instanceId}/regenerate-token");
+        
+        if (empty($tokenResult['instance_token'])) {
+            throw new Exception('Failed to get instance token');
+        }
+        
+        // Store instance details locally
+        $this->setSetting('cloud_connect_instance_id', $instance['id'] ?? $instanceId);
+        $this->setSetting('cloud_connect_subdomain', $instance['subdomain'] ?? null);
+        $this->setSetting('cloud_connect_full_domain', $instance['full_domain'] ?? null);
+        $this->setSetting('cloud_connect_tunnel_ip', $instance['tunnel_ip'] ?? null);
+        $this->setEncryptedSetting('cloud_connect_instance_token', $tokenResult['instance_token']);
+        
+        // Clear any previous WireGuard keys so new ones will be generated on connect
+        $this->setSetting('cloud_connect_private_key', null);
+        $this->setSetting('cloud_connect_public_key', null);
+        
+        return [
+            'instance' => $instance,
+            'linked' => true,
+        ];
+    }
+
+    /**
      * Check subdomain availability
      */
     public function checkSubdomain(string $subdomain): array

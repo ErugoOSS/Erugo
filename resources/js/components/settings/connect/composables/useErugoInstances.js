@@ -5,6 +5,7 @@ import {
   updateCloudConnectInstance,
   deleteCloudConnectInstance,
   regenerateCloudConnectInstanceToken,
+  linkCloudConnectInstance,
   checkCloudConnectSubdomain
 } from '../../../../api'
 import { useToast } from 'vue-toastification'
@@ -40,6 +41,9 @@ export function useErugoInstances(onInstanceChange) {
   const showRegenerateTokenConfirm = ref(false)
   const regeneratedToken = ref(null)
   const showRegeneratedToken = ref(false)
+
+  // Link instance confirmation
+  const showLinkConfirm = ref(false)
 
   // Subdomain checking
   const checkingSubdomain = ref(false)
@@ -270,6 +274,34 @@ export function useErugoInstances(onInstanceChange) {
     subdomainSuggestions.value = []
   }
 
+  const openLinkConfirm = (instance) => {
+    selectedInstance.value = instance
+    showLinkConfirm.value = true
+  }
+
+  const closeLinkConfirm = () => {
+    showLinkConfirm.value = false
+    selectedInstance.value = null
+  }
+
+  const handleLinkInstance = async () => {
+    if (!selectedInstance.value) return
+
+    try {
+      instanceLoading.value = true
+      await linkCloudConnectInstance(selectedInstance.value.id)
+      toast.success(t.value('cloudConnect.instances.linkSuccess') || 'Instance linked successfully')
+      closeLinkConfirm()
+      if (onInstanceChange) {
+        await onInstanceChange()
+      }
+    } catch (error) {
+      toast.error(error.message || t.value('cloudConnect.instances.linkFailed') || 'Failed to link instance')
+    } finally {
+      instanceLoading.value = false
+    }
+  }
+
   return {
     // State
     instances,
@@ -283,6 +315,7 @@ export function useErugoInstances(onInstanceChange) {
     showRegenerateTokenConfirm,
     regeneratedToken,
     showRegeneratedToken,
+    showLinkConfirm,
     checkingSubdomain,
     subdomainAvailable,
     subdomainSuggestions,
@@ -310,7 +343,10 @@ export function useErugoInstances(onInstanceChange) {
     closeRegeneratedTokenModal,
     copyToken,
     getInstanceStatusClass,
-    resetSubdomainState
+    resetSubdomainState,
+    openLinkConfirm,
+    closeLinkConfirm,
+    handleLinkInstance
   }
 }
 

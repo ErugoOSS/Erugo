@@ -188,6 +188,7 @@ Route::group([], function ($router) {
         Route::patch('/instances/{instanceId}', [CloudConnectController::class, 'updateInstance'])->name('cloud-connect.updateInstance');
         Route::delete('/instances/{instanceId}', [CloudConnectController::class, 'deleteInstance'])->name('cloud-connect.deleteInstance');
         Route::post('/instances/{instanceId}/regenerate-token', [CloudConnectController::class, 'regenerateToken'])->name('cloud-connect.regenerateToken');
+        Route::post('/instances/{instanceId}/link', [CloudConnectController::class, 'linkInstance'])->name('cloud-connect.linkInstance');
         Route::get('/subdomains/check', [CloudConnectController::class, 'checkSubdomain'])->name('cloud-connect.checkSubdomain');
         
         // Tunnel management

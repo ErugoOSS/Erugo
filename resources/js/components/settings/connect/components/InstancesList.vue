@@ -9,7 +9,8 @@ import {
   Trash2,
   ArrowDown,
   ArrowUp,
-  Loader2
+  Loader2,
+  Link
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -21,7 +22,7 @@ const props = defineProps({
   getInstanceStatusClass: Function
 })
 
-const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
+const emit = defineEmits(['edit', 'regenerateToken', 'delete', 'link'])
 </script>
 
 <template>
@@ -85,6 +86,14 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
       </div>
 
       <div class="instance-card-actions">
+        <button
+          v-if="instance.id !== currentInstanceId"
+          class="icon-only primary"
+          @click="emit('link', instance)"
+          :title="$t('cloudConnect.instances.link') || 'Link to this Erugo'"
+        >
+          <Link />
+        </button>
         <button
           class="icon-only"
           @click="emit('edit', instance)"
@@ -293,6 +302,17 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
         background: color-mix(in srgb, var(--color-danger) 15%, transparent);
         border-color: var(--color-danger);
         color: var(--color-danger);
+      }
+
+      &.primary {
+        background: color-mix(in srgb, var(--button-primary-background-color) 15%, transparent);
+        border-color: var(--button-primary-background-color);
+        color: var(--button-primary-background-color);
+
+        &:hover:not(:disabled) {
+          background: var(--button-primary-background-color);
+          color: var(--button-primary-text-color);
+        }
       }
 
       &:disabled {

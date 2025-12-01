@@ -554,6 +554,27 @@ class CloudConnectController extends Controller
     }
 
     /**
+     * Link an existing instance to this Erugo installation
+     */
+    public function linkInstance(string $instanceId): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->linkInstance($instanceId);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Instance linked successfully',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
      * Create billing portal session
      */
     public function billingPortal(Request $request): JsonResponse

@@ -1178,6 +1178,20 @@ export const regenerateCloudConnectInstanceToken = async (instanceId) => {
   return data.data
 }
 
+export const linkCloudConnectInstance = async (instanceId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/instances/${instanceId}/link`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const createCloudConnectBillingPortal = async (returnUrl = null) => {
   const body = returnUrl ? { return_url: returnUrl } : {}
   const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/billing/portal`, {
