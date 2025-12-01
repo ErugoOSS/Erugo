@@ -171,6 +171,7 @@ Route::group([], function ($router) {
         
         // Subscription management
         Route::get('/subscription', [CloudConnectController::class, 'subscription'])->name('cloud-connect.subscription');
+        Route::get('/plans', [CloudConnectController::class, 'plans'])->name('cloud-connect.plans');
         Route::post('/checkout', [CloudConnectController::class, 'checkout'])->name('cloud-connect.checkout');
         
         // Instance management

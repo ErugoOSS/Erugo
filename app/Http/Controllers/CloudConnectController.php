@@ -164,6 +164,26 @@ class CloudConnectController extends Controller
     }
 
     /**
+     * Get available subscription plans
+     */
+    public function plans(): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->getPlans();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
      * Create Stripe checkout session
      */
     public function checkout(Request $request): JsonResponse

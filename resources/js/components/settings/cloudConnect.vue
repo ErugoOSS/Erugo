@@ -28,6 +28,7 @@ import {
   cloudConnectLogin,
   cloudConnectLogout,
   getCloudConnectSubscription,
+  getCloudConnectPlans,
   createCloudConnectCheckout,
   checkCloudConnectSubdomain,
   createCloudConnectInstance,
@@ -40,7 +41,7 @@ import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
 const toast = useToast()
-const emit = defineEmits(['loginStateChanged'])
+const emit = defineEmits(['loginStateChanged', 'navItemClicked'])
 
 // State
 const loading = ref(true)
@@ -83,7 +84,10 @@ const instanceForm = ref({
   subdomain: ''
 })
 
-const selectedPlan = ref('pro')
+const selectedPlan = ref(null)
+const plans = ref([])
+const loadingPlans = ref(false)
+const showPlanManagement = ref(false)
 
 // Computed
 const canConnect = computed(() => {
@@ -133,8 +137,15 @@ const heartbeatHealthy = computed(() => {
 })
 
 const hasActiveSubscription = computed(() => {
+  // Consider active if status is active/trialing OR if user has any plan assigned (including free)
   return status.value?.subscription_status === 'active' || 
-         status.value?.subscription_status === 'trialing'
+         status.value?.subscription_status === 'trialing' ||
+         (status.value?.subscription_plan && status.value?.subscription_plan !== 'none')
+})
+
+const currentPlan = computed(() => {
+  if (!status.value?.subscription_plan || plans.value.length === 0) return null
+  return plans.value.find(p => p.name === status.value.subscription_plan)
 })
 
 const needsEmailVerification = computed(() => {
@@ -193,6 +204,8 @@ const determineStep = () => {
     currentStep.value = 'connected'
     // Start polling for status updates when connected
     startStatusPolling()
+    // Pre-load plans in background for plan management display
+    loadPlans()
     return
   }
 
@@ -205,6 +218,9 @@ const determineStep = () => {
     return
   }
 
+  // User is logged in - load plans in background for plan section
+  loadPlans()
+
   // Check if email verification is needed
   if (needsEmailVerification.value) {
     currentStep.value = 'email_verification'
@@ -214,6 +230,7 @@ const determineStep = () => {
   // Check subscription
   if (!hasActiveSubscription.value) {
     currentStep.value = 'subscription'
+    loadPlans()
     return
   }
 
@@ -225,6 +242,8 @@ const determineStep = () => {
 
   // Ready to connect
   currentStep.value = 'ready'
+  // Pre-load plans in background for plan management display
+  loadPlans()
 }
 
 const startStatusPolling = () => {
@@ -332,9 +351,89 @@ const resendVerificationEmail = async () => {
   }
 }
 
+const loadPlans = async (forceRefresh = false) => {
+  if (plans.value.length > 0 && !forceRefresh) return // Already loaded
+  
+  try {
+    loadingPlans.value = true
+    const result = await getCloudConnectPlans()
+    plans.value = result.plans || []
+    
+    // Auto-select first plan if none selected
+    if (!selectedPlan.value && plans.value.length > 0) {
+      selectedPlan.value = plans.value[0].name
+    }
+  } catch (error) {
+    console.error('Failed to load plans:', error)
+    toast.error(t.value('cloudConnect.subscription.loadPlansFailed'))
+  } finally {
+    loadingPlans.value = false
+  }
+}
+
+const openPlanManagement = async () => {
+  await loadPlans()
+  // Pre-select current plan
+  if (status.value?.subscription_plan) {
+    selectedPlan.value = status.value.subscription_plan
+  }
+  showPlanManagement.value = true
+}
+
+const closePlanManagement = () => {
+  showPlanManagement.value = false
+}
+
+const handleChangePlan = async () => {
+  // If selecting current plan, just close
+  if (selectedPlan.value === status.value?.subscription_plan) {
+    closePlanManagement()
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    // Check if selected plan is free
+    const plan = plans.value.find(p => p.name === selectedPlan.value)
+    if (plan?.is_free) {
+      // For downgrading to free, we might need API support
+      // For now, show a message that they need to cancel their subscription
+      toast.info(t.value('cloudConnect.planManagement.contactToDowngrade'))
+      closePlanManagement()
+      return
+    }
+    
+    const result = await createCloudConnectCheckout(selectedPlan.value)
+    
+    // Open checkout in new tab
+    window.open(result.checkout_url, '_blank')
+    
+    // Start polling for subscription status
+    startSubscriptionPolling(result.poll_interval || 3000)
+    
+    toast.info(t.value('cloudConnect.checkoutOpened'))
+    closePlanManagement()
+  } catch (error) {
+    toast.error(error.message || t.value('cloudConnect.checkoutFailed'))
+  } finally {
+    loading.value = false
+  }
+}
+
 const handleCheckout = async () => {
   try {
     loading.value = true
+    
+    // Check if selected plan is free
+    const plan = plans.value.find(p => p.name === selectedPlan.value)
+    if (plan?.is_free) {
+      // Free plan - just reload status, API assigns it by default
+      toast.success(t.value('cloudConnect.subscription.freePlanSelected'))
+      await loadStatus()
+      return
+    }
+    
     const result = await createCloudConnectCheckout(selectedPlan.value)
     
     // Open checkout in new tab
@@ -526,6 +625,10 @@ const refreshStatus = async () => {
   await loadStatus(true) // Force refresh from API
 }
 
+const handleNavItemClicked = (item) => {
+  emit('navItemClicked', item)
+}
+
 defineExpose({
   refreshStatus,
   handleLogout
@@ -533,333 +636,489 @@ defineExpose({
 </script>
 
 <template>
-  <div class="cloud-connect-container">
+  <div class="container-fluid">
     <!-- Loading State -->
-    <div v-if="loading && currentStep === 'loading'" class="loading-state">
+    <div v-if="loading && !status" class="loading-state">
       <Loader2 class="spinner" />
       <p>{{ $t('cloudConnect.loading') }}</p>
     </div>
 
-    <!-- Capabilities Error -->
-    <div v-else-if="currentStep === 'capabilities_error'" class="step-container">
-      <div class="step-header error">
-        <AlertTriangle />
-        <h3>{{ $t('cloudConnect.capabilitiesError.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <p>{{ $t('cloudConnect.capabilitiesError.description') }}</p>
-        <div class="capabilities-list">
-          <div class="capability-item" :class="{ success: status?.capabilities?.has_wg_tools, error: !status?.capabilities?.has_wg_tools }">
-            <component :is="status?.capabilities?.has_wg_tools ? CheckCircle : XCircle" />
-            <span>{{ $t('cloudConnect.capabilities.wireguardTools') }}</span>
+    <!-- Capabilities Error - Full Width Block -->
+    <div v-else-if="currentStep === 'capabilities_error'" class="row">
+      <div class="col-12 pt-5">
+        <div class="setting-group">
+          <div class="setting-group-header error">
+            <h3>
+              <AlertTriangle />
+              {{ $t('cloudConnect.capabilitiesError.title') }}
+            </h3>
           </div>
-          <div class="capability-item" :class="{ success: status?.capabilities?.has_tun_device, error: !status?.capabilities?.has_tun_device }">
-            <component :is="status?.capabilities?.has_tun_device ? CheckCircle : XCircle" />
-            <span>{{ $t('cloudConnect.capabilities.tunDevice') }}</span>
-          </div>
-          <div class="capability-item" :class="{ success: status?.capabilities?.has_net_admin, error: !status?.capabilities?.has_net_admin }">
-            <component :is="status?.capabilities?.has_net_admin ? CheckCircle : XCircle" />
-            <span>{{ $t('cloudConnect.capabilities.netAdmin') }}</span>
-          </div>
-        </div>
-        <div class="help-box">
-          <h4>{{ $t('cloudConnect.capabilitiesError.howToFix') }}</h4>
-          <p>{{ $t('cloudConnect.capabilitiesError.addToCompose') }}</p>
-          <pre><code>services:
+          <div class="setting-group-body">
+            <p>{{ $t('cloudConnect.capabilitiesError.description') }}</p>
+            <div class="capabilities-list">
+              <div class="capability-item" :class="{ success: status?.capabilities?.has_wg_tools, error: !status?.capabilities?.has_wg_tools }">
+                <component :is="status?.capabilities?.has_wg_tools ? CheckCircle : XCircle" />
+                <span>{{ $t('cloudConnect.capabilities.wireguardTools') }}</span>
+              </div>
+              <div class="capability-item" :class="{ success: status?.capabilities?.has_tun_device, error: !status?.capabilities?.has_tun_device }">
+                <component :is="status?.capabilities?.has_tun_device ? CheckCircle : XCircle" />
+                <span>{{ $t('cloudConnect.capabilities.tunDevice') }}</span>
+              </div>
+              <div class="capability-item" :class="{ success: status?.capabilities?.has_net_admin, error: !status?.capabilities?.has_net_admin }">
+                <component :is="status?.capabilities?.has_net_admin ? CheckCircle : XCircle" />
+                <span>{{ $t('cloudConnect.capabilities.netAdmin') }}</span>
+              </div>
+            </div>
+            <div class="help-box">
+              <h4>{{ $t('cloudConnect.capabilitiesError.howToFix') }}</h4>
+              <p>{{ $t('cloudConnect.capabilitiesError.addToCompose') }}</p>
+              <pre><code>services:
   app:
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun</code></pre>
-        </div>
-        <button @click="refreshStatus" class="btn-secondary">
-          <RefreshCw />
-          {{ $t('cloudConnect.checkAgain') }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Auth Step -->
-    <div v-else-if="currentStep === 'auth'" class="step-container">
-      <div class="step-header">
-        <Cloud />
-        <h3>{{ $t('cloudConnect.auth.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <p>{{ $t('cloudConnect.auth.description') }}</p>
-        
-        <div class="auth-buttons">
-          <button class="btn-primary" @click="openLoginForm">
-            <LogIn />
-            {{ $t('cloudConnect.auth.login') }}
-          </button>
-          <button class="btn-secondary" @click="openRegisterForm">
-            <UserPlus />
-            {{ $t('cloudConnect.auth.register') }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Email Verification Step -->
-    <div v-else-if="currentStep === 'email_verification'" class="step-container">
-      <div class="step-header warning">
-        <AlertTriangle />
-        <h3>{{ $t('cloudConnect.emailVerification.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <div class="verification-message">
-          <p>{{ $t('cloudConnect.emailVerification.description') }}</p>
-          <p class="email-sent-to">
-            {{ $t('cloudConnect.emailVerification.sentTo') }}: <strong>{{ status?.user_email }}</strong>
-          </p>
-        </div>
-
-        <div class="verification-instructions">
-          <h4>{{ $t('cloudConnect.emailVerification.instructions') }}</h4>
-          <ol>
-            <li>{{ $t('cloudConnect.emailVerification.step1') }}</li>
-            <li>{{ $t('cloudConnect.emailVerification.step2') }}</li>
-            <li>{{ $t('cloudConnect.emailVerification.step3') }}</li>
-          </ol>
-        </div>
-
-        <button @click="checkVerificationStatus" class="btn-primary" :disabled="loading">
-          <Loader2 v-if="loading" class="spinner" />
-          <RefreshCw v-else />
-          {{ $t('cloudConnect.emailVerification.checkStatus') }}
-        </button>
-
-        <p class="resend-note">
-          {{ $t('cloudConnect.emailVerification.didntReceive') }}
-          <button @click="resendVerificationEmail" class="btn-text" :disabled="loading">
-            {{ $t('cloudConnect.emailVerification.resend') }}
-          </button>
-        </p>
-      </div>
-    </div>
-
-    <!-- Subscription Step -->
-    <div v-else-if="currentStep === 'subscription'" class="step-container">
-      <div class="step-header">
-        <CreditCard />
-        <h3>{{ $t('cloudConnect.subscription.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <p>{{ $t('cloudConnect.subscription.description') }}</p>
-
-        <div class="plan-selector">
-          <div 
-            class="plan-card" 
-            :class="{ selected: selectedPlan === 'pro' }"
-            @click="selectedPlan = 'pro'"
-          >
-            <h4>Pro</h4>
-            <div class="price">$5<span>/{{ $t('cloudConnect.subscription.month') }}</span></div>
-            <ul>
-              <li>{{ $t('cloudConnect.subscription.pro.instances', { count: 3 }) }}</li>
-              <li>{{ $t('cloudConnect.subscription.pro.subdomain') }}</li>
-              <li>{{ $t('cloudConnect.subscription.pro.customDomain', { count: 1 }) }}</li>
-              <li>{{ $t('cloudConnect.subscription.pro.emailSupport') }}</li>
-            </ul>
-          </div>
-          <div 
-            class="plan-card" 
-            :class="{ selected: selectedPlan === 'business' }"
-            @click="selectedPlan = 'business'"
-          >
-            <h4>Business</h4>
-            <div class="price">$15<span>/{{ $t('cloudConnect.subscription.month') }}</span></div>
-            <ul>
-              <li>{{ $t('cloudConnect.subscription.business.instances', { count: 10 }) }}</li>
-              <li>{{ $t('cloudConnect.subscription.business.subdomain') }}</li>
-              <li>{{ $t('cloudConnect.subscription.business.customDomains', { count: 5 }) }}</li>
-              <li>{{ $t('cloudConnect.subscription.business.prioritySupport') }}</li>
-            </ul>
-          </div>
-        </div>
-
-        <button @click="handleCheckout" class="btn-primary" :disabled="loading || pollingSubscription">
-          <Loader2 v-if="loading || pollingSubscription" class="spinner" />
-          <CreditCard v-else />
-          {{ pollingSubscription ? $t('cloudConnect.subscription.waitingForPayment') : $t('cloudConnect.subscription.subscribe') }}
-        </button>
-
-        <p v-if="pollingSubscription" class="polling-note">
-          {{ $t('cloudConnect.subscription.pollingNote') }}
-          <button @click="stopPolling" class="btn-text">{{ $t('cloudConnect.subscription.stopWaiting') }}</button>
-        </p>
-      </div>
-    </div>
-
-    <!-- Instance Setup Step -->
-    <div v-else-if="currentStep === 'instance'" class="step-container">
-      <div class="step-header">
-        <Server />
-        <h3>{{ $t('cloudConnect.instance.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <p>{{ $t('cloudConnect.instance.description') }}</p>
-
-        <form @submit.prevent="handleCreateInstance" class="instance-form">
-          <div class="form-group">
-            <label for="instance-name">{{ $t('cloudConnect.instance.name') }}</label>
-            <input 
-              type="text" 
-              id="instance-name" 
-              v-model="instanceForm.name" 
-              required 
-              :placeholder="$t('cloudConnect.instance.namePlaceholder')"
-            />
-          </div>
-          <div class="form-group">
-            <label for="instance-subdomain">{{ $t('cloudConnect.instance.subdomain') }}</label>
-            <div class="subdomain-input">
-              <input 
-                type="text" 
-                id="instance-subdomain" 
-                v-model="instanceForm.subdomain" 
-                required 
-                pattern="^[a-z0-9][a-z0-9-]*[a-z0-9]$"
-                minlength="3"
-                maxlength="63"
-                :placeholder="$t('cloudConnect.instance.subdomainPlaceholder')"
-                @blur="handleCheckSubdomain"
-                @input="subdomainAvailable = null"
-              />
-              <span class="subdomain-suffix">.erugo.cloud</span>
-              <span v-if="checkingSubdomain" class="subdomain-status checking">
-                <Loader2 class="spinner" />
-              </span>
-              <span v-else-if="subdomainAvailable === true && !subdomainOwnedByUser" class="subdomain-status available">
-                <CheckCircle />
-              </span>
-              <span v-else-if="subdomainOwnedByUser" class="subdomain-status owned">
-                <RefreshCw />
-              </span>
-              <span v-else-if="subdomainAvailable === false" class="subdomain-status unavailable">
-                <XCircle />
-              </span>
             </div>
-            <div v-if="subdomainOwnedByUser" class="subdomain-owned-notice">
-              <AlertTriangle />
-              <span>{{ $t('cloudConnect.subdomainOwnedByYou') }}</span>
-            </div>
-            <div v-else-if="subdomainAvailable === false && subdomainSuggestions.length > 0" class="subdomain-suggestions">
-              <span>{{ $t('cloudConnect.instance.suggestions') }}:</span>
-              <button 
-                v-for="suggestion in subdomainSuggestions" 
-                :key="suggestion" 
-                type="button"
-                @click="selectSuggestion(suggestion)"
-                class="suggestion-btn"
-              >
-                {{ suggestion }}
-              </button>
+            <button @click="refreshStatus" class="secondary">
+              <RefreshCw />
+              {{ $t('cloudConnect.checkAgain') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout with Sidebar -->
+    <div v-else class="row">
+      <!-- Sidebar Navigation -->
+      <div class="col-2 d-none d-md-block">
+        <ul class="settings-nav pt-5">
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('status-section')">
+              <component :is="isConnected ? Wifi : WifiOff" />
+              {{ $t('cloudConnect.nav.status') }}
+            </a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('account-section')">
+              <component :is="status?.is_logged_in ? LogOut : LogIn" />
+              {{ $t('cloudConnect.nav.account') }}
+            </a>
+          </li>
+          <li v-if="status?.is_logged_in">
+            <a href="#" @click.prevent="handleNavItemClicked('plan-section')">
+              <CreditCard />
+              {{ $t('cloudConnect.nav.plan') }}
+            </a>
+          </li>
+          <li v-if="status?.is_logged_in && hasActiveSubscription">
+            <a href="#" @click.prevent="handleNavItemClicked('instance-section')">
+              <Server />
+              {{ $t('cloudConnect.nav.instance') }}
+            </a>
+          </li>
+          <li v-if="status?.has_instance">
+            <a href="#" @click.prevent="handleNavItemClicked('connection-section')">
+              <Globe />
+              {{ $t('cloudConnect.nav.connection') }}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-12 col-md-10 pt-5">
+        <!-- Status Section -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="status-section">
+              <div class="setting-group-header" :class="{ success: isConnected && heartbeatHealthy, warning: isConnected && !heartbeatHealthy }">
+                <h3>
+                  <component :is="isConnected ? (heartbeatHealthy ? CheckCircle : AlertTriangle) : CloudOff" />
+                  {{ $t('cloudConnect.nav.status') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <div class="status-overview">
+                  <div class="status-item">
+                    <span class="status-label">{{ $t('cloudConnect.status.connection') }}:</span>
+                    <span class="status-value" :class="{ online: isConnected, offline: !isConnected }">
+                      <Wifi v-if="isConnected" />
+                      <WifiOff v-else />
+                      {{ isConnected ? $t('cloudConnect.status.connected') : $t('cloudConnect.status.disconnected') }}
+                    </span>
+                  </div>
+                  <div class="status-item">
+                    <span class="status-label">{{ $t('cloudConnect.status.account') }}:</span>
+                    <span class="status-value">
+                      {{ status?.is_logged_in ? status?.user_email : $t('cloudConnect.status.notLoggedIn') }}
+                    </span>
+                  </div>
+                  <div v-if="status?.is_logged_in" class="status-item">
+                    <span class="status-label">{{ $t('cloudConnect.status.plan') }}:</span>
+                    <span class="status-value">
+                      {{ currentPlan?.display_name || status?.subscription_plan || $t('cloudConnect.status.noPlan') }}
+                    </span>
+                  </div>
+                  <div v-if="status?.full_domain" class="status-item">
+                    <span class="status-label">{{ $t('cloudConnect.status.domain') }}:</span>
+                    <span class="status-value domain">
+                      <a :href="`https://${status?.full_domain}`" target="_blank">
+                        {{ status?.full_domain }}
+                        <ExternalLink />
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <button 
-            type="submit" 
-            class="btn-primary" 
-            :disabled="loading || !subdomainAvailable"
-          >
-            <Loader2 v-if="loading" class="spinner" />
-            <Server v-else />
-            {{ $t('cloudConnect.instance.create') }}
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
 
-    <!-- Ready to Connect Step -->
-    <div v-else-if="currentStep === 'ready'" class="step-container">
-      <div class="step-header">
-        <Wifi />
-        <h3>{{ $t('cloudConnect.ready.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <p>{{ $t('cloudConnect.ready.description') }}</p>
-
-        <div class="instance-info">
-          <div class="info-row">
-            <Globe />
-            <span>{{ status?.full_domain }}</span>
-          </div>
-          <div class="info-row">
-            <Server />
-            <span>{{ status?.tunnel_ip }}</span>
+        <!-- Account Section -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="account-section">
+              <div class="setting-group-header">
+                <h3>
+                  <component :is="status?.is_logged_in ? LogOut : LogIn" />
+                  {{ $t('cloudConnect.nav.account') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <!-- Not logged in -->
+                <div v-if="!status?.is_logged_in">
+                  <p>{{ $t('cloudConnect.auth.description') }}</p>
+                  <div class="auth-buttons">
+                    <button  @click="openLoginForm">
+                      <LogIn />
+                      {{ $t('cloudConnect.auth.login') }}
+                    </button>
+                    <button class="secondary" @click="openRegisterForm">
+                      <UserPlus />
+                      {{ $t('cloudConnect.auth.register') }}
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Logged in but needs email verification -->
+                <div v-else-if="needsEmailVerification">
+                  <div class="verification-message">
+                    <p>{{ $t('cloudConnect.emailVerification.description') }}</p>
+                    <p class="email-sent-to">
+                      {{ $t('cloudConnect.emailVerification.sentTo') }}: <strong>{{ status?.user_email }}</strong>
+                    </p>
+                  </div>
+                  <div class="verification-instructions">
+                    <h4>{{ $t('cloudConnect.emailVerification.instructions') }}</h4>
+                    <ol>
+                      <li>{{ $t('cloudConnect.emailVerification.step1') }}</li>
+                      <li>{{ $t('cloudConnect.emailVerification.step2') }}</li>
+                      <li>{{ $t('cloudConnect.emailVerification.step3') }}</li>
+                    </ol>
+                  </div>
+                  <div class="button-row">
+                    <button @click="checkVerificationStatus"  :disabled="loading">
+                      <Loader2 v-if="loading" class="spinner" />
+                      <RefreshCw v-else />
+                      {{ $t('cloudConnect.emailVerification.checkStatus') }}
+                    </button>
+                    <button @click="resendVerificationEmail" class="secondary" :disabled="loading">
+                      <Mail />
+                      {{ $t('cloudConnect.emailVerification.resend') }}
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Logged in -->
+                <div v-else>
+                  <div class="account-info">
+                    <div class="account-row">
+                      <span class="account-label">{{ $t('cloudConnect.account.email') }}:</span>
+                      <span class="account-value">{{ status?.user_email }}</span>
+                    </div>
+                    <div class="account-row">
+                      <span class="account-label">{{ $t('cloudConnect.account.status') }}:</span>
+                      <span class="account-value status-badge" :class="status?.account_status">
+                        {{ status?.account_status }}
+                      </span>
+                    </div>
+                  </div>
+                  <button @click="handleLogout" class="secondary" :disabled="loading">
+                    <Loader2 v-if="loading" class="spinner" />
+                    <LogOut v-else />
+                    {{ $t('cloudConnect.auth.logout') }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <button @click="handleConnect" class="btn-primary btn-large" :disabled="connecting">
-          <Loader2 v-if="connecting" class="spinner" />
-          <Wifi v-else />
-          {{ connecting ? $t('cloudConnect.ready.connecting') : $t('cloudConnect.ready.connect') }}
-        </button>
-      </div>
-    </div>
+        <!-- Plan Section (visible when logged in) -->
+        <div v-if="status?.is_logged_in && !needsEmailVerification" class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="plan-section">
+              <div class="setting-group-header">
+                <h3>
+                  <CreditCard />
+                  {{ $t('cloudConnect.nav.plan') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <!-- Current Plan Info -->
+                <div v-if="currentPlan" class="current-plan-display">
+                  <div class="current-plan-header">
+                    <div class="plan-name-large">{{ currentPlan.display_name }}</div>
+                    <div v-if="currentPlan.price_cents" class="plan-price">
+                      ${{ Math.floor(currentPlan.price_cents / 100) }}/{{ $t('cloudConnect.subscription.month') }}
+                    </div>
+                    <div v-else class="plan-price free">{{ $t('cloudConnect.planManagement.free') }}</div>
+                  </div>
+                  <ul class="plan-features">
+                    <li>{{ $t('cloudConnect.subscription.instances', { count: currentPlan.max_instances }) }}</li>
+                    <li>{{ $t('cloudConnect.subscription.subdomain') }}</li>
+                    <li v-if="currentPlan.custom_domains_allowed">
+                      {{ $t('cloudConnect.subscription.customDomains', { count: currentPlan.max_domains_per_instance }) }}
+                    </li>
+                    <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
+                  </ul>
+                </div>
+                
+                <!-- No plan / Select plan -->
+                <div v-if="!hasActiveSubscription || !currentPlan">
+                  <p>{{ $t('cloudConnect.subscription.description') }}</p>
+                </div>
 
-    <!-- Connected Step -->
-    <div v-else-if="currentStep === 'connected'" class="step-container">
-      <div class="step-header" :class="{ success: heartbeatHealthy, warning: !heartbeatHealthy }">
-        <CheckCircle v-if="heartbeatHealthy" />
-        <AlertTriangle v-else />
-        <h3>{{ $t('cloudConnect.connected.title') }}</h3>
-      </div>
-      <div class="step-content">
-        <div class="connected-status">
-          <div class="status-indicator" :class="{ online: heartbeatHealthy, reconnecting: isReconnecting && !heartbeatHealthy, offline: !isReconnecting && !heartbeatHealthy }">
-            <Loader2 v-if="isReconnecting" class="spinner" />
-            <Wifi v-else-if="heartbeatHealthy" />
-            <WifiOff v-else />
-            <span v-if="isReconnecting">{{ $t('cloudConnect.connected.reconnecting') }}</span>
-            <span v-else-if="heartbeatHealthy">{{ $t('cloudConnect.connected.online') }}</span>
-            <span v-else>{{ $t('cloudConnect.connected.offline') }}</span>
+                <div v-if="loadingPlans" class="loading-plans">
+                  <Loader2 class="spinner" />
+                  <span>{{ $t('cloudConnect.subscription.loadingPlans') }}</span>
+                </div>
+
+                <div v-else class="plan-selector">
+                  <div 
+                    v-for="plan in plans" 
+                    :key="plan.name"
+                    class="plan-card" 
+                    :class="{ selected: selectedPlan === plan.name, current: plan.name === status?.subscription_plan }"
+                    @click="selectedPlan = plan.name"
+                  >
+                    <div class="plan-card-header">
+                      <h4>{{ plan.display_name }}</h4>
+                      <span v-if="plan.name === status?.subscription_plan" class="current-badge">
+                        {{ $t('cloudConnect.planManagement.current') }}
+                      </span>
+                    </div>
+                    <div v-if="plan.price_cents" class="price">
+                      ${{ Math.floor(plan.price_cents / 100) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
+                    </div>
+                    <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
+                    <ul>
+                      <li>{{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}</li>
+                      <li v-if="plan.custom_domains_allowed">
+                        {{ $t('cloudConnect.subscription.customDomains', { count: plan.max_domains_per_instance }) }}
+                      </li>
+                      <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <button 
+                  v-if="selectedPlan && selectedPlan !== status?.subscription_plan"
+                  @click="handleCheckout" 
+                  :disabled="loading || pollingSubscription || loadingPlans"
+                >
+                  <Loader2 v-if="loading || pollingSubscription" class="spinner" />
+                  <CreditCard v-else />
+                  {{ pollingSubscription ? $t('cloudConnect.subscription.waitingForPayment') : $t('cloudConnect.planManagement.changePlanButton') }}
+                </button>
+
+                <p v-if="pollingSubscription" class="polling-note">
+                  {{ $t('cloudConnect.subscription.pollingNote') }}
+                  <button @click="stopPolling" class="secondary">{{ $t('cloudConnect.subscription.stopWaiting') }}</button>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="domain-display">
-          <Globe />
-          <a :href="`https://${status?.full_domain}`" target="_blank" class="domain-link">
-            https://{{ status?.full_domain }}
-            <ExternalLink />
-          </a>
-          <button @click="copyDomain" class="btn-icon" :title="$t('cloudConnect.connected.copyUrl')">
-            <Check v-if="copiedDomain" />
-            <Copy v-else />
-          </button>
+        <!-- Instance Section (visible when logged in and has subscription) -->
+        <div v-if="status?.is_logged_in && hasActiveSubscription && !needsEmailVerification" class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="instance-section">
+              <div class="setting-group-header">
+                <h3>
+                  <Server />
+                  {{ $t('cloudConnect.nav.instance') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <!-- Has instance -->
+                <div v-if="status?.has_instance" class="instance-info-display">
+                  <div class="info-row">
+                    <span class="info-label">{{ $t('cloudConnect.instance.name') }}:</span>
+                    <span class="info-value">{{ instanceForm.name || 'My Erugo Server' }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">{{ $t('cloudConnect.instance.subdomain') }}:</span>
+                    <span class="info-value">{{ status?.subdomain }}.erugo.cloud</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">{{ $t('cloudConnect.connected.tunnelIp') }}:</span>
+                    <span class="info-value">{{ status?.tunnel_ip }}</span>
+                  </div>
+                </div>
+                
+                <!-- No instance - setup form -->
+                <div v-else>
+                  <p>{{ $t('cloudConnect.instance.description') }}</p>
+                  <form @submit.prevent="handleCreateInstance" class="instance-form">
+                    <div class="form-group">
+                      <label for="instance-name">{{ $t('cloudConnect.instance.name') }}</label>
+                      <input 
+                        type="text" 
+                        id="instance-name" 
+                        v-model="instanceForm.name" 
+                        required 
+                        :placeholder="$t('cloudConnect.instance.namePlaceholder')"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="instance-subdomain">{{ $t('cloudConnect.instance.subdomain') }}</label>
+                      <div class="subdomain-input">
+                        <input 
+                          type="text" 
+                          id="instance-subdomain" 
+                          v-model="instanceForm.subdomain" 
+                          required 
+                          pattern="^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+                          minlength="3"
+                          maxlength="63"
+                          :placeholder="$t('cloudConnect.instance.subdomainPlaceholder')"
+                          @blur="handleCheckSubdomain"
+                          @input="subdomainAvailable = null"
+                        />
+                        <span class="subdomain-suffix">.erugo.cloud</span>
+                        <span v-if="checkingSubdomain" class="subdomain-status checking">
+                          <Loader2 class="spinner" />
+                        </span>
+                        <span v-else-if="subdomainAvailable === true && !subdomainOwnedByUser" class="subdomain-status available">
+                          <CheckCircle />
+                        </span>
+                        <span v-else-if="subdomainOwnedByUser" class="subdomain-status owned">
+                          <RefreshCw />
+                        </span>
+                        <span v-else-if="subdomainAvailable === false" class="subdomain-status unavailable">
+                          <XCircle />
+                        </span>
+                      </div>
+                      <div v-if="subdomainOwnedByUser" class="subdomain-owned-notice">
+                        <AlertTriangle />
+                        <span>{{ $t('cloudConnect.subdomainOwnedByYou') }}</span>
+                      </div>
+                      <div v-else-if="subdomainAvailable === false && subdomainSuggestions.length > 0" class="subdomain-suggestions">
+                        <span>{{ $t('cloudConnect.instance.suggestions') }}:</span>
+                        <button 
+                          v-for="suggestion in subdomainSuggestions" 
+                          :key="suggestion" 
+                          type="button"
+                          @click="selectSuggestion(suggestion)"
+                          class="suggestion-btn"
+                        >
+                          {{ suggestion }}
+                        </button>
+                      </div>
+                    </div>
+                    <button 
+                      type="submit" 
+                      :disabled="loading || !subdomainAvailable"
+                    >
+                      <Loader2 v-if="loading" class="spinner" />
+                      <Server v-else />
+                      {{ $t('cloudConnect.instance.create') }}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="connection-details">
-          <div class="detail-row">
-            <span class="label">{{ $t('cloudConnect.connected.subdomain') }}:</span>
-            <span class="value">{{ status?.subdomain }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">{{ $t('cloudConnect.connected.tunnelIp') }}:</span>
-            <span class="value">{{ status?.tunnel_ip }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">{{ $t('cloudConnect.connected.subscription') }}:</span>
-            <span class="value">{{ status?.subscription_plan }} ({{ status?.subscription_status }})</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">{{ $t('cloudConnect.connected.lastHeartbeat') }}:</span>
-            <span class="value" :class="{ 'heartbeat-healthy': heartbeatHealthy, 'heartbeat-unhealthy': !heartbeatHealthy }">
-              {{ lastHeartbeatFormatted }}
-              <span v-if="!status?.last_heartbeat_success && status?.last_heartbeat_error" class="heartbeat-error">
-                ({{ $t('cloudConnect.connected.heartbeatFailed') }})
-              </span>
-            </span>
-          </div>
-        </div>
+        <!-- Connection Section (visible when has instance) -->
+        <div v-if="status?.has_instance" class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="connection-section">
+              <div class="setting-group-header" :class="{ success: isConnected && heartbeatHealthy, warning: isConnected && !heartbeatHealthy }">
+                <h3>
+                  <Globe />
+                  {{ $t('cloudConnect.nav.connection') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <!-- Connected -->
+                <div v-if="isConnected">
+                  <div class="connected-status">
+                    <div class="status-indicator" :class="{ online: heartbeatHealthy, reconnecting: isReconnecting && !heartbeatHealthy, offline: !isReconnecting && !heartbeatHealthy }">
+                      <Loader2 v-if="isReconnecting" class="spinner" />
+                      <Wifi v-else-if="heartbeatHealthy" />
+                      <WifiOff v-else />
+                      <span v-if="isReconnecting">{{ $t('cloudConnect.connected.reconnecting') }}</span>
+                      <span v-else-if="heartbeatHealthy">{{ $t('cloudConnect.connected.online') }}</span>
+                      <span v-else>{{ $t('cloudConnect.connected.offline') }}</span>
+                    </div>
+                  </div>
 
-        <div class="action-buttons">
-          <button @click="handleDisconnect" class="btn-danger" :disabled="disconnecting">
-            <Loader2 v-if="disconnecting" class="spinner" />
-            <WifiOff v-else />
-            {{ disconnecting ? $t('cloudConnect.connected.disconnecting') : $t('cloudConnect.connected.disconnect') }}
-          </button>
+                  <div class="domain-display">
+                    <Globe />
+                    <a :href="`https://${status?.full_domain}`" target="_blank" class="domain-link">
+                      https://{{ status?.full_domain }}
+                      <ExternalLink />
+                    </a>
+                    <button @click="copyDomain" class="icon-only" :title="$t('cloudConnect.connected.copyUrl')">
+                      <Check v-if="copiedDomain" />
+                      <Copy v-else />
+                    </button>
+                  </div>
+
+                  <div class="connection-details">
+                    <div class="detail-row">
+                      <span class="label">{{ $t('cloudConnect.connected.lastHeartbeat') }}:</span>
+                      <span class="value" :class="{ 'heartbeat-healthy': heartbeatHealthy, 'heartbeat-unhealthy': !heartbeatHealthy }">
+                        {{ lastHeartbeatFormatted }}
+                        <span v-if="!status?.last_heartbeat_success && status?.last_heartbeat_error" class="heartbeat-error">
+                          ({{ $t('cloudConnect.connected.heartbeatFailed') }})
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="action-buttons">
+                    <button @click="handleDisconnect" class="secondary" :disabled="disconnecting">
+                      <Loader2 v-if="disconnecting" class="spinner" />
+                      <WifiOff v-else />
+                      {{ disconnecting ? $t('cloudConnect.connected.disconnecting') : $t('cloudConnect.connected.disconnect') }}
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Not connected -->
+                <div v-else>
+                  <p>{{ $t('cloudConnect.ready.description') }}</p>
+                  <div class="instance-info">
+                    <div class="info-row">
+                      <Globe />
+                      <span>{{ status?.full_domain }}</span>
+                    </div>
+                  </div>
+                  <button @click="handleConnect"  :disabled="connecting">
+                    <Loader2 v-if="connecting" class="spinner" />
+                    <Wifi v-else />
+                    {{ connecting ? $t('cloudConnect.ready.connecting') : $t('cloudConnect.ready.connect') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1015,7 +1274,7 @@ defineExpose({
         {{ $t('cloudConnect.reclaimInstance.message', { name: existingInstanceName || instanceForm.subdomain }) }}
       </p>
       <div class="button-bar">
-        <button type="button" @click="handleConfirmReclaim" :disabled="loading" class="btn-warning">
+        <button type="button" @click="handleConfirmReclaim" :disabled="loading" class="secondary">
           <Loader2 v-if="loading" class="spinner" />
           <RefreshCw v-else />
           {{ $t('cloudConnect.reclaimInstance.confirm') }}
@@ -1027,13 +1286,290 @@ defineExpose({
       </div>
     </div>
   </div>
+
+  <!-- Plan Management Slide-out -->
+  <div class="auth-form-overlay" :class="{ active: showPlanManagement }" @click.self="closePlanManagement">
+    <div class="auth-slide-form plan-management-form">
+      <h2>
+        <CreditCard />
+        {{ $t('cloudConnect.planManagement.title') }}
+      </h2>
+      
+      <!-- Current Plan Info -->
+      <div v-if="currentPlan" class="current-plan-info">
+        <h4>{{ $t('cloudConnect.planManagement.currentPlan') }}</h4>
+        <div class="plan-details">
+          <div class="plan-name">{{ currentPlan.display_name }}</div>
+          <ul class="plan-limits">
+            <li>{{ $t('cloudConnect.subscription.instances', { count: currentPlan.max_instances }) }}</li>
+            <li v-if="currentPlan.custom_domains_allowed">
+              {{ $t('cloudConnect.subscription.customDomains', { count: currentPlan.max_domains_per_instance }) }}
+            </li>
+            <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4>{{ $t('cloudConnect.planManagement.changePlan') }}</h4>
+      
+      <div v-if="loadingPlans" class="loading-plans">
+        <Loader2 class="spinner" />
+        <span>{{ $t('cloudConnect.subscription.loadingPlans') }}</span>
+      </div>
+
+      <div v-else class="plan-selector compact">
+        <div 
+          v-for="plan in plans" 
+          :key="plan.name"
+          class="plan-card" 
+          :class="{ selected: selectedPlan === plan.name, current: plan.name === status?.subscription_plan }"
+          @click="selectedPlan = plan.name"
+        >
+          <div class="plan-card-header">
+            <h4>{{ plan.display_name }}</h4>
+            <span v-if="plan.name === status?.subscription_plan" class="current-badge">
+              {{ $t('cloudConnect.planManagement.current') }}
+            </span>
+          </div>
+          <div v-if="plan.price_cents" class="price">
+            ${{ Math.floor(plan.price_cents / 100) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
+          </div>
+          <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
+          <ul>
+            <li>{{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}</li>
+            <li v-if="plan.custom_domains_allowed">
+              {{ $t('cloudConnect.subscription.customDomains', { count: plan.max_domains_per_instance }) }}
+            </li>
+            <li v-else>{{ $t('cloudConnect.subscription.noCustomDomains') }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="button-bar">
+        <button 
+          type="button" 
+          @click="handleChangePlan" 
+          :disabled="loading || loadingPlans || selectedPlan === status?.subscription_plan"
+        >
+          <Loader2 v-if="loading" class="spinner" />
+          <CreditCard v-else />
+          {{ selectedPlan === status?.subscription_plan ? $t('cloudConnect.planManagement.currentPlanSelected') : $t('cloudConnect.planManagement.changePlanButton') }}
+        </button>
+        <button type="button" class="secondary close-button" @click="closePlanManagement">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.cloud-connect-container {
+// Use global .settings-nav, .setting-group, .setting-group-header, .setting-group-body styles from style.scss
+
+// Header color modifiers
+.setting-group-header {
+  &.error h3 svg {
+    color: var(--color-danger, #ef4444);
+  }
+
+  &.success h3 svg {
+    color: var(--color-success, #22c55e);
+  }
+
+  &.warning h3 svg {
+    color: var(--color-warning, #f59e0b);
+  }
+}
+
+.status-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+
+  .status-label {
+    font-size: 0.875rem;
+    color: var(--panel-section-text-color);
+    opacity: 0.7;
+    min-width: 100px;
+  }
+
+  .status-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--panel-section-text-color);
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &.online {
+      color: var(--color-success, #22c55e);
+    }
+
+    &.offline {
+      color: var(--color-danger, #ef4444);
+    }
+
+    &.domain a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--button-primary-background-color);
+      text-decoration: none;
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.account-info {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--panel-border-color);
+  }
+
+  .account-label {
+    font-size: 0.875rem;
+    color: var(--panel-section-text-color);
+    opacity: 0.7;
+    min-width: 80px;
+  }
+
+  .account-value {
+    font-weight: 500;
+    color: var(--panel-section-text-color);
+
+    &.status-badge {
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      background: var(--color-success, #22c55e);
+      color: white;
+
+      &.pending_email_verification {
+        background: var(--color-warning, #f59e0b);
+      }
+
+      &.suspended {
+        background: var(--color-danger, #ef4444);
+      }
+    }
+  }
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.current-plan-display {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  margin-bottom: 20px;
+
+  .current-plan-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+
+    .plan-name-large {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--button-primary-background-color);
+    }
+
+    .plan-price {
+      font-size: 1.1rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.7;
+
+      &.free {
+        color: var(--color-success, #22c55e);
+        opacity: 1;
+      }
+    }
+  }
+
+  .plan-features {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.8;
+
+      &::before {
+        content: '✓';
+        margin-right: 10px;
+        color: var(--color-success, #22c55e);
+      }
+    }
+  }
+}
+
+.instance-info-display {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 16px;
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--panel-border-color);
+    }
+
+    .info-label {
+      font-size: 0.875rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.7;
+      min-width: 120px;
+    }
+
+    .info-value {
+      font-weight: 500;
+      color: var(--panel-section-text-color);
+    }
+  }
 }
 
 .loading-state {
@@ -1452,165 +1988,17 @@ defineExpose({
   }
 }
 
-.btn-primary {
+.loading-plans {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: var(--button-primary-background-color);
-  color: var(--button-primary-text-color);
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &.btn-large {
-    padding: 18px 32px;
-    font-size: 1.125rem;
-  }
-}
-
-.btn-secondary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: var(--panel-section-background-color-alt);
+  gap: 12px;
+  padding: 48px 24px;
   color: var(--panel-section-text-color);
-  border: 1px solid var(--panel-border-color);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    background: var(--panel-border-color);
-  }
-}
-
-.btn-danger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: var(--color-danger, #ef4444);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.btn-warning {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: var(--color-warning, #f59e0b);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover:not(:disabled) {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.btn-text {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: transparent;
-  color: var(--panel-section-text-color);
-  border: none;
-  font-size: 0.875rem;
-  cursor: pointer;
   opacity: 0.7;
-  transition: opacity 0.2s;
 
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background: transparent;
-  color: var(--panel-section-text-color);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    background: var(--panel-section-background-color-alt);
+  .spinner {
+    animation: spin 1s linear infinite;
   }
 }
 
@@ -1674,6 +2062,118 @@ defineExpose({
         color: var(--color-success, #22c55e);
       }
     }
+  }
+
+  .plan-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    h4 {
+      margin: 0;
+    }
+  }
+
+  .current-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    background: var(--button-primary-background-color);
+    color: var(--button-primary-text-color);
+    border-radius: 4px;
+  }
+
+  .price.free {
+    font-size: 1.5rem;
+    color: var(--color-success, #22c55e);
+  }
+
+  &.current {
+    border-color: var(--color-success, #22c55e);
+  }
+}
+
+.plan-selector.compact {
+  grid-template-columns: 1fr;
+  
+  .plan-card {
+    padding: 16px;
+    
+    .price {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    ul li {
+      padding: 4px 0;
+    }
+  }
+}
+
+.current-plan-info {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  .plan-details {
+    .plan-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--button-primary-background-color);
+      margin-bottom: 8px;
+    }
+
+    .plan-limits {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      li {
+        font-size: 0.875rem;
+        padding: 4px 0;
+        color: var(--panel-section-text-color);
+        opacity: 0.8;
+
+        &::before {
+          content: '•';
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+.plan-management-form {
+  h4 {
+    margin: 16px 0 12px;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--button-primary-background-color);
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  font-size: 0.875rem;
+  text-decoration: underline;
+
+  &:hover {
+    opacity: 0.8;
   }
 }
 

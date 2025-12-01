@@ -343,6 +343,14 @@ class CloudConnectService
     }
 
     /**
+     * Get available subscription plans
+     */
+    public function getPlans(): array
+    {
+        return $this->apiRequest('GET', '/billing/plans');
+    }
+
+    /**
      * Create a checkout session
      */
     public function createCheckout(string $plan): array

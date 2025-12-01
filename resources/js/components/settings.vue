@@ -445,7 +445,7 @@ const updateCloudConnectLoginState = (isLoggedIn) => {
                 </div>
               </div>
               <div class="tab-content-body">
-                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" />
+                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
 

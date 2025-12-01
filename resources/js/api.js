@@ -952,6 +952,20 @@ export const getCloudConnectSubscription = async () => {
   return data.data
 }
 
+export const getCloudConnectPlans = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/plans`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const createCloudConnectCheckout = async (plan) => {
   const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/checkout`, {
     method: 'POST',
