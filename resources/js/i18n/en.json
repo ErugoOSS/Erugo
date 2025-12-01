@@ -260,6 +260,7 @@
       "maxInstances": "Max Instances",
       "maxTransfer": "Max Transfer",
       "maxBandwidth": "Max Bandwidth",
+      "unlimited": "Unlimited",
       "noData": "No usage data available"
     },
     "instances": {

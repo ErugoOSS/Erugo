@@ -1118,13 +1118,15 @@ defineExpose({
                         <span class="limit-label">{{ $t('cloudConnect.usage.maxInstances') || 'Max Instances' }}:</span>
                         <span class="limit-value">{{ usageData.plan.max_instances || '∞' }}</span>
                       </div>
-                      <div v-if="usageData.plan.max_transfer_gb" class="plan-limit-item">
+                      <div class="plan-limit-item">
                         <span class="limit-label">{{ $t('cloudConnect.usage.maxTransfer') || 'Max Transfer' }}:</span>
-                        <span class="limit-value">{{ usageData.plan.max_transfer_gb }} GB</span>
+                        <span v-if="usageData.plan.max_transfer_gb" class="limit-value">{{ usageData.plan.max_transfer_gb }} GB</span>
+                        <span v-else class="limit-value unlimited">{{ $t('cloudConnect.usage.unlimited') || 'Unlimited' }}</span>
                       </div>
-                      <div v-if="usageData.plan.max_bandwidth_mbps" class="plan-limit-item">
+                      <div class="plan-limit-item">
                         <span class="limit-label">{{ $t('cloudConnect.usage.maxBandwidth') || 'Max Bandwidth' }}:</span>
-                        <span class="limit-value">{{ usageData.plan.max_bandwidth_mbps }} Mbps</span>
+                        <span v-if="usageData.plan.max_bandwidth_mbps" class="limit-value">{{ usageData.plan.max_bandwidth_mbps }} Mbps</span>
+                        <span v-else class="limit-value unlimited">{{ $t('cloudConnect.usage.unlimited') || 'Unlimited' }}</span>
                       </div>
                     </div>
                   </div>
@@ -1258,7 +1260,7 @@ defineExpose({
                       </span>
                     </div>
                     <div v-if="plan.price_cents" class="price">
-                      ${{ Math.floor(plan.price_cents / 100) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
+                      ${{ (plan.price_cents / 100).toFixed(2) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
                     </div>
                     <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
                     <ul>
@@ -1284,6 +1286,7 @@ defineExpose({
                         {{ $t('cloudConnect.subscription.noCustomDomains') }}
                       </li>
                     </ul>
+                    <p v-if="plan.description" class="plan-description">{{ plan.description }}</p>
                   </div>
                 </div>
 
@@ -1775,7 +1778,7 @@ defineExpose({
             </span>
           </div>
           <div v-if="plan.price_cents" class="price">
-            ${{ Math.floor(plan.price_cents / 100) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
+            ${{ (plan.price_cents / 100).toFixed(2) }}<span>/{{ $t('cloudConnect.subscription.month') }}</span>
           </div>
           <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
           <ul>
@@ -2691,6 +2694,16 @@ defineExpose({
     }
   }
 
+  .plan-description {
+    margin: 16px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--panel-border-color);
+    font-size: 0.8125rem;
+    color: var(--panel-section-text-color);
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
   .plan-card-header {
     display: flex;
     align-items: center;
@@ -3180,6 +3193,10 @@ defineExpose({
       
       .limit-value {
         font-weight: 500;
+        
+        &.unlimited {
+          color: var(--color-success, #22c55e);
+        }
       }
     }
   }
