@@ -1,0 +1,359 @@
+.auth-form-overlay {
+  border-radius: 10px 10px 0 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--overlay-background-color);
+  backdrop-filter: blur(10px);
+  z-index: 230;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+
+  h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: var(--panel-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
+  }
+
+  > p {
+    text-align: center;
+    margin-bottom: 16px;
+    color: var(--panel-text-color);
+    opacity: 0.8;
+  }
+
+  .auth-slide-form {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    width: min(500px, 100vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--panel-background-color);
+    color: var(--panel-text-color);
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    transition: all 0.3s ease;
+    padding-bottom: 20px;
+
+    > p {
+      width: 100%;
+      text-align: center;
+      margin: 0;
+      color: var(--panel-text-color);
+      opacity: 0.8;
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+    .auth-slide-form {
+      transform: translate(-50%, 0%);
+    }
+  }
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--panel-text-color);
+  }
+
+  input {
+    padding: 12px 16px;
+    border: 1px solid var(--panel-border-color);
+    border-radius: 8px;
+    background: var(--panel-section-background-color-alt);
+    color: var(--panel-text-color);
+    font-size: 1rem;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+      border-color: var(--button-primary-background-color);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+
+  input[type='checkbox'] {
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  label {
+    font-size: 0.875rem;
+    color: var(--panel-text-color);
+    opacity: 0.8;
+
+    a {
+      color: var(--button-primary-background-color);
+    }
+  }
+}
+
+.button-bar {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+
+  button {
+    flex: 1;
+  }
+}
+
+.switch-form-text {
+  width: 100%;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--panel-text-color);
+  opacity: 0.7;
+  margin-top: 8px;
+}
+
+.btn-text-inline {
+  background: none;
+  border: none;
+  color: var(--button-primary-background-color);
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dialog variations
+.reclaim-dialog {
+  h2 {
+    color: var(--color-warning, #f59e0b);
+
+    svg {
+      color: var(--color-warning, #f59e0b);
+    }
+  }
+
+  .reclaim-message {
+    text-align: center;
+    margin: 16px 0 24px;
+    color: var(--panel-text-color);
+    line-height: 1.6;
+  }
+}
+
+.danger-dialog {
+  h2 {
+    color: var(--color-danger, #ef4444);
+
+    svg {
+      color: var(--color-danger, #ef4444);
+    }
+  }
+
+  .danger-message {
+    text-align: center;
+    margin: 16px 0;
+    color: var(--panel-text-color);
+  }
+}
+
+.warning-dialog {
+  h2 {
+    color: var(--color-warning, #f59e0b);
+
+    svg {
+      color: var(--color-warning, #f59e0b);
+    }
+  }
+
+  .warning-message {
+    text-align: center;
+    margin: 16px 0;
+    color: var(--panel-text-color);
+  }
+}
+
+.instance-to-delete {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+  width: 100%;
+
+  strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  span {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+}
+
+.token-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-section-background-color-alt);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  width: 100%;
+
+  code {
+    flex: 1;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+    color: var(--button-primary-background-color);
+  }
+
+  button.icon-only {
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--panel-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: auto;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: var(--panel-border-color);
+    }
+  }
+}
+
+.warning-text {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--color-warning, #f59e0b);
+}
+
+button.danger {
+  background: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, #ef4444);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger, #ef4444) 80%, black);
+  }
+}
+
+.subdomain-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+
+  input {
+    flex: 1;
+    padding-right: 140px;
+  }
+
+  .subdomain-suffix {
+    position: absolute;
+    right: 40px;
+    color: var(--panel-section-text-color);
+    opacity: 0.6;
+    font-size: 0.875rem;
+  }
+
+  .subdomain-status {
+    position: absolute;
+    right: 12px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.checking svg {
+      animation: spin 1s linear infinite;
+    }
+
+    &.available svg {
+      color: var(--color-success, #22c55e);
+    }
+
+    &.owned svg {
+      color: var(--color-warning, #f59e0b);
+    }
+
+    &.unavailable svg {
+      color: var(--color-danger, #ef4444);
+    }
+  }
+}
+

@@ -32,7 +32,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
-import ErugoConnect from './settings/erugoConnect.vue'
+import ErugoConnect from './settings/connect/ErugoConnectMain.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
