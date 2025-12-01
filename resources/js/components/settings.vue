@@ -18,7 +18,10 @@ import {
   FolderOpen,
   RefreshCw,
   Cloud,
-  LogOut
+  LogOut,
+  Wifi,
+  WifiOff,
+  Loader2
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -29,7 +32,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
-import CloudConnect from './settings/cloudConnect.vue'
+import ErugoConnect from './settings/erugoConnect.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
@@ -45,6 +48,8 @@ const brandingSettings = ref(null)
 const systemSettings = ref(null)
 const cloudConnectPanel = ref(null)
 const cloudConnectLoggedIn = ref(false)
+const cloudConnectConnected = ref(false)
+const cloudConnectConnecting = ref(false)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
@@ -218,6 +223,26 @@ const handleCloudConnectLogout = () => {
 
 const updateCloudConnectLoginState = (isLoggedIn) => {
   cloudConnectLoggedIn.value = isLoggedIn
+}
+
+const updateCloudConnectConnectionState = (isConnected) => {
+  cloudConnectConnected.value = isConnected
+}
+
+const updateCloudConnectConnectingState = (isConnecting) => {
+  cloudConnectConnecting.value = isConnecting
+}
+
+const handleCloudConnectConnect = () => {
+  if (cloudConnectPanel.value) {
+    cloudConnectPanel.value.handleConnect()
+  }
+}
+
+const handleCloudConnectDisconnect = () => {
+  if (cloudConnectPanel.value) {
+    cloudConnectPanel.value.handleDisconnect()
+  }
 }
 </script>
 
@@ -434,9 +459,14 @@ const updateCloudConnectLoginState = (isLoggedIn) => {
                   </span>
                 </h2>
                 <div class="user-actions">
-                  <button @click="cloudConnectPanel.refreshStatus()">
-                    <RefreshCw />
-                    {{ $t('cloudConnect.refresh') || 'Refresh' }}
+                  <button v-if="!cloudConnectConnected" @click="handleCloudConnectConnect" :disabled="cloudConnectConnecting">
+                    <Loader2 v-if="cloudConnectConnecting" class="spinner" />
+                    <Wifi v-else />
+                    {{ cloudConnectConnecting ? ($t('cloudConnect.ready.connecting') || 'Connecting...') : ($t('cloudConnect.ready.connect') || 'Connect') }}
+                  </button>
+                  <button v-else @click="handleCloudConnectDisconnect" class="secondary">
+                    <WifiOff />
+                    {{ $t('cloudConnect.connected.disconnect') || 'Disconnect' }}
                   </button>
                   <button v-if="cloudConnectLoggedIn" class="secondary" @click="handleCloudConnectLogout">
                     <LogOut />
@@ -445,7 +475,7 @@ const updateCloudConnectLoginState = (isLoggedIn) => {
                 </div>
               </div>
               <div class="tab-content-body">
-                <CloudConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @navItemClicked="handleNavItemClicked" />
+                <ErugoConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @connectionStateChanged="updateCloudConnectConnectionState" @connectingStateChanged="updateCloudConnectConnectingState" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
 
@@ -799,6 +829,19 @@ const updateCloudConnectLoginState = (isLoggedIn) => {
 
 .fade-enter-active {
   z-index: 1;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .user-filter-select {
