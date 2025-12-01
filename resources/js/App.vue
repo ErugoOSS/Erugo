@@ -20,7 +20,6 @@ import { useToast } from 'vue-toastification'
 import { useTranslate } from '@tolgee/vue'
 
 //1st party
-import { getApiUrl } from './utils'
 import { domData, domError, domSuccess } from './domData'
 import { emitter, store } from './store'
 import { logout } from './api'
@@ -30,8 +29,7 @@ import { logout } from './api'
 const { t } = useTranslate()
 
 //static data
-const apiUrl = getApiUrl()
-const logoUrl = `${apiUrl}/get-logo`
+const logoUrl = '/images/logo.png'
 const allowReverseShares = ref(false)
 const logoWidth = ref(0)
 const showPoweredBy = ref(false)

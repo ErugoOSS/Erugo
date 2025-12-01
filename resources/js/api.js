@@ -389,6 +389,17 @@ export const saveLogo = async (logoFile) => {
   return data.data
 }
 
+export const resetLogo = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/logo`, {
+    method: 'DELETE'
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const saveFavicon = async (faviconFile) => {
   const formData = new FormData()
   formData.append('favicon', faviconFile)

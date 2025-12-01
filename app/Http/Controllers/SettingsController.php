@@ -105,27 +105,40 @@ class SettingsController extends Controller
 
     public function writeLogo(Request $request)
     {
-
         $request->validate([
             'logo' => 'required|image|mimes:png,svg|max:2048',
         ]);
 
         $logo = $request->file('logo');
-        $originalFilename = $logo->getClientOriginalName();
         
-        // Sanitize the filename to prevent path traversal attacks
-        $sanitizedFilename = FileHelper::sanitizeFilename($originalFilename);
-        
-        // Store the logo using the sanitized filename
-        Storage::disk('public')->put($sanitizedFilename, file_get_contents($logo));
+        // Store the logo as logo.png in public/images (overwriting any existing logo)
+        $logoPath = public_path('images/logo.png');
+        file_put_contents($logoPath, file_get_contents($logo));
 
         return response()->json([
             'status' => 'success',
             'message' => 'Logo updated successfully',
-            'data' => [
-                'filename' => $sanitizedFilename,
-                'original_filename' => $originalFilename,
-            ]
+        ]);
+    }
+
+    public function deleteLogo()
+    {
+        $defaultLogoPath = public_path('images/_default-logo.png');
+        $logoPath = public_path('images/logo.png');
+        
+        if (!file_exists($defaultLogoPath)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Default logo not found',
+            ], 404);
+        }
+        
+        // Copy the default logo to restore it
+        copy($defaultLogoPath, $logoPath);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logo reset to default successfully',
         ]);
     }
 

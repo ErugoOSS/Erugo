@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Mail\shareDownloadedMail;
 use App\Jobs\sendEmail;
@@ -118,14 +117,6 @@ Route::get('/shares/{share}/file/{filepath}', function ($shareId, $filepath) {
     return $controller->downloadFile($shareId, $filepath);
 })->where('filepath', '.*');
 
-
-Route::get('/get-logo', function () {
-    //grab the logo file data from settings
-    $setting = Setting::where('key', 'logo')->first();
-    $logo = Storage::disk('public')->get($setting->value);
-    // return $setting;
-    return response($logo)->header('Content-Type', 'image/png');
-});
 
 //auth provider login
 Route::get('/auth/provider/{provider}/login', [ExternalAuthController::class, 'providerLogin'])

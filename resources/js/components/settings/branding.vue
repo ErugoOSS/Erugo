@@ -8,6 +8,7 @@ import {
   getSettingsByGroup,
   saveSettingsById,
   saveLogo,
+  resetLogo,
   saveFavicon,
   deleteFavicon,
   getFaviconStatus,
@@ -127,7 +128,9 @@ const saveSettings = async () => {
   saving.value = true
   try {
     if (settings.value.logo instanceof File) {
-      saveLogo(settings.value.logo)
+      await saveLogo(settings.value.logo)
+      // Update the logo in the browser by forcing a cache refresh
+      updateBrowserLogo()
     }
 
     await saveSettingsById(settings.value)
@@ -228,6 +231,29 @@ const handleDeleteFavicon = async () => {
     .catch((error) => {
       toast.error(t.value('settings.branding.favicon_delete_failed'))
     })
+}
+
+const handleResetLogo = async () => {
+  const reallyReset = confirm(t.value('settings.branding.confirm_reset_logo'))
+  if (!reallyReset) {
+    return
+  }
+  resetLogo()
+    .then((data) => {
+      toast.success(t.value('settings.branding.logo_reset_success'))
+      // Update the logo in the browser by forcing a refresh
+      updateBrowserLogo()
+    })
+    .catch((error) => {
+      toast.error(t.value('settings.branding.logo_reset_failed'))
+    })
+}
+
+const updateBrowserLogo = () => {
+  const logo = document.getElementById('logo')
+  if (logo) {
+    logo.src = `/images/logo.png?t=${Date.now()}`
+  }
 }
 
 const updateBrowserFavicon = () => {
@@ -500,6 +526,9 @@ defineExpose({
                 <div class="setting-group-body-item">
                   <label for="logoFile">{{ $t('settings.branding.logo_image') }}</label>
                   <FileInput v-model="settings.logo" accept="image/png" />
+                  <button class="secondary mt-2" @click="handleResetLogo">
+                    {{ $t('settings.branding.reset_logo_to_default') }}
+                  </button>
                 </div>
 
                 <div class="setting-group-body-item">

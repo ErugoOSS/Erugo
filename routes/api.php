@@ -82,6 +82,7 @@ Route::group([], function ($router) {
         //create or update a setting
         Route::put('/', [SettingsController::class, 'write'])->name('settings.write');
         Route::post('/logo', [SettingsController::class, 'writeLogo'])->name('settings.writeLogo');
+        Route::delete('/logo', [SettingsController::class, 'deleteLogo'])->name('settings.deleteLogo');
         //favicon management
         Route::post('/favicon', [SettingsController::class, 'writeFavicon'])->name('settings.writeFavicon');
         Route::delete('/favicon', [SettingsController::class, 'deleteFavicon'])->name('settings.deleteFavicon');
