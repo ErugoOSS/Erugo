@@ -110,10 +110,10 @@ const copyDomain = async () => {
         </template>
         <template v-else>
           <button @click="emit('login')" class="card-action-btn" :title="$t('cloudConnect.auth.login')">
-            <LogIn />
+            <LogIn /> {{ $t('cloudConnect.auth.login') }}
           </button>
           <button @click="emit('register')" class="card-action-btn secondary" :title="$t('cloudConnect.auth.register')">
-            <UserPlus />
+            <UserPlus /> {{ $t('cloudConnect.auth.register') }}
           </button>
         </template>
       </div>
