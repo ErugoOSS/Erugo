@@ -186,6 +186,11 @@ VALUES
     "width": "6px",
     "borderRadius": "3px"
   },
+  "status": {
+    "success": "rgb(16, 185, 129)",
+    "warning": "rgb(245, 158, 11)",
+    "danger": "rgb(239, 68, 68)"
+  },
   "dimensions": {
     "button": {
       "height": "50px",
