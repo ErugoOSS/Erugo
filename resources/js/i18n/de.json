@@ -54,6 +54,10 @@
     }
   },
   "cloudConnect": {
+    "account": {
+      "email": "E-Mail",
+      "status": "Status"
+    },
     "auth": {
       "acceptMarketing": "Senden Sie mir Produkt-Updates und Neuigkeiten",
       "acceptPrivacy": "Ich akzeptiere die",
@@ -63,6 +67,10 @@
       "description": "Melden Sie sich an oder erstellen Sie ein Konto, um Ihre Instanz mit Erugo Connect für einfaches Domain-Routing zu verbinden.",
       "email": "E-Mail Adresse",
       "emailPlaceholder": "you@example.com",
+      "emailRequired": "E-Mail Adresse ist erforderlich",
+      "forgotPassword": "Haben Sie Ihr Passwort vergessen?",
+      "forgotPasswordDescription": "Geben Sie Ihre E-Mail-Adresse ein, damit wir Ihnen einen Link zum Zurücksetzen Ihres Passworts zusenden können.",
+      "forgotPasswordTitle": "Passwort zurücksetzen",
       "haveAccount": "Sie haben bereits ein Konto?",
       "login": "Eintragen",
       "loginButton": "Eintragen",
@@ -79,8 +87,15 @@
       "registerButton": "Konto erstellen",
       "registerDescription": "Erstellen Sie ein neues Erugo Connect-Konto, um loszulegen.",
       "registerInstead": "Eine erstellen",
+      "resetEmailSent": "Wenn ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.",
+      "sendResetLink": "Reset-Link senden",
       "termsLink": "Bedingungen der Dienstleistung",
       "title": "Verbindung zu Erugo Connect"
+    },
+    "billing": {
+      "openPortal": "Abonnement verwalten",
+      "portalDescription": "Verwalten Sie Ihr Abonnement, aktualisieren Sie die Zahlungsmodalitäten oder sehen Sie sich die Rechnungen im Rechnungsportal an.",
+      "portalFailed": "Rechnungsportal konnte nicht geöffnet werden"
     },
     "capabilities": {
       "netAdmin": "NET_ADMIN-Fähigkeit",
@@ -101,7 +116,13 @@
       "copyUrl": "URL kopieren",
       "disconnect": "Trennen Sie die Verbindung",
       "disconnecting": "Trennen der Verbindung...",
+      "heartbeatAgo": "vor {time}",
+      "heartbeatFailed": "Gescheitert",
+      "heartbeatNever": "Niemals",
+      "lastHeartbeat": "Letzter Herzschlag",
+      "offline": "Offline",
       "online": "Online",
+      "reconnecting": "Die Verbindung wiederherstellen...",
       "subdomain": "Subdomain",
       "subscription": "Abonnement",
       "title": "Verbunden mit der Erugo Cloud",
@@ -140,13 +161,63 @@
     },
     "instanceCreateFailed": "Instanz konnte nicht erstellt werden",
     "instanceCreated": "Instanz erfolgreich erstellt!",
+    "instances": {
+      "cancelSubdomainEdit": "Abbrechen",
+      "confirmDelete": "Instanz löschen",
+      "confirmRegenerate": "Token regenerieren",
+      "copyToken": "Token kopieren",
+      "current": "Aktuell",
+      "delete": "Löschen",
+      "deleteFailed": "Instanz konnte nicht gelöscht werden",
+      "deleteSuccess": "Instanz erfolgreich gelöscht",
+      "deleteTitle": "Instanz löschen",
+      "deleteWarning": "Sind Sie sicher, dass Sie diese Instanz löschen wollen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "done": "Erledigt",
+      "edit": "bearbeiten",
+      "editSubdomain": "Ändern Sie",
+      "editTitle": "Instanz bearbeiten",
+      "lastSeen": "Zuletzt gesehen",
+      "loadFailed": "Instanzen konnten nicht geladen werden",
+      "loading": "Laden von Instanzen...",
+      "regenerateToken": "Token regenerieren",
+      "regenerateTokenTitle": "Token regenerieren",
+      "regenerateTokenWarning": "Wenn Sie den Token neu generieren, wird der aktuelle Token ungültig. Sie müssen diese Instanz erneut verbinden.",
+      "save": "Änderungen speichern",
+      "subdomainWarning": "Wenn Sie die Subdomain ändern, ändert sich die URL Ihrer Instanz. Möglicherweise müssen Sie die Verbindung erneut herstellen.",
+      "tokenCopied": "Token in die Zwischenablage kopiert",
+      "tokenRegenerateFailed": "Token konnte nicht regeneriert werden",
+      "tokenRegenerated": "Token erfolgreich regeneriert",
+      "tokenRegeneratedDescription": "Ihr neues Instanz-Token wird unten angezeigt. Stellen Sie sicher, dass Sie es jetzt kopieren - Sie werden es nicht mehr sehen können!",
+      "tokenRegeneratedTitle": "Neues Token generiert",
+      "updateFailed": "Aktualisierung der Instanz fehlgeschlagen",
+      "updateSuccess": "Instanz erfolgreich aktualisiert"
+    },
     "loading": "Laden des Cloud Connect-Status...",
     "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
     "loginSuccess": "Erfolgreich eingeloggt",
     "logoutFailed": "Abmeldung fehlgeschlagen",
     "logoutSuccess": "Erfolgreich abgemeldet",
     "mustAcceptTerms": "Sie müssen die Allgemeinen Geschäftsbedingungen und die Datenschutzrichtlinie akzeptieren.",
+    "nav": {
+      "account": "Konto",
+      "connection": "Verbindung",
+      "instance": "Instanzen",
+      "plan": "Ihr Plan",
+      "status": "Status",
+      "usage": "Verwendung"
+    },
     "passwordMismatch": "Passwörter stimmen nicht überein",
+    "planManagement": {
+      "changePlan": "Plan ändern",
+      "changePlanButton": "Plan ändern",
+      "contactToDowngrade": "Um auf den kostenlosen Tarif umzusteigen, kündigen Sie bitte zuerst Ihr Abonnement.",
+      "current": "IHR PLAN",
+      "currentPlan": "Aktueller Plan",
+      "currentPlanSelected": "Aktueller Plan",
+      "free": "Kostenlos",
+      "manage": "Verwalten Sie",
+      "title": "Verwalten Sie Ihren Plan"
+    },
     "ready": {
       "connect": "Jetzt verbinden",
       "connecting": "Verbinden...",
@@ -156,18 +227,36 @@
     "refresh": "Auffrischen",
     "registerFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "registerSuccess": "Konto erfolgreich erstellt!",
+    "status": {
+      "account": "Konto",
+      "connected": "Verbunden",
+      "connection": "Verbindung",
+      "disconnected": "Getrennt",
+      "domain": "Bereich",
+      "noPlan": "Kein Plan ausgewählt",
+      "notLoggedIn": "Nicht eingeloggt",
+      "plan": "Plan"
+    },
     "subdomainCheckFailed": "Überprüfung der Verfügbarkeit der Subdomain fehlgeschlagen",
     "subdomainNotAvailable": "Bitte wählen Sie eine verfügbare Subdomain",
     "subscription": {
+      "bandwidth": "{count} Mbit/s-Bandbreite",
+      "bandwidthUnlimited": "Unbegrenzte Bandbreite",
       "business": {
         "customDomains": "{count} benutzerdefinierte Domänen",
         "instances": "Bis zu {count} Instanzen",
         "prioritySupport": "Vorrangige Unterstützung",
         "subdomain": "Kostenlose Subdomain"
       },
+      "customDomains": "{count} benutzerdefinierte Domänen pro Instanz",
       "description": "Wählen Sie einen Abonnementplan, um Cloud Connect für Ihre Instanz zu aktivieren.",
+      "freePlanSelected": "Kostenloser Plan aktiviert!",
+      "instances": "{count, plural, one {1 Instanz} other {Bis zu {count} Instanzen}}",
+      "loadPlansFailed": "Abonnementpläne konnten nicht geladen werden",
+      "loadingPlans": "Verfügbare Pläne laden...",
       "loggedInAs": "Eingetragen als",
       "month": "Monat",
+      "noCustomDomains": "Keine benutzerdefinierten Domänen",
       "pollingNote": "Schließen Sie Ihre Zahlung in dem neuen Fenster ab. Diese Seite wird automatisch aktualisiert.",
       "pro": {
         "customDomain": "{count} benutzerdefinierte Domäne",
@@ -176,11 +265,29 @@
         "subdomain": "Kostenlose Subdomain"
       },
       "stopWaiting": "Abbrechen",
+      "subdomain": "Kostenlose Subdomain inklusive",
       "subscribe": "Jetzt abonnieren",
       "title": "Wählen Sie Ihren Plan",
+      "transfer": "{count} GB Übertragung/Monat",
+      "transferUnlimited": "Unbegrenzte Übertragung",
       "waitingForPayment": "Ich warte auf die Bezahlung..."
     },
-    "subscriptionActive": "Abonnement aktiviert!"
+    "subscriptionActive": "Abonnement aktiviert!",
+    "usage": {
+      "in": "Unter",
+      "instances": "Instanzen",
+      "loading": "Laden der Nutzungsdaten...",
+      "maxBandwidth": "Maximale Bandbreite",
+      "maxInstances": "Maximale Instanzen",
+      "maxTransfer": "Maximale Übertragung",
+      "noData": "Keine Nutzungsdaten verfügbar",
+      "out": "Aus",
+      "periodStart": "Begonnener Zeitraum",
+      "planLimits": "Plan-Grenzen",
+      "total": "Insgesamt",
+      "transfer": "Diesen Zeitraum übertragen",
+      "unlimited": "Unbegrenzt"
+    }
   },
   "confirm_delete_user": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
   "download": {

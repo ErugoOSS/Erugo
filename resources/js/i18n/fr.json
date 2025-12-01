@@ -54,12 +54,24 @@
     }
   },
   "cloudConnect": {
+    "account": {
+      "email": "Mail"
+    },
     "auth": {
       "confirmPassword": "Confirmez le mot de passe",
       "name": "Nom complet",
       "password": "Mot de passe"
     },
+    "instances": {
+      "cancelSubdomainEdit": "Fermer",
+      "delete": "Supprimer",
+      "edit": "Editer",
+      "save": "Enregistrer"
+    },
     "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "planManagement": {
+      "manage": "Gérer"
+    },
     "subscription": {
       "stopWaiting": "Fermer"
     }

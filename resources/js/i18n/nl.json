@@ -54,6 +54,10 @@
     }
   },
   "cloudConnect": {
+    "account": {
+      "email": "E-mail",
+      "status": "Status"
+    },
     "auth": {
       "acceptMarketing": "Stuur mij productupdates en nieuws",
       "acceptPrivacy": "Ik ga akkoord met de",
@@ -63,6 +67,10 @@
       "description": "Log in of maak een account aan om uw instantie te verbinden met Erugo Connect voor eenvoudige domeinroutering.",
       "email": "E-mailadres",
       "emailPlaceholder": "you@example.com",
+      "emailRequired": "E-mailadres is vereist",
+      "forgotPassword": "Wachtwoord vergeten?",
+      "forgotPasswordDescription": "Voer je e-mailadres in en we sturen je een link om je wachtwoord opnieuw in te stellen.",
+      "forgotPasswordTitle": "Wachtwoord opnieuw instellen",
       "haveAccount": "Heb je al een account?",
       "login": "Aanmelden",
       "loginButton": "Aanmelden",
@@ -79,8 +87,15 @@
       "registerButton": "Account aanmaken",
       "registerDescription": "Maak een nieuw Erugo Connect account aan om te beginnen.",
       "registerInstead": "Maak een",
+      "resetEmailSent": "Als er een account bestaat met dat e-mailadres, is er een link verzonden om het wachtwoord opnieuw in te stellen.",
+      "sendResetLink": "Link voor opnieuw instellen verzenden",
       "termsLink": "Servicevoorwaarden",
       "title": "Verbinding maken met Erugo Connect"
+    },
+    "billing": {
+      "openPortal": "Abonnement beheren",
+      "portalDescription": "Beheer je abonnement, werk betaalmethoden bij of bekijk facturen in de factureringsportal.",
+      "portalFailed": "Portaal voor facturering is niet geopend"
     },
     "capabilities": {
       "netAdmin": "NET_ADMIN Mogelijkheid",
@@ -101,7 +116,13 @@
       "copyUrl": "URL kopiëren",
       "disconnect": "Ontkoppelen",
       "disconnecting": "Loskoppelen...",
+      "heartbeatAgo": "{time} geleden",
+      "heartbeatFailed": "Mislukt",
+      "heartbeatNever": "Nooit",
+      "lastHeartbeat": "Laatste hartslag",
+      "offline": "Offline",
       "online": "Online",
+      "reconnecting": "Opnieuw verbinden...",
       "subdomain": "Subdomein",
       "subscription": "Abonnement",
       "title": "Verbonden met Erugo Cloud",
@@ -140,13 +161,63 @@
     },
     "instanceCreateFailed": "Instantie niet aangemaakt",
     "instanceCreated": "Instance succesvol aangemaakt!",
+    "instances": {
+      "cancelSubdomainEdit": "Annuleren",
+      "confirmDelete": "Instantie verwijderen",
+      "confirmRegenerate": "Munt opnieuw genereren",
+      "copyToken": "Kopieer token",
+      "current": "Huidige",
+      "delete": "Verwijder",
+      "deleteFailed": "Instantie niet verwijderd",
+      "deleteSuccess": "Instance succesvol verwijderd",
+      "deleteTitle": "Instantie verwijderen",
+      "deleteWarning": "Weet je zeker dat je deze instantie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+      "done": "Gedaan",
+      "edit": "Bewerk",
+      "editSubdomain": "Verander",
+      "editTitle": "Bewerk instantie",
+      "lastSeen": "Laatst gezien",
+      "loadFailed": "Laadt geen instanties",
+      "loading": "Instanties laden...",
+      "regenerateToken": "Munt opnieuw genereren",
+      "regenerateTokenTitle": "Munt opnieuw genereren",
+      "regenerateTokenWarning": "Als je het token opnieuw genereert, wordt het huidige token ongeldig. Je zult deze instantie opnieuw moeten verbinden.",
+      "save": "Wijzigingen opslaan",
+      "subdomainWarning": "Als je het subdomein wijzigt, verandert de URL van je instantie. Mogelijk moet je opnieuw verbinding maken.",
+      "tokenCopied": "Token gekopieerd naar klembord",
+      "tokenRegenerateFailed": "Fout bij het regenereren van token",
+      "tokenRegenerated": "Token succesvol geregenereerd",
+      "tokenRegeneratedDescription": "Je nieuwe instance token zie je hieronder. Zorg ervoor dat je het nu kopieert - je zult het niet meer kunnen zien!",
+      "tokenRegeneratedTitle": "Nieuw token gegenereerd",
+      "updateFailed": "Instantie kon niet worden bijgewerkt",
+      "updateSuccess": "Instance succesvol bijgewerkt"
+    },
     "loading": "Cloud Connect status wordt geladen...",
     "loginFailed": "Aanmelden mislukt. Controleer uw gegevens.",
     "loginSuccess": "Succesvol aangemeld",
     "logoutFailed": "Afmelden mislukt",
     "logoutSuccess": "Succesvol afgemeld",
     "mustAcceptTerms": "U moet de Servicevoorwaarden en het Privacybeleid accepteren",
+    "nav": {
+      "account": "Account",
+      "connection": "Aansluiting",
+      "instance": "Instanties",
+      "plan": "Uw plan",
+      "status": "Status",
+      "usage": "Gebruik"
+    },
     "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "planManagement": {
+      "changePlan": "Veranderingsplan",
+      "changePlanButton": "Veranderingsplan",
+      "contactToDowngrade": "Als je wilt downgraden naar het gratis plan, moet je eerst je abonnement opzeggen.",
+      "current": "UW PLAN",
+      "currentPlan": "Huidig plan",
+      "currentPlanSelected": "Huidig plan",
+      "free": "Gratis",
+      "manage": "Beheer",
+      "title": "Uw plan beheren"
+    },
     "ready": {
       "connect": "Nu verbinden",
       "connecting": "Aansluiten...",
@@ -156,18 +227,36 @@
     "refresh": "Vernieuw",
     "registerFailed": "Registratie mislukt. Probeer het opnieuw.",
     "registerSuccess": "Account succesvol aangemaakt!",
+    "status": {
+      "account": "Account",
+      "connected": "Aangesloten",
+      "connection": "Aansluiting",
+      "disconnected": "Ontkoppeld",
+      "domain": "Domein",
+      "noPlan": "Geen plan geselecteerd",
+      "notLoggedIn": "Niet ingelogd",
+      "plan": "Plan"
+    },
     "subdomainCheckFailed": "De beschikbaarheid van het subdomein is niet gecontroleerd",
     "subdomainNotAvailable": "Kies een beschikbaar subdomein",
     "subscription": {
+      "bandwidth": "{count} Mbps bandbreedte",
+      "bandwidthUnlimited": "Onbeperkte bandbreedte",
       "business": {
         "customDomains": "{count} aangepaste domeinen",
         "instances": "Tot {count} instanties",
         "prioritySupport": "Prioriteit ondersteuning",
         "subdomain": "Gratis subdomein"
       },
+      "customDomains": "{count} aangepaste domeinen per instantie",
       "description": "Selecteer een abonnement om Cloud Connect in te schakelen voor je instance.",
+      "freePlanSelected": "Gratis plan geactiveerd!",
+      "instances": "{count, plural, one {1 instantie} other {Tot {count} instanties}}",
+      "loadPlansFailed": "Kan abonnementen niet laden",
+      "loadingPlans": "Beschikbare plannen laden...",
       "loggedInAs": "Aangemeld als",
       "month": "maand",
+      "noCustomDomains": "Geen aangepaste domeinen",
       "pollingNote": "Voltooi je betaling in het nieuwe venster. Deze pagina wordt automatisch bijgewerkt.",
       "pro": {
         "customDomain": "{count} aangepast domein",
@@ -176,11 +265,29 @@
         "subdomain": "Gratis subdomein"
       },
       "stopWaiting": "Annuleren",
+      "subdomain": "Gratis subdomein inbegrepen",
       "subscribe": "Nu abonneren",
       "title": "Kies uw plan",
+      "transfer": "{count} GB overdracht/maand",
+      "transferUnlimited": "Onbeperkte overdracht",
       "waitingForPayment": "Wachten op betaling..."
     },
-    "subscriptionActive": "Abonnement geactiveerd!"
+    "subscriptionActive": "Abonnement geactiveerd!",
+    "usage": {
+      "in": "In",
+      "instances": "Instanties",
+      "loading": "Gebruiksgegevens laden...",
+      "maxBandwidth": "Maximale bandbreedte",
+      "maxInstances": "Max aantal instanties",
+      "maxTransfer": "Max Overdracht",
+      "noData": "Geen gebruiksgegevens beschikbaar",
+      "out": "Uit",
+      "periodStart": "Periode begonnen",
+      "planLimits": "Plangrenzen",
+      "total": "Totaal",
+      "transfer": "Overdracht deze periode",
+      "unlimited": "Onbeperkt"
+    }
   },
   "confirm_delete_user": "Weet je zeker dat je deze gebruiker wilt verwijderen?",
   "download": {

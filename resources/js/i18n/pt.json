@@ -54,6 +54,10 @@
     }
   },
   "cloudConnect": {
+    "account": {
+      "email": "E-mail",
+      "status": "Estado"
+    },
     "auth": {
       "acceptMarketing": "Enviar-me actualizações de produtos e notícias",
       "acceptPrivacy": "Concordo com o",
@@ -63,6 +67,10 @@
       "description": "Inicie sessão ou crie uma conta para ligar a sua instância ao Erugo Connect para um fácil encaminhamento de domínios.",
       "email": "Endereço de correio eletrónico",
       "emailPlaceholder": "you@example.com",
+      "emailRequired": "O endereço de correio eletrónico é obrigatório",
+      "forgotPassword": "Esqueceu-se da sua palavra-passe?",
+      "forgotPasswordDescription": "Introduza o seu endereço de correio eletrónico e enviar-lhe-emos uma ligação para redefinir a sua palavra-passe.",
+      "forgotPasswordTitle": "Repor a palavra-passe",
       "haveAccount": "Já tem uma conta?",
       "login": "Iniciar sessão",
       "loginButton": "Iniciar sessão",
@@ -79,8 +87,15 @@
       "registerButton": "Criar conta",
       "registerDescription": "Crie uma nova conta Erugo Connect para começar.",
       "registerInstead": "Criar um",
+      "resetEmailSent": "Se existir uma conta com esse e-mail, foi enviada uma ligação para redefinição da palavra-passe.",
+      "sendResetLink": "Enviar ligação de reposição",
       "termsLink": "Termos do serviço",
       "title": "Ligar ao Erugo Connect"
+    },
+    "billing": {
+      "openPortal": "Gerir a subscrição",
+      "portalDescription": "Faça a gestão da sua subscrição, actualize os métodos de pagamento ou veja as facturas no portal de faturação.",
+      "portalFailed": "Falha ao abrir o portal de faturação"
     },
     "capabilities": {
       "netAdmin": "Capacidade NET_ADMIN",
@@ -101,7 +116,13 @@
       "copyUrl": "Copiar URL",
       "disconnect": "Desligar",
       "disconnecting": "Desligar...",
+      "heartbeatAgo": "{time} atrás",
+      "heartbeatFailed": "Falhado",
+      "heartbeatNever": "Nunca",
+      "lastHeartbeat": "Último batimento cardíaco",
+      "offline": "Fora de linha",
       "online": "Em linha",
+      "reconnecting": "Ligar de novo...",
       "subdomain": "Subdomínio",
       "subscription": "Assinatura",
       "title": "Ligado ao Erugo Cloud",
@@ -140,13 +161,63 @@
     },
     "instanceCreateFailed": "Falha ao criar a instância",
     "instanceCreated": "Instância criada com sucesso!",
+    "instances": {
+      "cancelSubdomainEdit": "Cancelar",
+      "confirmDelete": "Eliminar a instância",
+      "confirmRegenerate": "Ficha de regeneração",
+      "copyToken": "Token de cópia",
+      "current": "Atual",
+      "delete": "Eliminar",
+      "deleteFailed": "Falha ao eliminar a instância",
+      "deleteSuccess": "Instância eliminada com êxito",
+      "deleteTitle": "Eliminar a instância",
+      "deleteWarning": "Tem a certeza de que pretende eliminar esta instância? Esta ação não pode ser anulada.",
+      "done": "Feito",
+      "edit": "Editar",
+      "editSubdomain": "Alterar",
+      "editTitle": "Editar Instância",
+      "lastSeen": "Visto pela última vez",
+      "loadFailed": "Falha ao carregar instâncias",
+      "loading": "Carregando instâncias...",
+      "regenerateToken": "Ficha de regeneração",
+      "regenerateTokenTitle": "Ficha de regeneração",
+      "regenerateTokenWarning": "A regeneração do token invalidará o token atual. Terá de voltar a ligar esta instância.",
+      "save": "Guardar Alterações",
+      "subdomainWarning": "A alteração do subdomínio irá alterar o URL da sua instância. Poderá ser necessário restabelecer a ligação.",
+      "tokenCopied": "Token copiado para a área de transferência",
+      "tokenRegenerateFailed": "Falha ao regenerar o token",
+      "tokenRegenerated": "Token regenerado com sucesso",
+      "tokenRegeneratedDescription": "O seu novo token de instância é apresentado abaixo. Certifique-se de que o copia agora - não o poderá voltar a ver!",
+      "tokenRegeneratedTitle": "Novo Token Gerado",
+      "updateFailed": "Falha ao atualizar a instância",
+      "updateSuccess": "Instância actualizada com sucesso"
+    },
     "loading": "Carregando o status do Cloud Connect...",
     "loginFailed": "O registo falhou. Por favor, verifique as suas credenciais.",
     "loginSuccess": "Registado com sucesso",
     "logoutFailed": "O registo falhou",
     "logoutSuccess": "Terminou a sessão com sucesso",
     "mustAcceptTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade",
+    "nav": {
+      "account": "Conta",
+      "connection": "Ligação",
+      "instance": "Instâncias",
+      "plan": "O seu plano",
+      "status": "Estado",
+      "usage": "Utilização"
+    },
     "passwordMismatch": "Palavras passe diferentes",
+    "planManagement": {
+      "changePlan": "Alterar plano",
+      "changePlanButton": "Alterar plano",
+      "contactToDowngrade": "Para fazer o downgrade para o plano gratuito, cancele primeiro a sua subscrição.",
+      "current": "O SEU PLANO",
+      "currentPlan": "Plano atual",
+      "currentPlanSelected": "Plano atual",
+      "free": "Grátis",
+      "manage": "Gerir",
+      "title": "Gerir o seu plano"
+    },
     "ready": {
       "connect": "Ligar agora",
       "connecting": "Ligar...",
@@ -156,18 +227,36 @@
     "refresh": "Atualizar",
     "registerFailed": "O registo falhou. Por favor, tente novamente.",
     "registerSuccess": "Conta criada com sucesso!",
+    "status": {
+      "account": "Conta",
+      "connected": "Ligado",
+      "connection": "Ligação",
+      "disconnected": "Desligado",
+      "domain": "Domínio",
+      "noPlan": "Nenhum plano selecionado",
+      "notLoggedIn": "Não conectado",
+      "plan": "Plano"
+    },
     "subdomainCheckFailed": "Falha ao verificar a disponibilidade do subdomínio",
     "subdomainNotAvailable": "Escolha um subdomínio disponível",
     "subscription": {
+      "bandwidth": "{count} Largura de banda Mbps",
+      "bandwidthUnlimited": "Largura de banda ilimitada",
       "business": {
         "customDomains": "{count} domínios personalizados",
         "instances": "Até {count} instâncias",
         "prioritySupport": "Apoio prioritário",
         "subdomain": "Subdomínio gratuito"
       },
+      "customDomains": "{count} domínios personalizados por instância",
       "description": "Selecione um plano de subscrição para ativar o Cloud Connect para a sua instância.",
+      "freePlanSelected": "Plano gratuito ativado!",
+      "instances": "{count, plural, one {1 instância} other {Até {count} instâncias} }",
+      "loadPlansFailed": "Falha ao carregar planos de subscrição",
+      "loadingPlans": "Carregamento de planos disponíveis...",
       "loggedInAs": "Registado como",
       "month": "mês",
+      "noCustomDomains": "Sem domínios personalizados",
       "pollingNote": "Conclua o seu pagamento na nova janela. Esta página será actualizada automaticamente.",
       "pro": {
         "customDomain": "{count} domínio personalizado",
@@ -176,11 +265,29 @@
         "subdomain": "Subdomínio gratuito"
       },
       "stopWaiting": "Cancelar",
+      "subdomain": "Subdomínio gratuito incluído",
       "subscribe": "Subscrever agora",
       "title": "Escolha o seu plano",
+      "transfer": "{count} Transferência de GB/mês",
+      "transferUnlimited": "Transferência ilimitada",
       "waitingForPayment": "À espera do pagamento..."
     },
-    "subscriptionActive": "Assinatura activada!"
+    "subscriptionActive": "Assinatura activada!",
+    "usage": {
+      "in": "Em",
+      "instances": "Instâncias",
+      "loading": "A carregar dados de utilização...",
+      "maxBandwidth": "Largura de banda máxima",
+      "maxInstances": "Máximo de instâncias",
+      "maxTransfer": "Transferência máxima",
+      "noData": "Não existem dados de utilização disponíveis",
+      "out": "Fora",
+      "periodStart": "Período iniciado",
+      "planLimits": "Limites do plano",
+      "total": "Total",
+      "transfer": "Transferir este período",
+      "unlimited": "Ilimitado"
+    }
   },
   "confirm_delete_user": "Tem a certeza de que pretende eliminar este utilizador?",
   "download": {
