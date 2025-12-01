@@ -147,11 +147,11 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
   }
 
   &.online {
-    border-left: 4px solid var(--color-success, #22c55e);
+    border-left: 4px solid var(--color-success);
   }
 
   &.offline {
-    border-left: 4px solid var(--color-danger, #ef4444);
+    border-left: 4px solid var(--color-danger);
   }
 
   .instance-card-header {
@@ -197,13 +197,13 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
       }
 
       &.online {
-        background: color-mix(in srgb, var(--color-success, #22c55e) 15%, transparent);
-        color: var(--color-success, #22c55e);
+        background: color-mix(in srgb, var(--color-success) 15%, transparent);
+        color: var(--color-success);
       }
 
       &.offline {
-        background: color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
-        color: var(--color-danger, #ef4444);
+        background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+        color: var(--color-danger);
       }
     }
   }
@@ -253,7 +253,7 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
           height: 14px;
 
           &.download {
-            color: var(--color-success, #22c55e);
+            color: var(--color-success);
           }
 
           &.upload {
@@ -290,9 +290,9 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete'])
       }
 
       &.danger:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
-        border-color: var(--color-danger, #ef4444);
-        color: var(--color-danger, #ef4444);
+        background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+        border-color: var(--color-danger);
+        color: var(--color-danger);
       }
 
       &:disabled {

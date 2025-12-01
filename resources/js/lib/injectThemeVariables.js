@@ -159,6 +159,11 @@ const injectThemeVariables = (location, theme) => {
       injectionPoint.style.setProperty('--overlay-background-color', theme.overlay.background)
     }
 
+    // Status Colors
+    injectionPoint.style.setProperty('--color-success', theme.status?.success ?? 'rgb(34, 197, 94)')
+    injectionPoint.style.setProperty('--color-warning', theme.status?.warning ?? 'rgb(234, 179, 8)')
+    injectionPoint.style.setProperty('--color-danger', theme.status?.danger ?? 'rgb(239, 68, 68)')
+
     // Dimensions (if provided)
     if (theme.dimensions) {
       if (theme.dimensions.button) {

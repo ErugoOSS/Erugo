@@ -202,7 +202,7 @@ const emit = defineEmits(['refresh'])
         transition: width 0.3s ease;
 
         &.warning {
-          background: var(--color-warning, #f59e0b);
+          background: var(--color-warning);
         }
       }
     }
@@ -224,7 +224,7 @@ const emit = defineEmits(['refresh'])
         height: 16px;
 
         &.download {
-          color: var(--color-success, #22c55e);
+          color: var(--color-success);
         }
 
         &.upload {
@@ -274,7 +274,7 @@ const emit = defineEmits(['refresh'])
         font-weight: 500;
 
         &.unlimited {
-          color: var(--color-success, #22c55e);
+          color: var(--color-success);
         }
       }
     }

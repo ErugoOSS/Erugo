@@ -592,15 +592,15 @@ defineExpose({
 // Header color modifiers
 .setting-group-header {
   &.error h3 svg {
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger);
   }
 
   &.success h3 svg {
-    color: var(--color-success, #22c55e);
+    color: var(--color-success);
   }
 
   &.warning h3 svg {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning);
   }
 }
 
@@ -650,11 +650,11 @@ defineExpose({
   }
 
   &.success svg {
-    color: var(--color-success, #22c55e);
+    color: var(--color-success);
   }
 
   &.error svg {
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger);
   }
 }
 
@@ -692,8 +692,8 @@ defineExpose({
 }
 
 .verification-message {
-  background: color-mix(in srgb, var(--color-warning, #f59e0b) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-warning, #f59e0b) 30%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 24px;

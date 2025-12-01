@@ -162,15 +162,15 @@ const emit = defineEmits(['submit', 'checkSubdomain', 'selectSuggestion', 'subdo
     }
 
     &.available svg {
-      color: var(--color-success, #22c55e);
+      color: var(--color-success);
     }
 
     &.owned svg {
-      color: var(--color-warning, #f59e0b);
+      color: var(--color-warning);
     }
 
     &.unavailable svg {
-      color: var(--color-danger, #ef4444);
+      color: var(--color-danger);
     }
   }
 }
@@ -181,11 +181,11 @@ const emit = defineEmits(['submit', 'checkSubdomain', 'selectSuggestion', 'subdo
   gap: 8px;
   margin-top: 8px;
   padding: 8px 12px;
-  background: color-mix(in srgb, var(--color-warning, #f59e0b) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-warning, #f59e0b) 30%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: var(--color-warning, #f59e0b);
+  color: var(--color-warning);
 
   svg {
     width: 16px;

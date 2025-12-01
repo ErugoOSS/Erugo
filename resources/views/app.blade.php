@@ -152,6 +152,11 @@
       --overlay-background-color: {{ $theme->theme->overlay->background ?? 'rgba(255, 255, 255, 0.2)' }};
       @endif
 
+      /* Status Colors */
+      --color-success: {{ $theme->theme->status->success ?? 'rgb(34, 197, 94)' }};
+      --color-warning: {{ $theme->theme->status->warning ?? 'rgb(234, 179, 8)' }};
+      --color-danger: {{ $theme->theme->status->danger ?? 'rgb(239, 68, 68)' }};
+
       /* Dimensions */
       @if(isset($theme->theme->dimensions))
         @if(isset($theme->theme->dimensions->button))

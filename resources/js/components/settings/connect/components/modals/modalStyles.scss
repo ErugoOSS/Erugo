@@ -190,10 +190,10 @@
 // Dialog variations
 .reclaim-dialog {
   h2 {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning);
 
     svg {
-      color: var(--color-warning, #f59e0b);
+      color: var(--color-warning);
     }
   }
 
@@ -207,10 +207,10 @@
 
 .danger-dialog {
   h2 {
-    color: var(--color-danger, #ef4444);
+    color: var(--color-danger);
 
     svg {
-      color: var(--color-danger, #ef4444);
+      color: var(--color-danger);
     }
   }
 
@@ -223,10 +223,10 @@
 
 .warning-dialog {
   h2 {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning);
 
     svg {
-      color: var(--color-warning, #f59e0b);
+      color: var(--color-warning);
     }
   }
 
@@ -298,16 +298,16 @@
 .warning-text {
   margin-top: 8px;
   font-size: 0.8rem;
-  color: var(--color-warning, #f59e0b);
+  color: var(--color-warning);
 }
 
 button.danger {
-  background: var(--color-danger, #ef4444);
-  border-color: var(--color-danger, #ef4444);
+  background: var(--color-danger);
+  border-color: var(--color-danger);
   color: white;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-danger, #ef4444) 80%, black);
+    background: color-mix(in srgb, var(--color-danger) 80%, black);
   }
 }
 
@@ -344,15 +344,15 @@ button.danger {
     }
 
     &.available svg {
-      color: var(--color-success, #22c55e);
+      color: var(--color-success);
     }
 
     &.owned svg {
-      color: var(--color-warning, #f59e0b);
+      color: var(--color-warning);
     }
 
     &.unavailable svg {
-      color: var(--color-danger, #ef4444);
+      color: var(--color-danger);
     }
   }
 }

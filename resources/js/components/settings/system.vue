@@ -1035,7 +1035,7 @@ const handleDeleteAuthProvider = async (id) => {
   font-size: 0.8rem;
   color: var(--panel-text-color);
   &:hover {
-    color: var(--danger-color);
+    color: var(--color-danger);
   }
   svg {
     width: 15px;

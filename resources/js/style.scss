@@ -149,7 +149,10 @@
   --settings-width: 100vw;
   --settings-height: 100vh;
 
-  --danger-color: rgb(239, 68, 68);
+  /* Status Colors */
+  --color-success: rgb(34, 197, 94);
+  --color-warning: rgb(234, 179, 8);
+  --color-danger: rgb(239, 68, 68);
 }
 
 body {

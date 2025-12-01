@@ -156,20 +156,20 @@ const copyDomain = async () => {
   transition: all 0.2s;
 
   &.online {
-    border-color: color-mix(in srgb, var(--color-success, #22c55e) 30%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
     
     .status-card-icon {
-      background: color-mix(in srgb, var(--color-success, #22c55e) 15%, transparent);
-      color: var(--color-success, #22c55e);
+      background: color-mix(in srgb, var(--color-success) 15%, transparent);
+      color: var(--color-success);
     }
   }
 
   &.offline {
-    border-color: color-mix(in srgb, var(--color-danger, #ef4444) 30%, transparent);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
     
     .status-card-icon {
-      background: color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
-      color: var(--color-danger, #ef4444);
+      background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+      color: var(--color-danger);
     }
   }
 
@@ -208,8 +208,8 @@ const copyDomain = async () => {
   &.account-card {
     &.logged-in {
       .status-card-icon {
-        background: color-mix(in srgb, var(--color-success, #22c55e) 15%, transparent);
-        color: var(--color-success, #22c55e);
+        background: color-mix(in srgb, var(--color-success) 15%, transparent);
+        color: var(--color-success);
       }
     }
 
@@ -219,15 +219,15 @@ const copyDomain = async () => {
       border-radius: 10px;
       font-size: 0.7rem;
       font-weight: 500;
-      background: var(--color-success, #22c55e);
+      background: var(--color-success);
       color: white;
 
       &.pending_email_verification {
-        background: var(--color-warning, #f59e0b);
+        background: var(--color-warning);
       }
 
       &.suspended {
-        background: var(--color-danger, #ef4444);
+        background: var(--color-danger);
       }
     }
   }
@@ -343,12 +343,12 @@ const copyDomain = async () => {
       width: 100px;
 
       &.healthy {
-        color: var(--color-success, #22c55e);
+        color: var(--color-success);
         opacity: 1;
       }
 
       &.unhealthy {
-        color: var(--color-danger, #ef4444);
+        color: var(--color-danger);
         opacity: 1;
       }
     }

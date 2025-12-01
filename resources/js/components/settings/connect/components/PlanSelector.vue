@@ -159,7 +159,7 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
   }
 
   &.current {
-    border-color: var(--color-success, #22c55e);
+    border-color: var(--color-success);
   }
 
   .plan-card-header {
@@ -197,7 +197,7 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
 
     &.free {
       font-size: 1.5rem;
-      color: var(--color-success, #22c55e);
+      color: var(--color-success);
     }
   }
 
@@ -221,7 +221,7 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
         flex-shrink: 0;
 
         &.included {
-          color: var(--color-success, #22c55e);
+          color: var(--color-success);
         }
       }
 
