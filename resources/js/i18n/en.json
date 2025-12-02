@@ -93,7 +93,7 @@
       "title": "Connect to Erugo Connect"
     },
     "billing": {
-      "openPortal": "Manage Subscription",
+      "openPortal": "Billing Portal",
       "portalDescription": "Manage your subscription, update payment methods, or view invoices in the billing portal.",
       "portalFailed": "Failed to open billing portal"
     },
@@ -164,11 +164,17 @@
     "instances": {
       "cancelSubdomainEdit": "Cancel",
       "confirmDelete": "Delete Instance",
+      "confirmDeleteCurrent": "Disconnect & Delete",
       "confirmLink": "Link Instance",
       "confirmRegenerate": "Regenerate Token",
       "copyToken": "Copy Token",
       "current": "Current",
       "delete": "Delete",
+      "deleteBlockedTitle": "Cannot delete while using this domain",
+      "deleteBlockedWarning": "You are currently accessing Erugo via this instance's domain. Deleting it would lock you out. Please access Erugo via a different URL (e.g., localhost or direct IP) to delete this instance.",
+      "deleteCurrentSuccess": "Instance deleted and Cloud Connect disconnected",
+      "deleteCurrentTitle": "This is your active instance!",
+      "deleteCurrentWarning": "Deleting this instance will disconnect your domain and disable Cloud Connect. You will need to create or link a new instance to reconnect.",
       "deleteFailed": "Failed to delete instance",
       "deleteSuccess": "Instance deleted successfully",
       "deleteTitle": "Delete Instance",
@@ -207,7 +213,7 @@
     "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
     "nav": {
       "account": "Account",
-      "connection": "Connection",
+      "connection": "Connection Status",
       "instance": "Instances",
       "plan": "Your Plan",
       "status": "Status",
@@ -228,7 +234,7 @@
     "ready": {
       "connect": "Connect Now",
       "connecting": "Connecting...",
-      "description": "Your instance is set up and ready to connect to Erugo Cloud.",
+      "description": "Ready to connect to Erugo Connect.",
       "title": "Ready to Connect"
     },
     "refresh": "Refresh",

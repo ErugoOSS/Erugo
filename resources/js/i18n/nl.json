@@ -93,7 +93,7 @@
       "title": "Verbinding maken met Erugo Connect"
     },
     "billing": {
-      "openPortal": "Abonnement beheren",
+      "openPortal": "Factureringsportal",
       "portalDescription": "Beheer je abonnement, werk betaalmethoden bij of bekijk facturen in de factureringsportal.",
       "portalFailed": "Portaal voor facturering is niet geopend"
     },
@@ -164,10 +164,15 @@
     "instances": {
       "cancelSubdomainEdit": "Annuleren",
       "confirmDelete": "Instantie verwijderen",
+      "confirmDeleteCurrent": "Ontkoppelen en verwijderen",
+      "confirmLink": "Link Instantie",
       "confirmRegenerate": "Munt opnieuw genereren",
       "copyToken": "Kopieer token",
       "current": "Huidige",
       "delete": "Verwijder",
+      "deleteCurrentSuccess": "Instance verwijderd en Cloud Connect verbroken",
+      "deleteCurrentTitle": "Dit is je actieve instantie!",
+      "deleteCurrentWarning": "Als je deze instantie verwijdert, wordt de verbinding met je domein verbroken en Cloud Connect uitgeschakeld. Je moet een nieuwe instantie aanmaken of koppelen om opnieuw verbinding te maken.",
       "deleteFailed": "Instantie niet verwijderd",
       "deleteSuccess": "Instance succesvol verwijderd",
       "deleteTitle": "Instantie verwijderen",
@@ -177,6 +182,12 @@
       "editSubdomain": "Verander",
       "editTitle": "Bewerk instantie",
       "lastSeen": "Laatst gezien",
+      "link": "Link naar deze Erugo",
+      "linkDescription": "Koppel deze instantie aan je huidige Erugo installatie. Hierdoor kun je verbinding maken met de tunnel door deze instantie te gebruiken.",
+      "linkFailed": "Koppeling van instantie mislukt",
+      "linkNote": "Opmerking: Een nieuw instance token zal worden gegenereerd. Alle andere Erugo installaties die deze instantie gebruiken moeten opnieuw worden gekoppeld.",
+      "linkSuccess": "Instance succesvol gekoppeld",
+      "linkTitle": "Link Instantie",
       "loadFailed": "Laadt geen instanties",
       "loading": "Instanties laden...",
       "regenerateToken": "Munt opnieuw genereren",
@@ -200,7 +211,7 @@
     "mustAcceptTerms": "U moet de Servicevoorwaarden en het Privacybeleid accepteren",
     "nav": {
       "account": "Account",
-      "connection": "Aansluiting",
+      "connection": "Verbindingsstatus",
       "instance": "Instanties",
       "plan": "Uw plan",
       "status": "Status",
@@ -221,7 +232,7 @@
     "ready": {
       "connect": "Nu verbinden",
       "connecting": "Aansluiten...",
-      "description": "Uw instantie is ingesteld en klaar om verbinding te maken met Erugo Cloud.",
+      "description": "Klaar om verbinding te maken met Erugo Connect.",
       "title": "Klaar om aan te sluiten"
     },
     "refresh": "Vernieuw",

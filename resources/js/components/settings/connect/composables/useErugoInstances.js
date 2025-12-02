@@ -6,14 +6,16 @@ import {
   deleteCloudConnectInstance,
   regenerateCloudConnectInstanceToken,
   linkCloudConnectInstance,
-  checkCloudConnectSubdomain
+  checkCloudConnectSubdomain,
+  disconnectCloudConnect
 } from '../../../../api'
 import { useToast } from 'vue-toastification'
 import { useTranslate } from '@tolgee/vue'
 
-export function useErugoInstances(onInstanceChange) {
+export function useErugoInstances(onInstanceChange, options = {}) {
   const { t } = useTranslate()
   const toast = useToast()
+  const { getCurrentInstanceId } = options
 
   // State
   const instances = ref([])
@@ -204,8 +206,31 @@ export function useErugoInstances(onInstanceChange) {
 
     try {
       instanceLoading.value = true
+      
+      // Check if we're deleting the current instance
+      const currentInstanceId = getCurrentInstanceId ? getCurrentInstanceId() : null
+      const isDeletingCurrentInstance = currentInstanceId && selectedInstance.value.id === currentInstanceId
+      
+      // If deleting the current instance, disconnect first
+      if (isDeletingCurrentInstance) {
+        try {
+          await disconnectCloudConnect()
+        } catch (disconnectError) {
+          // Log but continue - the tunnel might already be down
+          console.warn('Failed to disconnect tunnel before deletion:', disconnectError)
+        }
+      }
+      
+      // Now delete the instance via API
       await deleteCloudConnectInstance(selectedInstance.value.id)
-      toast.success(t.value('cloudConnect.instances.deleteSuccess'))
+      
+      // Show appropriate success message
+      if (isDeletingCurrentInstance) {
+        toast.success(t.value('cloudConnect.instances.deleteCurrentSuccess') || 'Instance deleted and Cloud Connect disconnected')
+      } else {
+        toast.success(t.value('cloudConnect.instances.deleteSuccess'))
+      }
+      
       closeDeleteConfirm()
       await loadInstances()
       if (onInstanceChange) {

@@ -93,7 +93,7 @@
       "title": "Ligar ao Erugo Connect"
     },
     "billing": {
-      "openPortal": "Gerir a subscrição",
+      "openPortal": "Portal de faturação",
       "portalDescription": "Faça a gestão da sua subscrição, actualize os métodos de pagamento ou veja as facturas no portal de faturação.",
       "portalFailed": "Falha ao abrir o portal de faturação"
     },
@@ -164,10 +164,15 @@
     "instances": {
       "cancelSubdomainEdit": "Cancelar",
       "confirmDelete": "Eliminar a instância",
+      "confirmDeleteCurrent": "Desligar e apagar",
+      "confirmLink": "Instância de ligação",
       "confirmRegenerate": "Ficha de regeneração",
       "copyToken": "Token de cópia",
       "current": "Atual",
       "delete": "Eliminar",
+      "deleteCurrentSuccess": "Instância excluída e Cloud Connect desconectado",
+      "deleteCurrentTitle": "Esta é a sua instância ativa!",
+      "deleteCurrentWarning": "A exclusão dessa instância desconectará seu domínio e desativará o Cloud Connect. Terá de criar ou associar uma nova instância para voltar a ligar-se.",
       "deleteFailed": "Falha ao eliminar a instância",
       "deleteSuccess": "Instância eliminada com êxito",
       "deleteTitle": "Eliminar a instância",
@@ -177,6 +182,12 @@
       "editSubdomain": "Alterar",
       "editTitle": "Editar Instância",
       "lastSeen": "Visto pela última vez",
+      "link": "Ligação a este Erugo",
+      "linkDescription": "Ligue esta instância à sua instalação atual do Erugo. Isto permitir-lhe-á ligar-se ao túnel utilizando esta instância.",
+      "linkFailed": "Falha ao ligar a instância",
+      "linkNote": "Nota: Será gerado um novo token de instância. Quaisquer outras instalações Erugo que utilizem esta instância terão de ser novamente ligadas.",
+      "linkSuccess": "Instância ligada com sucesso",
+      "linkTitle": "Instância de ligação",
       "loadFailed": "Falha ao carregar instâncias",
       "loading": "Carregando instâncias...",
       "regenerateToken": "Ficha de regeneração",
@@ -200,7 +211,7 @@
     "mustAcceptTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade",
     "nav": {
       "account": "Conta",
-      "connection": "Ligação",
+      "connection": "Estado da ligação",
       "instance": "Instâncias",
       "plan": "O seu plano",
       "status": "Estado",
@@ -221,7 +232,7 @@
     "ready": {
       "connect": "Ligar agora",
       "connecting": "Ligar...",
-      "description": "A sua instância está configurada e pronta para se ligar ao Erugo Cloud.",
+      "description": "Pronto para se ligar ao Erugo Connect.",
       "title": "Pronto para ligar"
     },
     "refresh": "Atualizar",

@@ -160,6 +160,8 @@ const {
   handleLinkInstance
 } = useErugoInstances(async () => {
   await loadStatus(true)
+}, {
+  getCurrentInstanceId: () => status.value?.instance_id
 })
 
 const {
@@ -564,6 +566,7 @@ defineExpose({
     :show="showDeleteConfirm"
     :loading="instanceLoading"
     :instance="selectedInstance"
+    :currentInstanceId="status?.instance_id"
     @update:show="closeDeleteConfirm"
     @confirm="handleDeleteInstance"
   />

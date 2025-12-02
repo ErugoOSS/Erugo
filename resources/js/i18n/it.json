@@ -93,7 +93,7 @@
       "title": "Collegarsi a Erugo Connect"
     },
     "billing": {
-      "openPortal": "Gestire l'abbonamento",
+      "openPortal": "Portale di fatturazione",
       "portalDescription": "Gestite il vostro abbonamento, aggiornate i metodi di pagamento o visualizzate le fatture nel portale di fatturazione.",
       "portalFailed": "Impossibile aprire il portale di fatturazione"
     },
@@ -164,10 +164,15 @@
     "instances": {
       "cancelSubdomainEdit": "Annullamento",
       "confirmDelete": "Cancellare l'istanza",
+      "confirmDeleteCurrent": "Disconnessione e cancellazione",
+      "confirmLink": "Istanza di collegamento",
       "confirmRegenerate": "Gettone rigenerato",
       "copyToken": "Copia del gettone",
       "current": "Attuale",
       "delete": "Cancellare",
+      "deleteCurrentSuccess": "Istanza eliminata e Cloud Connect disconnesso",
+      "deleteCurrentTitle": "Questa è la vostra istanza attiva!",
+      "deleteCurrentWarning": "L'eliminazione di questa istanza disconnette il dominio e disabilita Cloud Connect. Per riconnettersi sarà necessario creare o collegare una nuova istanza.",
       "deleteFailed": "Cancellazione fallita dell'istanza",
       "deleteSuccess": "Istanza cancellata con successo",
       "deleteTitle": "Cancellare l'istanza",
@@ -177,6 +182,12 @@
       "editSubdomain": "Cambiamento",
       "editTitle": "Modifica istanza",
       "lastSeen": "Ultimo visto",
+      "link": "Collegamento a questo Erugo",
+      "linkDescription": "Collegare questa istanza all'attuale installazione di Erugo. Ciò consentirà di connettersi al tunnel utilizzando questa istanza.",
+      "linkFailed": "Impossibile collegare l'istanza",
+      "linkNote": "Nota: verrà generato un nuovo token di istanza. Qualsiasi altra installazione di Erugo che utilizza questa istanza dovrà essere ricollegata.",
+      "linkSuccess": "Istanza collegata con successo",
+      "linkTitle": "Istanza di collegamento",
       "loadFailed": "Impossibile caricare le istanze",
       "loading": "Caricamento istanze...",
       "regenerateToken": "Gettone rigenerato",
@@ -200,7 +211,7 @@
     "mustAcceptTerms": "L'utente deve accettare i Termini di servizio e l'Informativa sulla privacy.",
     "nav": {
       "account": "Conto",
-      "connection": "Connessione",
+      "connection": "Stato della connessione",
       "instance": "Istanze",
       "plan": "Il vostro piano",
       "status": "Stato",
@@ -221,7 +232,7 @@
     "ready": {
       "connect": "Collegati ora",
       "connecting": "Collegamento...",
-      "description": "La vostra istanza è impostata e pronta per connettersi a Erugo Cloud.",
+      "description": "Pronti a collegarsi a Erugo Connect.",
       "title": "Pronti per la connessione"
     },
     "refresh": "Aggiornare",

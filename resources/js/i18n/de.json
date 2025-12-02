@@ -93,7 +93,7 @@
       "title": "Verbindung zu Erugo Connect"
     },
     "billing": {
-      "openPortal": "Abonnement verwalten",
+      "openPortal": "Abrechnungsportal",
       "portalDescription": "Verwalten Sie Ihr Abonnement, aktualisieren Sie die Zahlungsmodalitäten oder sehen Sie sich die Rechnungen im Rechnungsportal an.",
       "portalFailed": "Rechnungsportal konnte nicht geöffnet werden"
     },
@@ -164,10 +164,15 @@
     "instances": {
       "cancelSubdomainEdit": "Abbrechen",
       "confirmDelete": "Instanz löschen",
+      "confirmDeleteCurrent": "Trennen & Löschen",
+      "confirmLink": "Link-Instanz",
       "confirmRegenerate": "Token regenerieren",
       "copyToken": "Token kopieren",
       "current": "Aktuell",
       "delete": "Löschen",
+      "deleteCurrentSuccess": "Instanz gelöscht und Cloud Connect getrennt",
+      "deleteCurrentTitle": "Dies ist Ihre aktive Instanz!",
+      "deleteCurrentWarning": "Wenn Sie diese Instanz löschen, wird die Verbindung zu Ihrer Domäne getrennt und Cloud Connect wird deaktiviert. Sie müssen eine neue Instanz erstellen oder verknüpfen, um die Verbindung wiederherzustellen.",
       "deleteFailed": "Instanz konnte nicht gelöscht werden",
       "deleteSuccess": "Instanz erfolgreich gelöscht",
       "deleteTitle": "Instanz löschen",
@@ -177,6 +182,12 @@
       "editSubdomain": "Ändern Sie",
       "editTitle": "Instanz bearbeiten",
       "lastSeen": "Zuletzt gesehen",
+      "link": "Link zu diesem Erugo",
+      "linkDescription": "Verknüpfen Sie diese Instanz mit Ihrer aktuellen Erugo-Installation. Dadurch können Sie sich über diese Instanz mit dem Tunnel verbinden.",
+      "linkFailed": "Verknüpfung der Instanz fehlgeschlagen",
+      "linkNote": "Hinweis: Es wird ein neues Instanz-Token erzeugt. Alle anderen Erugo-Installationen, die diese Instanz verwenden, müssen neu verlinkt werden.",
+      "linkSuccess": "Instanz erfolgreich verlinkt",
+      "linkTitle": "Link-Instanz",
       "loadFailed": "Instanzen konnten nicht geladen werden",
       "loading": "Laden von Instanzen...",
       "regenerateToken": "Token regenerieren",
@@ -200,7 +211,7 @@
     "mustAcceptTerms": "Sie müssen die Allgemeinen Geschäftsbedingungen und die Datenschutzrichtlinie akzeptieren.",
     "nav": {
       "account": "Konto",
-      "connection": "Verbindung",
+      "connection": "Verbindungsstatus",
       "instance": "Instanzen",
       "plan": "Ihr Plan",
       "status": "Status",
@@ -221,7 +232,7 @@
     "ready": {
       "connect": "Jetzt verbinden",
       "connecting": "Verbinden...",
-      "description": "Ihre Instanz ist eingerichtet und bereit, sich mit der Erugo Cloud zu verbinden.",
+      "description": "Bereit zur Verbindung mit Erugo Connect.",
       "title": "Bereit zum Verbinden"
     },
     "refresh": "Auffrischen",

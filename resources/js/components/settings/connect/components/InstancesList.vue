@@ -112,7 +112,6 @@ const emit = defineEmits(['edit', 'regenerateToken', 'delete', 'link'])
           class="icon-only danger"
           @click="emit('delete', instance)"
           :title="$t('cloudConnect.instances.delete') || 'Delete'"
-          :disabled="instances.length <= 1"
         >
           <Trash2 />
         </button>
