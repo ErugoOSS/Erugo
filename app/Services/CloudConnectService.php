@@ -827,6 +827,12 @@ class CloudConnectService
             $this->setSetting('cloud_connect_subdomain', $tunnelData['domains']['subdomain'] ?? null);
         }
 
+        // Store heartbeat endpoint info from response (used for sending heartbeats via tunnel)
+        if (!empty($tunnelData['heartbeat'])) {
+            $this->setSetting('cloud_connect_heartbeat_endpoint', $tunnelData['heartbeat']['endpoint'] ?? null);
+            $this->setSetting('cloud_connect_heartbeat_interval', $tunnelData['heartbeat']['interval'] ?? '60');
+        }
+
         // Send initial heartbeat immediately so UI shows as online
         try {
             $this->sendHeartbeat();
@@ -908,19 +914,49 @@ class CloudConnectService
     }
 
     /**
-     * Send heartbeat to cloud service
+     * Send heartbeat to cloud service via the WireGuard tunnel
+     * This proves the tunnel is actually working by sending the heartbeat
+     * through the internal tunnel endpoint rather than the public API
      */
     public function sendHeartbeat(): array
     {
         try {
-            $data = $this->apiRequest('POST', '/tunnel/heartbeat', [], true);
+            // Get the internal heartbeat endpoint (set during tunnel registration)
+            $heartbeatEndpoint = $this->getSetting('cloud_connect_heartbeat_endpoint');
+            
+            if (empty($heartbeatEndpoint)) {
+                throw new Exception('Heartbeat endpoint not configured - tunnel may not be properly registered');
+            }
+
+            // Get instance token for authentication
+            $instanceToken = $this->getEncryptedSetting('cloud_connect_instance_token');
+            if (empty($instanceToken)) {
+                throw new Exception('Instance token not found');
+            }
+
+            // Send heartbeat through the tunnel to the internal endpoint
+            $response = Http::withToken($instanceToken)
+                ->timeout(10)
+                ->post($heartbeatEndpoint, [
+                    'timestamp' => now()->toIso8601String(),
+                ]);
+
+            if (!$response->successful()) {
+                $error = $response->json('error.message') ?? "Heartbeat failed: {$response->status()}";
+                throw new Exception($error);
+            }
+
+            $data = $response->json() ?? [];
 
             // Record successful heartbeat
             $this->setSetting('cloud_connect_last_heartbeat_at', now()->toIso8601String());
             $this->setSetting('cloud_connect_last_heartbeat_success', 'true');
             $this->setSetting('cloud_connect_last_heartbeat_error', null);
             
-            Log::info('Cloud Connect heartbeat sent successfully');
+            Log::info('Cloud Connect heartbeat sent successfully via tunnel', [
+                'endpoint' => $heartbeatEndpoint,
+                'next_heartbeat_in' => $data['next_heartbeat_in'] ?? null,
+            ]);
 
             return $data;
         } catch (Exception $e) {
@@ -942,7 +978,15 @@ class CloudConnectService
      */
     public function getTunnelStatus(): array
     {
-        return $this->apiRequest('GET', '/tunnel/status', [], true);
+        $data = $this->apiRequest('GET', '/tunnel/status', [], true);
+        
+        // Update heartbeat endpoint info if provided
+        if (!empty($data['heartbeat'])) {
+            $this->setSetting('cloud_connect_heartbeat_endpoint', $data['heartbeat']['endpoint'] ?? null);
+            $this->setSetting('cloud_connect_heartbeat_interval', $data['heartbeat']['interval'] ?? '60');
+        }
+        
+        return $data;
     }
 
     /**
@@ -989,6 +1033,8 @@ class CloudConnectService
         $this->setSetting('cloud_connect_status', 'disconnected');
         $this->setSetting('cloud_connect_enabled', 'false');
         $this->setSetting('cloud_connect_last_error', null);
+        $this->setSetting('cloud_connect_heartbeat_endpoint', null);
+        $this->setSetting('cloud_connect_heartbeat_interval', null);
     }
 
     /**
