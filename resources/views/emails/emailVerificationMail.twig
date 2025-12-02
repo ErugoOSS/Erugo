@@ -1,0 +1,26 @@
+{% extends 'emails/layout' %}
+
+{% block header %}Verify your email address
+{% endblock %}
+
+{% block content %}
+<h2>Hi {{ user.name }},</h2>
+
+<p>Thanks for creating an account on {{ settings.application_name }}.</p>
+<p>Please enter the following verification code to activate your account:</p>
+
+<div style="text-align: center; margin: 30px 0;">
+	<div style="display: inline-block; background-color: #f3f4f6; padding: 20px 40px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; font-family: monospace;">
+		{{ code }}
+	</div>
+</div>
+
+<p style="text-align: center; color: #6b7280; font-size: 14px;">
+	This code will expire in 15 minutes.
+</p>
+
+<p>
+	<small>Didn't create an account? You can safely ignore this email.</small>
+</p>
+{% endblock %}
+

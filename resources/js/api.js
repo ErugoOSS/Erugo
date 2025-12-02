@@ -128,6 +128,79 @@ export const forgotPassword = async (email) => {
   }
   return data
 }
+
+// Self-registration methods
+export const getRegistrationSettings = async () => {
+  const response = await fetch(`${apiUrl}/api/auth/registration-settings`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const registerUser = async (name, email, password, password_confirmation) => {
+  const response = await fetch(`${apiUrl}/api/auth/register`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      name,
+      email,
+      password,
+      password_confirmation
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    const error = new Error(data.message)
+    error.errors = data.data?.errors
+    throw error
+  }
+  return data
+}
+
+export const verifyEmail = async (email, code) => {
+  const response = await fetch(`${apiUrl}/api/auth/verify-email`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      email,
+      code
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const resendVerificationCode = async (email) => {
+  const response = await fetch(`${apiUrl}/api/auth/resend-verification`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      email
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const login = async (email, password) => {
   const response = await fetch(`${apiUrl}/api/auth/login`, {
     method: 'POST',

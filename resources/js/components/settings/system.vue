@@ -65,7 +65,10 @@ const settings = ref({
   smtp_username: '',
   smtp_password: '',
   smtp_sender_name: '',
-  smtp_sender_address: ''
+  smtp_sender_address: '',
+  self_registration_enabled: false,
+  self_registration_allow_any_domain: true,
+  self_registration_allowed_domains: ''
 })
 
 const settingsLoaded = ref(false)
@@ -701,6 +704,51 @@ const handleDeleteAuthProvider = async (id) => {
               </svg>
 
               <div class="setting-group-body">
+                <!-- Self Registration Settings -->
+                <h5 class="mb-3">{{ $t('settings.system.self_registration') }}</h5>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="self_registration_enabled"
+                      v-model="settings.self_registration_enabled"
+                    />
+                    <label for="self_registration_enabled">
+                      {{ $t('settings.system.self_registration_enabled') }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="self-registration-options" v-if="settings.self_registration_enabled">
+                  <div class="setting-group-body-item">
+                    <div class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="self_registration_allow_any_domain"
+                        v-model="settings.self_registration_allow_any_domain"
+                      />
+                      <label for="self_registration_allow_any_domain">
+                        {{ $t('settings.system.self_registration_allow_any_domain') }}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-group-body-item" v-if="!settings.self_registration_allow_any_domain">
+                    <label for="self_registration_allowed_domains">
+                      {{ $t('settings.system.self_registration_allowed_domains') }}
+                    </label>
+                    <input
+                      type="text"
+                      id="self_registration_allowed_domains"
+                      v-model="settings.self_registration_allowed_domains"
+                      :placeholder="$t('settings.system.self_registration_allowed_domains_placeholder')"
+                    />
+                    <p class="help-text">{{ $t('settings.system.self_registration_allowed_domains_help') }}</p>
+                  </div>
+                </div>
+
+                <hr class="my-4" />
+
                 <h5 class="mb-4">{{ $t('settings.system.your_auth_providers') }}</h5>
                 <div
                   class="setting-group-body-item auth-provider"
@@ -871,6 +919,10 @@ const handleDeleteAuthProvider = async (id) => {
           </div>
           <div class="d-none d-md-block col ps-0">
             <div class="section-help">
+              <h6>{{ $t('settings.system.self_registration') }}</h6>
+              <p>{{ $t('settings.system.self_registration_description') }}</p>
+              <h6>{{ $t('settings.system.self_registration_allowed_domains') }}</h6>
+              <p>{{ $t('settings.system.self_registration_allowed_domains_description') }}</p>
               <h6>{{ $t('settings.system.auth_providers') }}</h6>
               <p>{{ $t('settings.system.auth_providers_description') }}</p>
               <h6>{{ $t('settings.system.auth_provider_allow_registration') }}</h6>

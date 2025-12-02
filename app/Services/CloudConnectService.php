@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Setting;
+use App\Models\CloudConnectSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
@@ -12,11 +12,95 @@ class CloudConnectService
 {
     protected SettingsService $settingsService;
     protected string $apiUrl;
+    protected ?CloudConnectSetting $settings = null;
 
     public function __construct(SettingsService $settingsService)
     {
         $this->settingsService = $settingsService;
-        $this->apiUrl = $this->getSetting('cloud_connect_api_url') ?? 'https://api.erugo.cloud/v1';
+        $this->apiUrl = $this->getSetting('api_url') ?? 'https://api.erugo.cloud/v1';
+    }
+
+    /**
+     * Get the singleton cloud connect settings instance
+     */
+    protected function getSettings(): CloudConnectSetting
+    {
+        if ($this->settings === null) {
+            $this->settings = CloudConnectSetting::getInstance();
+        }
+        return $this->settings;
+    }
+
+    /**
+     * Get a setting value from the cloud connect settings table
+     */
+    protected function getSetting(string $key): mixed
+    {
+        // Strip the 'cloud_connect_' prefix if present for backward compatibility
+        $column = str_replace('cloud_connect_', '', $key);
+        
+        $settings = $this->getSettings();
+        
+        // Handle boolean 'enabled' field specially
+        if ($column === 'enabled') {
+            return $settings->enabled ? 'true' : 'false';
+        }
+        
+        return $settings->$column ?? null;
+    }
+
+    /**
+     * Set a setting value in the cloud connect settings table
+     */
+    protected function setSetting(string $key, mixed $value): void
+    {
+        // Strip the 'cloud_connect_' prefix if present for backward compatibility
+        $column = str_replace('cloud_connect_', '', $key);
+        
+        $settings = $this->getSettings();
+        
+        // Handle boolean 'enabled' field specially
+        if ($column === 'enabled') {
+            $settings->enabled = $value === 'true' || $value === true || $value === '1';
+        } else {
+            $settings->$column = $value;
+        }
+        
+        $settings->save();
+        
+        // Refresh the cached instance
+        $this->settings = $settings->fresh();
+    }
+
+    /**
+     * Get an encrypted setting value
+     */
+    protected function getEncryptedSetting(string $key): ?string
+    {
+        $value = $this->getSetting($key);
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (Exception $e) {
+            // If decryption fails, the value might not be encrypted
+            return $value;
+        }
+    }
+
+    /**
+     * Set an encrypted setting value
+     */
+    protected function setEncryptedSetting(string $key, ?string $value): void
+    {
+        if ($value === null) {
+            $this->setSetting($key, null);
+            return;
+        }
+
+        $this->setSetting($key, Crypt::encryptString($value));
     }
 
     /**
@@ -156,13 +240,13 @@ class CloudConnectService
     public function getStatus(bool $refreshProfile = false): array
     {
         $capabilities = $this->checkCapabilities();
-        $isLoggedIn = !empty($this->getSetting('cloud_connect_access_token'));
-        $hasInstance = !empty($this->getSetting('cloud_connect_instance_id'));
+        $isLoggedIn = !empty($this->getSetting('access_token'));
+        $hasInstance = !empty($this->getSetting('instance_id'));
         
         // Fetch user profile from API if logged in and either:
         // - account_status is missing, OR
         // - refreshProfile is requested (e.g., user clicked "Check Again")
-        if ($isLoggedIn && ($refreshProfile || empty($this->getSetting('cloud_connect_account_status')))) {
+        if ($isLoggedIn && ($refreshProfile || empty($this->getSetting('account_status')))) {
             try {
                 $this->getUserProfile();
             } catch (Exception $e) {
@@ -177,14 +261,14 @@ class CloudConnectService
             $tunnelActive = !empty($wgShow) && strpos($wgShow, 'interface: wg0') !== false;
         }
 
-        $status = $this->getSetting('cloud_connect_status') ?? 'disconnected';
+        $status = $this->getSetting('status') ?? 'disconnected';
         
         // Sync status with actual tunnel state
         if ($tunnelActive && $status !== 'connected') {
-            $this->setSetting('cloud_connect_status', 'connected');
+            $this->setSetting('status', 'connected');
             $status = 'connected';
         } elseif (!$tunnelActive && $status === 'connected') {
-            $this->setSetting('cloud_connect_status', 'disconnected');
+            $this->setSetting('status', 'disconnected');
             $status = 'disconnected';
         }
 
@@ -194,19 +278,19 @@ class CloudConnectService
             'has_instance' => $hasInstance,
             'status' => $status,
             'tunnel_active' => $tunnelActive,
-            'subdomain' => $this->getSetting('cloud_connect_subdomain'),
-            'full_domain' => $this->getSetting('cloud_connect_full_domain'),
-            'tunnel_ip' => $this->getSetting('cloud_connect_tunnel_ip'),
-            'user_email' => $this->getSetting('cloud_connect_user_email'),
-            'subscription_status' => $this->getSetting('cloud_connect_subscription_status'),
-            'subscription_plan' => $this->getSetting('cloud_connect_subscription_plan'),
-            'account_status' => $this->getSetting('cloud_connect_account_status'),
-            'last_error' => $this->getSetting('cloud_connect_last_error'),
-            'instance_id' => $this->getSetting('cloud_connect_instance_id'),
+            'subdomain' => $this->getSetting('subdomain'),
+            'full_domain' => $this->getSetting('full_domain'),
+            'tunnel_ip' => $this->getSetting('tunnel_ip'),
+            'user_email' => $this->getSetting('user_email'),
+            'subscription_status' => $this->getSetting('subscription_status'),
+            'subscription_plan' => $this->getSetting('subscription_plan'),
+            'account_status' => $this->getSetting('account_status'),
+            'last_error' => $this->getSetting('last_error'),
+            'instance_id' => $this->getSetting('instance_id'),
             'erugo_instance_guid' => $this->getErugoInstanceGuid(),
-            'last_heartbeat_at' => $this->getSetting('cloud_connect_last_heartbeat_at'),
-            'last_heartbeat_success' => $this->getSetting('cloud_connect_last_heartbeat_success') === 'true',
-            'last_heartbeat_error' => $this->getSetting('cloud_connect_last_heartbeat_error'),
+            'last_heartbeat_at' => $this->getSetting('last_heartbeat_at'),
+            'last_heartbeat_success' => $this->getSetting('last_heartbeat_success') === 'true',
+            'last_heartbeat_error' => $this->getSetting('last_heartbeat_error'),
         ];
     }
 
@@ -252,13 +336,13 @@ class CloudConnectService
         $data = $response->json();
 
         // Store tokens
-        $this->setEncryptedSetting('cloud_connect_access_token', $data['access_token']);
-        $this->setEncryptedSetting('cloud_connect_refresh_token', $data['refresh_token']);
-        $this->setSetting('cloud_connect_token_expires_at', time() + ($data['expires_in'] ?? 900));
-        $this->setSetting('cloud_connect_user_email', $data['user']['email'] ?? $email);
-        $this->setSetting('cloud_connect_subscription_status', $data['user']['subscription_status'] ?? 'none');
-        $this->setSetting('cloud_connect_subscription_plan', $data['user']['subscription_plan'] ?? null);
-        $this->setSetting('cloud_connect_account_status', $data['user']['account_status'] ?? $data['user']['status'] ?? null);
+        $this->setEncryptedSetting('access_token', $data['access_token']);
+        $this->setEncryptedSetting('refresh_token', $data['refresh_token']);
+        $this->setSetting('token_expires_at', time() + ($data['expires_in'] ?? 900));
+        $this->setSetting('user_email', $data['user']['email'] ?? $email);
+        $this->setSetting('subscription_status', $data['user']['subscription_status'] ?? 'none');
+        $this->setSetting('subscription_plan', $data['user']['subscription_plan'] ?? null);
+        $this->setSetting('account_status', $data['user']['account_status'] ?? $data['user']['status'] ?? null);
 
         return $data;
     }
@@ -276,7 +360,7 @@ class CloudConnectService
      */
     public function refreshToken(): bool
     {
-        $refreshToken = $this->getEncryptedSetting('cloud_connect_refresh_token');
+        $refreshToken = $this->getEncryptedSetting('refresh_token');
         if (empty($refreshToken)) {
             return false;
         }
@@ -293,8 +377,8 @@ class CloudConnectService
             }
 
             $data = $response->json();
-            $this->setEncryptedSetting('cloud_connect_access_token', $data['access_token']);
-            $this->setSetting('cloud_connect_token_expires_at', time() + ($data['expires_in'] ?? 900));
+            $this->setEncryptedSetting('access_token', $data['access_token']);
+            $this->setSetting('token_expires_at', time() + ($data['expires_in'] ?? 900));
 
             return true;
         } catch (Exception $e) {
@@ -309,8 +393,8 @@ class CloudConnectService
     protected function apiRequest(string $method, string $endpoint, array $data = [], bool $useInstanceToken = false): array
     {
         $token = $useInstanceToken
-            ? $this->getEncryptedSetting('cloud_connect_instance_token')
-            : $this->getEncryptedSetting('cloud_connect_access_token');
+            ? $this->getEncryptedSetting('instance_token')
+            : $this->getEncryptedSetting('access_token');
 
         if (empty($token)) {
             throw new Exception('Not authenticated');
@@ -318,12 +402,12 @@ class CloudConnectService
 
         // Check if access token needs refresh (not for instance tokens)
         if (!$useInstanceToken) {
-            $expiresAt = (int) $this->getSetting('cloud_connect_token_expires_at');
+            $expiresAt = (int) $this->getSetting('token_expires_at');
             if ($expiresAt && time() >= $expiresAt - 60) {
                 if (!$this->refreshToken()) {
                     throw new Exception('Session expired. Please login again.');
                 }
-                $token = $this->getEncryptedSetting('cloud_connect_access_token');
+                $token = $this->getEncryptedSetting('access_token');
             }
         }
 
@@ -370,12 +454,12 @@ class CloudConnectService
         $data = $this->apiRequest('GET', '/billing/subscription');
         
         // Update local cache
-        $this->setSetting('cloud_connect_subscription_status', $data['status'] ?? 'none');
-        $this->setSetting('cloud_connect_subscription_plan', $data['plan'] ?? null);
+        $this->setSetting('subscription_status', $data['status'] ?? 'none');
+        $this->setSetting('subscription_plan', $data['plan'] ?? null);
         
         // Also update account status if provided
         if (isset($data['account_status'])) {
-            $this->setSetting('cloud_connect_account_status', $data['account_status']);
+            $this->setSetting('account_status', $data['account_status']);
         }
 
         return $data;
@@ -390,10 +474,10 @@ class CloudConnectService
         
         // The /user endpoint returns the user object directly (not wrapped in 'user' key)
         $user = $data;
-        $this->setSetting('cloud_connect_user_email', $user['email'] ?? null);
-        $this->setSetting('cloud_connect_account_status', $user['account_status'] ?? $user['status'] ?? null);
-        $this->setSetting('cloud_connect_subscription_status', $user['subscription_status'] ?? 'none');
-        $this->setSetting('cloud_connect_subscription_plan', $user['subscription_plan'] ?? null);
+        $this->setSetting('user_email', $user['email'] ?? null);
+        $this->setSetting('account_status', $user['account_status'] ?? $user['status'] ?? null);
+        $this->setSetting('subscription_status', $user['subscription_status'] ?? 'none');
+        $this->setSetting('subscription_plan', $user['subscription_plan'] ?? null);
 
         return $data;
     }
@@ -443,7 +527,7 @@ class CloudConnectService
         
         // Update local cache if name changed
         if (isset($result['name'])) {
-            $this->setSetting('cloud_connect_user_name', $result['name']);
+            $this->setSetting('user_name', $result['name']);
         }
         
         return $result;
@@ -501,13 +585,13 @@ class CloudConnectService
         $result = $this->apiRequest('PATCH', "/instances/{$instanceId}", $data);
         
         // If updating the current connected instance, update local cache
-        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        $currentInstanceId = $this->getSetting('instance_id');
         if ($currentInstanceId === $instanceId) {
             if (isset($result['subdomain'])) {
-                $this->setSetting('cloud_connect_subdomain', $result['subdomain']);
+                $this->setSetting('subdomain', $result['subdomain']);
             }
             if (isset($result['full_domain'])) {
-                $this->setSetting('cloud_connect_full_domain', $result['full_domain']);
+                $this->setSetting('full_domain', $result['full_domain']);
             }
         }
         
@@ -522,7 +606,7 @@ class CloudConnectService
         $this->apiRequest('DELETE', "/instances/{$instanceId}");
         
         // If deleting the current connected instance, clear local state
-        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        $currentInstanceId = $this->getSetting('instance_id');
         if ($currentInstanceId === $instanceId) {
             $this->clearInstanceState();
         }
@@ -538,9 +622,9 @@ class CloudConnectService
         $result = $this->apiRequest('POST', "/instances/{$instanceId}/regenerate-token");
         
         // If regenerating token for current instance, update local cache
-        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        $currentInstanceId = $this->getSetting('instance_id');
         if ($currentInstanceId === $instanceId && isset($result['instance_token'])) {
-            $this->setEncryptedSetting('cloud_connect_instance_token', $result['instance_token']);
+            $this->setEncryptedSetting('instance_token', $result['instance_token']);
         }
         
         return $result;
@@ -563,15 +647,15 @@ class CloudConnectService
         }
         
         // Store instance details locally
-        $this->setSetting('cloud_connect_instance_id', $instance['id'] ?? $instanceId);
-        $this->setSetting('cloud_connect_subdomain', $instance['subdomain'] ?? null);
-        $this->setSetting('cloud_connect_full_domain', $instance['full_domain'] ?? null);
-        $this->setSetting('cloud_connect_tunnel_ip', $instance['tunnel_ip'] ?? null);
-        $this->setEncryptedSetting('cloud_connect_instance_token', $tokenResult['instance_token']);
+        $this->setSetting('instance_id', $instance['id'] ?? $instanceId);
+        $this->setSetting('subdomain', $instance['subdomain'] ?? null);
+        $this->setSetting('full_domain', $instance['full_domain'] ?? null);
+        $this->setSetting('tunnel_ip', $instance['tunnel_ip'] ?? null);
+        $this->setEncryptedSetting('instance_token', $tokenResult['instance_token']);
         
         // Clear any previous WireGuard keys so new ones will be generated on connect
-        $this->setSetting('cloud_connect_private_key', null);
-        $this->setSetting('cloud_connect_public_key', null);
+        $this->setSetting('private_key', null);
+        $this->setSetting('public_key', null);
         
         return [
             'instance' => $instance,
@@ -615,13 +699,13 @@ class CloudConnectService
         $instance = $data['instance'] ?? [];
         $credentials = $data['credentials'] ?? [];
 
-        $this->setSetting('cloud_connect_instance_id', $instance['id'] ?? null);
-        $this->setSetting('cloud_connect_subdomain', $instance['subdomain'] ?? null);
-        $this->setSetting('cloud_connect_full_domain', $instance['full_domain'] ?? null);
-        $this->setSetting('cloud_connect_tunnel_ip', $instance['tunnel_ip'] ?? null);
+        $this->setSetting('instance_id', $instance['id'] ?? null);
+        $this->setSetting('subdomain', $instance['subdomain'] ?? null);
+        $this->setSetting('full_domain', $instance['full_domain'] ?? null);
+        $this->setSetting('tunnel_ip', $instance['tunnel_ip'] ?? null);
         
         if (!empty($credentials['instance_token'])) {
-            $this->setEncryptedSetting('cloud_connect_instance_token', $credentials['instance_token']);
+            $this->setEncryptedSetting('instance_token', $credentials['instance_token']);
         }
 
         return $data;
@@ -676,15 +760,15 @@ class CloudConnectService
         }
 
         // Check if we're logged in
-        $accessToken = $this->getEncryptedSetting('cloud_connect_access_token');
+        $accessToken = $this->getEncryptedSetting('access_token');
         if (empty($accessToken)) {
             Log::debug('Auto-reconnect skipped: Not logged in to Cloud Connect');
             return false;
         }
 
         // Check if we already have a valid instance configured
-        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
-        $instanceToken = $this->getEncryptedSetting('cloud_connect_instance_token');
+        $currentInstanceId = $this->getSetting('instance_id');
+        $instanceToken = $this->getEncryptedSetting('instance_token');
         
         if (!empty($currentInstanceId) && !empty($instanceToken)) {
             Log::debug('Auto-reconnect: Instance already configured, attempting to connect tunnel');
@@ -744,8 +828,8 @@ class CloudConnectService
         }
 
         // Store keys
-        $this->setEncryptedSetting('cloud_connect_private_key', $privateKey);
-        $this->setSetting('cloud_connect_public_key', $publicKey);
+        $this->setEncryptedSetting('private_key', $privateKey);
+        $this->setSetting('public_key', $publicKey);
 
         return [
             'private_key' => $privateKey,
@@ -759,7 +843,7 @@ class CloudConnectService
     public function registerTunnel(): array
     {
         // Ensure we have keys
-        $publicKey = $this->getSetting('cloud_connect_public_key');
+        $publicKey = $this->getSetting('public_key');
         if (empty($publicKey)) {
             $keys = $this->generateWireGuardKeys();
             $publicKey = $keys['public_key'];
@@ -792,7 +876,7 @@ class CloudConnectService
         }
 
         // Get private key
-        $privateKey = $this->getEncryptedSetting('cloud_connect_private_key');
+        $privateKey = $this->getEncryptedSetting('private_key');
         if (empty($privateKey)) {
             throw new Exception('WireGuard private key not found');
         }
@@ -812,25 +896,25 @@ class CloudConnectService
         // Verify tunnel is up
         $wgShow = shell_exec('sudo wg show wg0 2>/dev/null');
         if (empty($wgShow) || strpos($wgShow, 'interface: wg0') === false) {
-            $this->setSetting('cloud_connect_status', 'error');
-            $this->setSetting('cloud_connect_last_error', 'Failed to bring up WireGuard tunnel: ' . ($output ?? 'Unknown error'));
+            $this->setSetting('status', 'error');
+            $this->setSetting('last_error', 'Failed to bring up WireGuard tunnel: ' . ($output ?? 'Unknown error'));
             throw new Exception('Failed to bring up WireGuard tunnel: ' . ($output ?? 'Unknown error'));
         }
 
         // Update status
-        $this->setSetting('cloud_connect_status', 'connected');
-        $this->setSetting('cloud_connect_enabled', 'true');
-        $this->setSetting('cloud_connect_last_error', null);
+        $this->setSetting('status', 'connected');
+        $this->setSetting('enabled', 'true');
+        $this->setSetting('last_error', null);
 
         // Update domain info from response
         if (!empty($tunnelData['domains'])) {
-            $this->setSetting('cloud_connect_subdomain', $tunnelData['domains']['subdomain'] ?? null);
+            $this->setSetting('subdomain', $tunnelData['domains']['subdomain'] ?? null);
         }
 
         // Store heartbeat endpoint info from response (used for sending heartbeats via tunnel)
         if (!empty($tunnelData['heartbeat'])) {
-            $this->setSetting('cloud_connect_heartbeat_endpoint', $tunnelData['heartbeat']['endpoint'] ?? null);
-            $this->setSetting('cloud_connect_heartbeat_interval', $tunnelData['heartbeat']['interval'] ?? '60');
+            $this->setSetting('heartbeat_endpoint', $tunnelData['heartbeat']['endpoint'] ?? null);
+            $this->setSetting('heartbeat_interval', $tunnelData['heartbeat']['interval'] ?? '60');
         }
 
         // Send initial heartbeat immediately so UI shows as online
@@ -905,8 +989,8 @@ class CloudConnectService
         shell_exec('sudo wg-quick down wg0 2>/dev/null');
 
         // Update status
-        $this->setSetting('cloud_connect_status', 'disconnected');
-        $this->setSetting('cloud_connect_enabled', 'false');
+        $this->setSetting('status', 'disconnected');
+        $this->setSetting('enabled', 'false');
 
         return [
             'status' => 'disconnected',
@@ -922,14 +1006,14 @@ class CloudConnectService
     {
         try {
             // Get the internal heartbeat endpoint (set during tunnel registration)
-            $heartbeatEndpoint = $this->getSetting('cloud_connect_heartbeat_endpoint');
+            $heartbeatEndpoint = $this->getSetting('heartbeat_endpoint');
             
             if (empty($heartbeatEndpoint)) {
                 throw new Exception('Heartbeat endpoint not configured - tunnel may not be properly registered');
             }
 
             // Get instance token for authentication
-            $instanceToken = $this->getEncryptedSetting('cloud_connect_instance_token');
+            $instanceToken = $this->getEncryptedSetting('instance_token');
             if (empty($instanceToken)) {
                 throw new Exception('Instance token not found');
             }
@@ -949,9 +1033,9 @@ class CloudConnectService
             $data = $response->json() ?? [];
 
             // Record successful heartbeat
-            $this->setSetting('cloud_connect_last_heartbeat_at', now()->toIso8601String());
-            $this->setSetting('cloud_connect_last_heartbeat_success', 'true');
-            $this->setSetting('cloud_connect_last_heartbeat_error', null);
+            $this->setSetting('last_heartbeat_at', now()->toIso8601String());
+            $this->setSetting('last_heartbeat_success', 'true');
+            $this->setSetting('last_heartbeat_error', null);
             
             Log::info('Cloud Connect heartbeat sent successfully via tunnel', [
                 'endpoint' => $heartbeatEndpoint,
@@ -963,11 +1047,11 @@ class CloudConnectService
             Log::error('Cloud Connect heartbeat failed: ' . $e->getMessage());
             
             // Record failed heartbeat
-            $this->setSetting('cloud_connect_last_heartbeat_success', 'false');
-            $this->setSetting('cloud_connect_last_heartbeat_error', $e->getMessage());
+            $this->setSetting('last_heartbeat_success', 'false');
+            $this->setSetting('last_heartbeat_error', $e->getMessage());
             
             // Update status to indicate connection issue
-            $this->setSetting('cloud_connect_status', 'reconnecting');
+            $this->setSetting('status', 'reconnecting');
             
             throw $e;
         }
@@ -982,8 +1066,8 @@ class CloudConnectService
         
         // Update heartbeat endpoint info if provided
         if (!empty($data['heartbeat'])) {
-            $this->setSetting('cloud_connect_heartbeat_endpoint', $data['heartbeat']['endpoint'] ?? null);
-            $this->setSetting('cloud_connect_heartbeat_interval', $data['heartbeat']['interval'] ?? '60');
+            $this->setSetting('heartbeat_endpoint', $data['heartbeat']['endpoint'] ?? null);
+            $this->setSetting('heartbeat_interval', $data['heartbeat']['interval'] ?? '60');
         }
         
         return $data;
@@ -1010,12 +1094,12 @@ class CloudConnectService
      */
     protected function clearAuthState(): void
     {
-        $this->setSetting('cloud_connect_access_token', null);
-        $this->setSetting('cloud_connect_refresh_token', null);
-        $this->setSetting('cloud_connect_token_expires_at', null);
-        $this->setSetting('cloud_connect_user_email', null);
-        $this->setSetting('cloud_connect_subscription_status', null);
-        $this->setSetting('cloud_connect_subscription_plan', null);
+        $this->setSetting('access_token', null);
+        $this->setSetting('refresh_token', null);
+        $this->setSetting('token_expires_at', null);
+        $this->setSetting('user_email', null);
+        $this->setSetting('subscription_status', null);
+        $this->setSetting('subscription_plan', null);
     }
 
     /**
@@ -1023,72 +1107,17 @@ class CloudConnectService
      */
     protected function clearInstanceState(): void
     {
-        $this->setSetting('cloud_connect_instance_id', null);
-        $this->setSetting('cloud_connect_instance_token', null);
-        $this->setSetting('cloud_connect_subdomain', null);
-        $this->setSetting('cloud_connect_full_domain', null);
-        $this->setSetting('cloud_connect_tunnel_ip', null);
-        $this->setSetting('cloud_connect_private_key', null);
-        $this->setSetting('cloud_connect_public_key', null);
-        $this->setSetting('cloud_connect_status', 'disconnected');
-        $this->setSetting('cloud_connect_enabled', 'false');
-        $this->setSetting('cloud_connect_last_error', null);
-        $this->setSetting('cloud_connect_heartbeat_endpoint', null);
-        $this->setSetting('cloud_connect_heartbeat_interval', null);
-    }
-
-    /**
-     * Get a setting value
-     */
-    protected function getSetting(string $key): ?string
-    {
-        $setting = Setting::where('key', $key)->first();
-        return $setting?->value;
-    }
-
-    /**
-     * Set a setting value
-     */
-    protected function setSetting(string $key, ?string $value): void
-    {
-        Setting::updateOrCreate(
-            ['key' => $key],
-            [
-                'value' => $value,
-                'group' => 'system.cloud_connect',
-            ]
-        );
-    }
-
-    /**
-     * Get an encrypted setting value
-     */
-    protected function getEncryptedSetting(string $key): ?string
-    {
-        $value = $this->getSetting($key);
-        if (empty($value)) {
-            return null;
-        }
-
-        try {
-            return Crypt::decryptString($value);
-        } catch (Exception $e) {
-            // If decryption fails, the value might not be encrypted
-            return $value;
-        }
-    }
-
-    /**
-     * Set an encrypted setting value
-     */
-    protected function setEncryptedSetting(string $key, ?string $value): void
-    {
-        if ($value === null) {
-            $this->setSetting($key, null);
-            return;
-        }
-
-        $this->setSetting($key, Crypt::encryptString($value));
+        $this->setSetting('instance_id', null);
+        $this->setSetting('instance_token', null);
+        $this->setSetting('subdomain', null);
+        $this->setSetting('full_domain', null);
+        $this->setSetting('tunnel_ip', null);
+        $this->setSetting('private_key', null);
+        $this->setSetting('public_key', null);
+        $this->setSetting('status', 'disconnected');
+        $this->setSetting('enabled', 'false');
+        $this->setSetting('last_error', null);
+        $this->setSetting('heartbeat_endpoint', null);
+        $this->setSetting('heartbeat_interval', null);
     }
 }
-

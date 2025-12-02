@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\CloudConnectSetting;
 use App\Services\CloudConnectService;
 use App\Services\SettingsService;
 use Illuminate\Console\Command;
@@ -25,8 +26,8 @@ class CloudConnectAutoReconnect extends Command
     public function handle(CloudConnectService $cloudConnectService, SettingsService $settingsService): int
     {
         // Check if cloud connect was previously enabled
-        $enabled = $settingsService->get('cloud_connect_enabled');
-        if (!$enabled) {
+        $settings = CloudConnectSetting::getInstance();
+        if (!$settings->enabled) {
             $this->info('Cloud Connect is not enabled, skipping auto-reconnect.');
             return Command::SUCCESS;
         }
@@ -58,4 +59,3 @@ class CloudConnectAutoReconnect extends Command
         }
     }
 }
-

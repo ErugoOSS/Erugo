@@ -14,7 +14,7 @@ class SettingsController extends Controller
         $request->validate([
             'settings' => 'required|array',
             'settings.*.key' => 'required|string|max:255',
-            'settings.*.value' => 'string|nullable|max:255',
+            'settings.*.value' => 'string|nullable|max:65535',
         ]);
 
         $errors = [];

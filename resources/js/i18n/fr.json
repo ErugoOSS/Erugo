@@ -31,6 +31,7 @@
     "login_successful": "Connexion réussie",
     "login_with": "Se connecter avec",
     "logout": "Déconnexion",
+    "name": "Nom complet",
     "or": "Ou",
     "password": "Mot de passe",
     "password_reset_email_sent": "Envoi du mail de réinitialisation du mot de passe",

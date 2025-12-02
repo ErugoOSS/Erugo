@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\CloudConnectSetting;
 use App\Services\CloudConnectService;
 use App\Services\SettingsService;
 use Illuminate\Bus\Queueable;
@@ -40,8 +41,8 @@ class CloudConnectHeartbeat implements ShouldQueue
     public function handle(CloudConnectService $cloudConnectService, SettingsService $settingsService): void
     {
         // Check if cloud connect is enabled
-        $enabled = $settingsService->get('cloud_connect_enabled');
-        if (!$enabled) {
+        $settings = CloudConnectSetting::getInstance();
+        if (!$settings->enabled) {
             Log::debug('Cloud Connect heartbeat skipped - not enabled');
             return;
         }
@@ -110,4 +111,3 @@ class CloudConnectHeartbeat implements ShouldQueue
         Log::error('Cloud Connect heartbeat job failed permanently: ' . ($exception?->getMessage() ?? 'Unknown error'));
     }
 }
-

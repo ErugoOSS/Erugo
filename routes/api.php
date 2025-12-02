@@ -18,6 +18,7 @@ use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\CloudConnectController;
+use App\Http\Controllers\SelfRegistrationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -48,6 +49,12 @@ Route::group([], function ($router) {
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
         Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword');
         Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword');
+        
+        // Self-registration routes
+        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register');
+        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail');
+        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification');
+        Route::get('registration-settings', [SelfRegistrationController::class, 'getSettings'])->name('auth.registrationSettings');
     });
 
     //manage my profile [auth]
