@@ -6,6 +6,7 @@
 /public/backgrounds/*
 !/public/backgrounds/.gitkeep
 /storage/*.key
+/storage/instance.guid
 /storage/pail
 /storage/templates/*
 /vendor

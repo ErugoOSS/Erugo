@@ -20,6 +20,61 @@ class CloudConnectService
     }
 
     /**
+     * Get the persistent Erugo instance GUID
+     * This identifier persists across container restarts and is used to reconnect to existing tunnels
+     * If no GUID exists, one will be generated and saved (for development environments)
+     */
+    public function getErugoInstanceGuid(): ?string
+    {
+        // First check environment variable (set by container startup script)
+        $guid = env('ERUGO_INSTANCE_GUID');
+        
+        // Fallback to reading from file directly if env var not set
+        if (empty($guid)) {
+            $guidFile = storage_path('instance.guid');
+            if (file_exists($guidFile)) {
+                $guid = trim(file_get_contents($guidFile));
+            }
+        }
+        
+        // If still no GUID, generate one (for development environments without the startup script)
+        if (empty($guid)) {
+            $guid = $this->generateAndSaveInstanceGuid();
+        }
+        
+        return $guid ?: null;
+    }
+
+    /**
+     * Generate a new instance GUID and save it to storage
+     * Used in development environments where the container startup script doesn't run
+     */
+    protected function generateAndSaveInstanceGuid(): ?string
+    {
+        try {
+            // Generate UUID-like format
+            $guid = sprintf(
+                '%s-%s-%s-%s-%s',
+                bin2hex(random_bytes(4)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(2)),
+                bin2hex(random_bytes(6))
+            );
+            
+            $guidFile = storage_path('instance.guid');
+            file_put_contents($guidFile, $guid);
+            
+            Log::info('Generated new Erugo instance GUID', ['guid' => $guid]);
+            
+            return $guid;
+        } catch (Exception $e) {
+            Log::error('Failed to generate Erugo instance GUID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Check if the container has the required capabilities for WireGuard
      */
     public function checkCapabilities(): array
@@ -148,6 +203,7 @@ class CloudConnectService
             'account_status' => $this->getSetting('cloud_connect_account_status'),
             'last_error' => $this->getSetting('cloud_connect_last_error'),
             'instance_id' => $this->getSetting('cloud_connect_instance_id'),
+            'erugo_instance_guid' => $this->getErugoInstanceGuid(),
             'last_heartbeat_at' => $this->getSetting('cloud_connect_last_heartbeat_at'),
             'last_heartbeat_success' => $this->getSetting('cloud_connect_last_heartbeat_success') === 'true',
             'last_heartbeat_error' => $this->getSetting('cloud_connect_last_heartbeat_error'),
@@ -543,6 +599,12 @@ class CloudConnectService
             'subdomain' => $subdomain,
         ];
         
+        // Include the persistent Erugo instance GUID for reconnection after container restarts
+        $erugoInstanceGuid = $this->getErugoInstanceGuid();
+        if ($erugoInstanceGuid) {
+            $requestData['erugo_instance_id'] = $erugoInstanceGuid;
+        }
+        
         if ($confirmReclaim) {
             $requestData['confirm_reclaim'] = true;
         }
@@ -571,6 +633,97 @@ class CloudConnectService
     public function getInstances(): array
     {
         return $this->apiRequest('GET', '/instances');
+    }
+
+    /**
+     * Find an existing instance by this Erugo's persistent GUID
+     * Returns the instance if found, null otherwise
+     */
+    public function findInstanceByErugoGuid(): ?array
+    {
+        $erugoInstanceGuid = $this->getErugoInstanceGuid();
+        if (empty($erugoInstanceGuid)) {
+            return null;
+        }
+
+        try {
+            $response = $this->getInstances();
+            $instances = $response['instances'] ?? [];
+            
+            foreach ($instances as $instance) {
+                if (isset($instance['erugo_instance_id']) && $instance['erugo_instance_id'] === $erugoInstanceGuid) {
+                    return $instance;
+                }
+            }
+        } catch (Exception $e) {
+            Log::warning('Failed to search for existing instance by GUID: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempt to automatically reconnect to an existing instance
+     * This is called on container startup when cloud connect was previously enabled
+     * Returns true if successfully reconnected, false otherwise
+     */
+    public function attemptAutoReconnect(): bool
+    {
+        $erugoInstanceGuid = $this->getErugoInstanceGuid();
+        if (empty($erugoInstanceGuid)) {
+            Log::debug('Auto-reconnect skipped: No Erugo instance GUID available');
+            return false;
+        }
+
+        // Check if we're logged in
+        $accessToken = $this->getEncryptedSetting('cloud_connect_access_token');
+        if (empty($accessToken)) {
+            Log::debug('Auto-reconnect skipped: Not logged in to Cloud Connect');
+            return false;
+        }
+
+        // Check if we already have a valid instance configured
+        $currentInstanceId = $this->getSetting('cloud_connect_instance_id');
+        $instanceToken = $this->getEncryptedSetting('cloud_connect_instance_token');
+        
+        if (!empty($currentInstanceId) && !empty($instanceToken)) {
+            Log::debug('Auto-reconnect: Instance already configured, attempting to connect tunnel');
+            try {
+                $this->connect();
+                return true;
+            } catch (Exception $e) {
+                Log::warning('Auto-reconnect: Failed to connect with existing instance config: ' . $e->getMessage());
+                // Fall through to try finding instance by GUID
+            }
+        }
+
+        // Try to find an existing instance by our GUID
+        Log::info('Auto-reconnect: Searching for existing instance by Erugo GUID');
+        $existingInstance = $this->findInstanceByErugoGuid();
+        
+        if ($existingInstance) {
+            Log::info('Auto-reconnect: Found existing instance', [
+                'instance_id' => $existingInstance['id'],
+                'subdomain' => $existingInstance['subdomain'] ?? null,
+            ]);
+            
+            try {
+                // Link to the existing instance (this regenerates the token)
+                $this->linkInstance($existingInstance['id']);
+                
+                // Now connect the tunnel
+                $this->connect();
+                
+                Log::info('Auto-reconnect: Successfully reconnected to existing instance');
+                return true;
+            } catch (Exception $e) {
+                Log::error('Auto-reconnect: Failed to link/connect to existing instance: ' . $e->getMessage());
+                return false;
+            }
+        }
+
+        Log::debug('Auto-reconnect: No existing instance found for this Erugo GUID');
+        return false;
     }
 
     /**

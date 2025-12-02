@@ -252,10 +252,24 @@ class CloudConnectController extends Controller
             $statusCode = ($result['reclaimed'] ?? false) ? 200 : 201;
             $message = ($result['reclaimed'] ?? false) ? 'Instance reclaimed successfully' : 'Instance created successfully';
 
+            // Automatically connect the tunnel after creating/reclaiming the instance
+            $connectResult = null;
+            $connectError = null;
+            try {
+                $connectResult = $this->cloudConnectService->connect();
+                $message .= ' and connected';
+            } catch (Exception $connectException) {
+                // Don't fail the whole request if connect fails - instance was still created
+                $connectError = $connectException->getMessage();
+            }
+
             return response()->json([
                 'status' => 'success',
                 'message' => $message,
-                'data' => $result,
+                'data' => array_merge($result, [
+                    'connected' => $connectResult !== null,
+                    'connect_error' => $connectError,
+                ]),
             ], $statusCode);
         } catch (Exception $e) {
             // Check if this is a SUBDOMAIN_OWNED_BY_USER error (409 from API)

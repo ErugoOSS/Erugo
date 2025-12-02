@@ -81,6 +81,7 @@ class CloudConnectHeartbeat implements ShouldQueue
 
     /**
      * Attempt to reconnect the tunnel
+     * First tries a simple reconnect, then falls back to auto-reconnect by GUID if needed
      */
     protected function attemptReconnect(CloudConnectService $cloudConnectService): void
     {
@@ -89,7 +90,15 @@ class CloudConnectHeartbeat implements ShouldQueue
             $cloudConnectService->connect();
             Log::info('Cloud Connect tunnel reconnected successfully');
         } catch (Exception $e) {
-            Log::error('Cloud Connect reconnection failed: ' . $e->getMessage());
+            Log::warning('Cloud Connect simple reconnection failed: ' . $e->getMessage());
+            
+            // Try auto-reconnect which can find and re-link instance by GUID
+            Log::info('Cloud Connect attempting auto-reconnect by Erugo GUID');
+            if ($cloudConnectService->attemptAutoReconnect()) {
+                Log::info('Cloud Connect auto-reconnect successful');
+            } else {
+                Log::error('Cloud Connect auto-reconnect also failed');
+            }
         }
     }
 

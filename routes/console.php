@@ -20,8 +20,13 @@ Schedule::job(pruneLogs::class)->daily();
 Schedule::job(backUpDatabase::class)->daily();
 //hourly jobs
 Schedule::job(sendExpiredWarningEmails::class)->hourly();
-//cloud connect heartbeat - every minute
-Schedule::job(CloudConnectHeartbeat::class)->everyMinute();
+//cloud connect heartbeat - every minute (run synchronously, not via queue)
+Schedule::call(function () {
+    app(\App\Jobs\CloudConnectHeartbeat::class)->handle(
+        app(\App\Services\CloudConnectService::class),
+        app(\App\Services\SettingsService::class)
+    );
+})->everyMinute();
 
 //manually run jobs
 Artisan::command('clean-expired-shares', function () {
