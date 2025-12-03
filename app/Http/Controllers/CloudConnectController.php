@@ -208,6 +208,70 @@ class CloudConnectController extends Controller
     }
 
     /**
+     * Change subscription plan (between paid plans)
+     */
+    public function changePlan(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'plan' => 'required|string|in:pro,business',
+        ]);
+
+        try {
+            $result = $this->cloudConnectService->changePlan($validated['plan']);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Cancel subscription at period end
+     */
+    public function cancelSubscription(): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->cancelSubscription();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * Reactivate a cancelled subscription
+     */
+    public function reactivateSubscription(): JsonResponse
+    {
+        try {
+            $result = $this->cloudConnectService->reactivateSubscription();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
      * Check subdomain availability
      */
     public function checkSubdomain(Request $request): JsonResponse

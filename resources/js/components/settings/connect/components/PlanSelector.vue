@@ -1,5 +1,9 @@
 <script setup>
-import { CreditCard, Check, X, Loader2 } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { CreditCard, Check, X, Loader2, AlertTriangle, RotateCcw } from 'lucide-vue-next'
+import { useTranslate } from '@tolgee/vue'
+
+const { t } = useTranslate()
 
 const props = defineProps({
   plans: Array,
@@ -11,13 +15,67 @@ const props = defineProps({
   hasActiveSubscription: Boolean,
   currentPlan: Object,
   readOnly: Boolean,
+  cancelAtPeriodEnd: Boolean,
+  currentPeriodEnd: String,
   compact: {
     type: Boolean,
     default: false
   }
 })
 
-const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
+const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling', 'reactivate'])
+
+// Compute what action will be taken based on current state
+const selectedPlanObj = computed(() => {
+  return props.plans?.find((p) => p.name === props.selectedPlan)
+})
+
+const formattedCancellationDate = computed(() => {
+  if (!props.currentPeriodEnd) return null
+  try {
+    const date = new Date(props.currentPeriodEnd)
+    return date.toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  } catch {
+    return props.currentPeriodEnd
+  }
+})
+
+const buttonText = computed(() => {
+  if (props.pollingSubscription) {
+    return t.value('cloudConnect.subscription.waitingForPayment')
+  }
+
+  // If subscription is scheduled for cancellation, don't show the normal button
+  if (props.cancelAtPeriodEnd) {
+    return t.value('cloudConnect.planManagement.changePlanButton')
+  }
+
+  // If no subscription and selecting free plan
+  if (!props.hasActiveSubscription && selectedPlanObj.value?.is_free) {
+    return t.value('cloudConnect.subscription.activateFreePlan') || 'Activate Free Plan'
+  }
+
+  // If no subscription and selecting paid plan
+  if (!props.hasActiveSubscription && !selectedPlanObj.value?.is_free) {
+    return t.value('cloudConnect.subscription.subscribe') || 'Subscribe'
+  }
+
+  // If has subscription and selecting free plan (cancel)
+  if (props.hasActiveSubscription && selectedPlanObj.value?.is_free) {
+    return t.value('cloudConnect.subscription.cancelSubscription') || 'Cancel Subscription'
+  }
+
+  // If has subscription and selecting different paid plan
+  if (props.hasActiveSubscription && !selectedPlanObj.value?.is_free) {
+    return t.value('cloudConnect.planManagement.changePlanButton')
+  }
+
+  return t.value('cloudConnect.planManagement.changePlanButton')
+})
 </script>
 
 <template>
@@ -88,18 +146,32 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
     </div>
   </div>
 
+  <!-- Cancellation scheduled notice -->
+  <div v-if="cancelAtPeriodEnd && !readOnly" class="cancellation-notice">
+    <AlertTriangle class="notice-icon" />
+    <div class="notice-content">
+      <strong>{{ $t('cloudConnect.subscription.cancellationScheduledTitle') || 'Subscription Cancelling' }}</strong>
+      <p>
+        {{ $t('cloudConnect.subscription.cancellationScheduledMessage', { date: formattedCancellationDate }) || 
+           `Your subscription will be cancelled on ${formattedCancellationDate}. You'll retain access until then.` }}
+      </p>
+    </div>
+    <button @click="emit('reactivate')" :disabled="loading" class="reactivate-btn">
+      <Loader2 v-if="loading" class="spinner" />
+      <RotateCcw v-else />
+      {{ $t('cloudConnect.subscription.reactivate') || 'Reactivate' }}
+    </button>
+  </div>
+
   <button
-    v-if="selectedPlan && selectedPlan !== currentSubscriptionPlan && !readOnly"
+    v-if="!readOnly && !cancelAtPeriodEnd"
     @click="emit('checkout')"
-    :disabled="loading || pollingSubscription || loadingPlans"
+    :disabled="loading || pollingSubscription || loadingPlans || (selectedPlan && selectedPlan == currentSubscriptionPlan)"
+    :class="{ danger: hasActiveSubscription && selectedPlanObj?.is_free }"
   >
     <Loader2 v-if="loading || pollingSubscription" class="spinner" />
     <CreditCard v-else />
-    {{
-      pollingSubscription
-        ? $t('cloudConnect.subscription.waitingForPayment')
-        : $t('cloudConnect.planManagement.changePlanButton')
-    }}
+    {{ buttonText }}
   </button>
 
   <p v-if="pollingSubscription" class="polling-note">
@@ -174,7 +246,7 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
     border-color: var(--primary-button-background-color);
   }
 
-  &.current {
+  &.selected {
     border-color: transparent;
 
     &::before {
@@ -286,6 +358,80 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
   color: var(--panel-section-text-color);
   opacity: 0.7;
   text-align: center;
+}
+
+.cancellation-notice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: color-mix(in srgb, var(--color-warning) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 40%, transparent);
+  border-radius: var(--panel-border-radius, 8px);
+
+  .notice-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--color-warning);
+  }
+
+  .notice-content {
+    flex: 1;
+
+    strong {
+      display: block;
+      color: var(--panel-section-text-color);
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.8;
+    }
+  }
+
+  .reactivate-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--color-success);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-success) 80%, black);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+button.danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger) 80%, black);
+    border-color: color-mix(in srgb, var(--color-danger) 80%, black);
+  }
 }
 
 .spinner {

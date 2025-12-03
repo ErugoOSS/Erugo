@@ -184,6 +184,9 @@ Route::group([], function ($router) {
         
         // Subscription management
         Route::get('/subscription', [CloudConnectController::class, 'subscription'])->name('cloud-connect.subscription');
+        Route::patch('/subscription', [CloudConnectController::class, 'changePlan'])->name('cloud-connect.changePlan');
+        Route::post('/subscription/cancel', [CloudConnectController::class, 'cancelSubscription'])->name('cloud-connect.cancelSubscription');
+        Route::post('/subscription/reactivate', [CloudConnectController::class, 'reactivateSubscription'])->name('cloud-connect.reactivateSubscription');
         Route::get('/plans', [CloudConnectController::class, 'plans'])->name('cloud-connect.plans');
         Route::post('/checkout', [CloudConnectController::class, 'checkout'])->name('cloud-connect.checkout');
         Route::post('/billing/portal', [CloudConnectController::class, 'billingPortal'])->name('cloud-connect.billingPortal');

@@ -1069,6 +1069,49 @@ export const createCloudConnectCheckout = async (plan) => {
   return data.data
 }
 
+export const changeCloudConnectPlan = async (plan) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subscription`, {
+    method: 'PATCH',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ plan })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const cancelCloudConnectSubscription = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subscription/cancel`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const reactivateCloudConnectSubscription = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subscription/reactivate`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const checkCloudConnectSubdomain = async (subdomain) => {
   const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/subdomains/check?subdomain=${encodeURIComponent(subdomain)}`, {
     method: 'GET',
@@ -1112,14 +1155,30 @@ export const createCloudConnectInstance = async (name, subdomain, confirmReclaim
   })
   const data = await response.json()
   if (!response.ok) {
-    // For SUBDOMAIN_OWNED_BY_USER errors, throw an error with the full data
-    if (data.code === 'SUBDOMAIN_OWNED_BY_USER') {
-      const error = new Error(data.message)
-      error.code = data.code
-      error.data = data.data
+    // Try to parse the message if it's a JSON string (error from remote API)
+    let errorCode = data.code
+    let errorMessage = data.message
+    let errorData = data.data
+    
+    if (typeof data.message === 'string' && data.message.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(data.message)
+        errorCode = parsed.code || errorCode
+        errorMessage = parsed.message || errorMessage
+        errorData = parsed.data || errorData
+      } catch (e) {
+        // Not valid JSON, use original message
+      }
+    }
+    
+    // For specific error codes, throw an error with the code attached
+    if (errorCode === 'SUBDOMAIN_OWNED_BY_USER' || errorCode === 'CONFLICT') {
+      const error = new Error(errorMessage)
+      error.code = errorCode
+      error.data = errorData
       throw error
     }
-    throw new Error(data.message)
+    throw new Error(errorMessage)
   }
   return data.data
 }

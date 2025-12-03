@@ -243,14 +243,30 @@ class CloudConnectService
         $isLoggedIn = !empty($this->getSetting('access_token'));
         $hasInstance = !empty($this->getSetting('instance_id'));
         
-        // Fetch user profile from API if logged in and either:
-        // - account_status is missing, OR
-        // - refreshProfile is requested (e.g., user clicked "Check Again")
-        if ($isLoggedIn && ($refreshProfile || empty($this->getSetting('account_status')))) {
+        // Always fetch fresh subscription data from API when logged in
+        // Fall back to cached values only if API call fails
+        $subscriptionCancelAtPeriodEnd = $this->getSetting('subscription_cancel_at_period_end') === 'true';
+        $subscriptionCurrentPeriodEnd = $this->getSetting('subscription_current_period_end');
+        
+        if ($isLoggedIn) {
             try {
-                $this->getUserProfile();
+                // Fetch user profile if needed
+                if ($refreshProfile || empty($this->getSetting('account_status'))) {
+                    $this->getUserProfile();
+                }
+                
+                // Always fetch fresh subscription data to get current cancel_at_period_end status
+                $subscriptionData = $this->getSubscription();
+                Log::info('Fresh subscription data from API', $subscriptionData);
+                $subscriptionCancelAtPeriodEnd = $subscriptionData['cancel_at_period_end'] ?? false;
+                $subscriptionCurrentPeriodEnd = $subscriptionData['current_period_end'] ?? null;
+                Log::info('Parsed subscription values', [
+                    'cancel_at_period_end' => $subscriptionCancelAtPeriodEnd,
+                    'current_period_end' => $subscriptionCurrentPeriodEnd,
+                ]);
             } catch (Exception $e) {
-                // Ignore errors - we'll just return cached values
+                // API call failed - use cached values (already set above)
+                Log::warning('Failed to fetch fresh subscription data: ' . $e->getMessage());
             }
         }
         
@@ -284,6 +300,8 @@ class CloudConnectService
             'user_email' => $this->getSetting('user_email'),
             'subscription_status' => $this->getSetting('subscription_status'),
             'subscription_plan' => $this->getSetting('subscription_plan'),
+            'subscription_cancel_at_period_end' => $subscriptionCancelAtPeriodEnd,
+            'subscription_current_period_end' => $subscriptionCurrentPeriodEnd,
             'account_status' => $this->getSetting('account_status'),
             'last_error' => $this->getSetting('last_error'),
             'instance_id' => $this->getSetting('instance_id'),
@@ -505,6 +523,8 @@ class CloudConnectService
         // Update local cache
         $this->setSetting('subscription_status', $data['status'] ?? 'none');
         $this->setSetting('subscription_plan', $data['plan'] ?? null);
+        $this->setSetting('subscription_cancel_at_period_end', ($data['cancel_at_period_end'] ?? false) ? 'true' : 'false');
+        $this->setSetting('subscription_current_period_end', $data['current_period_end'] ?? null);
         
         // Also update account status if provided
         if (isset($data['account_status'])) {
@@ -547,6 +567,52 @@ class CloudConnectService
         return $this->apiRequest('POST', '/billing/checkout', [
             'plan' => $plan,
         ]);
+    }
+
+    /**
+     * Change subscription plan (between paid plans)
+     */
+    public function changePlan(string $plan): array
+    {
+        $result = $this->apiRequest('PATCH', '/billing/subscription', [
+            'plan' => $plan,
+        ]);
+        
+        // Update local cache
+        if (isset($result['plan'])) {
+            $this->setSetting('subscription_plan', $result['plan']);
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Cancel subscription at period end
+     */
+    public function cancelSubscription(): array
+    {
+        $result = $this->apiRequest('POST', '/billing/subscription/cancel');
+        
+        // Update local cache with cancellation status
+        $this->setSetting('subscription_cancel_at_period_end', 'true');
+        if (isset($result['current_period_end'])) {
+            $this->setSetting('subscription_current_period_end', $result['current_period_end']);
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Reactivate a cancelled subscription
+     */
+    public function reactivateSubscription(): array
+    {
+        $result = $this->apiRequest('POST', '/billing/subscription/reactivate');
+        
+        // Update local cache - cancellation is no longer scheduled
+        $this->setSetting('subscription_cancel_at_period_end', 'false');
+        
+        return $result;
     }
 
     /**

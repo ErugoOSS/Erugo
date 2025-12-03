@@ -24,6 +24,8 @@ class CloudConnectSetting extends Model
         'user_email',
         'subscription_status',
         'subscription_plan',
+        'subscription_cancel_at_period_end',
+        'subscription_current_period_end',
         'account_status',
         'heartbeat_endpoint',
         'heartbeat_interval',

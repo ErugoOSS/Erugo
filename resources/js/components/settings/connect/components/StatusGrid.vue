@@ -11,7 +11,8 @@ import {
   LogIn,
   LogOut,
   UserPlus,
-  Loader2
+  Loader2,
+  ServerOff
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useToast } from 'vue-toastification'
@@ -30,7 +31,7 @@ const props = defineProps({
   loading: Boolean
 })
 
-const emit = defineEmits(['login', 'logout', 'register'])
+const emit = defineEmits(['login', 'logout', 'register', 'createInstance'])
 
 const copiedDomain = ref(false)
 
@@ -50,10 +51,11 @@ const copyDomain = async () => {
 <template>
   <div class="status-grid">
     <!-- Connection Status Card -->
-    <div class="status-card" :class="{ online: isConnected, offline: !isConnected }">
+    <div class="status-card" :class="{ online: isConnected, offline: !isConnected && status?.has_instance, 'no-instance': !status?.has_instance }">
       <div class="status-card-icon">
         <Loader2 v-if="isReconnecting" class="spinner" />
         <Wifi v-else-if="isConnected" />
+        <ServerOff v-else-if="!status?.has_instance" />
         <WifiOff v-else />
       </div>
       <div class="status-card-content">
@@ -61,6 +63,12 @@ const copyDomain = async () => {
         <span class="status-card-value">
           <template v-if="isReconnecting">{{ $t('cloudConnect.connected.reconnecting') }}</template>
           <template v-else-if="isConnected">{{ $t('cloudConnect.status.connected') }}</template>
+          <template v-else-if="!status?.has_instance">
+            {{ $t('cloudConnect.status.noInstance') }} 
+            <br><br></br>
+            <button @click="emit('createInstance')" class="card-action-btn" :title="$t('cloudConnect.auth.createInstance')">
+            <ServerPlus /> {{ $t('cloudConnect.auth.createInstance') }}
+          </button></template>
           <template v-else>{{ $t('cloudConnect.status.disconnected') }}</template>
         </span>
         <span v-if="isConnected && status?.last_heartbeat_at" class="status-card-meta" :class="{ healthy: heartbeatHealthy, unhealthy: !heartbeatHealthy }">
@@ -170,6 +178,15 @@ const copyDomain = async () => {
     .status-card-icon {
       background: color-mix(in srgb, var(--color-danger) 15%, transparent);
       color: var(--color-danger);
+    }
+  }
+
+  &.no-instance {
+    border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
+    
+    .status-card-icon {
+      background: color-mix(in srgb, var(--color-warning) 15%, transparent);
+      color: var(--color-warning);
     }
   }
 

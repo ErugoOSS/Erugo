@@ -85,6 +85,8 @@
       "acceptTerms": "Ik ga akkoord met de",
       "confirmPassword": "Wachtwoord bevestigen",
       "confirmPasswordPlaceholder": "Bevestig je wachtwoord",
+      "createAccount": "Aan de slag",
+      "createInstance": "Nu een instantie maken",
       "description": "Log in of maak een account aan om uw instantie te verbinden met Erugo Connect voor eenvoudige domeinroutering.",
       "email": "E-mailadres",
       "emailPlaceholder": "you@example.com",
@@ -172,14 +174,17 @@
     "errorLoadingStatus": "Cloud Connect-status kon niet worden geladen",
     "instance": {
       "create": "Instantie maken",
-      "description": "Kies een subdomein voor je Erugo instantie. Dit wordt je publieke URL.",
+      "createTitle": "Instantie maken",
+      "description": "Kies een subdomein voor uw Erugo instantie.",
       "name": "Instance Naam",
       "namePlaceholder": "Mijn Erugo-server",
       "subdomain": "Subdomein",
+      "subdomainHelp": "Dit is de publieke URL waarmee uw gebruikers toegang krijgen tot uw Erugo instantie.",
       "subdomainPlaceholder": "mijn-server",
       "suggestions": "Beschikbare alternatieven",
       "title": "Uw Instance instellen"
     },
+    "instanceAlreadyLinked": "Deze installatie van Erugo is al geregistreerd bij een andere gebruikersaccount. Als je een nieuw account hebt aangemaakt, meld je dan aan met je vorige account om verbinding te maken met je reeds geclaimde instantie.",
     "instanceCreateFailed": "Instantie niet aangemaakt",
     "instanceCreated": "Instance succesvol aangemaakt!",
     "instances": {
@@ -252,6 +257,23 @@
       "usage": "Gebruik"
     },
     "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "planChange": {
+      "cancelMessage": "Je abonnement wordt geannuleerd aan het einde van je huidige factureringsperiode ({date}). Je behoudt tot die tijd toegang tot alle functies.",
+      "cancelTitle": "Abonnement annuleren",
+      "cancelling": "Annuleren",
+      "confirmCancel": "Abonnement annuleren",
+      "confirmDowngrade": "Verlaging schema",
+      "confirmReactivate": "Reactiveren",
+      "confirmUpgrade": "Nu upgraden",
+      "downgradeMessage": "Je plan wordt gedowngraded aan het einde van je huidige factureringsperiode ({date}). Je behoudt tot dan de functies van je huidige plan.",
+      "downgradeTitle": "Downgrade plan",
+      "from": "Van",
+      "reactivateMessage": "Je abonnement wordt opnieuw geactiveerd en loopt gewoon door. Er worden geen extra kosten in rekening gebracht tot de volgende factureringsdatum.",
+      "reactivateTitle": "Abonnement heractiveren",
+      "to": "Naar",
+      "upgradeMessage": "Het pro rata verschil wordt onmiddellijk in rekening gebracht. De nieuwe planken zullen onmiddellijk beschikbaar zijn.",
+      "upgradeTitle": "Upgrade plan"
+    },
     "planManagement": {
       "changePlan": "Veranderingsplan",
       "changePlanButton": "Veranderingsplan",
@@ -261,6 +283,7 @@
       "currentPlanSelected": "Huidig plan",
       "free": "Gratis",
       "manage": "Beheer",
+      "selected": "GESELECTEERD",
       "title": "Uw plan beheren"
     },
     "ready": {
@@ -278,6 +301,7 @@
       "connection": "Aansluiting",
       "disconnected": "Ontkoppeld",
       "domain": "Domein",
+      "noInstance": "Je hebt nog geen instantie aangemaakt",
       "noPlan": "Geen plan geselecteerd",
       "notLoggedIn": "Niet ingelogd",
       "plan": "Plan"
@@ -293,6 +317,10 @@
         "prioritySupport": "Prioriteit ondersteuning",
         "subdomain": "Gratis subdomein"
       },
+      "cancelSubscription": "Abonnement annuleren",
+      "cancellationScheduled": "Uw abonnement is gepland voor annulering",
+      "cancellationScheduledMessage": "Uw Erugo Connect abonnement wordt geannuleerd aan het einde van uw factureringsperiode ({date})",
+      "cancellationScheduledTitle": "Uw abonnement staat gepland voor opzegging",
       "customDomains": "{count} aangepaste domeinen per instantie",
       "description": "Selecteer een abonnement om Cloud Connect in te schakelen voor je instance.",
       "description_read_only": "Erugo Connect is gratis beschikbaar voor basis- of persoonlijk gebruik. Als je meer bandbreedte of aangepaste domeinen nodig hebt, kun je een van onze betaalde plannen kiezen.",
@@ -303,6 +331,7 @@
       "loggedInAs": "Aangemeld als",
       "month": "maand",
       "noCustomDomains": "Geen aangepaste domeinen",
+      "planChanged": "Je plan is bijgewerkt",
       "pollingNote": "Voltooi je betaling in het nieuwe venster. Deze pagina wordt automatisch bijgewerkt.",
       "pro": {
         "customDomain": "{count} aangepast domein",
@@ -310,6 +339,8 @@
         "instances": "Tot {count} instanties",
         "subdomain": "Gratis subdomein"
       },
+      "reactivate": "Niet annuleren",
+      "reactivated": "Uw abonnement is opnieuw geactiveerd en zal niet langer worden geannuleerd",
       "stopWaiting": "Annuleren",
       "subdomain": "Gratis subdomein inbegrepen",
       "subscribe": "Nu abonneren",
@@ -320,6 +351,7 @@
     },
     "subscriptionActive": "Abonnement geactiveerd!",
     "title": "Erugo aansluiten",
+    "tunnelConnected": "Tunnel aangesloten",
     "usage": {
       "in": "In",
       "instances": "Instanties",

@@ -64,6 +64,8 @@
       "acceptTerms": "Concordo com o",
       "confirmPassword": "Confirme a palavra-passe",
       "confirmPasswordPlaceholder": "Confirmar a sua palavra-passe",
+      "createAccount": "Começar a trabalhar",
+      "createInstance": "Criar uma instância agora",
       "description": "Inicie sessão ou crie uma conta para ligar a sua instância ao Erugo Connect para um fácil encaminhamento de domínios.",
       "email": "Endereço de correio eletrónico",
       "emailPlaceholder": "you@example.com",
@@ -151,14 +153,17 @@
     "errorLoadingStatus": "Falha ao carregar o estado do Cloud Connect",
     "instance": {
       "create": "Criar instância",
-      "description": "Escolha um subdomínio para a sua instância Erugo. Este será o seu URL público.",
+      "createTitle": "Criar instância",
+      "description": "Escolha um subdomínio para a sua instância Erugo.",
       "name": "Nome da instância",
       "namePlaceholder": "O meu servidor Erugo",
       "subdomain": "Subdomínio",
+      "subdomainHelp": "Este será o URL público através do qual os seus utilizadores acederão à sua instância Erugo.",
       "subdomainPlaceholder": "meu-servidor",
       "suggestions": "Alternativas disponíveis",
       "title": "Configurar a sua instância"
     },
+    "instanceAlreadyLinked": "Esta instalação do Erugo já está registada noutra conta de utilizador. Se criou uma nova conta, inicie sessão utilizando a sua conta anterior para se ligar à sua instância já registada.",
     "instanceCreateFailed": "Falha ao criar a instância",
     "instanceCreated": "Instância criada com sucesso!",
     "instances": {
@@ -231,6 +236,23 @@
       "usage": "Utilização"
     },
     "passwordMismatch": "Palavras passe diferentes",
+    "planChange": {
+      "cancelMessage": "A sua subscrição será cancelada no final do período de faturação atual ({date}). Manterá o acesso a todas as funcionalidades até essa altura.",
+      "cancelTitle": "Cancelar subscrição",
+      "cancelling": "Cancelamento",
+      "confirmCancel": "Cancelar subscrição",
+      "confirmDowngrade": "Redução do calendário",
+      "confirmReactivate": "Reativar",
+      "confirmUpgrade": "Atualizar agora",
+      "downgradeMessage": "O seu plano será reduzido no final do período de faturação atual ({date}). Até lá, manterá as funcionalidades do seu plano atual.",
+      "downgradeTitle": "Plano de desvalorização",
+      "from": "De",
+      "reactivateMessage": "A sua subscrição será reactivada e continuará a funcionar normalmente. Não serão cobrados encargos adicionais até à data de faturação seguinte.",
+      "reactivateTitle": "Reativar a subscrição",
+      "to": "Para",
+      "upgradeMessage": "Ser-lhe-á cobrada imediatamente a diferença proporcional. As novas funcionalidades do seu plano estarão disponíveis de imediato.",
+      "upgradeTitle": "Plano de atualização"
+    },
     "planManagement": {
       "changePlan": "Alterar plano",
       "changePlanButton": "Alterar plano",
@@ -240,6 +262,7 @@
       "currentPlanSelected": "Plano atual",
       "free": "Grátis",
       "manage": "Gerir",
+      "selected": "SELECCIONADO",
       "title": "Gerir o seu plano"
     },
     "ready": {
@@ -257,6 +280,7 @@
       "connection": "Ligação",
       "disconnected": "Desligado",
       "domain": "Domínio",
+      "noInstance": "Ainda não criou uma instância",
       "noPlan": "Nenhum plano selecionado",
       "notLoggedIn": "Não conectado",
       "plan": "Plano"
@@ -272,6 +296,10 @@
         "prioritySupport": "Apoio prioritário",
         "subdomain": "Subdomínio gratuito"
       },
+      "cancelSubscription": "Cancelar subscrição",
+      "cancellationScheduled": "A sua subscrição foi programada para ser cancelada",
+      "cancellationScheduledMessage": "A sua subscrição Erugo Connect será anulada no final do seu período de faturação ({date})",
+      "cancellationScheduledTitle": "A sua subscrição está programada para ser cancelada",
       "customDomains": "{count} domínios personalizados por instância",
       "description": "Selecione um plano de subscrição para ativar o Cloud Connect para a sua instância.",
       "description_read_only": "O Erugo Connect está disponível gratuitamente para utilização básica ou pessoal. Se precisar de mais largura de banda ou de domínios personalizados, pode optar por um dos nossos planos pagos.",
@@ -282,6 +310,7 @@
       "loggedInAs": "Registado como",
       "month": "mês",
       "noCustomDomains": "Sem domínios personalizados",
+      "planChanged": "O seu plano foi atualizado",
       "pollingNote": "Conclua o seu pagamento na nova janela. Esta página será actualizada automaticamente.",
       "pro": {
         "customDomain": "{count} domínio personalizado",
@@ -289,6 +318,8 @@
         "instances": "Até {count} instâncias",
         "subdomain": "Subdomínio gratuito"
       },
+      "reactivate": "Não cancelar",
+      "reactivated": "A sua subscrição foi reactivada e já não será cancelada",
       "stopWaiting": "Cancelar",
       "subdomain": "Subdomínio gratuito incluído",
       "subscribe": "Subscrever agora",
@@ -299,6 +330,7 @@
     },
     "subscriptionActive": "Assinatura activada!",
     "title": "Erugo Connect",
+    "tunnelConnected": "Túnel ligado",
     "usage": {
       "in": "Em",
       "instances": "Instâncias",

@@ -135,6 +135,10 @@ export function useErugoInstances(onInstanceChange, options = {}) {
         showReclaimConfirm.value = true
         return
       }
+      if (error.code === 'CONFLICT') {
+        toast.error(t.value('cloudConnect.instanceAlreadyLinked'))
+        return
+      }
       toast.error(error.message || t.value('cloudConnect.instanceCreateFailed'))
     } finally {
       instanceLoading.value = false

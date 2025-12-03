@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import {
   Cloud,
   CloudOff,
@@ -41,6 +41,8 @@ import RegenerateTokenModal from './components/modals/RegenerateTokenModal.vue'
 import TokenDisplayModal from './components/modals/TokenDisplayModal.vue'
 import ReclaimInstanceModal from './components/modals/ReclaimInstanceModal.vue'
 import LinkInstanceModal from './components/modals/LinkInstanceModal.vue'
+import CreateInstanceModal from './components/modals/CreateInstanceModal.vue'
+import PlanChangeConfirmModal from './components/modals/PlanChangeConfirmModal.vue'
 
 const emit = defineEmits(['loginStateChanged', 'connectionStateChanged', 'connectingStateChanged', 'instanceReadyChanged', 'navItemClicked'])
 
@@ -103,11 +105,19 @@ const {
   loadingPlans,
   pollingSubscription,
   loadingBillingPortal,
+  changingPlan,
   currentPlan,
   loadPlans,
   handleCheckout,
+  handleReactivateSubscription,
   stopPolling,
-  openBillingPortal
+  openBillingPortal,
+  // Plan change confirmation
+  showPlanChangeConfirm,
+  pendingPlanAction,
+  pendingTargetPlan,
+  confirmPlanChange,
+  closePlanChangeConfirm
 } = useErugoSubscription(status, loadStatus)
 
 const {
@@ -229,6 +239,25 @@ const handleNavItemClicked = (item) => {
 // Handle forgot password from login modal
 const handleOpenForgotPassword = () => {
   openForgotPasswordForm(status.value?.user_email || loginForm.value.email || '')
+}
+
+// Create instance modal state
+const showCreateInstanceModal = ref(false)
+
+const openCreateInstanceModal = () => {
+  showCreateInstanceModal.value = true
+}
+
+const closeCreateInstanceModal = () => {
+  showCreateInstanceModal.value = false
+}
+
+const handleCreateInstanceFromModal = async () => {
+  await handleCreateInstance()
+  // Close modal on success (if instance was created)
+  if (status.value?.has_instance) {
+    closeCreateInstanceModal()
+  }
 }
 
 // Expose methods for parent component
@@ -425,6 +454,7 @@ defineExpose({
                   @login="openLoginForm"
                   @logout="handleLogout"
                   @register="openRegisterForm"
+                  @createInstance="openCreateInstanceModal"
                 />
               </div>
             </div>
@@ -516,14 +546,17 @@ defineExpose({
                   :plans="plans"
                   :selectedPlan="selectedPlan"
                   :currentSubscriptionPlan="status?.subscription_plan"
-                  :loading="loading"
+                  :loading="loading || changingPlan"
                   :loadingPlans="loadingPlans"
                   :pollingSubscription="pollingSubscription"
                   :hasActiveSubscription="hasActiveSubscription"
                   :currentPlan="currentPlan"
+                  :cancelAtPeriodEnd="status?.subscription_cancel_at_period_end"
+                  :currentPeriodEnd="status?.subscription_current_period_end"
                   @update:selectedPlan="selectedPlan = $event"
                   @checkout="handleCheckout"
                   @stopPolling="stopPolling"
+                  @reactivate="handleReactivateSubscription"
                 />
               </div>
             </div>
@@ -660,6 +693,33 @@ defineExpose({
     :instance="selectedInstance"
     @update:show="closeLinkConfirm"
     @confirm="handleLinkInstance"
+  />
+
+  <CreateInstanceModal
+    :show="showCreateInstanceModal"
+    :loading="instanceLoading"
+    :instanceForm="instanceForm"
+    :checkingSubdomain="checkingSubdomain"
+    :subdomainAvailable="subdomainAvailable"
+    :subdomainOwnedByUser="subdomainOwnedByUser"
+    :subdomainSuggestions="subdomainSuggestions"
+    @update:show="closeCreateInstanceModal"
+    @submit="handleCreateInstanceFromModal"
+    @checkSubdomain="handleCheckSubdomain"
+    @selectSuggestion="selectSuggestion"
+    @subdomainInput="resetSubdomainState"
+    @clickOutside="closeCreateInstanceModal"
+  />
+
+  <PlanChangeConfirmModal
+    :show="showPlanChangeConfirm"
+    :loading="changingPlan"
+    :actionType="pendingPlanAction"
+    :currentPlan="currentPlan"
+    :targetPlan="pendingTargetPlan"
+    :currentPeriodEnd="status?.subscription_current_period_end"
+    @update:show="closePlanChangeConfirm"
+    @confirm="confirmPlanChange"
   />
 </template>
 

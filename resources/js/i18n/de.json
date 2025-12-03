@@ -85,6 +85,8 @@
       "acceptTerms": "Ich akzeptiere die",
       "confirmPassword": "Bestätigen Sie Ihr Passwort",
       "confirmPasswordPlaceholder": "Bestätigen Sie Ihr Passwort",
+      "createAccount": "Los geht's",
+      "createInstance": "Jetzt eine Instanz erstellen",
       "description": "Melden Sie sich an oder erstellen Sie ein Konto, um Ihre Instanz mit Erugo Connect für einfaches Domain-Routing zu verbinden.",
       "email": "E-Mail Adresse",
       "emailPlaceholder": "you@example.com",
@@ -172,14 +174,17 @@
     "errorLoadingStatus": "Cloud Connect-Status konnte nicht geladen werden",
     "instance": {
       "create": "Instanz erstellen",
-      "description": "Wählen Sie eine Subdomain für Ihre Erugo-Instanz. Dies wird Ihre öffentliche URL sein.",
+      "createTitle": "Instanz erstellen",
+      "description": "Wählen Sie eine Subdomain für Ihre Erugo-Instanz.",
       "name": "Name der Instanz",
       "namePlaceholder": "Mein Erugo-Server",
       "subdomain": "Subdomain",
+      "subdomainHelp": "Dies wird die öffentliche URL sein, über die Ihre Benutzer auf Ihre Erugo-Instanz zugreifen werden.",
       "subdomainPlaceholder": "mein-server",
       "suggestions": "Verfügbare Alternativen",
       "title": "Einrichten Ihrer Instanz"
     },
+    "instanceAlreadyLinked": "Diese Installation von Erugo ist bereits auf ein anderes Benutzerkonto registriert. Wenn Sie ein neues Konto erstellt haben, melden Sie sich bitte mit Ihrem vorherigen Konto an, um sich mit Ihrer bereits beanspruchten Instanz zu verbinden.",
     "instanceCreateFailed": "Instanz konnte nicht erstellt werden",
     "instanceCreated": "Instanz erfolgreich erstellt!",
     "instances": {
@@ -252,6 +257,23 @@
       "usage": "Verwendung"
     },
     "passwordMismatch": "Passwörter stimmen nicht überein",
+    "planChange": {
+      "cancelMessage": "Ihr Abonnement wird am Ende des aktuellen Abrechnungszeitraums ({date}) gekündigt. Bis dahin haben Sie weiterhin Zugriff auf alle Funktionen.",
+      "cancelTitle": "Abonnement kündigen",
+      "cancelling": "Abbestellen",
+      "confirmCancel": "Abonnement kündigen",
+      "confirmDowngrade": "Zeitplan Downgrade",
+      "confirmReactivate": "Reaktivieren Sie",
+      "confirmUpgrade": "Jetzt aktualisieren",
+      "downgradeMessage": "Ihr Tarif wird am Ende des aktuellen Abrechnungszeitraums ({date}) herabgestuft. Bis dahin behalten Sie die Funktionen Ihres aktuellen Tarifs bei.",
+      "downgradeTitle": "Downgrade-Plan",
+      "from": "Von",
+      "reactivateMessage": "Ihr Abonnement wird reaktiviert und läuft wie gewohnt weiter. Bis zu Ihrem nächsten Abrechnungsdatum werden keine weiteren Gebühren fällig.",
+      "reactivateTitle": "Abonnement reaktivieren",
+      "to": "An",
+      "upgradeMessage": "Die anteilige Differenz wird Ihnen sofort in Rechnung gestellt. Ihre neuen Tarifmerkmale sind sofort verfügbar.",
+      "upgradeTitle": "Upgrade-Plan"
+    },
     "planManagement": {
       "changePlan": "Plan ändern",
       "changePlanButton": "Plan ändern",
@@ -261,6 +283,7 @@
       "currentPlanSelected": "Aktueller Plan",
       "free": "Kostenlos",
       "manage": "Verwalten Sie",
+      "selected": "AUSGEWÄHLT",
       "title": "Verwalten Sie Ihren Plan"
     },
     "ready": {
@@ -278,6 +301,7 @@
       "connection": "Verbindung",
       "disconnected": "Getrennt",
       "domain": "Bereich",
+      "noInstance": "Sie haben noch keine Instanz erstellt",
       "noPlan": "Kein Plan ausgewählt",
       "notLoggedIn": "Nicht eingeloggt",
       "plan": "Plan"
@@ -293,6 +317,10 @@
         "prioritySupport": "Vorrangige Unterstützung",
         "subdomain": "Kostenlose Subdomain"
       },
+      "cancelSubscription": "Abonnement kündigen",
+      "cancellationScheduled": "Ihr Abonnement ist zur Kündigung vorgesehen",
+      "cancellationScheduledMessage": "Ihr Erugo Connect-Abonnement wird zum Ende Ihres Abrechnungszeitraums ({date}) gekündigt.",
+      "cancellationScheduledTitle": "Ihr Abonnement ist zur Kündigung vorgesehen",
       "customDomains": "{count} benutzerdefinierte Domänen pro Instanz",
       "description": "Wählen Sie einen Abonnementplan, um Cloud Connect für Ihre Instanz zu aktivieren.",
       "description_read_only": "Erugo Connect ist für die einfache oder persönliche Nutzung kostenlos verfügbar. Wenn Sie mehr Bandbreite oder benutzerdefinierte Domains benötigen, können Sie einen unserer kostenpflichtigen Pläne wählen.",
@@ -303,6 +331,7 @@
       "loggedInAs": "Eingetragen als",
       "month": "Monat",
       "noCustomDomains": "Keine benutzerdefinierten Domänen",
+      "planChanged": "Ihr Plan wurde aktualisiert",
       "pollingNote": "Schließen Sie Ihre Zahlung in dem neuen Fenster ab. Diese Seite wird automatisch aktualisiert.",
       "pro": {
         "customDomain": "{count} benutzerdefinierte Domäne",
@@ -310,6 +339,8 @@
         "instances": "Bis zu {count} Instanzen",
         "subdomain": "Kostenlose Subdomain"
       },
+      "reactivate": "Nicht absagen",
+      "reactivated": "Ihr Abonnement wurde reaktiviert und wird nicht mehr gekündigt",
       "stopWaiting": "Abbrechen",
       "subdomain": "Kostenlose Subdomain inklusive",
       "subscribe": "Jetzt abonnieren",
@@ -320,6 +351,7 @@
     },
     "subscriptionActive": "Abonnement aktiviert!",
     "title": "Erugo Verbinden",
+    "tunnelConnected": "Tunnel verbunden",
     "usage": {
       "in": "Unter",
       "instances": "Instanzen",

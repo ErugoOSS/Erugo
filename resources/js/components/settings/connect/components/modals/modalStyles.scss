@@ -325,6 +325,7 @@ button.danger {
   .subdomain-suffix {
     position: absolute;
     right: 40px;
+    top: 15px;
     color: var(--panel-section-text-color);
     opacity: 0.6;
     font-size: 0.875rem;
@@ -333,6 +334,7 @@ button.danger {
   .subdomain-status {
     position: absolute;
     right: 12px;
+    top: 12px;
 
     svg {
       width: 20px;

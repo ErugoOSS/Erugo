@@ -85,6 +85,8 @@
       "acceptTerms": "I agree to the",
       "confirmPassword": "Confirm Password",
       "confirmPasswordPlaceholder": "Confirm your password",
+      "createAccount": "Get started",
+      "createInstance": "Create an instance now",
       "description": "Sign in or create an account to connect your instance to Erugo Connect for easy domain routing.",
       "email": "Email Address",
       "emailPlaceholder": "you@example.com",
@@ -172,14 +174,17 @@
     "errorLoadingStatus": "Failed to load Cloud Connect status",
     "instance": {
       "create": "Create Instance",
-      "description": "Choose a subdomain for your Erugo instance. This will be your public URL.",
+      "createTitle": "Create Instance",
+      "description": "Choose a subdomain for your Erugo instance.",
       "name": "Instance Name",
       "namePlaceholder": "My Erugo Server",
       "subdomain": "Subdomain",
+      "subdomainHelp": "This will be the public URL via which your users will access your Erugo instance.",
       "subdomainPlaceholder": "my-server",
       "suggestions": "Available alternatives",
       "title": "Set Up Your Instance"
     },
+    "instanceAlreadyLinked": "This installation of Erugo is already registered to another user account. If you’ve created a new account, please sign in using your previous account to connect to your already-claimed instance.",
     "instanceCreateFailed": "Failed to create instance",
     "instanceCreated": "Instance created successfully!",
     "instances": {
@@ -252,6 +257,23 @@
       "usage": "Usage"
     },
     "passwordMismatch": "Passwords do not match",
+    "planChange": {
+      "cancelMessage": "Your subscription will be cancelled at the end of your current billing period ({date}). You'll retain access to all features until then.",
+      "cancelTitle": "Cancel Subscription",
+      "cancelling": "Cancelling",
+      "confirmCancel": "Cancel Subscription",
+      "confirmDowngrade": "Schedule Downgrade",
+      "confirmReactivate": "Reactivate",
+      "confirmUpgrade": "Upgrade Now",
+      "downgradeMessage": "Your plan will be downgraded at the end of your current billing period ({date}). You'll retain your current plan features until then.",
+      "downgradeTitle": "Downgrade Plan",
+      "from": "From",
+      "reactivateMessage": "Your subscription will be reactivated and will continue as normal. No additional charges will be made until your next billing date.",
+      "reactivateTitle": "Reactivate Subscription",
+      "to": "To",
+      "upgradeMessage": "You will be charged the pro-rated difference immediately. Your new plan features will be available right away.",
+      "upgradeTitle": "Upgrade Plan"
+    },
     "planManagement": {
       "changePlan": "Change Plan",
       "changePlanButton": "Change Plan",
@@ -261,6 +283,7 @@
       "currentPlanSelected": "Current Plan",
       "free": "Free",
       "manage": "Manage",
+      "selected": "SELECTED",
       "title": "Manage Your Plan"
     },
     "ready": {
@@ -278,6 +301,7 @@
       "connection": "Connection",
       "disconnected": "Disconnected",
       "domain": "Domain",
+      "noInstance": "You have not created an instance yet",
       "noPlan": "No plan selected",
       "notLoggedIn": "Not logged in",
       "plan": "Plan"
@@ -293,6 +317,10 @@
         "prioritySupport": "Priority support",
         "subdomain": "Free subdomain"
       },
+      "cancelSubscription": "Cancel Subscription",
+      "cancellationScheduled": "Your subscription has been scheduled for cancellation",
+      "cancellationScheduledMessage": "Your Erugo Connect subscription will be cancelled at the end of your billing period ({date})",
+      "cancellationScheduledTitle": "Your subscription is scheduled for cancellation",
       "customDomains": "{count} custom domains per instance",
       "description": "Select a subscription plan to enable Cloud Connect for your instance.",
       "description_read_only": "Erugo Connect is available for free for basic or personal use. If you need more bandwidth or custom domains, you can choose one of our paid plans.",
@@ -303,6 +331,7 @@
       "loggedInAs": "Signed in as",
       "month": "month",
       "noCustomDomains": "No custom domains",
+      "planChanged": "Your plan has been updated",
       "pollingNote": "Complete your payment in the new window. This page will update automatically.",
       "pro": {
         "customDomain": "{count} custom domain",
@@ -310,6 +339,8 @@
         "instances": "Up to {count} instances",
         "subdomain": "Free subdomain"
       },
+      "reactivate": "Don't Cancel",
+      "reactivated": "Your subscription has been reactivated and will no longer be cancelled",
       "stopWaiting": "Cancel",
       "subdomain": "Free subdomain included",
       "subscribe": "Subscribe Now",
@@ -320,6 +351,7 @@
     },
     "subscriptionActive": "Subscription activated!",
     "title": "Erugo Connect",
+    "tunnelConnected": "Tunnel connected",
     "usage": {
       "in": "In",
       "instances": "Instances",
