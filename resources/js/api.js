@@ -1039,6 +1039,21 @@ export const getCloudConnectPlans = async () => {
   return data.data
 }
 
+// Fetch plans from public Erugo Cloud API (no auth required)
+export const getCloudConnectPublicPlans = async () => {
+  const response = await fetch('https://api.erugo.cloud/v1/billing/plans', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to fetch plans')
+  }
+  return data
+}
+
 export const createCloudConnectCheckout = async (plan) => {
   const response = await fetchWithAuth(`${apiUrl}/api/cloud-connect/checkout`, {
     method: 'POST',

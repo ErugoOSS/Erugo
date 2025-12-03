@@ -50,14 +50,12 @@ const {
   status,
   currentStep,
   connecting,
-  disconnecting,
   isConnected,
   isReconnecting,
   lastHeartbeatFormatted,
   heartbeatHealthy,
   needsEmailVerification,
   hasActiveSubscription,
-  canConnect,
   loadStatus,
   refreshStatus,
   handleConnect,
@@ -66,6 +64,9 @@ const {
   resendVerificationEmail
 } = useErugoStatus({
   onStatusLoaded: () => {
+    // Load plans always (API now supports unauthenticated requests for plan preview)
+    loadPlans()
+
     // Load additional data when status is loaded and user is logged in
     if (status.value?.is_logged_in) {
       loadUsage()
@@ -73,6 +74,7 @@ const {
     }
   },
   onHasSubscription: () => {
+    // Plans are already loaded in onStatusLoaded, but this ensures refresh after subscription changes
     loadPlans()
   }
 })
@@ -91,12 +93,8 @@ const {
   handleLogout,
   openLoginForm,
   openRegisterForm,
-  closeAuthForms,
   openForgotPasswordForm,
-  closeForgotPasswordForm,
-  handleForgotPassword,
-  loginFormClickOutside,
-  registerFormClickOutside
+  handleForgotPassword
 } = useErugoAuth(loadStatus)
 
 const {
@@ -104,15 +102,11 @@ const {
   selectedPlan,
   loadingPlans,
   pollingSubscription,
-  showPlanManagement,
   loadingBillingPortal,
   currentPlan,
   loadPlans,
   handleCheckout,
-  handleChangePlan,
   stopPolling,
-  openPlanManagement,
-  closePlanManagement,
   openBillingPortal
 } = useErugoSubscription(status, loadStatus)
 
@@ -295,9 +289,9 @@ defineExpose({
     <!-- Main Layout with Sidebar -->
     <div v-else class="row">
       <!-- Sidebar Navigation -->
-      <div class="col-2 d-none d-md-block">
+      <div class="col-2 d-none d-md-block" v-if="status?.is_logged_in">
         <ul class="settings-nav pt-5">
-          <li>
+          <li v-if="status?.is_logged_in">
             <a href="#" @click.prevent="handleNavItemClicked('status-section')">
               <component :is="isConnected ? Wifi : WifiOff" />
               {{ $t('cloudConnect.nav.status') }}
@@ -321,7 +315,7 @@ defineExpose({
               {{ $t('cloudConnect.nav.instance') }}
             </a>
           </li>
-          <li>
+          <li v-if="status?.is_logged_in">
             <a href="#" @click.prevent="openBillingPortal" :disabled="loadingBillingPortal">
               <Loader2 v-if="loadingBillingPortal" class="spinner" />
               <ExternalLink v-else />
@@ -332,9 +326,64 @@ defineExpose({
       </div>
 
       <!-- Main Content -->
-      <div class="col-12 col-md-10 pt-5">
+
+      <!-- logged out content -->
+      <div class="col-12 col-md-6 offset-md-3 pt-5" v-if="!status?.is_logged_in">
+        <!-- introduction to Erugo Connect for logged out users -->
+        <div class="row mb-4" v-if="!status?.is_logged_in">
+          <div class="col-12">
+            <h1>{{ $t('cloudConnect.title') }}</h1>
+            <p>{{ $t('cloudConnect.introduction.description') }} <a href="https://new.erugo.app/connect/" target="_blank">{{ $t('cloudConnect.introduction.learnMore') }}</a></p>
+            <h2>{{ $t('cloudConnect.introduction.title_2') }}</h2>
+            <p>{{ $t('cloudConnect.introduction.description_2') }}</p>
+            <p>{{ $t('cloudConnect.introduction.description_2.1') }} <a href="https://www.wireguard.com/" target="_blank">{{ $t('cloudConnect.introduction.wireguard_link_text') }}</a>.</p>
+            <h2>{{ $t('cloudConnect.introduction.title_3') }}</h2>
+            <p>{{ $t('cloudConnect.introduction.description_3') }}</p>
+            <h2>{{ $t('cloudConnect.introduction.title_4') }}</h2>
+            <p>{{ $t('cloudConnect.introduction.description_4') }}</p>
+          </div>
+        </div>
+
+         <!-- Read only Plan Section (visible when not logged in) -->
+         <div v-if="!status?.is_logged_in && !needsEmailVerification" class="row mb-4">
+          <div class="col-12">
+            <div class="setting-group" id="plan-section">
+              <div class="setting-group-header">
+                <h3>
+                  <CreditCard />
+                  {{ $t('cloudConnect.nav.availablePlans') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <!-- No plan / Select plan -->
+                <div v-if="!hasActiveSubscription || !currentPlan">
+                  <p>{{ $t('cloudConnect.subscription.description_read_only') }}</p>
+                </div>
+
+                <PlanSelector
+                  :plans="plans"
+                  :selectedPlan="selectedPlan"
+                  :currentSubscriptionPlan="status?.subscription_plan"
+                  :loading="loading"
+                  :loadingPlans="loadingPlans"
+                  :pollingSubscription="pollingSubscription"
+                  :hasActiveSubscription="hasActiveSubscription"
+                  :currentPlan="currentPlan"
+                  :readOnly="true"
+                  @checkout="handleCheckout"
+                  @stopPolling="stopPolling"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- logged in content -->
+      <div class="col-12 col-md-10 pt-5" v-if="status?.is_logged_in">
+
         <!-- Combined Status & Connection Section -->
-        <div class="row mb-4">
+        <div class="row mb-4" v-if="status?.is_logged_in">
           <div class="col-12">
             <div class="setting-group" id="status-section">
               <div
@@ -458,21 +507,12 @@ defineExpose({
                   @checkout="handleCheckout"
                   @stopPolling="stopPolling"
                 />
-
-                <!-- Billing Portal Button -->
-                <div v-if="hasActiveSubscription && currentPlan" class="billing-portal-section">
-                  <hr class="section-divider" />
-                  <p class="billing-portal-description">
-                    {{
-                      $t('cloudConnect.billing.portalDescription') ||
-                      'Manage your subscription, update payment methods, or view invoices in the billing portal.'
-                    }}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </div>
+
+       
 
         <!-- Instance Section (visible when logged in and has subscription) -->
         <div v-if="status?.is_logged_in && hasActiveSubscription && !needsEmailVerification" class="row mb-4">
@@ -641,6 +681,7 @@ defineExpose({
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

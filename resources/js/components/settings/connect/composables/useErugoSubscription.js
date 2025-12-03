@@ -1,6 +1,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import {
   getCloudConnectPlans,
+  getCloudConnectPublicPlans,
   getCloudConnectSubscription,
   createCloudConnectCheckout,
   createCloudConnectBillingPortal
@@ -41,7 +42,10 @@ export function useErugoSubscription(statusRef, onSubscriptionActive) {
 
     try {
       loadingPlans.value = true
-      const result = await getCloudConnectPlans()
+      // Use public endpoint when not logged in, authenticated endpoint when logged in
+      const result = statusRef.value?.is_logged_in
+        ? await getCloudConnectPlans()
+        : await getCloudConnectPublicPlans()
       plans.value = result.plans || []
 
       if (!selectedPlan.value && plans.value.length > 0) {

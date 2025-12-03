@@ -10,11 +10,12 @@ const props = defineProps({
   pollingSubscription: Boolean,
   hasActiveSubscription: Boolean,
   currentPlan: Object,
+  readOnly: Boolean,
   compact: {
     type: Boolean,
     default: false
   }
-})
+})  
 
 const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
 </script>
@@ -81,7 +82,7 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
   </div>
 
   <button
-    v-if="selectedPlan && selectedPlan !== currentSubscriptionPlan"
+    v-if="selectedPlan && selectedPlan !== currentSubscriptionPlan && !readOnly"
     @click="emit('checkout')"
     :disabled="loading || pollingSubscription || loadingPlans"
   >
