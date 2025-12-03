@@ -43,6 +43,21 @@
         }
     }
 
+    # Handle download routes with immediate flushing for better streaming through tunnels
+    @downloads {
+        path /shares/*/download /api/shares/*/download/*
+    }
+    handle @downloads {
+        try_files {path} {path}/ /index.php?{query}
+        
+        php_fastcgi unix//run/php/php-fpm.sock {
+            # Flush responses immediately for streaming downloads
+            transport fastcgi {
+                read_timeout 300s
+            }
+        }
+    }
+
     # Handle everything else with Laravel
     handle {
         # Handle static files first

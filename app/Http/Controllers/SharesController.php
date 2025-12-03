@@ -321,10 +321,11 @@ class SharesController extends Controller
     // Determine content type
     $mimeType = $foundFile->type ?? 'application/octet-stream';
 
-    // Stream the response
+    // Stream the response with larger buffer for better throughput
+    // 64KB buffer size optimizes for tunnel/proxy scenarios
     return response()->stream(function () use ($stream, $zip) {
       while (!feof($stream)) {
-        echo fread($stream, 8192);
+        echo fread($stream, 65536);
         flush();
       }
       fclose($stream);
@@ -333,6 +334,7 @@ class SharesController extends Controller
       'Content-Type' => $mimeType,
       'Content-Disposition' => 'attachment; filename="' . $foundFile->display_name . '"',
       'Content-Length' => $fileSize,
+      'X-Accel-Buffering' => 'no', // Disable proxy buffering for streaming
     ]);
   }
 

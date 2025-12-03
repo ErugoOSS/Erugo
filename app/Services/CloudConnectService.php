@@ -1078,6 +1078,9 @@ class CloudConnectService
         $config = "[Interface]\n";
         $config .= "PrivateKey = {$privateKey}\n";
         $config .= "Address = " . ($interface['address'] ?? '10.100.0.2/32') . "\n";
+        // Set MTU to 1420 to account for WireGuard overhead (60 bytes) and avoid fragmentation
+        // This improves throughput especially for large file transfers
+        $config .= "MTU = " . ($interface['mtu'] ?? 1420) . "\n";
         $config .= "\n";
         $config .= "[Peer]\n";
         $config .= "PublicKey = " . ($peer['public_key'] ?? '') . "\n";

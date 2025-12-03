@@ -267,11 +267,14 @@ class BackgroundsController extends Controller
             $headers['Content-Range'] = "bytes $start-$end/$fileSize";
             $headers['Content-Length'] = $length;
             
+            // Use larger buffer (64KB) for better throughput through tunnels/proxies
+            $headers['X-Accel-Buffering'] = 'no';
+            
             return response()->stream(function () use ($fullPath, $start, $length) {
                 $stream = fopen($fullPath, 'rb');
                 fseek($stream, $start);
                 $remaining = $length;
-                $bufferSize = 8192;
+                $bufferSize = 65536; // 64KB buffer for better throughput
                 
                 while ($remaining > 0 && !feof($stream)) {
                     $readSize = min($bufferSize, $remaining);
@@ -286,11 +289,12 @@ class BackgroundsController extends Controller
         
         // No range request - serve entire file
         $headers['Content-Length'] = $fileSize;
+        $headers['X-Accel-Buffering'] = 'no'; // Disable proxy buffering for streaming
         
         return response()->stream(function () use ($fullPath) {
             $stream = fopen($fullPath, 'rb');
             while (!feof($stream)) {
-                echo fread($stream, 8192);
+                echo fread($stream, 65536); // 64KB buffer for better throughput
                 flush();
             }
             fclose($stream);
