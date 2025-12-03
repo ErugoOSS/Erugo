@@ -21,7 +21,8 @@ import {
   LogOut,
   Wifi,
   WifiOff,
-  Loader2
+  Loader2,
+  LogIn
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -50,6 +51,7 @@ const cloudConnectPanel = ref(null)
 const cloudConnectLoggedIn = ref(false)
 const cloudConnectConnected = ref(false)
 const cloudConnectConnecting = ref(false)
+const cloudConnectInstanceReady = ref(false)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
@@ -233,6 +235,10 @@ const updateCloudConnectConnectingState = (isConnecting) => {
   cloudConnectConnecting.value = isConnecting
 }
 
+const updateCloudConnectInstanceReadyState = (isReady) => {
+  cloudConnectInstanceReady.value = isReady
+}
+
 const handleCloudConnectConnect = () => {
   if (cloudConnectPanel.value) {
     cloudConnectPanel.value.handleConnect()
@@ -242,6 +248,18 @@ const handleCloudConnectConnect = () => {
 const handleCloudConnectDisconnect = () => {
   if (cloudConnectPanel.value) {
     cloudConnectPanel.value.handleDisconnect()
+  }
+}
+
+const handleCloudConnectLogin = () => {
+  if (cloudConnectPanel.value) {
+    cloudConnectPanel.value.openLoginForm()
+  }
+}
+
+const handleCloudConnectRegister = () => {
+  if (cloudConnectPanel.value) {
+    cloudConnectPanel.value.openRegisterForm()
   }
 }
 </script>
@@ -459,15 +477,30 @@ const handleCloudConnectDisconnect = () => {
                   </span>
                 </h2>
                 <div class="user-actions">
-                  <button v-if="!cloudConnectConnected" @click="handleCloudConnectConnect" :disabled="cloudConnectConnecting">
-                    <Loader2 v-if="cloudConnectConnecting" class="spinner" />
-                    <Wifi v-else />
-                    {{ cloudConnectConnecting ? ($t('cloudConnect.ready.connecting') || 'Connecting...') : ($t('cloudConnect.ready.connect') || 'Connect') }}
-                  </button>
-                  <button v-else @click="handleCloudConnectDisconnect" class="secondary">
-                    <WifiOff />
-                    {{ $t('cloudConnect.connected.disconnect') || 'Disconnect' }}
-                  </button>
+                  <!-- Not logged in: show Create Account and Login buttons -->
+                  <template v-if="!cloudConnectLoggedIn">
+                    <button @click="handleCloudConnectRegister">
+                      <UserPlus />
+                      {{ $t('cloudConnect.auth.register') || 'Create Account' }}
+                    </button>
+                    <button class="secondary" @click="handleCloudConnectLogin">
+                      <LogIn />
+                      {{ $t('cloudConnect.auth.login') || 'Sign In' }}
+                    </button>
+                  </template>
+                  <!-- Logged in with instance ready: show Connect/Disconnect -->
+                  <template v-else-if="cloudConnectInstanceReady">
+                    <button v-if="!cloudConnectConnected" @click="handleCloudConnectConnect" :disabled="cloudConnectConnecting">
+                      <Loader2 v-if="cloudConnectConnecting" class="spinner" />
+                      <Wifi v-else />
+                      {{ cloudConnectConnecting ? ($t('cloudConnect.ready.connecting') || 'Connecting...') : ($t('cloudConnect.ready.connect') || 'Connect') }}
+                    </button>
+                    <button v-else @click="handleCloudConnectDisconnect" class="secondary">
+                      <WifiOff />
+                      {{ $t('cloudConnect.connected.disconnect') || 'Disconnect' }}
+                    </button>
+                  </template>
+                  <!-- Logged in: always show Sign Out -->
                   <button v-if="cloudConnectLoggedIn" class="secondary" @click="handleCloudConnectLogout">
                     <LogOut />
                     {{ $t('cloudConnect.auth.logout') || 'Sign Out' }}
@@ -475,7 +508,7 @@ const handleCloudConnectDisconnect = () => {
                 </div>
               </div>
               <div class="tab-content-body">
-                <ErugoConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @connectionStateChanged="updateCloudConnectConnectionState" @connectingStateChanged="updateCloudConnectConnectingState" @navItemClicked="handleNavItemClicked" />
+                <ErugoConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @connectionStateChanged="updateCloudConnectConnectionState" @connectingStateChanged="updateCloudConnectConnectingState" @instanceReadyChanged="updateCloudConnectInstanceReadyState" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
 

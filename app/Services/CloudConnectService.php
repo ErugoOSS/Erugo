@@ -344,7 +344,56 @@ class CloudConnectService
         $this->setSetting('subscription_plan', $data['user']['subscription_plan'] ?? null);
         $this->setSetting('account_status', $data['user']['account_status'] ?? $data['user']['status'] ?? null);
 
+        // After successful login, check if user has an instance matching this Erugo's GUID
+        // If found, automatically re-link it so the user doesn't have to manually select it
+        $this->attemptAutoLinkInstance();
+
         return $data;
+    }
+
+    /**
+     * Attempt to automatically link an existing instance that matches this Erugo's GUID
+     * This is called after login to reconnect a previously linked instance
+     * Does not connect the tunnel - just links the instance
+     */
+    protected function attemptAutoLinkInstance(): void
+    {
+        $erugoInstanceGuid = $this->getErugoInstanceGuid();
+        if (empty($erugoInstanceGuid)) {
+            Log::debug('Auto-link skipped: No Erugo instance GUID available');
+            return;
+        }
+
+        // Check if we already have a valid instance configured
+        $currentInstanceId = $this->getSetting('instance_id');
+        $instanceToken = $this->getEncryptedSetting('instance_token');
+        
+        if (!empty($currentInstanceId) && !empty($instanceToken)) {
+            Log::debug('Auto-link skipped: Instance already configured locally');
+            return;
+        }
+
+        // Try to find an existing instance by our GUID
+        Log::info('Auto-link: Searching for existing instance by Erugo GUID after login');
+        $existingInstance = $this->findInstanceByErugoGuid();
+        
+        if ($existingInstance) {
+            Log::info('Auto-link: Found existing instance, linking', [
+                'instance_id' => $existingInstance['id'],
+                'subdomain' => $existingInstance['subdomain'] ?? null,
+            ]);
+            
+            try {
+                // Link to the existing instance (this regenerates the token and stores instance details)
+                $this->linkInstance($existingInstance['id']);
+                Log::info('Auto-link: Successfully linked to existing instance');
+            } catch (Exception $e) {
+                Log::warning('Auto-link: Failed to link to existing instance: ' . $e->getMessage());
+                // Don't throw - login was successful, linking is just a convenience
+            }
+        } else {
+            Log::debug('Auto-link: No existing instance found for this Erugo GUID');
+        }
     }
 
     /**

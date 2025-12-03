@@ -15,7 +15,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-})  
+})
 
 const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
 </script>
@@ -34,50 +34,57 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
       :class="{ selected: selectedPlan === plan.name, current: plan.name === currentSubscriptionPlan }"
       @click="emit('update:selectedPlan', plan.name)"
     >
-      <div class="plan-card-header">
-        <h4>{{ plan.display_name }}</h4>
-        <span v-if="plan.name === currentSubscriptionPlan" class="current-badge">
-          {{ $t('cloudConnect.planManagement.current') }}
-        </span>
+      <div class="plan-card-content">
+        <div class="plan-card-header">
+          <h4>{{ plan.display_name }}</h4>
+          <div>
+            <span v-if="plan.name === selectedPlan" class="selected-badge">
+              {{ $t('cloudConnect.planManagement.selected') }}
+            </span>
+            <span v-if="plan.name === currentSubscriptionPlan" class="current-badge">
+              {{ $t('cloudConnect.planManagement.current') }}
+            </span>
+          </div>
+        </div>
+        <div v-if="plan.price_cents" class="price">
+          ${{ (plan.price_cents / 100).toFixed(2) }}
+          <span>/{{ $t('cloudConnect.subscription.month') }}</span>
+        </div>
+        <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
+        <ul>
+          <li>
+            <Check class="list-icon included" />
+            {{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}
+          </li>
+          <li>
+            <Check class="list-icon included" />
+            {{
+              plan.max_transfer_gb
+                ? $t('cloudConnect.subscription.transfer', { count: plan.max_transfer_gb }) ||
+                  `${plan.max_transfer_gb} GB transfer`
+                : $t('cloudConnect.subscription.transferUnlimited') || 'Unlimited transfer'
+            }}
+          </li>
+          <li>
+            <Check class="list-icon included" />
+            {{
+              plan.max_bandwidth_mbps
+                ? $t('cloudConnect.subscription.bandwidth', { count: plan.max_bandwidth_mbps }) ||
+                  `${plan.max_bandwidth_mbps} Mbps bandwidth`
+                : $t('cloudConnect.subscription.bandwidthUnlimited') || 'Unlimited bandwidth'
+            }}
+          </li>
+          <li v-if="plan.custom_domains_allowed">
+            <Check class="list-icon included" />
+            {{ $t('cloudConnect.subscription.customDomains', { count: plan.max_domains_per_instance }) }}
+          </li>
+          <li v-else class="not-included">
+            <X class="list-icon" />
+            {{ $t('cloudConnect.subscription.noCustomDomains') }}
+          </li>
+        </ul>
+        <p v-if="plan.description && !compact" class="plan-description">{{ plan.description }}</p>
       </div>
-      <div v-if="plan.price_cents" class="price">
-        ${{ (plan.price_cents / 100).toFixed(2) }}
-        <span>/{{ $t('cloudConnect.subscription.month') }}</span>
-      </div>
-      <div v-else class="price free">{{ $t('cloudConnect.planManagement.free') }}</div>
-      <ul>
-        <li>
-          <Check class="list-icon included" />
-          {{ $t('cloudConnect.subscription.instances', { count: plan.max_instances }) }}
-        </li>
-        <li>
-          <Check class="list-icon included" />
-          {{
-            plan.max_transfer_gb
-              ? $t('cloudConnect.subscription.transfer', { count: plan.max_transfer_gb }) ||
-                `${plan.max_transfer_gb} GB transfer`
-              : $t('cloudConnect.subscription.transferUnlimited') || 'Unlimited transfer'
-          }}
-        </li>
-        <li>
-          <Check class="list-icon included" />
-          {{
-            plan.max_bandwidth_mbps
-              ? $t('cloudConnect.subscription.bandwidth', { count: plan.max_bandwidth_mbps }) ||
-                `${plan.max_bandwidth_mbps} Mbps bandwidth`
-              : $t('cloudConnect.subscription.bandwidthUnlimited') || 'Unlimited bandwidth'
-          }}
-        </li>
-        <li v-if="plan.custom_domains_allowed">
-          <Check class="list-icon included" />
-          {{ $t('cloudConnect.subscription.customDomains', { count: plan.max_domains_per_instance }) }}
-        </li>
-        <li v-else class="not-included">
-          <X class="list-icon" />
-          {{ $t('cloudConnect.subscription.noCustomDomains') }}
-        </li>
-      </ul>
-      <p v-if="plan.description && !compact" class="plan-description">{{ plan.description }}</p>
     </div>
   </div>
 
@@ -143,24 +150,41 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
 }
 
 .plan-card {
-  padding: 24px;
-  background: var(--panel-section-background-color-alt);
   border: 2px solid var(--panel-border-color);
-  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  isolation: isolate;
+
+  .plan-card-content {
+    position: relative;
+    background: var(--panel-background-color);
+    padding: 24px;
+    z-index: 10;
+    border-radius: var(--panel-border-radius);
+    height: 100%;
+  }
 
   &.selected {
-    border-color: var(--button-primary-background-color);
-    background: color-mix(in srgb, var(--button-primary-background-color) 10%, transparent);
+    // border-color: var(--primary-button-background-color);
+    // background: color-mix(in srgb, var(--primary-button-background-color) 10%, transparent);
   }
 
   &:hover:not(.selected) {
-    border-color: var(--button-primary-background-color);
+    border-color: var(--primary-button-background-color);
   }
 
   &.current {
-    border-color: var(--color-success);
+    border-color: transparent;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: var(--primary-button-background-color);
+      border-radius: var(--panel-border-radius);
+      z-index: -1;
+    }
   }
 
   .plan-card-header {
@@ -178,16 +202,25 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
     .current-badge {
       font-size: 0.75rem;
       padding: 2px 8px;
-      background: var(--button-primary-background-color);
-      color: var(--button-primary-text-color);
+      background: var(--primary-button-background-color);
+      color: var(--primary-button-text-color);
       border-radius: 4px;
+    }
+    .selected-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      background: var(--secondary-button-background-color);
+      color: var(--secondary-button-text-color);
+      border-radius: 4px;
+      margin-right: 10px;
+      border: 1px solid var(--primary-button-background-color);
     }
   }
 
   .price {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--button-primary-background-color);
+    color: var(--primary-button-background-color);
     margin-bottom: 16px;
 
     span {
@@ -268,4 +301,3 @@ const emit = defineEmits(['update:selectedPlan', 'checkout', 'stopPolling'])
   }
 }
 </style>
-

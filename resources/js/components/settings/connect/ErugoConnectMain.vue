@@ -42,7 +42,7 @@ import TokenDisplayModal from './components/modals/TokenDisplayModal.vue'
 import ReclaimInstanceModal from './components/modals/ReclaimInstanceModal.vue'
 import LinkInstanceModal from './components/modals/LinkInstanceModal.vue'
 
-const emit = defineEmits(['loginStateChanged', 'connectionStateChanged', 'connectingStateChanged', 'navItemClicked'])
+const emit = defineEmits(['loginStateChanged', 'connectionStateChanged', 'connectingStateChanged', 'instanceReadyChanged', 'navItemClicked'])
 
 // Initialize composables with callbacks
 const {
@@ -200,6 +200,22 @@ watch(
   { immediate: true }
 )
 
+// Watch for instance ready state changes and emit to parent
+// An instance is ready when logged in, has active subscription, and has an instance
+watch(
+  () => ({
+    isLoggedIn: status.value?.is_logged_in,
+    hasInstance: status.value?.has_instance,
+    hasSubscription: hasActiveSubscription.value,
+    needsVerification: needsEmailVerification.value
+  }),
+  (newVal) => {
+    const instanceReady = newVal.isLoggedIn && newVal.hasInstance && newVal.hasSubscription && !newVal.needsVerification
+    emit('instanceReadyChanged', instanceReady)
+  },
+  { immediate: true, deep: true }
+)
+
 // Lifecycle
 onMounted(async () => {
   await loadStatus()
@@ -220,7 +236,9 @@ defineExpose({
   refreshStatus,
   handleLogout,
   handleConnect,
-  handleDisconnect
+  handleDisconnect,
+  openLoginForm,
+  openRegisterForm
 })
 </script>
 
