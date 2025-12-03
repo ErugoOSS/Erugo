@@ -345,7 +345,7 @@ defineExpose({
         </div>
 
          <!-- Read only Plan Section (visible when not logged in) -->
-         <div v-if="!status?.is_logged_in && !needsEmailVerification" class="row mb-4">
+         <div v-if="!status?.is_logged_in && !needsEmailVerification && plans?.length > 0" class="row mb-4">
           <div class="col-12">
             <div class="setting-group" id="plan-section">
               <div class="setting-group-header">

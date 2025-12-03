@@ -43,9 +43,7 @@ export function useErugoSubscription(statusRef, onSubscriptionActive) {
     try {
       loadingPlans.value = true
       // Use public endpoint when not logged in, authenticated endpoint when logged in
-      const result = statusRef.value?.is_logged_in
-        ? await getCloudConnectPlans()
-        : await getCloudConnectPublicPlans()
+      const result = statusRef.value?.is_logged_in ? await getCloudConnectPlans() : await getCloudConnectPublicPlans()
       plans.value = result.plans || []
 
       if (!selectedPlan.value && plans.value.length > 0) {
@@ -53,7 +51,9 @@ export function useErugoSubscription(statusRef, onSubscriptionActive) {
       }
     } catch (error) {
       console.error('Failed to load plans:', error)
-      toast.error(t.value('cloudConnect.subscription.loadPlansFailed'))
+      if (statusRef.value?.is_logged_in) {
+        toast.error(t.value('cloudConnect.subscription.loadPlansFailed'))
+      }
     } finally {
       loadingPlans.value = false
     }
@@ -191,4 +191,3 @@ export function useErugoSubscription(statusRef, onSubscriptionActive) {
     openBillingPortal
   }
 }
-

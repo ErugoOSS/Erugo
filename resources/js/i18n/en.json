@@ -224,6 +224,18 @@
       "updateFailed": "Failed to update instance",
       "updateSuccess": "Instance updated successfully"
     },
+    "introduction": {
+      "description": "Erugo Connect gives your self-hosted instance a public URL in seconds.\nNo port forwarding, no reverse proxies, no DNS headaches, just effortless sharing.",
+      "description_2": "Erugo Connect creates a secure tunnel between your Erugo instance and our network routing system. When a user accesses your erugo.cloud domain, we securely proxy the request through this tunnel to the web server inside your instance. This allows you to make your instance available online without dealing with port-forwarding, reverse proxies, DNS, or SSL configuration — we handle it all for you.",
+      "description_2.1": "Erugo Connect uses WireGuard under the hood — a highly respected, open-source VPN technology widely used by the self-hosting community. You can learn more about Wireguard",
+      "description_3": "Erugo was created to put control of your data back in your hands. We strongly believe in this core principle, and Erugo Connect is designed to uphold your right to own your data. Connecting your instance to our network does not give us access to your data or your shares. The tunnel is initiated by your instance and is fully controlled by you.",
+      "description_4": "Erugo Connect is completely optional. It's a convenience feature designed to make setup easier — not a requirement to use Erugo successfully.",
+      "learnMore": "Learn More.",
+      "title_2": "How it works",
+      "title_3": "Security and your data sovereignty ",
+      "title_4": "Our open source promise",
+      "wireguard_link_text": "here"
+    },
     "loading": "Loading Cloud Connect status...",
     "loginFailed": "Sign in failed. Please check your credentials.",
     "loginSuccess": "Signed in successfully",
@@ -232,6 +244,7 @@
     "mustAcceptTerms": "You must accept the Terms of Service and Privacy Policy",
     "nav": {
       "account": "Account",
+      "availablePlans": "Available Erugo Connect Plans",
       "connection": "Connection Status",
       "instance": "Instances",
       "plan": "Your Plan",
@@ -282,6 +295,7 @@
       },
       "customDomains": "{count} custom domains per instance",
       "description": "Select a subscription plan to enable Cloud Connect for your instance.",
+      "description_read_only": "Erugo Connect is available for free for basic or personal use. If you need more bandwidth or custom domains, you can choose one of our paid plans.",
       "freePlanSelected": "Free plan activated!",
       "instances": "{count, plural, one {1 instance} other {Up to {count} instances}}",
       "loadPlansFailed": "Failed to load subscription plans",
@@ -305,6 +319,7 @@
       "waitingForPayment": "Waiting for payment..."
     },
     "subscriptionActive": "Subscription activated!",
+    "title": "Erugo Connect",
     "usage": {
       "in": "In",
       "instances": "Instances",

@@ -224,6 +224,18 @@
       "updateFailed": "Instantie kon niet worden bijgewerkt",
       "updateSuccess": "Instance succesvol bijgewerkt"
     },
+    "introduction": {
+      "description": "Erugo Connect geeft uw zelf gehoste instantie binnen enkele seconden een publieke URL.\nGeen port forwarding, geen reverse proxies, geen DNS hoofdpijn, gewoon moeiteloos delen.",
+      "description_2": "Erugo Connect creëert een veilige tunnel tussen uw Erugo instantie en ons netwerk routing systeem. Wanneer een gebruiker uw erugo.cloud domein benadert, sturen wij het verzoek veilig door deze tunnel naar de webserver in uw instantie. Hierdoor kunt u uw instantie online beschikbaar maken zonder dat u zich bezig hoeft te houden met port-forwarding, reverse proxies, DNS of SSL-configuratie - wij regelen het allemaal voor u.",
+      "description_2.1": "Erugo Connect gebruikt WireGuard onder de motorkap - een zeer gerespecteerde, open-source VPN-technologie die veel gebruikt wordt door de self-hosting gemeenschap. U kunt meer te weten komen over Wireguard",
+      "description_3": "Erugo is opgericht om de controle over uw gegevens terug te leggen in uw handen. Wij geloven sterk in dit basisprincipe en Erugo Connect is ontworpen om uw recht op eigendom van uw gegevens te handhaven. Het verbinden van Uw instantie met ons netwerk geeft ons geen toegang tot Uw gegevens of Uw aandelen. De tunnel wordt geïnitieerd door jouw instantie en wordt volledig door jou beheerd.",
+      "description_4": "Erugo Connect is volledig optioneel. Het is een gemaksfunctie ontworpen om de installatie te vergemakkelijken - geen vereiste om Erugo succesvol te gebruiken.",
+      "learnMore": "Meer informatie.",
+      "title_2": "Hoe het werkt",
+      "title_3": "Beveiliging en datasoevereiniteit",
+      "title_4": "Onze open source belofte",
+      "wireguard_link_text": "hier"
+    },
     "loading": "Cloud Connect status wordt geladen...",
     "loginFailed": "Aanmelden mislukt. Controleer uw gegevens.",
     "loginSuccess": "Succesvol aangemeld",
@@ -232,6 +244,7 @@
     "mustAcceptTerms": "U moet de Servicevoorwaarden en het Privacybeleid accepteren",
     "nav": {
       "account": "Account",
+      "availablePlans": "Beschikbare Erugo Connect Plannen",
       "connection": "Verbindingsstatus",
       "instance": "Instanties",
       "plan": "Uw plan",
@@ -282,6 +295,7 @@
       },
       "customDomains": "{count} aangepaste domeinen per instantie",
       "description": "Selecteer een abonnement om Cloud Connect in te schakelen voor je instance.",
+      "description_read_only": "Erugo Connect is gratis beschikbaar voor basis- of persoonlijk gebruik. Als je meer bandbreedte of aangepaste domeinen nodig hebt, kun je een van onze betaalde plannen kiezen.",
       "freePlanSelected": "Gratis plan geactiveerd!",
       "instances": "{count, plural, one {1 instantie} other {Tot {count} instanties}}",
       "loadPlansFailed": "Kan abonnementen niet laden",
@@ -305,6 +319,7 @@
       "waitingForPayment": "Wachten op betaling..."
     },
     "subscriptionActive": "Abonnement geactiveerd!",
+    "title": "Erugo aansluiten",
     "usage": {
       "in": "In",
       "instances": "Instanties",

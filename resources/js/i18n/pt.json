@@ -203,6 +203,18 @@
       "updateFailed": "Falha ao atualizar a instância",
       "updateSuccess": "Instância actualizada com sucesso"
     },
+    "introduction": {
+      "description": "O Erugo Connect dá à sua instância auto-hospedada um URL público em segundos.\nSem encaminhamento de portas, sem proxies inversos, sem dores de cabeça de DNS, apenas partilha sem esforço.",
+      "description_2": "O Erugo Connect cria um túnel seguro entre a sua instância Erugo e o nosso sistema de encaminhamento de rede. Quando um utilizador acede ao seu domínio erugo.cloud, fazemos um proxy seguro do pedido através deste túnel para o servidor Web dentro da sua instância. Isto permite-lhe disponibilizar a sua instância online sem ter de lidar com o encaminhamento de portas, proxies inversos, DNS ou configuração SSL - nós tratamos de tudo por si.",
+      "description_2.1": "O Erugo Connect utiliza o WireGuard - uma tecnologia VPN de código aberto altamente respeitada e amplamente utilizada pela comunidade de auto-hospedagem. Pode saber mais sobre o Wireguard",
+      "description_3": "O Erugo foi criado para devolver o controlo dos seus dados às suas mãos. Acreditamos firmemente neste princípio fundamental, e o Erugo Connect foi concebido para defender o seu direito de possuir os seus dados. A ligação da sua instância à nossa rede não nos dá acesso aos seus dados ou às suas partilhas. O túnel é iniciado pela sua instância e é totalmente controlado por si.",
+      "description_4": "O Erugo Connect é totalmente opcional. É um recurso de conveniência projetado para facilitar a configuração - não é um requisito para usar o Erugo com sucesso.",
+      "learnMore": "Saiba mais.",
+      "title_2": "Como funciona",
+      "title_3": "Segurança e soberania dos seus dados",
+      "title_4": "A nossa promessa de fonte aberta",
+      "wireguard_link_text": "aqui"
+    },
     "loading": "Carregando o status do Cloud Connect...",
     "loginFailed": "O registo falhou. Por favor, verifique as suas credenciais.",
     "loginSuccess": "Registado com sucesso",
@@ -211,6 +223,7 @@
     "mustAcceptTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade",
     "nav": {
       "account": "Conta",
+      "availablePlans": "Planos Erugo Connect disponíveis",
       "connection": "Estado da ligação",
       "instance": "Instâncias",
       "plan": "O seu plano",
@@ -261,6 +274,7 @@
       },
       "customDomains": "{count} domínios personalizados por instância",
       "description": "Selecione um plano de subscrição para ativar o Cloud Connect para a sua instância.",
+      "description_read_only": "O Erugo Connect está disponível gratuitamente para utilização básica ou pessoal. Se precisar de mais largura de banda ou de domínios personalizados, pode optar por um dos nossos planos pagos.",
       "freePlanSelected": "Plano gratuito ativado!",
       "instances": "{count, plural, one {1 instância} other {Até {count} instâncias} }",
       "loadPlansFailed": "Falha ao carregar planos de subscrição",
@@ -284,6 +298,7 @@
       "waitingForPayment": "À espera do pagamento..."
     },
     "subscriptionActive": "Assinatura activada!",
+    "title": "Erugo Connect",
     "usage": {
       "in": "Em",
       "instances": "Instâncias",
