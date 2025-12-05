@@ -54,29 +54,6 @@
       "password_protect": "Mot de passe"
     }
   },
-  "cloudConnect": {
-    "account": {
-      "email": "Mail"
-    },
-    "auth": {
-      "confirmPassword": "Confirmez le mot de passe",
-      "name": "Nom complet",
-      "password": "Mot de passe"
-    },
-    "instances": {
-      "cancelSubdomainEdit": "Fermer",
-      "delete": "Supprimer",
-      "edit": "Editer",
-      "save": "Enregistrer"
-    },
-    "passwordMismatch": "Les mots de passe ne correspondent pas",
-    "planManagement": {
-      "manage": "Gérer"
-    },
-    "subscription": {
-      "stopWaiting": "Fermer"
-    }
-  },
   "confirm_delete_user": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
   "download": {
     "files": "{value, plural, one {Télécharger # fichier} other {Télécharger {value} fichiers} }"

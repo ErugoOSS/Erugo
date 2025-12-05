@@ -17,10 +17,6 @@ import {
   BarChart3,
   FolderOpen,
   RefreshCw,
-  Cloud,
-  LogOut,
-  Wifi,
-  WifiOff,
   Loader2,
   LogIn
 } from 'lucide-vue-next'
@@ -33,7 +29,6 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
-// import ErugoConnect from './settings/connect/ErugoConnectMain.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
@@ -47,11 +42,6 @@ const mySharesPanel = ref(null)
 const allSharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
-// const cloudConnectPanel = ref(null)
-// const cloudConnectLoggedIn = ref(false)
-// const cloudConnectConnected = ref(false)
-// const cloudConnectConnecting = ref(false)
-// const cloudConnectInstanceReady = ref(false)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
@@ -65,8 +55,7 @@ const tabContents = ref({
   users: ref(null),
   myProfile: ref(null),
   myShares: ref(null),
-  allShares: ref(null),
-  // cloudConnect: ref(null)
+  allShares: ref(null)
 })
 
 onMounted(() => {
@@ -140,8 +129,7 @@ const getSettingsTitle = () => {
       myProfile: 'My Profile',
       myShares: 'My Shares',
       allShares: 'All Shares',
-      emailTemplates: 'Email Templates',
-      // cloudConnect: 'Cloud Connect'
+      emailTemplates: 'Email Templates'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
@@ -163,8 +151,6 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
-    // case 'cloudConnect':
-    //   return t.value('settings.title.cloudConnect') || 'Cloud Connect'
     default:
       return t.value('settings.title.erugo')
   }
@@ -217,51 +203,6 @@ const handleUserFilterChange = (event) => {
   }
 }
 
-// const handleCloudConnectLogout = () => {
-//   if (cloudConnectPanel.value) {
-//     cloudConnectPanel.value.handleLogout()
-//   }
-// }
-
-// const updateCloudConnectLoginState = (isLoggedIn) => {
-//   cloudConnectLoggedIn.value = isLoggedIn
-// }
-
-// const updateCloudConnectConnectionState = (isConnected) => {
-//   cloudConnectConnected.value = isConnected
-// }
-
-// const updateCloudConnectConnectingState = (isConnecting) => {
-//   cloudConnectConnecting.value = isConnecting
-// }
-
-// const updateCloudConnectInstanceReadyState = (isReady) => {
-//   cloudConnectInstanceReady.value = isReady
-// }
-
-// const handleCloudConnectConnect = () => {
-//   if (cloudConnectPanel.value) {
-//     cloudConnectPanel.value.handleConnect()
-//   }
-// }
-
-// const handleCloudConnectDisconnect = () => {
-//   if (cloudConnectPanel.value) {
-//     cloudConnectPanel.value.handleDisconnect()
-//   }
-// }
-
-// const handleCloudConnectLogin = () => {
-//   if (cloudConnectPanel.value) {
-//     cloudConnectPanel.value.openLoginForm()
-//   }
-// }
-
-// const handleCloudConnectRegister = () => {
-//   if (cloudConnectPanel.value) {
-//     cloudConnectPanel.value.openRegisterForm()
-//   }
-// }
 </script>
 
 <template>
@@ -363,17 +304,6 @@ const handleUserFilterChange = (event) => {
             </h2>
           </div>
           <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
-          <!-- <div
-            class="settings-tab"
-            :class="{ active: activeTab === 'cloudConnect' }"
-            @click="setActiveTab('cloudConnect')"
-            v-if="store.isAdmin()"
-          >
-            <h2>
-              <Cloud />
-              {{ $t('settings.title.cloudConnect') || 'Cloud' }}
-            </h2>
-          </div> -->
         </div>
         <div class="settings-tabs-content-container">
           <Transition name="fade">

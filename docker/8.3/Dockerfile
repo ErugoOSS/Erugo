@@ -21,7 +21,7 @@ RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
 RUN apt-get update && apt-get upgrade -y \
     && mkdir -p /etc/apt/keyrings \
     && apt-get install -y  ca-certificates \
-    && apt-get install -y gnupg gosu curl zip unzip git supervisor sqlite3 libcap2-bin libpng-dev python3 dnsutils librsvg2-bin fswatch ffmpeg nano wireguard-tools iproute2 sudo \
+    && apt-get install -y gnupg gosu curl zip unzip git supervisor sqlite3 libcap2-bin libpng-dev python3 dnsutils librsvg2-bin fswatch ffmpeg nano sudo \
     && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8dc7e53946656efbce4c1dd71daeaab4ad4cab6' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
     && apt-get update \
@@ -50,9 +50,6 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
 RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
-# Allow sail user to run sudo without password for WireGuard commands
-RUN echo "sail ALL=(ALL) NOPASSWD: /usr/bin/wg, /usr/bin/wg-quick, /usr/sbin/ip, /usr/bin/tee, /usr/bin/mkdir, /usr/bin/chmod" >> /etc/sudoers.d/sail
-
 #copy project files and remove .env and .git
 COPY . /var/www/html/
 RUN rm -rf /var/www/html/.env /var/www/html/.git

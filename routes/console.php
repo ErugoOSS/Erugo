@@ -9,7 +9,6 @@ use App\Jobs\sendDeletionWarningEmails;
 use App\Jobs\pruneLogs;
 use App\Jobs\updateLegacySharePaths;
 use App\Jobs\backUpDatabase;
-use App\Jobs\CloudConnectHeartbeat;
 
 //daily jobs
 Schedule::job(cleanExpiredShares::class)->daily();
@@ -20,14 +19,6 @@ Schedule::job(pruneLogs::class)->daily();
 Schedule::job(backUpDatabase::class)->daily();
 //hourly jobs
 Schedule::job(sendExpiredWarningEmails::class)->hourly();
-//cloud connect heartbeat - every minute (run synchronously, not via queue)
-Schedule::call(function () {
-    app(\App\Jobs\CloudConnectHeartbeat::class)->handle(
-        app(\App\Services\CloudConnectService::class),
-        app(\App\Services\SettingsService::class)
-    );
-})->everyMinute();
-
 //manually run jobs
 Artisan::command('clean-expired-shares', function () {
     cleanExpiredShares::dispatch();

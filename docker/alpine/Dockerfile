@@ -66,10 +66,7 @@ RUN apk add --no-cache \
     zip \
     php83-fpm \
     caddy \
-    wireguard-tools \
-    iproute2 \
     && ln -s /usr/bin/php83 /usr/bin/php \
-    && ln -s /sbin/ip /usr/bin/ip \
     && rm -rf /var/cache/apk/*
 
 # Create necessary directories
@@ -87,9 +84,6 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php83
 # Create erugo user and group
 RUN addgroup erugo && \
     adduser -D -G erugo erugo
-
-# Allow erugo user to run sudo without password for WireGuard commands
-RUN echo "erugo ALL=(ALL) NOPASSWD: /usr/bin/wg, /usr/bin/wg-quick, /sbin/ip, /usr/bin/tee, /bin/mkdir, /bin/chmod" >> /etc/sudoers.d/erugo
 
 # Set permissions
 RUN chown -R erugo:erugo /run/php

@@ -71,18 +71,6 @@ else
     export JWT_SECRET=$(cat /var/www/html/storage/jwt.secret)
 fi
 
-# if the instance.guid file exists, load its contents into the environment, otherwise generate a new one
-# this is used by Cloud Connect to identify this Erugo installation across container restarts
-if [ -f /var/www/html/storage/instance.guid ]; then
-    echo "Instance GUID already exists, loading..."
-    export ERUGO_INSTANCE_GUID=$(cat /var/www/html/storage/instance.guid)
-else
-    echo "Generating instance GUID..."
-    su-exec erugo php -r "echo sprintf('%s-%s-%s-%s-%s', bin2hex(random_bytes(4)), bin2hex(random_bytes(2)), bin2hex(random_bytes(2)), bin2hex(random_bytes(2)), bin2hex(random_bytes(6)));" >/var/www/html/storage/instance.guid
-    echo "Instance GUID generated, loading..."
-    export ERUGO_INSTANCE_GUID=$(cat /var/www/html/storage/instance.guid)
-fi
-
 # does and environment variable DB_CONNECTION exist?
 if [ -z "$DB_CONNECTION" ]; then
     echo "DB_CONNECTION environment variable not set, setting to sqlite..."
@@ -92,7 +80,7 @@ fi
 
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
-env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_|ERUGO_)" > /var/www/html/.env
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env
 
 # Create a temporary crontab file
 echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab
@@ -136,10 +124,6 @@ if [ -d /var/www/html/storage/app/public/backgrounds ] && [ "$(ls -A /var/www/ht
     chown -R erugo:erugo /var/www/html/public/backgrounds
     echo "Backgrounds migration complete."
 fi
-
-# Attempt to auto-reconnect Cloud Connect tunnel if it was previously enabled
-echo "Checking Cloud Connect auto-reconnect..."
-su-exec erugo php artisan cloud-connect:auto-reconnect
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

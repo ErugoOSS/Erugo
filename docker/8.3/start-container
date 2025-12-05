@@ -22,13 +22,5 @@ if [ $# -gt 0 ]; then
         exec gosu $WWWUSER "$@"
     fi
 else
-    # Attempt to auto-reconnect Cloud Connect tunnel if it was previously enabled
-    echo "Checking Cloud Connect auto-reconnect..."
-    if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
-        php /var/www/html/artisan cloud-connect:auto-reconnect
-    else
-        gosu $WWWUSER php /var/www/html/artisan cloud-connect:auto-reconnect
-    fi
-
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi
