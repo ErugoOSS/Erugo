@@ -196,6 +196,12 @@ We welcome community contributions! Feel free to:
 - Create pull requests
 - Engage in discussions
 
+  ## Files updated
+
+  - /app/Services/ClamavScanner.php
+  - /app/Http/Controllers/ReverseSharesController.php
+  - /app/Http/Controllers/UploadsController.php
+
 ## License
 
 Erugo is released under the MIT License, ensuring maximum flexibility for both personal and commercial use.

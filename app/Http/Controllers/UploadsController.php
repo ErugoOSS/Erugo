@@ -15,6 +15,7 @@ use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
+use App\Services\ClamavScanner;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -235,6 +236,29 @@ class UploadsController extends Controller
     }
 
     fclose($finalFileHandle);
+
+    // --- Antivirus scan with ClamAV on the assembled file ---
+    // Path relative to storage/app, which is what Storage::path() expects
+    $relativePath = 'temp/' . $user->id . '/' . $uuid . '.' . $extension;
+
+    /** @var \App\Services\ClamavScanner $scanner */
+    $scanner = app(ClamavScanner::class);
+    $clean   = $scanner->scanPath($relativePath);
+
+    if (!$clean) {
+        // Delete the assembled file
+        if (file_exists($finalFilePath)) {
+            @unlink($finalFilePath);
+        }
+
+        // Optionally: clean up chunks + upload session, same as success flow
+
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Uploaded file failed antivirus scan and was rejected.',
+        ], 422);
+    }
+    // --- end AV check ---
 
     // Create a file record in the database
     $file = File::create([
@@ -458,3 +482,4 @@ class UploadsController extends Controller
     }
   }
 }
+
