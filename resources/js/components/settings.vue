@@ -33,7 +33,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
-import ErugoConnect from './settings/connect/ErugoConnectMain.vue'
+// import ErugoConnect from './settings/connect/ErugoConnectMain.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 
@@ -47,11 +47,11 @@ const mySharesPanel = ref(null)
 const allSharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
-const cloudConnectPanel = ref(null)
-const cloudConnectLoggedIn = ref(false)
-const cloudConnectConnected = ref(false)
-const cloudConnectConnecting = ref(false)
-const cloudConnectInstanceReady = ref(false)
+// const cloudConnectPanel = ref(null)
+// const cloudConnectLoggedIn = ref(false)
+// const cloudConnectConnected = ref(false)
+// const cloudConnectConnecting = ref(false)
+// const cloudConnectInstanceReady = ref(false)
 
 const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
@@ -66,7 +66,7 @@ const tabContents = ref({
   myProfile: ref(null),
   myShares: ref(null),
   allShares: ref(null),
-  cloudConnect: ref(null)
+  // cloudConnect: ref(null)
 })
 
 onMounted(() => {
@@ -141,7 +141,7 @@ const getSettingsTitle = () => {
       myShares: 'My Shares',
       allShares: 'All Shares',
       emailTemplates: 'Email Templates',
-      cloudConnect: 'Cloud Connect'
+      // cloudConnect: 'Cloud Connect'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
@@ -163,8 +163,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
-    case 'cloudConnect':
-      return t.value('settings.title.cloudConnect') || 'Cloud Connect'
+    // case 'cloudConnect':
+    //   return t.value('settings.title.cloudConnect') || 'Cloud Connect'
     default:
       return t.value('settings.title.erugo')
   }
@@ -217,51 +217,51 @@ const handleUserFilterChange = (event) => {
   }
 }
 
-const handleCloudConnectLogout = () => {
-  if (cloudConnectPanel.value) {
-    cloudConnectPanel.value.handleLogout()
-  }
-}
+// const handleCloudConnectLogout = () => {
+//   if (cloudConnectPanel.value) {
+//     cloudConnectPanel.value.handleLogout()
+//   }
+// }
 
-const updateCloudConnectLoginState = (isLoggedIn) => {
-  cloudConnectLoggedIn.value = isLoggedIn
-}
+// const updateCloudConnectLoginState = (isLoggedIn) => {
+//   cloudConnectLoggedIn.value = isLoggedIn
+// }
 
-const updateCloudConnectConnectionState = (isConnected) => {
-  cloudConnectConnected.value = isConnected
-}
+// const updateCloudConnectConnectionState = (isConnected) => {
+//   cloudConnectConnected.value = isConnected
+// }
 
-const updateCloudConnectConnectingState = (isConnecting) => {
-  cloudConnectConnecting.value = isConnecting
-}
+// const updateCloudConnectConnectingState = (isConnecting) => {
+//   cloudConnectConnecting.value = isConnecting
+// }
 
-const updateCloudConnectInstanceReadyState = (isReady) => {
-  cloudConnectInstanceReady.value = isReady
-}
+// const updateCloudConnectInstanceReadyState = (isReady) => {
+//   cloudConnectInstanceReady.value = isReady
+// }
 
-const handleCloudConnectConnect = () => {
-  if (cloudConnectPanel.value) {
-    cloudConnectPanel.value.handleConnect()
-  }
-}
+// const handleCloudConnectConnect = () => {
+//   if (cloudConnectPanel.value) {
+//     cloudConnectPanel.value.handleConnect()
+//   }
+// }
 
-const handleCloudConnectDisconnect = () => {
-  if (cloudConnectPanel.value) {
-    cloudConnectPanel.value.handleDisconnect()
-  }
-}
+// const handleCloudConnectDisconnect = () => {
+//   if (cloudConnectPanel.value) {
+//     cloudConnectPanel.value.handleDisconnect()
+//   }
+// }
 
-const handleCloudConnectLogin = () => {
-  if (cloudConnectPanel.value) {
-    cloudConnectPanel.value.openLoginForm()
-  }
-}
+// const handleCloudConnectLogin = () => {
+//   if (cloudConnectPanel.value) {
+//     cloudConnectPanel.value.openLoginForm()
+//   }
+// }
 
-const handleCloudConnectRegister = () => {
-  if (cloudConnectPanel.value) {
-    cloudConnectPanel.value.openRegisterForm()
-  }
-}
+// const handleCloudConnectRegister = () => {
+//   if (cloudConnectPanel.value) {
+//     cloudConnectPanel.value.openRegisterForm()
+//   }
+// }
 </script>
 
 <template>
@@ -363,7 +363,7 @@ const handleCloudConnectRegister = () => {
             </h2>
           </div>
           <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
-          <div
+          <!-- <div
             class="settings-tab"
             :class="{ active: activeTab === 'cloudConnect' }"
             @click="setActiveTab('cloudConnect')"
@@ -373,7 +373,7 @@ const handleCloudConnectRegister = () => {
               <Cloud />
               {{ $t('settings.title.cloudConnect') || 'Cloud' }}
             </h2>
-          </div>
+          </div> -->
         </div>
         <div class="settings-tabs-content-container">
           <Transition name="fade">
@@ -467,50 +467,7 @@ const handleCloudConnectRegister = () => {
               </div>
             </div>
 
-            <div v-else-if="activeTab === 'cloudConnect'" class="settings-tab-content" ref="tabContents.cloudConnect" key="cloudConnect">
-              <div class="tab-content-header">
-                <h2 class="d-none d-md-flex">
-                  <Cloud />
-                  <span>
-                    {{ $t('settings.title.cloudConnect') || 'Erugo Connect' }}
-                    <small>{{ $t('settings.description.cloudConnect') || 'Connect your instance to Erugo Connect' }}</small>
-                  </span>
-                </h2>
-                <div class="user-actions">
-                  <!-- Not logged in: show Create Account and Login buttons -->
-                  <template v-if="!cloudConnectLoggedIn">
-                    <button @click="handleCloudConnectRegister">
-                      <UserPlus />
-                      {{ $t('cloudConnect.auth.register') || 'Create Account' }}
-                    </button>
-                    <button class="secondary" @click="handleCloudConnectLogin">
-                      <LogIn />
-                      {{ $t('cloudConnect.auth.login') || 'Sign In' }}
-                    </button>
-                  </template>
-                  <!-- Logged in with instance ready: show Connect/Disconnect -->
-                  <template v-else-if="cloudConnectInstanceReady">
-                    <button v-if="!cloudConnectConnected" @click="handleCloudConnectConnect" :disabled="cloudConnectConnecting">
-                      <Loader2 v-if="cloudConnectConnecting" class="spinner" />
-                      <Wifi v-else />
-                      {{ cloudConnectConnecting ? ($t('cloudConnect.ready.connecting') || 'Connecting...') : ($t('cloudConnect.ready.connect') || 'Connect') }}
-                    </button>
-                    <button v-else @click="handleCloudConnectDisconnect" class="secondary">
-                      <WifiOff />
-                      {{ $t('cloudConnect.connected.disconnect') || 'Disconnect' }}
-                    </button>
-                  </template>
-                  <!-- Logged in: always show Sign Out -->
-                  <button v-if="cloudConnectLoggedIn" class="secondary" @click="handleCloudConnectLogout">
-                    <LogOut />
-                    {{ $t('cloudConnect.auth.logout') || 'Sign Out' }}
-                  </button>
-                </div>
-              </div>
-              <div class="tab-content-body">
-                <ErugoConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @connectionStateChanged="updateCloudConnectConnectionState" @connectingStateChanged="updateCloudConnectConnectingState" @instanceReadyChanged="updateCloudConnectInstanceReadyState" @navItemClicked="handleNavItemClicked" />
-              </div>
-            </div>
+            
 
             <div v-else-if="activeTab === 'users'" class="settings-tab-content" ref="tabContents.users" key="users">
               <div class="tab-content-header">

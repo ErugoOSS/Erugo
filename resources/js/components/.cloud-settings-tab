@@ -1,0 +1,44 @@
+<div v-else-if="activeTab === 'cloudConnect'" class="settings-tab-content" ref="tabContents.cloudConnect" key="cloudConnect">
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Cloud />
+                  <span>
+                    {{ $t('settings.title.cloudConnect') || 'Erugo Connect' }}
+                    <small>{{ $t('settings.description.cloudConnect') || 'Connect your instance to Erugo Connect' }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <!-- Not logged in: show Create Account and Login buttons -->
+                  <template v-if="!cloudConnectLoggedIn">
+                    <button @click="handleCloudConnectRegister">
+                      <UserPlus />
+                      {{ $t('cloudConnect.auth.register') || 'Create Account' }}
+                    </button>
+                    <button class="secondary" @click="handleCloudConnectLogin">
+                      <LogIn />
+                      {{ $t('cloudConnect.auth.login') || 'Sign In' }}
+                    </button>
+                  </template>
+                  <!-- Logged in with instance ready: show Connect/Disconnect -->
+                  <template v-else-if="cloudConnectInstanceReady">
+                    <button v-if="!cloudConnectConnected" @click="handleCloudConnectConnect" :disabled="cloudConnectConnecting">
+                      <Loader2 v-if="cloudConnectConnecting" class="spinner" />
+                      <Wifi v-else />
+                      {{ cloudConnectConnecting ? ($t('cloudConnect.ready.connecting') || 'Connecting...') : ($t('cloudConnect.ready.connect') || 'Connect') }}
+                    </button>
+                    <button v-else @click="handleCloudConnectDisconnect" class="secondary">
+                      <WifiOff />
+                      {{ $t('cloudConnect.connected.disconnect') || 'Disconnect' }}
+                    </button>
+                  </template>
+                  <!-- Logged in: always show Sign Out -->
+                  <button v-if="cloudConnectLoggedIn" class="secondary" @click="handleCloudConnectLogout">
+                    <LogOut />
+                    {{ $t('cloudConnect.auth.logout') || 'Sign Out' }}
+                  </button>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <ErugoConnect ref="cloudConnectPanel" v-if="store.settingsOpen" @loginStateChanged="updateCloudConnectLoginState" @connectionStateChanged="updateCloudConnectConnectionState" @connectingStateChanged="updateCloudConnectConnectingState" @instanceReadyChanged="updateCloudConnectInstanceReadyState" @navItemClicked="handleNavItemClicked" />
+              </div>
+            </div>
