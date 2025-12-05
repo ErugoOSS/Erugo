@@ -58,3 +58,4 @@ class emailVerificationMail extends Mailable
     }
 }
 
+

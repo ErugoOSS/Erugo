@@ -969,6 +969,8 @@ class CloudConnectService
             'public_key' => $publicKey,
         ], true);
 
+        Log::info('Tunnel register API response:', $data);
+
         return $data;
     }
 
