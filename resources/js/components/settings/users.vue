@@ -6,6 +6,7 @@ import { store } from '../../store'
 import { useToast } from 'vue-toastification'
 import { niceDate } from '../../utils'
 import { useConfirmDialog } from '../../composables/useConfirmDialog'
+import { useSetting } from '../../composables/useSetting'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -17,6 +18,9 @@ const toast = useToast()
 const confirmDialog = useConfirmDialog()
 const users = ref([])
 const errors = ref({})
+
+// Subscribe to self_registration_enabled setting - auto-updates when settings change
+const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
 
 const newUser = ref({})
 const editUser = ref({})
@@ -240,6 +244,8 @@ const confirmForceResetPassword = () => {
         {{ $t('settings.users.add') }}
       </h2>
       <p v-html="$t('settings.users.add_user_description')"></p>
+      <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on') }}</p>
+      <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off') }}</p>
       <div class="input-container">
         <label for="new_user_email">{{ $t('settings.users.email') }}</label>
         <input

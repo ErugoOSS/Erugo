@@ -18,7 +18,8 @@ import {
   FolderOpen,
   RefreshCw,
   Loader2,
-  LogIn
+  LogIn,
+  Info
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -31,6 +32,7 @@ import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
+import { useSetting } from '../composables/useSetting'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -47,6 +49,9 @@ const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
 const allSharesUsers = ref([])
 const selectedUserId = ref(null)
+
+// Subscribe to self_registration_enabled setting - auto-updates when settings change
+const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
 // Create refs for the tab contents
 const tabContents = ref({
   stats: ref(null),
@@ -202,7 +207,6 @@ const handleUserFilterChange = (event) => {
     allSharesPanel.value.setUserFilter(selectedUserId.value)
   }
 }
-
 </script>
 
 <template>
@@ -408,6 +412,11 @@ const handleUserFilterChange = (event) => {
                     <small>{{ $t('settings.description.users') }}</small>
                   </span>
                 </h2>
+                <div class="admin-tip" v-if="store.isAdmin()">
+                  <Info />
+                  <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on_short') }}</p>
+                  <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off_short') }}</p>
+                </div>
                 <div class="user-actions">
                   <button @click="usersPanel.addUser">
                     <UserPlus />
@@ -777,7 +786,25 @@ const handleUserFilterChange = (event) => {
   
   &:focus {
     outline: none;
-    border-color: var(--button-primary-background-color);
+    border-color: var(--primary-button-background-color);
+  }
+}
+
+.admin-tip {
+  background: var(--secondary-button-background-color);
+  padding: 10px 20px;
+  border-radius: var(--button-border-radius);
+  p {
+    font-size: 0.8rem;
+    color: var(--secondary-button-text-color)!important;
+    margin: 0;
+  }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  svg {
+    width: 20px;
+    height: 20px;
   }
 }
 </style>

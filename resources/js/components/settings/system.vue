@@ -29,6 +29,7 @@ import HelpTip from '../helpTip.vue'
 
 import { useToast } from 'vue-toastification'
 import { mapSettings } from '../../utils'
+import { notifySettingsChanged } from '../../composables/useSetting'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -150,6 +151,9 @@ const saveSettings = async () => {
     saving.value = false
     toast.success(t.value('settings.settingsSavedSuccessfully'))
     await loadSettings()
+    
+    // Notify other components that settings have changed
+    notifySettingsChanged()
   } catch (error) {
     saving.value = false
     toast.error(t.value('settings.failedToSaveSettings'))
