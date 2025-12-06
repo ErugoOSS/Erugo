@@ -52,13 +52,7 @@ const settings = ref({
   max_share_size_unit: '',
   clean_files_after_days: '',
   share_url_mode: 'haiku',
-  share_url_random_length: '16',
-  share_url_random_lowercase: 'true',
-  share_url_random_uppercase: 'true',
-  share_url_random_numbers: 'true',
-  share_url_random_special: 'false',
-  share_url_prefix: '',
-  share_url_shortcode_length: '6',
+  share_url_pattern: '******',
   emails_share_downloaded_enabled: '',
   smtp_host: '',
   smtp_port: '',
@@ -71,6 +65,161 @@ const settings = ref({
   self_registration_allow_any_domain: true,
   self_registration_allowed_domains: ''
 })
+
+// Pattern presets for share URL generation
+const patternPresets = [
+  { id: 'shortcode', name: 'Shortcode (6 chars)', pattern: '******' },
+  { id: 'random16', name: 'Random (16 chars)', pattern: '****************' },
+  { id: 'uuid', name: 'UUID-style', pattern: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX' },
+  { id: 'hex8', name: 'Hex (8 chars)', pattern: 'XXXXXXXX' },
+  { id: 'custom', name: 'Custom', pattern: '' }
+]
+
+const selectedPreset = ref('shortcode')
+const patternPreview = ref('')
+
+// Generate a preview of the pattern
+const generatePatternPreview = () => {
+  const pattern = settings.value.share_url_pattern
+  if (!pattern) {
+    patternPreview.value = ''
+    return
+  }
+  
+  // Client-side pattern preview generation
+  let result = ''
+  const length = pattern.length
+  let i = 0
+  
+  const DIGITS = '0123456789'
+  const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
+  const HEX = '0123456789ABCDEF'
+  const ALPHANUMERIC = DIGITS + UPPERCASE + LOWERCASE
+  
+  const randomChar = (charset) => charset[Math.floor(Math.random() * charset.length)]
+  
+  const expandRange = (start, end) => {
+    const chars = []
+    const startCode = start.charCodeAt(0)
+    const endCode = end.charCodeAt(0)
+    const [from, to] = startCode <= endCode ? [startCode, endCode] : [endCode, startCode]
+    for (let c = from; c <= to; c++) {
+      chars.push(String.fromCharCode(c))
+    }
+    return chars
+  }
+  
+  const expandCharClass = (content) => {
+    const chars = []
+    let j = 0
+    while (j < content.length) {
+      const ch = content[j]
+      if (ch === '\\' && j + 1 < content.length) {
+        chars.push(content[j + 1])
+        j += 2
+        continue
+      }
+      if (j + 2 < content.length && content[j + 1] === '-') {
+        const rangeChars = expandRange(ch, content[j + 2])
+        chars.push(...rangeChars)
+        j += 3
+        continue
+      }
+      chars.push(ch)
+      j++
+    }
+    return [...new Set(chars)]
+  }
+  
+  while (i < length) {
+    const char = pattern[i]
+    
+    // Handle escape sequences
+    if (char === '\\' && i + 1 < length) {
+      const nextChar = pattern[i + 1]
+      if (['#', 'A', 'a', '*', 'X', '\\'].includes(nextChar)) {
+        result += nextChar
+        i += 2
+        continue
+      }
+      result += char
+      i++
+      continue
+    }
+    
+    // Handle character classes [...]
+    if (char === '[') {
+      const closePos = pattern.indexOf(']', i + 1)
+      if (closePos !== -1) {
+        const classContent = pattern.substring(i + 1, closePos)
+        const chars = expandCharClass(classContent)
+        if (chars.length > 0) {
+          result += randomChar(chars.join(''))
+        }
+        i = closePos + 1
+        continue
+      }
+      result += char
+      i++
+      continue
+    }
+    
+    // Handle special tokens
+    if (char === '#') {
+      result += randomChar(DIGITS)
+      i++
+      continue
+    }
+    if (char === 'A') {
+      result += randomChar(UPPERCASE)
+      i++
+      continue
+    }
+    if (char === 'a') {
+      result += randomChar(LOWERCASE)
+      i++
+      continue
+    }
+    if (char === '*') {
+      result += randomChar(ALPHANUMERIC)
+      i++
+      continue
+    }
+    if (char === 'X') {
+      result += randomChar(HEX)
+      i++
+      continue
+    }
+    
+    // Literal character
+    result += char
+    i++
+  }
+  
+  patternPreview.value = result
+}
+
+// Watch for pattern changes to update preview
+watch(() => settings.value.share_url_pattern, () => {
+  generatePatternPreview()
+  // Update selected preset to 'custom' if pattern doesn't match any preset
+  const matchingPreset = patternPresets.find(p => p.pattern === settings.value.share_url_pattern)
+  if (matchingPreset) {
+    selectedPreset.value = matchingPreset.id
+  } else {
+    selectedPreset.value = 'custom'
+  }
+})
+
+// Handle preset selection
+const handlePresetChange = () => {
+  const preset = patternPresets.find(p => p.id === selectedPreset.value)
+  if (preset && preset.pattern) {
+    settings.value.share_url_pattern = preset.pattern
+  }
+  generatePatternPreview()
+}
 
 const settingsLoaded = ref(false)
 const saving = ref(false)
@@ -438,64 +587,36 @@ const handleDeleteAuthProvider = async (id) => {
                   <label for="share_url_mode">{{ $t('settings.system.share_url_mode') }}</label>
                   <select id="share_url_mode" v-model="settings.share_url_mode">
                     <option value="haiku">{{ $t('settings.system.share_url_mode_haiku') }}</option>
-                    <option value="random">{{ $t('settings.system.share_url_mode_random') }}</option>
-                    <option value="shortcode">{{ $t('settings.system.share_url_mode_shortcode') }}</option>
-                    <option value="uuid">{{ $t('settings.system.share_url_mode_uuid') }}</option>
+                    <option value="pattern">{{ $t('settings.system.share_url_mode_pattern') }}</option>
                   </select>
                 </div>
 
-                <div class="setting-group-body-item">
-                  <label for="share_url_prefix">{{ $t('settings.system.share_url_prefix') }}</label>
-                  <input
-                    type="text"
-                    id="share_url_prefix"
-                    v-model="settings.share_url_prefix"
-                    :placeholder="$t('settings.system.share_url_prefix_placeholder')"
-                  />
-                </div>
-
-                <div v-if="settings.share_url_mode === 'random'" class="random-url-settings">
+                <div v-if="settings.share_url_mode === 'pattern'" class="pattern-url-settings">
                   <div class="setting-group-body-item">
-                    <label for="share_url_random_length">{{ $t('settings.system.share_url_random_length') }}</label>
+                    <label for="share_url_preset">{{ $t('settings.system.share_url_preset') }}</label>
+                    <select id="share_url_preset" v-model="selectedPreset" @change="handlePresetChange">
+                      <option v-for="preset in patternPresets" :key="preset.id" :value="preset.id">
+                        {{ preset.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="setting-group-body-item">
+                    <label for="share_url_pattern">{{ $t('settings.system.share_url_pattern') }}</label>
                     <input
-                      type="number"
-                      id="share_url_random_length"
-                      v-model="settings.share_url_random_length"
-                      min="8"
-                      max="64"
+                      type="text"
+                      id="share_url_pattern"
+                      v-model="settings.share_url_pattern"
+                      :placeholder="$t('settings.system.share_url_pattern_placeholder')"
                     />
                   </div>
-                  <div class="setting-group-body-item pt-4">
-                    <label>{{ $t('settings.system.share_url_random_characters') }}</label>
-                    <div class="checkbox-container pt-3">
-                      <input type="checkbox" id="share_url_random_lowercase" v-model="settings.share_url_random_lowercase" />
-                      <label for="share_url_random_lowercase">{{ $t('settings.system.share_url_random_lowercase') }}</label>
+                  <div class="setting-group-body-item pattern-preview" v-if="settings.share_url_pattern">
+                    <label>{{ $t('settings.system.share_url_pattern_preview') }}</label>
+                    <div class="preview-box">
+                      <code>{{ patternPreview }}</code>
+                      <button type="button" class="refresh-preview" @click="generatePatternPreview">
+                        ↻
+                      </button>
                     </div>
-                    <div class="checkbox-container">
-                      <input type="checkbox" id="share_url_random_uppercase" v-model="settings.share_url_random_uppercase" />
-                      <label for="share_url_random_uppercase">{{ $t('settings.system.share_url_random_uppercase') }}</label>
-                    </div>
-                    <div class="checkbox-container">
-                      <input type="checkbox" id="share_url_random_numbers" v-model="settings.share_url_random_numbers" />
-                      <label for="share_url_random_numbers">{{ $t('settings.system.share_url_random_numbers') }}</label>
-                    </div>
-                    <div class="checkbox-container">
-                      <input type="checkbox" id="share_url_random_special" v-model="settings.share_url_random_special" />
-                      <label for="share_url_random_special">{{ $t('settings.system.share_url_random_special') }}</label>
-                    </div>
-                  </div>
-                </div>
-
-                <div v-if="settings.share_url_mode === 'shortcode'" class="shortcode-url-settings">
-                  <div class="setting-group-body-item">
-                    <label for="share_url_shortcode_length">{{ $t('settings.system.share_url_shortcode_length') }}</label>
-                    <input
-                      type="number"
-                      id="share_url_shortcode_length"
-                      v-model="settings.share_url_shortcode_length"
-                      min="4"
-                      max="12"
-                    />
                   </div>
                 </div>
 
@@ -514,8 +635,22 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
               <h6>{{ $t('settings.system.share_url_mode') }}</h6>
               <p>{{ $t('settings.system.share_url_mode_description') }}</p>
-              <h6>{{ $t('settings.system.share_url_prefix') }}</h6>
-              <p>{{ $t('settings.system.share_url_prefix_description') }}</p>
+              <div v-if="settings.share_url_mode === 'pattern'">
+                <h6>{{ $t('settings.system.share_url_pattern') }}</h6>
+                <p>{{ $t('settings.system.share_url_pattern_description') }}</p>
+                <div class="pattern-syntax-help">
+                  <h6>{{ $t('settings.system.share_url_pattern_syntax') }}</h6>
+                  <ul class="syntax-list">
+                    <li><code>#</code> {{ $t('settings.system.pattern_token_digit') }}</li>
+                    <li><code>A</code> {{ $t('settings.system.pattern_token_uppercase') }}</li>
+                    <li><code>a</code> {{ $t('settings.system.pattern_token_lowercase') }}</li>
+                    <li><code>*</code> {{ $t('settings.system.pattern_token_alphanumeric') }}</li>
+                    <li><code>X</code> {{ $t('settings.system.pattern_token_hex') }}</li>
+                    <li><code>[A-Z]</code> {{ $t('settings.system.pattern_token_range') }}</li>
+                    <li><code>\#</code> {{ $t('settings.system.pattern_token_escape') }}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1108,6 +1243,66 @@ const handleDeleteAuthProvider = async (id) => {
     width: 15px;
     height: 15px;
     margin-top: -2px;
+  }
+}
+
+.pattern-preview {
+  .preview-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-section-background-color-alt);
+    padding: 10px 15px;
+    border-radius: var(--panel-border-radius);
+    font-family: monospace;
+    
+    code {
+      flex: 1;
+      font-size: 1rem;
+      word-break: break-all;
+    }
+    
+    .refresh-preview {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 5px;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+.pattern-syntax-help {
+  margin-top: 1rem;
+  
+  .syntax-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+    
+    li {
+      padding: 4px 0;
+      
+      code {
+        background: var(--panel-section-background-color-alt);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        margin-right: 8px;
+      }
+    }
   }
 }
 </style>
