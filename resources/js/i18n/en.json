@@ -33,6 +33,7 @@
     "invalid_email_or_password": "Login failed",
     "invite_accepted": "Reverse share invite accepted. You can now upload files.",
     "login": "Login",
+    "login_to_accept_invite": "Please log in to accept this reverse share invite.",
     "login_successful": "Logged in successfully",
     "login_with": "Login With",
     "logout": "Logout",

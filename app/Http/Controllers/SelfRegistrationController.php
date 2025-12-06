@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\Setting;
+use App\Models\ReverseShareInvite;
 use App\Mail\emailVerificationMail;
 use App\Jobs\sendEmail;
 use Carbon\Carbon;
@@ -81,6 +82,24 @@ class SelfRegistrationController extends Controller
                 'email_verification_code' => $code,
                 'email_verification_code_expires_at' => $expiresAt,
             ]);
+
+            // Migrate any existing reverse share invites to the new user
+            // This is in its own try-catch so it doesn't prevent the verification email from being sent
+            try {
+                $existingInvites = ReverseShareInvite::where('recipient_email', $user->email)->get();
+                foreach ($existingInvites as $invite) {
+                    // Delete the old guest user if it exists
+                    if ($invite->guestUser && $invite->guestUser->is_guest) {
+                        $invite->guestUser->delete();
+                    }
+                    // Point the invite to the new real user
+                    $invite->guest_user_id = $user->id;
+                    $invite->save();
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to migrate reverse share invites for user ' . $user->email . ': ' . $e->getMessage());
+                // Continue anyway - user creation and verification email are more important
+            }
 
             // Send verification email
             sendEmail::dispatch($user->email, emailVerificationMail::class, ['code' => $code, 'user' => $user]);

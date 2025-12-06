@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Password as PasswordFacade;
 use App\Models\User;
+use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
 use App\Jobs\sendEmail;
@@ -198,6 +199,24 @@ class UsersController extends Controller
         'active' => true,
         'must_change_password' => false,
       ]);
+
+      // Migrate any existing reverse share invites to the new user
+      // This is in its own try-catch so it doesn't prevent the password email from being sent
+      try {
+        $existingInvites = ReverseShareInvite::where('recipient_email', $user->email)->get();
+        foreach ($existingInvites as $invite) {
+          // Delete the old guest user if it exists
+          if ($invite->guestUser && $invite->guestUser->is_guest) {
+            $invite->guestUser->delete();
+          }
+          // Point the invite to the new real user
+          $invite->guest_user_id = $user->id;
+          $invite->save();
+        }
+      } catch (\Exception $e) {
+        \Log::warning('Failed to migrate reverse share invites for user ' . $user->email . ': ' . $e->getMessage());
+        // Continue anyway - user creation and password email are more important
+      }
 
       $token = PasswordFacade::createToken($user);
 

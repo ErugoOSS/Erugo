@@ -13,6 +13,7 @@ import {
   resetPassword,
   getAvailableAuthProviders,
   acceptReverseShareInvite,
+  acceptReverseShareInviteById,
   getRegistrationSettings,
   registerUser,
   verifyEmail,
@@ -39,6 +40,10 @@ const waitingForRedirect = ref(false)
 const authProviders = ref([])
 const reverseShareToken = ref('')
 
+// Reverse share invite by ID (for existing users)
+const pendingInviteId = ref(null)
+const hasInviteIdPending = ref(false)
+
 // Registration state
 const registrationMode = ref(false)
 const verificationMode = ref(false)
@@ -49,13 +54,28 @@ const isVerifying = ref(false)
 const isResending = ref(false)
 
 onMounted(async () => {
-  attemptRefresh()
-
   const token = domData().token
   if (token) {
     haveResetToken.value = true
     resetToken.value = token
   }
+
+  // Parse URL parameters FIRST (before any async operations)
+  // This ensures invite_id is set before attemptRefresh() completes
+  const urlParams = new URLSearchParams(window.location.search)
+  
+  // Check for invite_id (for existing users who need to log in)
+  const inviteId = urlParams.get('invite_id')
+  if (inviteId) {
+    pendingInviteId.value = inviteId
+    hasInviteIdPending.value = true
+    // Remove the invite_id from the URL but keep it stored
+    window.history.replaceState({}, document.title, window.location.pathname)
+  }
+
+  // Now try to refresh (if user is already logged in, this will accept the pending invite)
+  attemptRefresh()
+
   getAvailableAuthProviders().then((data) => {
     authProviders.value = data
   })
@@ -69,8 +89,7 @@ onMounted(async () => {
     selfRegistrationEnabled.value = false
   }
 
-  //grab reverse share token from url
-  const urlParams = new URLSearchParams(window.location.search)
+  // Grab reverse share token from url (for guest users)
   reverseShareToken.value = urlParams.get('invite_token')
   if (reverseShareToken.value) {
     try {
@@ -97,19 +116,44 @@ const attemptLogin = async () => {
     const data = await login(email.value, password.value)
     store.authSuccess(data)
     toast.success(t.value('auth.login_successful'))
+
+    // If there's a pending invite, accept it after successful login
+    if (hasInviteIdPending.value && pendingInviteId.value) {
+      try {
+        await acceptReverseShareInviteById(pendingInviteId.value)
+        toast.success(t.value('auth.invite_accepted'))
+      } catch (inviteError) {
+        toast.error(t.value('auth.failed_to_accept_invite'))
+      } finally {
+        hasInviteIdPending.value = false
+        pendingInviteId.value = null
+      }
+    }
   } catch (error) {
     toast.error(t.value('auth.invalid_email_or_password'))
   }
 }
 
-const attemptRefresh = () => {
-  refresh()
-    .then((data) => {
-      store.authSuccess(data)
-    })
-    .catch((error) => {
-      //noop
-    })
+const attemptRefresh = async () => {
+  try {
+    const data = await refresh()
+    store.authSuccess(data)
+
+    // If there's a pending invite and user is now logged in, accept it
+    if (hasInviteIdPending.value && pendingInviteId.value) {
+      try {
+        await acceptReverseShareInviteById(pendingInviteId.value)
+        toast.success(t.value('auth.invite_accepted'))
+      } catch (inviteError) {
+        toast.error(t.value('auth.failed_to_accept_invite'))
+      } finally {
+        hasInviteIdPending.value = false
+        pendingInviteId.value = null
+      }
+    }
+  } catch (error) {
+    //noop
+  }
 }
 
 const attemptLogout = async () => {
@@ -282,7 +326,8 @@ const switchToLogin = () => {
       <!-- Login Mode -->
       <template v-if="!forgotPasswordMode && !registrationMode">
         <h1>{{ $t('auth.welcome') }}</h1>
-        <p>{{ loginMessage }}</p>
+        <p v-if="hasInviteIdPending">{{ $t('auth.login_to_accept_invite') }}</p>
+        <p v-else>{{ loginMessage }}</p>
         <div class="input-container">
           <label for="email">{{ $t('auth.email') }}</label>
           <input type="text" v-model="email" :placeholder="$t('auth.email')" @keyup.enter="moveToPassword" />

@@ -24,3 +24,4 @@
 {% block action_url %}{% if isExistingUser %}{{ settings.application_url }}/?invite_id={{ invite.id }}{% else %}{{ settings.application_url }}/?invite_token={{ token }}{% endif %}{% endblock %}
 
 {% block action_text %}{% if isExistingUser %}Log In & Upload{% else %}Accept Request{% endif %}{% endblock %}
+

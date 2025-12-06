@@ -26,12 +26,14 @@ class reverseShareInviteMail extends Mailable
     public $sender_name;
     public $token;
     public $invite;
+    public $isExistingUser;
 
-    public function __construct(User $user, ReverseShareInvite $invite, $token)
+    public function __construct(User $user, ReverseShareInvite $invite, $token, $isExistingUser = false)
     {
         $this->user = $user;
         $this->invite = $invite;
         $this->token = $token;
+        $this->isExistingUser = $isExistingUser;
         $this->recipient_name = explode(' ', $invite->recipient_name)[0];
         $this->sender_name = explode(' ', $user->name)[0];
     }
@@ -52,7 +54,7 @@ class reverseShareInviteMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.reverseShareInviteMail',
+            view: 'emails.reverseShareInviteMailV2',
         );
     }
 

@@ -251,6 +251,23 @@ export const acceptReverseShareInvite = async (token) => {
   return buildAuthSuccessData(data)
 }
 
+export const acceptReverseShareInviteById = async (inviteId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/reverse-shares/accept-by-id`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      invite_id: inviteId
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const refresh = async () => {
   const response = await fetch(`${apiUrl}/api/auth/refresh`, {
     method: 'POST',

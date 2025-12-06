@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Share;
 use App\Models\File;
 use App\Models\UploadSession;
+use App\Models\ReverseShareInvite;
 use Carbon\Carbon;
 use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
@@ -254,6 +255,7 @@ class UploadsController extends Controller
     CreateShareZip::dispatch($share);
 
     if ($user->is_guest) {
+      // Guest user flow (unchanged)
       $invite = $user->invite;
       $share->public = false;
       $share->invite_id = $invite->id;
@@ -280,7 +282,43 @@ class UploadsController extends Controller
       ])->withCookie($cookie);
     }
 
-    // Process recipients if provided
+    // Check if this existing user has an active reverse share invite
+    // (i.e., they accepted an invite by logging in and are now uploading)
+    $activeInvite = ReverseShareInvite::where('guest_user_id', $user->id)
+      ->where('recipient_email', $user->email)
+      ->whereNotNull('used_at')
+      ->whereNull('completed_at')
+      ->first();
+
+    if ($activeInvite) {
+      // Existing user uploading via reverse share invite
+      // Keep the share associated with their account but also notify the requester
+      $share->invite_id = $activeInvite->id;
+      $share->save();
+
+      // Send notification to the requester
+      if ($activeInvite->user) {
+        $this->sendShareCreatedEmail($share, [
+          'name' => $activeInvite->user->name,
+          'email' => $activeInvite->user->email
+        ]);
+      }
+
+      // Mark the invite as completed
+      $activeInvite->completed_at = now();
+      $activeInvite->guest_user_id = null; // Clear the link since upload is done
+      $activeInvite->save();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Share created',
+        'data' => [
+          'share' => $share
+        ]
+      ]);
+    }
+
+    // Process recipients if provided (normal share flow)
     if ($request->has('recipients') && is_array($request->recipients)) {
       foreach ($request->recipients as $recipient) {
         if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {

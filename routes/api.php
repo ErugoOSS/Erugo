@@ -168,9 +168,11 @@ Route::group([], function ($router) {
     //manage reverse shares [auth]
     Route::group(['prefix' => 'reverse-shares', 'middleware' => ['auth']], function ($router) {
         Route::post('/invite', [ReverseSharesController::class, 'createInvite'])->name('reverse-shares.createInvite');
+        // Accept invite by ID (for existing users who must log in first)
+        Route::post('/accept-by-id', [AuthController::class, 'acceptReverseShareInviteById'])->name('reverse-shares.acceptInviteById');
     });
 
-    //accept a reverse share invite [public]
+    //accept a reverse share invite [public] (for guests with token)
     Route::group(['prefix' => 'reverse-shares'], function ($router) {
         Route::get('/accept', [ AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
     });
