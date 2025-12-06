@@ -301,6 +301,36 @@ class UsersController extends Controller
     }
 
     try {
+      // Collect guest users to delete (from invites created by this user)
+      $guestUsersToDelete = [];
+      $invitesCreatedByUser = ReverseShareInvite::where('user_id', $user->id)->get();
+      foreach ($invitesCreatedByUser as $invite) {
+        if ($invite->guest_user_id) {
+          $guestUser = User::find($invite->guest_user_id);
+          if ($guestUser && $guestUser->is_guest) {
+            $guestUsersToDelete[] = $guestUser;
+          }
+        }
+      }
+
+      // Delete all invites created by this user first (removes FK references to guest users)
+      ReverseShareInvite::where('user_id', $user->id)->delete();
+
+      // Set guest_user_id to null where this user is the guest
+      ReverseShareInvite::where('guest_user_id', $user->id)->update(['guest_user_id' => null]);
+
+      // Now safely delete the guest users
+      foreach ($guestUsersToDelete as $guestUser) {
+        // Clean up any invites where this guest is referenced
+        ReverseShareInvite::where('guest_user_id', $guestUser->id)->update(['guest_user_id' => null]);
+        // Clean up guest user's data (shares, files, downloads)
+        $this->cleanupUserData($guestUser);
+        $guestUser->delete();
+      }
+
+      // Clean up all the user's data (shares, files, downloads)
+      $this->cleanupUserData($user);
+
       $user->delete();
 
       return response()->json([
@@ -313,6 +343,29 @@ class UsersController extends Controller
         ['status' => 'error', 'message' => 'Failed to delete user'],
         500
       );
+    }
+  }
+
+  /**
+   * Clean up all data associated with a user (shares, files, downloads)
+   */
+  private function cleanupUserData(User $user)
+  {
+    // Get all shares belonging to this user
+    $shares = $user->shares;
+
+    foreach ($shares as $share) {
+      // Delete download records for this share
+      \App\Models\Download::where('share_id', $share->id)->delete();
+
+      // Delete file records for this share
+      \App\Models\File::where('share_id', $share->id)->delete();
+
+      // Clean up the actual files on disk (suppress email notifications)
+      $share->cleanFiles(true);
+
+      // Delete the share record
+      $share->delete();
     }
   }
 
