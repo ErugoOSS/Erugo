@@ -425,7 +425,7 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
-                <h6 class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
+                <h6 id="reverse_shares" class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
                     <input type="checkbox" id="allow_reverse_shares" v-model="settings.allow_reverse_shares" />
@@ -433,7 +433,7 @@ const handleDeleteAuthProvider = async (id) => {
                   </div>
                 </div>
 
-                <h6 class="mt-3 mb-3">{{ $t('settings.system.share_url_generation') }}</h6>
+                <h6 id="share_url_generation" class="mt-3 mb-3">{{ $t('settings.system.share_url_generation') }}</h6>
                 <div class="setting-group-body-item">
                   <label for="share_url_mode">{{ $t('settings.system.share_url_mode') }}</label>
                   <select id="share_url_mode" v-model="settings.share_url_mode">
@@ -709,7 +709,7 @@ const handleDeleteAuthProvider = async (id) => {
 
               <div class="setting-group-body">
                 <!-- Self Registration Settings -->
-                <h5 class="mb-3">{{ $t('settings.system.self_registration') }}</h5>
+                <h5 id="self_registration" class="mb-3">{{ $t('settings.system.self_registration') }}</h5>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
                     <input
@@ -753,7 +753,7 @@ const handleDeleteAuthProvider = async (id) => {
 
                 <hr class="my-4" />
 
-                <h5 class="mb-4">{{ $t('settings.system.your_auth_providers') }}</h5>
+                <h5 id="auth_providers" class="mb-4">{{ $t('settings.system.your_auth_providers') }}</h5>
                 <div
                   class="setting-group-body-item auth-provider"
                   v-for="authProvider in authProviders"

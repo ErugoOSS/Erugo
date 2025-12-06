@@ -33,10 +33,12 @@ import AllShares from './settings/allShares.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 import { useSetting } from '../composables/useSetting'
+import { useSettingsNavigation, updateUrlHash, buildSettingsPath, clearUrlHash } from '../composables/useSettingsNavigation'
 
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
+const { navigateTo } = useSettingsNavigation()
 
 //settings panels
 const usersPanel = ref(null)
@@ -78,6 +80,7 @@ onMounted(() => {
 
 const closeSettings = () => {
   store.setSettingsOpen(false)
+  clearUrlHash()
 }
 
 const clickOutside = (e) => {
@@ -86,10 +89,16 @@ const clickOutside = (e) => {
   }
 }
 
-const setActiveTab = (tab) => {
+const setActiveTab = (tab, options = {}) => {
+  const { updateUrl = true } = options
   activeTab.value = tab
   if (tab === 'allShares' && allSharesUsers.value.length === 0) {
     loadAllSharesUsers()
+  }
+  
+  // Update URL hash with the new tab
+  if (updateUrl) {
+    updateUrlHash(tab)
   }
 }
 
@@ -104,7 +113,8 @@ const createShare = () => {
   store.setSettingsOpen(false)
 }
 
-const handleNavItemClicked = (item) => {
+const handleNavItemClicked = (item, options = {}) => {
+  const { skipUrlUpdate = false } = options
   console.log('handleNavItemClicked', item)
   const scrollableElement = document.querySelector('.tab-content-body')
   const element = document.getElementById(item)
@@ -114,6 +124,12 @@ const handleNavItemClicked = (item) => {
       top: element.offsetTop - 100,
       behavior: 'smooth'
     })
+  }
+  
+  // Update URL hash with current tab and section
+  if (activeTab.value && !skipUrlUpdate) {
+    const path = buildSettingsPath(activeTab.value, item)
+    updateUrlHash(path)
   }
 }
 
@@ -412,7 +428,12 @@ const handleUserFilterChange = (event) => {
                     <small>{{ $t('settings.description.users') }}</small>
                   </span>
                 </h2>
-                <div class="admin-tip" v-if="store.isAdmin()">
+                <div 
+                  class="admin-tip clickable" 
+                  v-if="store.isAdmin()"
+                  @click="navigateTo('system.auth.self_registration')"
+                  :title="$t('settings.users.click_to_configure') || 'Click to configure'"
+                >
                   <Info />
                   <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on_short') }}</p>
                   <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off_short') }}</p>
@@ -805,6 +826,16 @@ const handleUserFilterChange = (event) => {
   svg {
     width: 20px;
     height: 20px;
+  }
+  
+  &.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--secondary-button-background-color-hover, var(--secondary-button-background-color));
+      transform: translateY(-1px);
+    }
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 
 
 //components
@@ -24,6 +24,7 @@ import { useTranslate } from '@tolgee/vue'
 import { domData, domError, domSuccess } from './domData'
 import { emitter, store } from './store'
 import { logout } from './api'
+import { checkUrlHash, clearUrlHash } from './composables/useSettingsNavigation'
 
 
 //use
@@ -90,6 +91,15 @@ onMounted(() => {
       })
     })
   })
+
+  // Register settings navigation event listener
+  emitter.on('settingsNavigate', handleSettingsNavigate)
+
+  // Check for settings deep-link in URL hash
+  // Delay slightly to ensure user is logged in and settings panel is available
+  setTimeout(() => {
+    checkSettingsDeepLink()
+  }, 100)
 })
 
 const setMode = () => {
@@ -126,6 +136,70 @@ const openSettings = () => {
 const openReverseShareInvite = () => {
   reverseInvite.value.showReverseInviteForm()
 }
+
+/**
+ * Handle settings navigation from the composable
+ * @param {{ tab: string, section: string|null, subSection: string|null, skipUrlUpdate?: boolean }} navigation
+ */
+const handleSettingsNavigate = (navigation) => {
+  const { tab, section, subSection, skipUrlUpdate = false } = navigation
+
+  // Open settings panel
+  store.setSettingsOpen(true)
+
+  // Wait for settings panel to be ready, then navigate
+  nextTick(() => {
+    if (!settingsPanel.value) {
+      console.warn('[App] Settings panel not available')
+      return
+    }
+
+    // Set the active tab (skip URL update if requested)
+    settingsPanel.value.setActiveTab(tab, { updateUrl: !skipUrlUpdate })
+
+    // If there's a section or sub-section to scroll to, do it after a short delay
+    // to allow the tab content to render
+    if (section || subSection) {
+      setTimeout(() => {
+        // Prefer sub-section if available, otherwise use section
+        const scrollTarget = subSection || section
+        settingsPanel.value.handleNavItemClicked(scrollTarget, { skipUrlUpdate })
+      }, 300)
+    }
+  })
+}
+
+/**
+ * Track if we've already handled the initial deep-link
+ */
+const deepLinkHandled = ref(false)
+
+/**
+ * Check for settings deep-link in URL hash on page load
+ */
+const checkSettingsDeepLink = () => {
+  if (deepLinkHandled.value) return
+  
+  const hashNav = checkUrlHash()
+  if (hashNav && store.isLoggedIn()) {
+    deepLinkHandled.value = true
+    // Skip URL update since we're already at the correct URL
+    handleSettingsNavigate({ ...hashNav, skipUrlUpdate: true })
+  }
+}
+
+// Watch for login state changes to handle deep-links
+watch(
+  () => store.loggedIn,
+  (isLoggedIn) => {
+    if (isLoggedIn && !deepLinkHandled.value) {
+      // Small delay to ensure settings panel is mounted
+      setTimeout(() => {
+        checkSettingsDeepLink()
+      }, 100)
+    }
+  }
+)
 </script>
 
 <template>
