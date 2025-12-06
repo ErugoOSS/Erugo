@@ -136,6 +136,14 @@ class SettingsController extends Controller
         // Copy the default logo to restore it
         copy($defaultLogoPath, $logoPath);
 
+        // Update the logo setting to show the default logo filename
+        $logoSetting = Setting::where('key', 'logo')->where('group', 'ui.logo')->first();
+        if ($logoSetting) {
+            $logoSetting->previous_value = $logoSetting->value;
+            $logoSetting->value = 'erugo-logo.png';
+            $logoSetting->save();
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Logo reset to default successfully',

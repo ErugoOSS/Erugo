@@ -499,6 +499,17 @@ export const deleteFavicon = async () => {
   return data
 }
 
+export const resetFavicon = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/favicon`, {
+    method: 'DELETE'
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const getFaviconStatus = async () => {
   const response = await fetchWithAuth(`${apiUrl}/api/settings/favicon/status`, {
     method: 'GET',

@@ -12,6 +12,7 @@ import Setup from './components/setup.vue'
 import ThankGuestForUpload from './components/thankGuestForUpload.vue'
 import ReverseInvite from './components/reverseInvite.vue'
 import Background from './components/layout/background.vue'
+import ConfirmDialog from './components/ConfirmDialog.vue'
 
 //3rd party
 import { LogOut, Settings as SettingsIcon, MailPlus } from 'lucide-vue-next'
@@ -187,6 +188,9 @@ const openReverseShareInvite = () => {
 
     <!-- reverse invite: load only if reverse shares are allowed and user is logged in and not a guest -->
     <ReverseInvite ref="reverseInvite" v-if="allowReverseShares && !store.isGuest() && store.isLoggedIn()" />
+
+    <!-- confirmation dialog: available globally -->
+    <ConfirmDialog />
   </TolgeeProvider>
 </template>
 

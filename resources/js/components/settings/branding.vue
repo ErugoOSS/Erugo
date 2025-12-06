@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch, defineExpose, onBeforeUnmount, computed } from 'vue'
-import { Pipette, Image, Ruler, Tag, X, Dice5, Images, FileDown, Trash, FileUp, Clock8   } from 'lucide-vue-next'
+import { Pipette, Image, Ruler, Tag, X, Dice5, Images, FileDown, Trash, FileUp, Clock8, RotateCcw   } from 'lucide-vue-next'
 import injectThemeVariables from '../../lib/injectThemeVariables'
 import ButtonWithMenu from '../buttonWithMenu.vue'
 
@@ -11,6 +11,7 @@ import {
   resetLogo,
   saveFavicon,
   deleteFavicon,
+  resetFavicon,
   getFaviconStatus,
   getBackgroundImages,
   saveBackgroundImage,
@@ -24,11 +25,13 @@ import {
 import FileInput from '../fileInput.vue'
 import { useToast } from 'vue-toastification'
 import { niceFileName, mapSettings } from '../../utils'
+import { useConfirmDialog } from '../../composables/useConfirmDialog'
 
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
 const toast = useToast()
+const confirmDialog = useConfirmDialog()
 const themeEditor = ref(null)
 const showThemeEditor = ref(false)
 
@@ -56,6 +59,8 @@ const backgroundImages = ref([])
 
 const settingsLoaded = ref(false)
 const saving = ref(false)
+const logoTimestamp = ref(Date.now())
+const faviconTimestamp = ref(Date.now())
 
 const emit = defineEmits(['navItemClicked'])
 
@@ -65,8 +70,14 @@ onMounted(async () => {
 
 const loadSettings = async () => {
   try {
+    const loadedSettings = mapSettings(await getSettingsByGroup('ui.*'))
+    // Use the logo setting value as a string to show in the input
+    // This is just for display - when saving, we only save if it's a File object
     settings.value = {
-      ...mapSettings(await getSettingsByGroup('ui.*'))
+      ...loadedSettings,
+      // If logo is a string from DB, keep it for display. If it's null/empty, set to null
+      // If user has selected a File object, that takes precedence
+      logo: settings.value.logo instanceof File ? settings.value.logo : (loadedSettings.logo || null)
     }
 
     settingsLoaded.value = true
@@ -105,6 +116,20 @@ const groupedThemes = computed(() => {
   }, {})
 })
 
+const logoPreview = computed(() => {
+  return {
+    url: `/images/logo.png?t=${logoTimestamp.value}`
+  }
+})
+
+const faviconPreview = computed(() => {
+  // Always show preview - default favicon if no custom one exists
+  return {
+    url: `/api/favicon?t=${faviconTimestamp.value}`,
+    filename: faviconStatus.value.has_custom_favicon ? faviconStatus.value.filename : 'icon.svg'
+  }
+})
+
 watch(themes, () => {
   themes.value.forEach((theme) => {
     if (theme.active) {
@@ -129,11 +154,18 @@ const saveSettings = async () => {
   try {
     if (settings.value.logo instanceof File) {
       await saveLogo(settings.value.logo)
+      logoTimestamp.value = Date.now()
       // Update the logo in the browser by forcing a cache refresh
       updateBrowserLogo()
     }
 
-    await saveSettingsById(settings.value)
+    // Don't save logo setting if it's just a string (from DB) - only save if it's a File object
+    const settingsToSave = { ...settings.value }
+    if (!(settingsToSave.logo instanceof File)) {
+      delete settingsToSave.logo
+    }
+
+    await saveSettingsById(settingsToSave)
 
     await setActiveTheme(activeTheme.value.name)
 
@@ -204,6 +236,7 @@ watch(newFavicon, async () => {
   if (newFavicon.value) {
     saveFavicon(newFavicon.value)
       .then((data) => {
+        faviconTimestamp.value = Date.now()
         loadFaviconStatus()
         newFavicon.value = null
         toast.success(t.value('settings.branding.favicon_uploaded'))
@@ -223,6 +256,7 @@ const handleDeleteFavicon = async () => {
   }
   deleteFavicon()
     .then((data) => {
+      faviconTimestamp.value = Date.now()
       loadFaviconStatus()
       toast.success(t.value('settings.branding.favicon_deleted'))
       // Update the favicon in the browser
@@ -234,18 +268,48 @@ const handleDeleteFavicon = async () => {
 }
 
 const handleResetLogo = async () => {
-  const reallyReset = confirm(t.value('settings.branding.confirm_reset_logo'))
+  const reallyReset = await confirmDialog.show({
+    title: t.value('settings.branding.confirm'),
+    message: t.value('settings.branding.confirm_reset_logo'),
+    okText: t.value('settings.branding.reset'),
+    cancelText: t.value('settings.close')
+  })
   if (!reallyReset) {
     return
   }
   resetLogo()
     .then((data) => {
+      logoTimestamp.value = Date.now()
+      settings.value.logo = 'erugo-logo.png' // Show default logo filename in input
       toast.success(t.value('settings.branding.logo_reset_success'))
       // Update the logo in the browser by forcing a refresh
       updateBrowserLogo()
     })
     .catch((error) => {
       toast.error(t.value('settings.branding.logo_reset_failed'))
+    })
+}
+
+const handleResetFavicon = async () => {
+  const reallyReset = await confirmDialog.show({
+    title: t.value('settings.branding.confirm'),
+    message: t.value('settings.branding.confirm_reset_favicon'),
+    okText: t.value('settings.branding.reset'),
+    cancelText: t.value('settings.close')
+  })
+  if (!reallyReset) {
+    return
+  }
+  resetFavicon()
+    .then((data) => {
+      faviconTimestamp.value = Date.now()
+      loadFaviconStatus()
+      toast.success(t.value('settings.branding.favicon_reset_success'))
+      // Update the favicon in the browser
+      updateBrowserFavicon()
+    })
+    .catch((error) => {
+      toast.error(t.value('settings.branding.favicon_reset_failed'))
     })
 }
 
@@ -338,17 +402,22 @@ const handleInstallCustomTheme = async () => {
 }
 
 const handleDeleteTheme = async () => {
-  const reallyDelete = confirm('Are you sure you want to delete this theme?')
+  const reallyDelete = await confirmDialog.show({
+    title: t.value('settings.branding.confirm'),
+    message: t.value('settings.branding.confirm_delete_theme', { name: activeTheme.value?.name }),
+    okText: t.value('settings.branding.delete'),
+    cancelText: t.value('settings.close')
+  })
   if (!reallyDelete) {
     return
   }
   deleteTheme(activeTheme.value.name)
     .then((data) => {
-      toast.success('Theme deleted successfully')
+      toast.success(t.value('settings.branding.theme_deleted_successfully'))
       loadThemes()
     })
     .catch((error) => {
-      toast.error('Failed to delete theme')
+      toast.error(t.value('settings.branding.theme_delete_failed'))
     })
 }
 
@@ -525,10 +594,21 @@ defineExpose({
               <div class="setting-group-body">
                 <div class="setting-group-body-item">
                   <label for="logoFile">{{ $t('settings.branding.logo_image') }}</label>
-                  <FileInput v-model="settings.logo" accept="image/png" />
-                  <button class="secondary mt-2" @click="handleResetLogo">
-                    {{ $t('settings.branding.reset_logo_to_default') }}
-                  </button>
+                  <FileInput 
+                    v-model="settings.logo" 
+                    accept="image/png"
+                    :preview="logoPreview"
+                  >
+                    <template #actions>
+                      <button
+                        @click.stop="handleResetLogo"
+                        :title="$t('settings.branding.reset_logo_to_default')"
+                        aria-label="Reset logo to default"
+                      >
+                        <RotateCcw />
+                      </button>
+                    </template>
+                  </FileInput>
                 </div>
 
                 <div class="setting-group-body-item">
@@ -541,14 +621,22 @@ defineExpose({
 
                 <div class="setting-group-body-item mt-4">
                   <label for="faviconFile">{{ $t('settings.branding.favicon') }}</label>
-                  <div class="favicon-preview" v-if="faviconStatus.has_custom_favicon">
-                    <img :src="`/api/favicon?t=${Date.now()}`" alt="Current favicon" class="favicon-img" />
-                    <span class="favicon-filename">{{ faviconStatus.filename }}</span>
-                    <button class="delete-favicon" @click="handleDeleteFavicon" :title="$t('settings.branding.delete_favicon')">
-                      <X />
-                    </button>
-                  </div>
-                  <FileInput v-model="newFavicon" accept="image/png, image/svg+xml" :label="$t('settings.branding.upload_favicon')" />
+                  <FileInput 
+                    v-model="newFavicon" 
+                    accept="image/png, image/svg+xml" 
+                    :label="$t('settings.branding.upload_favicon')"
+                    :preview="faviconPreview"
+                  >
+                    <template #actions>
+                      <button
+                        @click.stop="handleResetFavicon"
+                        :title="$t('settings.branding.reset_favicon_to_default')"
+                        aria-label="Reset favicon to default"
+                      >
+                        <RotateCcw />
+                      </button>
+                    </template>
+                  </FileInput>
                 </div>
               </div>
             </div>

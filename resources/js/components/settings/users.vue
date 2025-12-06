@@ -5,6 +5,7 @@ import { UserPen, Trash, UserPlus, CircleX, UserRoundCheck, FolderOpen, KeyRound
 import { store } from '../../store'
 import { useToast } from 'vue-toastification'
 import { niceDate } from '../../utils'
+import { useConfirmDialog } from '../../composables/useConfirmDialog'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -13,6 +14,7 @@ const { t } = useTranslate()
 const emit = defineEmits(['viewUserShares'])
 
 const toast = useToast()
+const confirmDialog = useConfirmDialog()
 const users = ref([])
 const errors = ref({})
 
@@ -30,14 +32,20 @@ const loadUsers = () => {
   })
 }
 
-const handleDeleteUserClick = (id) => {
+const handleDeleteUserClick = async (id) => {
   if (id === store.userId) {
     toast.error(t.value('settings.users.cannot_delete_yourself'))
     return
   }
 
+  const confirmed = await confirmDialog.show({
+    title: t.value('settings.users.delete'),
+    message: t.value('confirm_delete_user'),
+    okText: t.value('settings.users.delete'),
+    cancelText: t.value('settings.close')
+  })
 
-  if (confirm(t.value('confirm_delete_user'))) {
+  if (confirmed) {
     deleteUser(id).then(
       (data) => {
         loadUsers()
