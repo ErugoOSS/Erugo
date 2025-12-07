@@ -29,6 +29,7 @@
     "invite_accepted": "Convite para partilha aceite. Já pode carregar ficheiros para partilhar.",
     "login": "Iniciar Sessão",
     "login_successful": "Autenticação bem sucedida",
+    "login_to_accept_invite": "Inicie sessão para aceitar este convite de partilha inversa.",
     "login_with": "Iniciar sessão com",
     "logout": "Terminar Sessão",
     "or": "Ou",
@@ -818,6 +819,7 @@
       "leave_blank_to_keep_same_password": "Deixar vazio para manter a mesma palavra passe.",
       "link_provider_confirm": "Deseja realmente associar a sua conta a este fornecedor?",
       "linked": "Conta Ligada",
+      "must_change_password": "O utilizador tem de alterar a palavra-passe",
       "name": "Nome",
       "not_linked": "Conta Não Ligada",
       "password": "Nova Palavra Passe",
@@ -912,5 +914,10 @@
   },
   "uploading": {
     "files": "{value, plural, one {Transferindo # ficheiro} other {Transferindo # ficheiros} }"
+  },
+  "warnings": {
+    "how_to_fix": "Como corrigir",
+    "tusd_help_title": "Serviço de carregamento indisponível",
+    "tusd_unavailable": "Serviço de carregamento indisponível. O serviço tusd não está a funcionar. Os carregamentos de ficheiros não funcionarão até que isto seja resolvido."
   }
 }

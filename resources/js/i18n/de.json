@@ -34,6 +34,7 @@
     "invite_accepted": "Freigabeeinladung akzeptiert. Sie können jetzt Dateien hochladen.",
     "login": "Anmeldung",
     "login_successful": "Erfolgreich eingeloggt",
+    "login_to_accept_invite": "Bitte melden Sie sich an, um diese Einladung zur umgekehrten Freigabe anzunehmen.",
     "login_with": "Anmeldung mit",
     "logout": "Abmeldung",
     "name": "Vollständiger Name",
@@ -847,6 +848,7 @@
       "leave_blank_to_keep_same_password": "Leer lassen, um dasselbe Passwort beizubehalten.",
       "link_provider_confirm": "Möchten Sie Ihr Konto wirklich mit diesem Anbieter verknüpfen?",
       "linked": "Verbundenes Konto",
+      "must_change_password": "Benutzer muss Passwort ändern",
       "name": "Name",
       "not_linked": "Konto nicht verknüpft",
       "password": "Neues Passwort",
@@ -941,5 +943,10 @@
   },
   "uploading": {
     "files": "{value, plural, one {Hochladen der Datei #} other {Hochladen von # Dateien}}"
+  },
+  "warnings": {
+    "how_to_fix": "Wie beheben",
+    "tusd_help_title": "Upload-Dienst nicht verfügbar",
+    "tusd_unavailable": "Der Upload-Dienst ist nicht verfügbar. Der tusd-Dienst läuft nicht. Datei-Uploads funktionieren nicht, bis das Problem behoben ist."
   }
 }

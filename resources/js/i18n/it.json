@@ -34,6 +34,7 @@
     "invite_accepted": "Invito alla condivisione inversa accettato. Ora è possibile caricare i file.",
     "login": "Accesso",
     "login_successful": "Accesso effettuato con successo",
+    "login_to_accept_invite": "Effettuare il login per accettare l'invito alla condivisione inversa.",
     "login_with": "Accesso con",
     "logout": "Disconnessione",
     "name": "Nome completo",
@@ -847,6 +848,7 @@
       "leave_blank_to_keep_same_password": "Lasciare vuoto per mantenere la stessa password.",
       "link_provider_confirm": "Collegare davvero il proprio account a questo provider?",
       "linked": "Account collegato",
+      "must_change_password": "L'utente deve cambiare la password",
       "name": "Nome",
       "not_linked": "Account non collegato ",
       "password": "Nuova password",
@@ -941,5 +943,10 @@
   },
   "uploading": {
     "files": "{value, plural, one {Caricamento del file} other {Caricamento di # file} }"
+  },
+  "warnings": {
+    "how_to_fix": "Come risolvere",
+    "tusd_help_title": "Servizio di caricamento non disponibile",
+    "tusd_unavailable": "Servizio di caricamento non disponibile. Il servizio tusd non è in esecuzione. Il caricamento dei file non funzionerà finché non sarà risolto."
   }
 }

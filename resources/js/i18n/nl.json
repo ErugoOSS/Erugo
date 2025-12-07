@@ -34,6 +34,7 @@
     "invite_accepted": "Uitnodiging voor omgekeerd delen geaccepteerd. Je kunt nu bestanden uploaden.",
     "login": "Inloggen",
     "login_successful": "Succesvol ingelogd",
+    "login_to_accept_invite": "Log in om deze uitnodiging voor omgekeerd delen te accepteren.",
     "login_with": "Inloggen met",
     "logout": "Afmelden",
     "name": "Volledige naam",
@@ -841,6 +842,7 @@
       "leave_blank_to_keep_same_password": "Laat leeg om hetzelfde wachtwoord te behouden.",
       "link_provider_confirm": "Ben je zeker voor je account te linken aan deze provider?",
       "linked": "Gekoppeld account",
+      "must_change_password": "Gebruiker moet wachtwoord wijzigen",
       "name": "Naam",
       "not_linked": "Account niet gekoppeld",
       "password": "Nieuw wachtwoord",
@@ -935,5 +937,10 @@
   },
   "uploading": {
     "files": "{value, plural, one {# bestand uploaden} other {# bestanden uploaden}}"
+  },
+  "warnings": {
+    "how_to_fix": "Hoe repareren",
+    "tusd_help_title": "Uploaddienst niet beschikbaar",
+    "tusd_unavailable": "Uploaddienst niet beschikbaar. De tusd-service wordt niet uitgevoerd. Het uploaden van bestanden werkt niet totdat dit is opgelost."
   }
 }
