@@ -942,5 +942,10 @@
   },
   "uploading": {
     "files": "{value, plural, one {Uploading # file} other {Uploading # files}}"
+  },
+  "warnings": {
+    "how_to_fix": "How to fix",
+    "tusd_help_title": "Upload Service Unavailable",
+    "tusd_unavailable": "Upload service unavailable. The tusd service is not running. File uploads will not work until this is resolved."
   }
 }
