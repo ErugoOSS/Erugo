@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue'
 import { niceFileSize, timeUntilExpiration, getApiUrl, niceFileType, niceFileName } from '../utils'
-import { FileIcon, HeartCrack, TrendingDown, FileX } from 'lucide-vue-next'
+import { FileIcon, HeartCrack, TrendingDown, FileX, Boxes } from 'lucide-vue-next'
 import { getShare } from '../api'
 import { domError } from '../domData'
 import { useToast } from 'vue-toastification'
@@ -154,12 +154,15 @@ const filesByDirectory = computed(() => {
 <template>
   <div class="download-panel-content">
     <template v-if="share">
-      <h1>
+      <h1 class="share-name">
+        <Boxes />
         {{ share.name }}
       </h1>
-      <div class="total-size">{{ $t('total_size') }}: {{ niceFileSize(share.size) }}</div>
-      <div class="file-count">
-        {{ $t('share.contains.count', 'Contains: {value} files', { value: share.file_count }) }}
+      <div class="stats">
+        <div class="total-size stat">{{ niceFileSize(share.size) }}</div>
+        <div class="file-count stat">
+          {{ $t('share.contains.count', 'Contains: {value} files', { value: share.file_count }) }}
+        </div>
       </div>
       <div class="share-expires">
         {{
@@ -171,7 +174,12 @@ const filesByDirectory = computed(() => {
         }}
       </div>
       <div class="share-files-list">
-        <directory-item :structure="filesByDirectory" :is-root="true" :read-only="true" />
+        <directory-item
+          :structure="filesByDirectory"
+          :is-root="true"
+          :read-only="true"
+          :share-code="downloadShareCode"
+        />
       </div>
       <div class="share-message mt-3" v-if="share.description">
         <h6>{{ $t('message.from', { name: splitFullName(share.user.name) }) }}</h6>
@@ -281,5 +289,60 @@ const filesByDirectory = computed(() => {
 
 .error-message {
   margin-top: -24px;
+}
+
+.share-name {
+  color: var(--panel-text-color);
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  background: var(--primary-button-background-color);
+  color: var(--primary-button-text-color);
+  padding: 20px 20px;
+  border-radius: var(--panel-border-radius);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  width: calc(100%);
+  margin-top: -20px;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0px!important;
+  width: 100%;
+  background: var(--panel-section-background-color-alt);
+  padding: 10px 20px;
+}
+.stat {
+  color: var(--panel-text-color);
+  font-size: 0.8rem;
+  display: block;
+  background: var(--panel-section-background-color);
+  padding: 10px 20px;
+  border-radius: var(--panel-border-radius);
+  margin-bottom: 0!important;
+}
+
+
+.share-expires {
+  width: 100%;
+  background: var(--panel-item-background-color);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  margin-top: 0!important;
 }
 </style>

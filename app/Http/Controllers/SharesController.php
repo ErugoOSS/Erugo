@@ -3,220 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Share;
-use App\Models\File;
-use Illuminate\Support\Str;
-use App\Jobs\CreateShareZip;
 use Carbon\Carbon;
 use App\Haikunator;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Download;
 use App\Mail\shareDownloadedMail;
-use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Services\SettingsService;
+use App\Services\PatternGenerator;
 use App\Jobs\cleanSpecificShares;
 use Illuminate\Support\Facades\Hash;
 
 class SharesController extends Controller
 {
-  public function create(Request $request)
-  {
-    $validator = Validator::make($request->all(), [
-      'name' => ['string', 'max:255'],
-      'description' => ['max:500'],
-      'expires_at' => ['date'],
-      'files' => ['required', 'array'],
-      'expiry_date' => ['required', 'date']
-    ]);
-
-    if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
-    }
-
-    $maxExpiryTime = Setting::where('key', 'max_expiry_time')->first()->value;
-    $expiryDate = Carbon::parse($request->expiry_date);
-
-    if ($maxExpiryTime !== null) {
-      $now = Carbon::now();
-
-      if ($now->diffInDays($expiryDate) > $maxExpiryTime) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Expiry date is too long',
-          'data' => [
-            'max_expiry_time' => $maxExpiryTime
-          ]
-        ], 400);
-      }
-    }
-
-    $user = Auth::user();
-
-    if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
-    }
-    $longId = $this->generateLongId();
-    $files = $request->file('files');
-    \Log::info('paths', ['paths' => $request->file_paths]);
-    \Log::info('files', ['files' => array_map(function ($file) {
-      return $file->getClientOriginalName();
-    }, $files)]);
-
-    $totalFileSize = 0;
-    foreach ($files as $file) {
-      $totalFileSize += $file->getSize();
-    }
-
-    $password = $request->password;
-    $passwordConfirm = $request->password_confirm;
-
-    $password = $request->password;
-    $passwordConfirm = $request->password_confirm;
-
-    if ($password) {
-      if ($password !== $passwordConfirm) {
-        return response()->json([
-          'status' => 'error',
-          'message' => 'Password confirmation does not match'
-        ], 400);
-      }
-    }
-
-    $sharePath = $user->id . '/' . $longId;
-    $completePath = storage_path('app/shares/' .  $sharePath);
-    
-    //create the directory if it doesn't exist
-    if (!file_exists($completePath)) {
-      mkdir($completePath, 0777, true);
-    }
-
-    $shareData = [
-      'name' => $request->name,
-      'description' => $request->description,
-      'expires_at' => Carbon::now()->addDays(7),
-      'user_id' => $user->id,
-      'path' => $sharePath,
-      'long_id' => $longId,
-      'size' => $totalFileSize,
-      'file_count' => count($files),
-      'password' => $password ? Hash::make($password) : null
-    ];
-    $share = Share::create($shareData);
-    foreach ($files as $file) {
-
-      $fileData = [
-        'share_id' => $share->id,
-        'name' => $file->getClientOriginalName(),
-        'type' => $file->getMimeType(),
-        'size' => $file->getSize()
-      ];
-      $db_file = File::create($fileData);
-      $db_file->share_id = $share->id;
-      $db_file->save();
-      $file->dbFile = $db_file;
-    }
-
-    foreach ($files as $index => $file) {
-      $originalPath = $request->file_paths[$index];
-      $originalPath = explode('/', $originalPath);
-      $originalPath = implode('/', array_slice($originalPath, 0, -1));
-      $file->move($completePath . '/' . $originalPath, $file->getClientOriginalName());
-      $file->dbFile->full_path = $originalPath;
-      $file->dbFile->save();
-    }
-    $share->status = 'pending';
-    $share->save();
-
-    //dispatch the job to create the zip file
-    CreateShareZip::dispatch($share);
-
-    if ($user->is_guest) {
-
-      $invite = $user->invite;
-
-      $share->public = false;
-      $share->invite_id = $invite->id;
-      $share->user_id = null;
-      $share->save();
-
-      if ($invite->user) {
-        $this->sendShareCreatedEmail($share, $invite->user);
-      } else {
-        Log::error('Guest user has no invite user', ['user_id' => $user->id]);
-      }
-
-      $invite->guest_user_id = null;
-      $invite->save();
-
-
-      //log the user out
-      Auth::logout();
-      $user->delete();
-
-
-
-      $cookie = cookie('refresh_token', '', 0, null, null, false, true);
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Share created',
-        'data' => [
-          'share' => $share
-        ]
-      ])->withCookie($cookie);
-    }
-
-    // Process recipients if provided
-    if ($request->has('recipients')) {
-      $recipients = $request->input('recipients');
-
-      // If using the indexed approach from the frontend, Laravel will automatically parse it
-      foreach ($recipients as $recipient) {
-        // For indexed approach, recipient will be an array with name and email keys
-        // Laravel handles the parsing of recipients[0][name], recipients[0][email], etc.
-        if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {
-          $this->sendShareCreatedEmail($share, $recipient);
-        }
-        // For the JSON.stringify approach (optional fallback)
-        else if (is_string($recipient)) {
-          $recipientData = json_decode($recipient, true);
-          if ($recipientData && isset($recipientData['name']) && isset($recipientData['email'])) {
-            $this->sendShareCreatedEmail($share, $recipientData);
-          }
-        }
-      }
-    }
-
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Files uploaded successfully',
-      'data' => [
-        'share' => $share
-      ]
-    ]);
-  }
-
-
-  private function sendShareCreatedEmail(Share $share, $recipient)
-  {
-    $user = Auth::user();
-    if ($recipient) {
-      sendEmail::dispatch($recipient['email'], shareCreatedMail::class, ['user' => $user, 'share' => $share, 'recipient' => $recipient]);
-    }
-  }
-
   public function read($shareId)
   {
     $share = Share::where('long_id', $shareId)->with(['files', 'user'])->first();
@@ -273,7 +75,7 @@ class SharesController extends Controller
       'files' => $share->files->map(function ($file) {
         return [
           'id' => $file->id,
-          'name' => $file->name,
+          'name' => $file->display_name, // Show original filename to users
           'size' => $file->size,
           'type' => $file->type,
           'full_path' => $file->full_path,
@@ -357,7 +159,7 @@ class SharesController extends Controller
 
         $this->createDownloadRecord($share);
 
-        return response()->download($sharePath . '/' . $share->files[0]->name);
+        return response()->download($sharePath . '/' . $share->files[0]->name, $share->files[0]->display_name);
       } else {
         return redirect()->to('/shares/' . $shareId);
       }
@@ -404,6 +206,139 @@ class SharesController extends Controller
     ]);
   }
 
+  /**
+   * Download a specific file from a multi-file share
+   * The filepath can include nested directories (e.g., "folder/subfolder/file.txt")
+   */
+  public function downloadFile($shareId, $filepath)
+  {
+    $share = Share::where('long_id', $shareId)->with('files')->first();
+    if (!$share) {
+      return response()->json(['error' => 'Share not found'], 404);
+    }
+
+    if ($share->password) {
+      $password = request()->input('password');
+      if (!$password) {
+        return response()->json(['error' => 'Password required'], 401);
+      }
+      if (!Hash::check($password, $share->password)) {
+        return response()->json(['error' => 'Invalid password'], 401);
+      }
+    }
+
+    if ($share->expires_at < Carbon::now()) {
+      return response()->json(['error' => 'Share expired'], 410);
+    }
+
+    if ($share->download_limit != null && $share->download_count >= $share->download_limit) {
+      return response()->json(['error' => 'Download limit reached'], 410);
+    }
+
+    if (!$this->checkShareAccess($share)) {
+      return response()->json(['error' => 'Access denied'], 403);
+    }
+
+    // Decode the filepath (it may be URL encoded)
+    $filepath = urldecode($filepath);
+
+    // For single file shares, check if the requested file matches
+    if ($share->file_count == 1) {
+      $file = $share->files[0];
+      $expectedPath = $file->full_path ? $file->full_path . '/' . $file->display_name : $file->display_name;
+      
+      if ($filepath === $expectedPath || $filepath === $file->display_name) {
+        $sharePath = storage_path('app/shares/' . $share->path);
+        $filePath = $sharePath . '/' . $file->name;
+        
+        if (file_exists($filePath)) {
+          $this->createDownloadRecord($share);
+          return response()->download($filePath, $file->display_name);
+        }
+      }
+      return response()->json(['error' => 'File not found'], 404);
+    }
+
+    // For multi-file shares, we need to extract from the zip
+    if ($share->status !== 'ready') {
+      return response()->json(['error' => 'Share is not ready'], 400);
+    }
+
+    $sharePath = storage_path('app/shares/' . $share->path);
+    $zipPath = $sharePath . '.zip';
+
+    if (!file_exists($zipPath)) {
+      return response()->json(['error' => 'Archive not found'], 404);
+    }
+
+    // Find the file in the share's file list to validate it exists
+    $foundFile = null;
+    foreach ($share->files as $file) {
+      $expectedPath = $file->full_path ? $file->full_path . '/' . $file->display_name : $file->display_name;
+      if ($filepath === $expectedPath || $filepath === $file->display_name) {
+        $foundFile = $file;
+        break;
+      }
+    }
+
+    if (!$foundFile) {
+      return response()->json(['error' => 'File not found in share'], 404);
+    }
+
+    // Build the path as it exists in the zip (using sanitized name)
+    $zipFilePath = $foundFile->full_path ? $foundFile->full_path . '/' . $foundFile->name : $foundFile->name;
+
+    // Open the zip and stream the file
+    $zip = new \ZipArchive();
+    if ($zip->open($zipPath) !== true) {
+      return response()->json(['error' => 'Failed to open archive'], 500);
+    }
+
+    // Try to find the file in the zip
+    $fileIndex = $zip->locateName($zipFilePath);
+    if ($fileIndex === false) {
+      // Try without the path prefix (zip might have different structure)
+      $fileIndex = $zip->locateName($foundFile->name);
+    }
+
+    if ($fileIndex === false) {
+      $zip->close();
+      return response()->json(['error' => 'File not found in archive'], 404);
+    }
+
+    // Get file stats
+    $stat = $zip->statIndex($fileIndex);
+    $fileSize = $stat['size'];
+
+    // Get the stream
+    $stream = $zip->getStream($zip->getNameIndex($fileIndex));
+    if (!$stream) {
+      $zip->close();
+      return response()->json(['error' => 'Failed to read file from archive'], 500);
+    }
+
+    $this->createDownloadRecord($share);
+
+    // Determine content type
+    $mimeType = $foundFile->type ?? 'application/octet-stream';
+
+    // Stream the response with larger buffer for better throughput
+    // 64KB buffer size optimizes for tunnel/proxy scenarios
+    return response()->stream(function () use ($stream, $zip) {
+      while (!feof($stream)) {
+        echo fread($stream, 65536);
+        flush();
+      }
+      fclose($stream);
+      $zip->close();
+    }, 200, [
+      'Content-Type' => $mimeType,
+      'Content-Disposition' => 'attachment; filename="' . $foundFile->display_name . '"',
+      'Content-Length' => $fileSize,
+      'X-Accel-Buffering' => 'no', // Disable proxy buffering for streaming
+    ]);
+  }
+
   public function myShares(Request $request)
   {
     $user = Auth::user();
@@ -428,6 +363,46 @@ class SharesController extends Controller
       'data' => [
         'shares' => $shares->map(function ($share) {
           return $this->formatSharePrivate($share);
+        })
+      ]
+    ]);
+  }
+
+  public function allShares(Request $request)
+  {
+    $user = Auth::user();
+
+    if (!$user || !$user->admin) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Unauthorized'
+      ], 401);
+    }
+
+    $showDeleted = $request->input('show_deleted', false);
+    $userId = $request->input('user_id', null);
+
+    $shares = Share::orderBy('created_at', 'desc')->with(['files', 'user']);
+    
+    if ($showDeleted === 'false') {
+      $shares = $shares->where('status', '!=', 'deleted');
+    }
+    
+    if ($userId) {
+      $shares = $shares->where('user_id', $userId);
+    }
+    
+    $shares = $shares->get();
+    
+    return response()->json([
+      'status' => 'success',
+      'message' => 'All shares',
+      'data' => [
+        'shares' => $shares->map(function ($share) {
+          $formatted = $this->formatSharePrivate($share);
+          $formatted->user_name = $share->user ? $share->user->name : 'Unknown User';
+          $formatted->user_email = $share->user ? $share->user->email : '';
+          return $formatted;
         })
       ]
     ]);
@@ -563,17 +538,51 @@ class SharesController extends Controller
 
   public function generateLongId()
   {
+    $settingsService = new SettingsService();
+    $mode = $settingsService->get('share_url_mode') ?? 'haiku';
+
     $maxAttempts = 10;
     $attempts = 0;
-    $id = Haikunator::haikunate() . '-' . Haikunator::haikunate();
+
+    $id = $this->generateIdByMode($mode, $settingsService);
     while (Share::where('long_id', $id)->exists() && $attempts < $maxAttempts) {
-      $id = Haikunator::haikunate() . '-' . Haikunator::haikunate();
+      $id = $this->generateIdByMode($mode, $settingsService);
       $attempts++;
     }
+
     if ($attempts >= $maxAttempts) {
       throw new \Exception('Unable to generate unique long_id after ' . $maxAttempts . ' attempts');
     }
+
     return $id;
+  }
+
+  private function generateIdByMode(string $mode, SettingsService $settingsService): string
+  {
+    return match ($mode) {
+      'pattern' => $this->generatePatternId($settingsService),
+      default => $this->generateHaikuId(),
+    };
+  }
+
+  private function generateHaikuId(): string
+  {
+    return Haikunator::haikunate() . '-' . Haikunator::haikunate();
+  }
+
+  private function generatePatternId(SettingsService $settingsService): string
+  {
+    $pattern = $settingsService->get('share_url_pattern') ?? '******';
+    $generator = new PatternGenerator();
+    
+    $error = $generator->validate($pattern);
+    if ($error !== null) {
+      // Fallback to a safe default pattern if the configured one is invalid
+      \Log::warning("Invalid share URL pattern configured: {$error}. Using default.");
+      $pattern = '******';
+    }
+    
+    return $generator->generate($pattern);
   }
 
   private function getSettings()

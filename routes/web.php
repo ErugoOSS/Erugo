@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Mail\shareDownloadedMail;
 use App\Jobs\sendEmail;
@@ -21,9 +20,6 @@ function getSettings()
     $settings = Setting::whereLike('group', 'ui%')
         ->orWhere('key', 'default_language')
         ->orWhere('key', 'show_language_selector')
-        ->orWhere('key', 'default_upload_mode')
-        ->orWhere('key', 'allow_direct_uploads')
-        ->orWhere('key', 'allow_chunked_uploads')
         ->orWhere('key', 'allow_reverse_shares')
         ->orWhere('key', 'max_expiry_time')
         ->orWhere('key', 'default_expiry_time')
@@ -77,7 +73,31 @@ Route::get('/reset-password/{token}', function ($token) {
     return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
 });
 
-Route::get('/shares/{share}', function () {
+Route::get('/shares/{share}', function ($shareId) {
+    // Detect CLI tools (curl, wget, etc.) and serve file directly
+    $userAgent = request()->userAgent() ?? '';
+    $cliPatterns = [
+        '/^curl\//i',
+        '/^wget\//i',
+        '/^libcurl/i',
+        '/^Wget/i',
+        '/^HTTPie\//i',
+    ];
+    
+    $isCli = false;
+    foreach ($cliPatterns as $pattern) {
+        if (preg_match($pattern, $userAgent)) {
+            $isCli = true;
+            break;
+        }
+    }
+    
+    if ($isCli) {
+        // Serve file directly (curl uses Content-Disposition with -OJ flag)
+        $controller = app(\App\Http\Controllers\SharesController::class);
+        return $controller->download($shareId);
+    }
+
     $indexedSettings = getSettings();
 
     $theme = Theme::where('active', true)->first();
@@ -85,14 +105,18 @@ Route::get('/shares/{share}', function () {
     return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
 });
 
+// Direct download route with filename in URL (for wget compatibility - wget uses URL path for filename)
+Route::get('/shares/{share}/{filename}', function ($shareId, $filename) {
+    $controller = app(\App\Http\Controllers\SharesController::class);
+    return $controller->download($shareId);
+})->where('filename', '[^/]+'); // Only match single filename, not paths
 
-Route::get('/get-logo', function () {
-    //grab the logo file data from settings
-    $setting = Setting::where('key', 'logo')->first();
-    $logo = Storage::disk('public')->get($setting->value);
-    // return $setting;
-    return response($logo)->header('Content-Type', 'image/png');
-});
+// Download specific file from a multi-file share (supports nested paths)
+Route::get('/shares/{share}/file/{filepath}', function ($shareId, $filepath) {
+    $controller = app(\App\Http\Controllers\SharesController::class);
+    return $controller->downloadFile($shareId, $filepath);
+})->where('filepath', '.*');
+
 
 //auth provider login
 Route::get('/auth/provider/{provider}/login', [ExternalAuthController::class, 'providerLogin'])

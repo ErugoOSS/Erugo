@@ -6,6 +6,52 @@
 
 Erugo is a powerful, self-hosted file-sharing platform built with PHP and Laravel with a Vue.js frontend. It offers secure, customisable file-transfer capabilities through an elegant user interface, giving you complete control over your data while providing a seamless experience for both senders and recipients.
 
+
+### Support Erugo's Development
+
+If you would like to support Erugo's development, please consider donating to the project. Your support helps me maintain and improve the software.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B11BF8EC)
+
+## Quick Start
+
+You can use the example docker-compose.yaml below to run Erugo in a container.
+
+```yaml
+services:
+  app:
+    image: wardy784/erugo:latest
+    restart: unless-stopped
+    volumes:
+      - ./erugo-storage:/var/www/html/storage # Use a dedicated folder
+    ports:
+      - "9998:80"
+```
+
+The above docker-compose.yml provides a basic configuration starting point that will get Erugo up and running with a default sqlite database.
+
+```sh
+docker compose up -d
+``` 
+
+## Screenshots
+
+![Upload Interface](.github/images/screenshots/main-screen-with-files.png)
+
+_A clean, modern upload interface with file and folder support_
+
+![My Shares](.github/images/screenshots/main-screen-with-password-form.png)
+
+_Optionally password protect your shares_
+
+![Settings](.github/images/screenshots/main-screen-with-reverse-share-req.png)
+
+_Invite guests to upload files to your account with a one-time reverse share token_
+
+![image](.github/images/screenshots/login-screen-with-external-providers.png)
+
+_Login screen with external auth provider support_
+
 ## Demo
 
 Check out a sample share on our demo site at [demo.erugo.app/shares/tight-silence-sweet-sea](https://demo.erugo.app/shares/tight-silence-sweet-sea). While uploads are disabled on the demo, you can experience the recipient's view and download the sample file.
@@ -18,32 +64,6 @@ Check out a sample share on our demo site at [demo.erugo.app/shares/tight-silenc
 
 BoxToPlay offers premium VPS and game servers at competitive prices. They have generously contributed server resources to support Erugo's infrastructure, for which I am deeply grateful. Explore their services at [boxtoplay.com](https://www.boxtoplay.com/en/vps-hosting/vps-server?ref=erugo-readme).
 
-
-
-
-### Support Erugo's Development
-
-If you would like to support Erugo's development, please consider donating to the project. Your support helps me maintain and improve the software.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B11BF8EC)
-
-## Screenshots
-
-![Upload Interface](.github/images/uploader.jpg)
-
-_A clean, intuitive upload interface showing file selection and recipient information_
-
-![My Shares](.github/images/my-shares.jpg)
-
-_My Shares page showing share details and options to manage user's shares_
-
-![Settings](.github/images/settings.jpg)
-
-_Comprehensive settings page to configure the application_
-
-![image](https://github.com/user-attachments/assets/ebce35e8-12ec-475c-9e0d-d438a5ad58b3)
-
-_New login screen with external auth provider support_
 
 ## Videos Featuring Erugo
 
@@ -59,10 +79,14 @@ _New login screen with external auth provider support_
 - **Effortless Deployment**: Easy to deploy on Docker with the provided docker-compose file
 - **Zero-Configuration**: Reasonable defaults out of the box, but easily customised via the web interface
 - **Human-Friendly Share Links**: Easy-to-read URLs like `you.com/shares/quiet-cloud-shrill-thunder`
-- **Secure Access Control**: Only authorized users can create shares, while anyone with a share link can download
-- **Simple Data Management**: SQLite database for efficient metadata storage
-- **Flexible Configuration**: Configure maximum share size, branding, expiry, and more
-- **Easy User Management**: Invite and remove users from the web interface
+- **Maintains Folder Structure**: When uploading folders, the folder structure is maintained in the share link and subsequent downloads
+- **Reverse Share**: Users can invite guests to upload files to their account with a one-time reverse share token
+- **Secure Access Control**: Only authorized users can create shares, shares are publicly accessible or can be password protected
+- **Control Expiration**: Shares can be configured to expire after a configurable period of time at upload time. Admins can set maximum expiration times for shares
+- **Flexible Configuration**: Built-in themes and branding options, custom themes can be installed via the web interface, easily white-label your Erugo, set maximum upload sizes, maximum expiration times, and more
+- **Automatic Cleanup**: Shares are automatically deleted after a configurable period of time
+- **Email Support**: Full email support for notifications, password reset, and more
+- **Easy User Management**: Invite, edit, and remove users from the web interface
 - **Interactive Setup**: User-friendly first-run configuration when the web interface is first loaded
 - **Modern Interface**: Clean, intuitive web UI
 - **Open Source**: MIT licensed and ready for white-labeling
@@ -73,64 +97,6 @@ _New login screen with external auth provider support_
 Give this repository a star to keep track of releases and updates. Stars are also great for motivating me to keep adding features!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=DeanWard/erugo&type=Date)](https://star-history.com/#DeanWard/erugo&Date)
-
-## Quick Start
-
-You can use the example docker-compose.yaml below to run Erugo in a container.
-
-```yaml
-services:
-  app:
-    image: wardy784/erugo:latest
-    restart: unless-stopped
-    volumes:
-      - ./erugo-storage:/var/www/html/storage # Use a dedicated folder
-    ports:
-      - "9998:80"
-    networks:
-      - erugo
-
-networks:
-  erugo:
-    driver: bridge
-```
-
-The above docker-compose.yml provides a basic configuration starting point that will get Erugo up and running with a default sqlite database.
-
-```sh
-docker compose up -d
-``` 
-
-## Configuration Options
-
-Erugo can be customised via the web interface.
-
-- General settings
-  - Application name
-  - Application URL
-  - Login message
-  - Default language
-  - Enable language selector
-- Share settings
-  - Maximum share size
-  - Expiration time
-  - Cleanup delay (how long after expiration the share is deleted)
-- Notifications
-  - Enabale / disable various notifications
-- SMTP settings
-  - SMTP host
-  - SMTP port
-  - SMTP encryption
-  - SMTP username
-  - SMTP password
-  - SMTP from name
-- Branding
-  - Background images
-  - Custom logo image and size
-  - Hide powered by erugo text
-  - Select themes
-  - Manage themes
-
 
 ## Using Erugo
 

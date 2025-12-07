@@ -67,7 +67,7 @@ const saveUser = async () => {
   <div class="setup-container">
     <div class="setup-inner">
       <div class="setup-logo-container">
-        <img src="../assets/images/erugo-logo.png" alt="Erugo" class="setup-logo" />
+        <img :src="'/images/logo.png'" alt="Erugo" class="setup-logo" />
       </div>
 
       <p>

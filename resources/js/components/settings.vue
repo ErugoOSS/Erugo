@@ -12,35 +12,57 @@ import {
   Plus,
   EllipsisVertical,
   Bomb,
-  Mail
+  Mail,
+  HelpCircle,
+  BarChart3,
+  FolderOpen,
+  RefreshCw,
+  Loader2,
+  LogIn,
+  Info
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
 import BrandingSettings from './settings/branding.vue'
 import SystemSettings from './settings/system.vue'
+import SystemStats from './settings/systemStats.vue'
 import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
+import AllShares from './settings/allShares.vue'
+import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
+import { useSetting } from '../composables/useSetting'
+import { useSettingsNavigation, updateUrlHash, buildSettingsPath, clearUrlHash } from '../composables/useSettingsNavigation'
 
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
+const { navigateTo } = useSettingsNavigation()
 
 //settings panels
 const usersPanel = ref(null)
 const mySharesPanel = ref(null)
+const allSharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
 
 const showDeletedShares = ref(false)
+const showDeletedSharesAll = ref(false)
+const allSharesUsers = ref([])
+const selectedUserId = ref(null)
+
+// Subscribe to self_registration_enabled setting - auto-updates when settings change
+const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
 // Create refs for the tab contents
 const tabContents = ref({
+  stats: ref(null),
   branding: ref(null),
   system: ref(null),
   users: ref(null),
   myProfile: ref(null),
-  myShares: ref(null)
+  myShares: ref(null),
+  allShares: ref(null)
 })
 
 onMounted(() => {
@@ -50,10 +72,15 @@ onMounted(() => {
   if (showDeletedSharesSetting) {
     showDeletedShares.value = showDeletedSharesSetting === 'true'
   }
+  const showDeletedSharesAllSetting = localStorage.getItem('allSharesShowDeleted')
+  if (showDeletedSharesAllSetting) {
+    showDeletedSharesAll.value = showDeletedSharesAllSetting === 'true'
+  }
 })
 
 const closeSettings = () => {
   store.setSettingsOpen(false)
+  clearUrlHash()
 }
 
 const clickOutside = (e) => {
@@ -62,8 +89,17 @@ const clickOutside = (e) => {
   }
 }
 
-const setActiveTab = (tab) => {
+const setActiveTab = (tab, options = {}) => {
+  const { updateUrl = true } = options
   activeTab.value = tab
+  if (tab === 'allShares' && allSharesUsers.value.length === 0) {
+    loadAllSharesUsers()
+  }
+  
+  // Update URL hash with the new tab
+  if (updateUrl) {
+    updateUrlHash(tab)
+  }
 }
 
 const getInitialTab = () => {
@@ -77,7 +113,8 @@ const createShare = () => {
   store.setSettingsOpen(false)
 }
 
-const handleNavItemClicked = (item) => {
+const handleNavItemClicked = (item, options = {}) => {
+  const { skipUrlUpdate = false } = options
   console.log('handleNavItemClicked', item)
   const scrollableElement = document.querySelector('.tab-content-body')
   const element = document.getElementById(item)
@@ -87,6 +124,12 @@ const handleNavItemClicked = (item) => {
       top: element.offsetTop - 100,
       behavior: 'smooth'
     })
+  }
+  
+  // Update URL hash with current tab and section
+  if (activeTab.value && !skipUrlUpdate) {
+    const path = buildSettingsPath(activeTab.value, item)
+    updateUrlHash(path)
   }
 }
 
@@ -100,17 +143,21 @@ const getSettingsTitle = () => {
   if (!t.value) {
     // Fallback if translation function is not ready
     const fallbackTitles = {
+      stats: 'System Stats',
       branding: 'Branding',
       system: 'System',
       users: 'Users',
       myProfile: 'My Profile',
       myShares: 'My Shares',
+      allShares: 'All Shares',
       emailTemplates: 'Email Templates'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
 
   switch (activeTab.value) {
+    case 'stats':
+      return t.value('settings.title.stats') || 'System Stats'
     case 'branding':
       return t.value('settings.title.branding')
     case 'system':
@@ -121,6 +168,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.myProfile')
     case 'myShares':
       return t.value('settings.title.myShares')
+    case 'allShares':
+      return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
     default:
@@ -137,6 +186,43 @@ const setShowDeletedShares = (value) => {
   localStorage.setItem('showDeletedShares', value)
   mySharesPanel.value.setShowDeletedShares(value)
 }
+
+const setShowDeletedSharesAll = (value) => {
+  showDeletedSharesAll.value = value
+  localStorage.setItem('allSharesShowDeleted', value)
+  allSharesPanel.value.setShowDeletedShares(value)
+}
+
+const goToHelp = () => {
+  window.open('https://new.erugo.app/docs/configuration/', '_blank')
+}
+
+const handleViewUserShares = (user) => {
+  setActiveTab('allShares')
+  // Use nextTick to ensure the component is mounted before setting the filter
+  setTimeout(() => {
+    if (allSharesPanel.value) {
+      selectedUserId.value = user.id
+      allSharesPanel.value.setUserFilter(user.id)
+    }
+  }, 100)
+}
+
+const loadAllSharesUsers = async () => {
+  try {
+    const data = await getUsers()
+    allSharesUsers.value = data.users || []
+  } catch (error) {
+    console.error('Failed to load users', error)
+  }
+}
+
+const handleUserFilterChange = (event) => {
+  selectedUserId.value = event.target.value || null
+  if (allSharesPanel.value) {
+    allSharesPanel.value.setUserFilter(selectedUserId.value)
+  }
+}
 </script>
 
 <template>
@@ -150,12 +236,26 @@ const setShowDeletedShares = (value) => {
             <span v-html="getSettingsTitle()" />
           </span>
         </h1>
+        <button class="settings-help-button icon-only" @click="goToHelp">
+          <HelpCircle />
+        </button>
         <button class="close-settings-button icon-only" @click="closeSettings">
           <CircleX />
         </button>
       </div>
       <div class="settings-tabs-wrapper">
         <div class="settings-tabs-container">
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'stats' }"
+            @click="setActiveTab('stats')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <BarChart3 />
+              {{ $t('settings.title.stats') || 'Stats' }}
+            </h2>
+          </div>
           <div
             class="settings-tab"
             :class="{ active: activeTab === 'branding' }"
@@ -200,6 +300,17 @@ const setShowDeletedShares = (value) => {
               {{ $t('settings.title.users') }}
             </h2>
           </div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'allShares' }"
+            @click="setActiveTab('allShares')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <FolderOpen />
+              {{ $t('settings.title.allShares') }}
+            </h2>
+          </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myShares' }" @click="setActiveTab('myShares')">
             <h2>
               <Boxes />
@@ -212,10 +323,35 @@ const setShowDeletedShares = (value) => {
               {{ $t('settings.title.myProfile') }}
             </h2>
           </div>
+          <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
         </div>
         <div class="settings-tabs-content-container">
           <Transition name="fade">
-            <div v-if="activeTab === 'branding'" class="settings-tab-content" ref="tabContents.branding" key="branding">
+            <div v-if="activeTab === 'stats'" class="settings-tab-content" ref="tabContents.stats" key="stats">
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <BarChart3 />
+                  <span>
+                    {{ $t('settings.title.stats') || 'System Stats' }}
+                    <small>{{ $t('settings.description.stats') || 'Monitor system usage and activity' }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <button @click="$refs['systemStats'].refreshStats()">
+                    <RefreshCw />
+                    {{ $t('settings.stats.refresh') }}
+                  </button>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <SystemStats
+                  ref="systemStats"
+                  v-if="store.settingsOpen"
+                  @navItemClicked="handleNavItemClicked"
+                />
+              </div>
+            </div>
+            <div v-else-if="activeTab === 'branding'" class="settings-tab-content" ref="tabContents.branding" key="branding">
               <div class="tab-content-header">
                 <h2 class="d-none d-md-flex">
                   <Palette />
@@ -281,6 +417,8 @@ const setShowDeletedShares = (value) => {
               </div>
             </div>
 
+            
+
             <div v-else-if="activeTab === 'users'" class="settings-tab-content" ref="tabContents.users" key="users">
               <div class="tab-content-header">
                 <h2 class="d-none d-md-flex">
@@ -290,6 +428,16 @@ const setShowDeletedShares = (value) => {
                     <small>{{ $t('settings.description.users') }}</small>
                   </span>
                 </h2>
+                <div 
+                  class="admin-tip clickable" 
+                  v-if="store.isAdmin()"
+                  @click="navigateTo('system.auth.self_registration')"
+                  :title="$t('settings.users.click_to_configure') || 'Click to configure'"
+                >
+                  <Info />
+                  <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on_short') }}</p>
+                  <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off_short') }}</p>
+                </div>
                 <div class="user-actions">
                   <button @click="usersPanel.addUser">
                     <UserPlus />
@@ -298,7 +446,44 @@ const setShowDeletedShares = (value) => {
                 </div>
               </div>
               <div class="tab-content-body">
-                <Users ref="usersPanel" v-if="store.settingsOpen" />
+                <Users ref="usersPanel" v-if="store.settingsOpen" @viewUserShares="handleViewUserShares" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'allShares'"
+              class="settings-tab-content"
+              ref="tabContents.allShares"
+              key="allShares"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <FolderOpen />
+                  <span>
+                    {{ $t('settings.title.allShares') }}
+                    <small>{{ $t('settings.description.allShares') }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <div class="checkbox-container pt-4">
+                        <input type="checkbox" id="show_deleted_shares_all" :checked="showDeletedSharesAll" @change="setShowDeletedSharesAll($event.target.checked)" />
+                        <label for="show_deleted_shares_all">{{ $t('settings.system.show_deleted_shares') }}</label>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <select id="user-filter-all" class="user-filter-select" @change="handleUserFilterChange" :value="selectedUserId || ''">
+                        <option value="">{{ $t('settings.allShares.allUsers') }}</option>
+                        <option v-for="user in allSharesUsers" :key="user.id" :value="user.id">
+                          {{ user.name }} ({{ user.email }})
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <AllShares ref="allSharesPanel" v-if="store.settingsOpen" />
               </div>
             </div>
             <div
@@ -429,7 +614,7 @@ const setShowDeletedShares = (value) => {
 
 .settings-header {
   background: var(--panel-header-background-color);
-  border-radius: 5px 5px 0 0;
+  // border-radius: 5px 5px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -466,6 +651,11 @@ const setShowDeletedShares = (value) => {
   padding-right: 20px;
   background: var(--tabs-bar-background-color);
   width: 100%;
+  
+  .settings-tab-spacer {
+    flex-grow: 1;
+  }
+  
   .settings-tab {
     background: var(--tabs-tab-background-color);
     margin-top: 10px;
@@ -476,7 +666,7 @@ const setShowDeletedShares = (value) => {
 
     h2 {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 400;
       color: var(--tabs-tab-text-color);
       margin: 0;
       display: flex;
@@ -589,5 +779,63 @@ const setShowDeletedShares = (value) => {
 
 .fade-enter-active {
   z-index: 1;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.user-filter-select {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--panel-section-background-color-alt);
+  background: var(--panel-section-background-color-alt);
+  color: var(--panel-section-text-color);
+  font-size: 0.9rem;
+  min-width: 200px;
+  cursor: pointer;
+  margin-top: 16px;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary-button-background-color);
+  }
+}
+
+.admin-tip {
+  background: var(--secondary-button-background-color);
+  padding: 10px 20px;
+  border-radius: var(--button-border-radius);
+  p {
+    font-size: 0.8rem;
+    color: var(--secondary-button-text-color)!important;
+    margin: 0;
+  }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--secondary-button-background-color-hover, var(--secondary-button-background-color));
+      transform: translateY(-1px);
+    }
+  }
 }
 </style>

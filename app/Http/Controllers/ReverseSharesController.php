@@ -54,23 +54,39 @@ class ReverseSharesController extends Controller
             ], 401);
         }
 
-        $guestUser = User::where('email', $request->recipient_email)->first();
+        // Check if recipient is an existing non-guest user
+        $existingUser = User::where('email', $request->recipient_email)
+            ->where(function ($query) {
+                $query->where('is_guest', false)
+                    ->orWhereNull('is_guest');
+            })
+            ->first();
 
-        if (!$guestUser) {
+        $encryptedToken = null;
+        $guestUserId = null;
+
+        if ($existingUser) {
+            // Existing user - no token, no guest user
+            // They will need to log in with their credentials
+            $guestUserId = null;
+        } else {
+            // Create a guest user for the invite
             $guestUser = User::create([
                 'name' => $request->recipient_name,
                 'email' => Str::random(20), //we don't need a real email for the guest user
                 'password' => Hash::make(Str::random(20)), //set a random password so the user can't login
                 'is_guest' => true
             ]);
+            $guestUserId = $guestUser->id;
 
-            $token = $token = auth()->tokenById($guestUser->id);
+            // Generate a token only for guest users
+            $token = auth()->tokenById($guestUser->id);
             $encryptedToken = Crypt::encryptString($token);
         }
 
         $invite = ReverseShareInvite::create([
             'user_id' => $user->id,
-            'guest_user_id' => $guestUser->id,
+            'guest_user_id' => $guestUserId,
             'recipient_name' => $request->recipient_name,
             'recipient_email' => $request->recipient_email,
             'message' => $request->message,
@@ -80,7 +96,8 @@ class ReverseSharesController extends Controller
         sendEmail::dispatch($request->recipient_email, reverseShareInviteMail::class, [
             'user' => $user,
             'invite' => $invite,
-            'token' => $encryptedToken
+            'token' => $encryptedToken, // Will be null for existing users
+            'isExistingUser' => $existingUser !== null
         ]);
 
         return response()->json([

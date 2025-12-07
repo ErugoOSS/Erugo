@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Password as PasswordFacade;
 use App\Models\User;
+use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
 use App\Jobs\sendEmail;
@@ -199,6 +200,24 @@ class UsersController extends Controller
         'must_change_password' => false,
       ]);
 
+      // Migrate any existing reverse share invites to the new user
+      // This is in its own try-catch so it doesn't prevent the password email from being sent
+      try {
+        $existingInvites = ReverseShareInvite::where('recipient_email', $user->email)->get();
+        foreach ($existingInvites as $invite) {
+          // Delete the old guest user if it exists
+          if ($invite->guestUser && $invite->guestUser->is_guest) {
+            $invite->guestUser->delete();
+          }
+          // Point the invite to the new real user
+          $invite->guest_user_id = $user->id;
+          $invite->save();
+        }
+      } catch (\Exception $e) {
+        \Log::warning('Failed to migrate reverse share invites for user ' . $user->email . ': ' . $e->getMessage());
+        // Continue anyway - user creation and password email are more important
+      }
+
       $token = PasswordFacade::createToken($user);
 
       sendEmail::dispatch($user->email, accountCreatedMail::class, ['token' => $token, 'user' => $user]);
@@ -282,6 +301,36 @@ class UsersController extends Controller
     }
 
     try {
+      // Collect guest users to delete (from invites created by this user)
+      $guestUsersToDelete = [];
+      $invitesCreatedByUser = ReverseShareInvite::where('user_id', $user->id)->get();
+      foreach ($invitesCreatedByUser as $invite) {
+        if ($invite->guest_user_id) {
+          $guestUser = User::find($invite->guest_user_id);
+          if ($guestUser && $guestUser->is_guest) {
+            $guestUsersToDelete[] = $guestUser;
+          }
+        }
+      }
+
+      // Delete all invites created by this user first (removes FK references to guest users)
+      ReverseShareInvite::where('user_id', $user->id)->delete();
+
+      // Set guest_user_id to null where this user is the guest
+      ReverseShareInvite::where('guest_user_id', $user->id)->update(['guest_user_id' => null]);
+
+      // Now safely delete the guest users
+      foreach ($guestUsersToDelete as $guestUser) {
+        // Clean up any invites where this guest is referenced
+        ReverseShareInvite::where('guest_user_id', $guestUser->id)->update(['guest_user_id' => null]);
+        // Clean up guest user's data (shares, files, downloads)
+        $this->cleanupUserData($guestUser);
+        $guestUser->delete();
+      }
+
+      // Clean up all the user's data (shares, files, downloads)
+      $this->cleanupUserData($user);
+
       $user->delete();
 
       return response()->json([
@@ -292,6 +341,74 @@ class UsersController extends Controller
       \Log::error('Error deleting user ' . $user->id . ': ' . $e->getMessage());
       return response()->json(
         ['status' => 'error', 'message' => 'Failed to delete user'],
+        500
+      );
+    }
+  }
+
+  /**
+   * Clean up all data associated with a user (shares, files, downloads)
+   */
+  private function cleanupUserData(User $user)
+  {
+    // Get all shares belonging to this user
+    $shares = $user->shares;
+
+    foreach ($shares as $share) {
+      // Delete download records for this share
+      \App\Models\Download::where('share_id', $share->id)->delete();
+
+      // Delete file records for this share
+      \App\Models\File::where('share_id', $share->id)->delete();
+
+      // Clean up the actual files on disk (suppress email notifications)
+      $share->cleanFiles(true);
+
+      // Delete the share record
+      $share->delete();
+    }
+  }
+
+  //force reset a user's password
+  public function forceResetPassword($id)
+  {
+    $currentUser = Auth::user();
+    $user = User::find($id);
+
+    if (!$user) {
+      return response()->json(
+        ['status' => 'error', 'message' => 'User not found'],
+        404
+      );
+    }
+
+    // Don't allow admins to force reset their own password through this endpoint
+    if ($currentUser->id === $user->id) {
+      return response()->json(
+        ['status' => 'error', 'message' => 'Cannot force reset your own password'],
+        400
+      );
+    }
+
+    try {
+      // Set a random password to invalidate the current one
+      $user->password = Hash::make(Str::random(64));
+      $user->must_change_password = true;
+      $user->remember_token = null;
+      $user->save();
+
+      // Send password reset email
+      $token = PasswordFacade::createToken($user);
+      sendEmail::dispatch($user->email, \App\Mail\passwordResetMail::class, ['token' => $token, 'user' => $user]);
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Password reset forced successfully. User will receive an email to set a new password.'
+      ]);
+    } catch (\Exception $e) {
+      \Log::error('Error forcing password reset for user ' . $user->id . ': ' . $e->getMessage());
+      return response()->json(
+        ['status' => 'error', 'message' => 'Failed to force password reset'],
         500
       );
     }

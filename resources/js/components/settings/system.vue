@@ -29,6 +29,7 @@ import HelpTip from '../helpTip.vue'
 
 import { useToast } from 'vue-toastification'
 import { mapSettings } from '../../utils'
+import { notifySettingsChanged } from '../../composables/useSetting'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -50,14 +51,175 @@ const settings = ref({
   max_share_size: '',
   max_share_size_unit: '',
   clean_files_after_days: '',
+  share_url_mode: 'haiku',
+  share_url_pattern: '******',
   emails_share_downloaded_enabled: '',
   smtp_host: '',
   smtp_port: '',
+  smtp_encryption: 'tls',
   smtp_username: '',
   smtp_password: '',
   smtp_sender_name: '',
-  smtp_sender_address: ''
+  smtp_sender_address: '',
+  self_registration_enabled: false,
+  self_registration_allow_any_domain: true,
+  self_registration_allowed_domains: ''
 })
+
+// Pattern presets for share URL generation
+const patternPresets = [
+  { id: 'shortcode', name: 'Shortcode (6 chars)', pattern: '******' },
+  { id: 'random16', name: 'Random (16 chars)', pattern: '****************' },
+  { id: 'uuid', name: 'UUID-style', pattern: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX' },
+  { id: 'hex8', name: 'Hex (8 chars)', pattern: 'XXXXXXXX' },
+  { id: 'custom', name: 'Custom', pattern: '' }
+]
+
+const selectedPreset = ref('shortcode')
+const patternPreview = ref('')
+
+// Generate a preview of the pattern
+const generatePatternPreview = () => {
+  const pattern = settings.value.share_url_pattern
+  if (!pattern) {
+    patternPreview.value = ''
+    return
+  }
+  
+  // Client-side pattern preview generation
+  let result = ''
+  const length = pattern.length
+  let i = 0
+  
+  const DIGITS = '0123456789'
+  const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
+  const HEX = '0123456789ABCDEF'
+  const ALPHANUMERIC = DIGITS + UPPERCASE + LOWERCASE
+  
+  const randomChar = (charset) => charset[Math.floor(Math.random() * charset.length)]
+  
+  const expandRange = (start, end) => {
+    const chars = []
+    const startCode = start.charCodeAt(0)
+    const endCode = end.charCodeAt(0)
+    const [from, to] = startCode <= endCode ? [startCode, endCode] : [endCode, startCode]
+    for (let c = from; c <= to; c++) {
+      chars.push(String.fromCharCode(c))
+    }
+    return chars
+  }
+  
+  const expandCharClass = (content) => {
+    const chars = []
+    let j = 0
+    while (j < content.length) {
+      const ch = content[j]
+      if (ch === '\\' && j + 1 < content.length) {
+        chars.push(content[j + 1])
+        j += 2
+        continue
+      }
+      if (j + 2 < content.length && content[j + 1] === '-') {
+        const rangeChars = expandRange(ch, content[j + 2])
+        chars.push(...rangeChars)
+        j += 3
+        continue
+      }
+      chars.push(ch)
+      j++
+    }
+    return [...new Set(chars)]
+  }
+  
+  while (i < length) {
+    const char = pattern[i]
+    
+    // Handle escape sequences
+    if (char === '\\' && i + 1 < length) {
+      const nextChar = pattern[i + 1]
+      if (['#', 'A', 'a', '*', 'X', '\\'].includes(nextChar)) {
+        result += nextChar
+        i += 2
+        continue
+      }
+      result += char
+      i++
+      continue
+    }
+    
+    // Handle character classes [...]
+    if (char === '[') {
+      const closePos = pattern.indexOf(']', i + 1)
+      if (closePos !== -1) {
+        const classContent = pattern.substring(i + 1, closePos)
+        const chars = expandCharClass(classContent)
+        if (chars.length > 0) {
+          result += randomChar(chars.join(''))
+        }
+        i = closePos + 1
+        continue
+      }
+      result += char
+      i++
+      continue
+    }
+    
+    // Handle special tokens
+    if (char === '#') {
+      result += randomChar(DIGITS)
+      i++
+      continue
+    }
+    if (char === 'A') {
+      result += randomChar(UPPERCASE)
+      i++
+      continue
+    }
+    if (char === 'a') {
+      result += randomChar(LOWERCASE)
+      i++
+      continue
+    }
+    if (char === '*') {
+      result += randomChar(ALPHANUMERIC)
+      i++
+      continue
+    }
+    if (char === 'X') {
+      result += randomChar(HEX)
+      i++
+      continue
+    }
+    
+    // Literal character
+    result += char
+    i++
+  }
+  
+  patternPreview.value = result
+}
+
+// Watch for pattern changes to update preview
+watch(() => settings.value.share_url_pattern, () => {
+  generatePatternPreview()
+  // Update selected preset to 'custom' if pattern doesn't match any preset
+  const matchingPreset = patternPresets.find(p => p.pattern === settings.value.share_url_pattern)
+  if (matchingPreset) {
+    selectedPreset.value = matchingPreset.id
+  } else {
+    selectedPreset.value = 'custom'
+  }
+})
+
+// Handle preset selection
+const handlePresetChange = () => {
+  const preset = patternPresets.find(p => p.id === selectedPreset.value)
+  if (preset && preset.pattern) {
+    settings.value.share_url_pattern = preset.pattern
+  }
+  generatePatternPreview()
+}
 
 const settingsLoaded = ref(false)
 const saving = ref(false)
@@ -138,6 +300,9 @@ const saveSettings = async () => {
     saving.value = false
     toast.success(t.value('settings.settingsSavedSuccessfully'))
     await loadSettings()
+    
+    // Notify other components that settings have changed
+    notifySettingsChanged()
   } catch (error) {
     saving.value = false
     toast.error(t.value('settings.failedToSaveSettings'))
@@ -146,22 +311,6 @@ const saveSettings = async () => {
 }
 
 const shareSettingsLookOk = () => {
-  if (settings.value.allow_chunked_uploads == false && settings.allow_direct_uploads == false) {
-    toast.error(t.value('settings.system.atLeastOneUploadMode'))
-    return false
-  }
-
-  //check that the selected upload mode is enabled
-  if (settings.value.default_upload_mode == 'direct' && settings.value.allow_direct_uploads == false) {
-    toast.error(t.value('settings.system.direct_uploads_disabled_but_default'))
-    return false
-  }
-
-  if (settings.value.default_upload_mode == 'chunked' && settings.value.allow_chunked_uploads == false) {
-    toast.error(t.value('settings.system.chunked_uploads_disabled_but_default'))
-    return false
-  }
-
   return true
 }
 
@@ -425,34 +574,49 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
-                <h6 class="mt-3 mb-3">{{ $t('settings.system.upload_modes') }}</h6>
-                <div class="setting-group-body-item">
-                  <div class="checkbox-container">
-                    <input type="checkbox" id="allow_direct_uploads" v-model="settings.allow_direct_uploads" />
-                    <label for="allow_direct_uploads">{{ $t('settings.system.allow_direct_uploads') }}</label>
-                  </div>
-                </div>
-
-                <div class="setting-group-body-item">
-                  <div class="checkbox-container">
-                    <input type="checkbox" id="allow_chunked_uploads" v-model="settings.allow_chunked_uploads" />
-                    <label for="allow_chunked_uploads">{{ $t('settings.system.allow_chunked_uploads') }}</label>
-                  </div>
-                </div>
-
-                <div class="setting-group-body-item">
-                  <label for="default_upload_mode">{{ $t('settings.system.default_upload_mode') }}</label>
-                  <select id="default_upload_mode" v-model="settings.default_upload_mode">
-                    <option value="direct">{{ $t('settings.system.direct') }}</option>
-                    <option value="chunked">{{ $t('settings.system.chunked') }}</option>
-                  </select>
-                </div>
-
-                <h6 class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
+                <h6 id="reverse_shares" class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
                     <input type="checkbox" id="allow_reverse_shares" v-model="settings.allow_reverse_shares" />
                     <label for="allow_reverse_shares">{{ $t('settings.system.allow_reverse_shares') }}</label>
+                  </div>
+                </div>
+
+                <h6 id="share_url_generation" class="mt-3 mb-3">{{ $t('settings.system.share_url_generation') }}</h6>
+                <div class="setting-group-body-item">
+                  <label for="share_url_mode">{{ $t('settings.system.share_url_mode') }}</label>
+                  <select id="share_url_mode" v-model="settings.share_url_mode">
+                    <option value="haiku">{{ $t('settings.system.share_url_mode_haiku') }}</option>
+                    <option value="pattern">{{ $t('settings.system.share_url_mode_pattern') }}</option>
+                  </select>
+                </div>
+
+                <div v-if="settings.share_url_mode === 'pattern'" class="pattern-url-settings">
+                  <div class="setting-group-body-item">
+                    <label for="share_url_preset">{{ $t('settings.system.share_url_preset') }}</label>
+                    <select id="share_url_preset" v-model="selectedPreset" @change="handlePresetChange">
+                      <option v-for="preset in patternPresets" :key="preset.id" :value="preset.id">
+                        {{ preset.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="setting-group-body-item">
+                    <label for="share_url_pattern">{{ $t('settings.system.share_url_pattern') }}</label>
+                    <input
+                      type="text"
+                      id="share_url_pattern"
+                      v-model="settings.share_url_pattern"
+                      :placeholder="$t('settings.system.share_url_pattern_placeholder')"
+                    />
+                  </div>
+                  <div class="setting-group-body-item pattern-preview" v-if="settings.share_url_pattern">
+                    <label>{{ $t('settings.system.share_url_pattern_preview') }}</label>
+                    <div class="preview-box">
+                      <code>{{ patternPreview }}</code>
+                      <button type="button" class="refresh-preview" @click="generatePatternPreview">
+                        ↻
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -467,14 +631,26 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.max_share_size_description') }}</p>
               <h6>{{ $t('settings.system.clean_files_after') }}</h6>
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
-              <h6>{{ $t('settings.system.allow_direct_uploads') }}</h6>
-              <p>{{ $t('settings.system.allow_direct_uploads_description') }}</p>
-              <h6>{{ $t('settings.system.allow_chunked_uploads') }}</h6>
-              <p>{{ $t('settings.system.allow_chunked_uploads_description') }}</p>
-              <h6>{{ $t('settings.system.default_upload_mode') }}</h6>
-              <p>{{ $t('settings.system.default_upload_mode_description') }}</p>
               <h6>{{ $t('settings.system.allow_reverse_shares') }}</h6>
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
+              <h6>{{ $t('settings.system.share_url_mode') }}</h6>
+              <p>{{ $t('settings.system.share_url_mode_description') }}</p>
+              <div v-if="settings.share_url_mode === 'pattern'">
+                <h6>{{ $t('settings.system.share_url_pattern') }}</h6>
+                <p>{{ $t('settings.system.share_url_pattern_description') }}</p>
+                <div class="pattern-syntax-help">
+                  <h6>{{ $t('settings.system.share_url_pattern_syntax') }}</h6>
+                  <ul class="syntax-list">
+                    <li><code>#</code> {{ $t('settings.system.pattern_token_digit') }}</li>
+                    <li><code>A</code> {{ $t('settings.system.pattern_token_uppercase') }}</li>
+                    <li><code>a</code> {{ $t('settings.system.pattern_token_lowercase') }}</li>
+                    <li><code>*</code> {{ $t('settings.system.pattern_token_alphanumeric') }}</li>
+                    <li><code>X</code> {{ $t('settings.system.pattern_token_hex') }}</li>
+                    <li><code>[A-Z]</code> {{ $t('settings.system.pattern_token_range') }}</li>
+                    <li><code>\#</code> {{ $t('settings.system.pattern_token_escape') }}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -597,6 +773,14 @@ const handleDeleteAuthProvider = async (id) => {
                   <input type="number" id="smtp_port" v-model="settings.smtp_port" />
                 </div>
                 <div class="setting-group-body-item">
+                  <label for="smtp_encryption">{{ $t('settings.system.smtp_encryption') }}</label>
+                  <select id="smtp_encryption" v-model="settings.smtp_encryption">
+                    <option value="tls">TLS</option>
+                    <option value="ssl">SSL</option>
+                    <option value="">{{ $t('settings.system.smtp_encryption_none') }}</option>
+                  </select>
+                </div>
+                <div class="setting-group-body-item">
                   <label for="smtp_username">{{ $t('settings.system.smtp_username') }}</label>
                   <input type="text" id="smtp_username" v-model="settings.smtp_username" />
                 </div>
@@ -622,6 +806,9 @@ const handleDeleteAuthProvider = async (id) => {
 
               <h6>{{ $t('settings.system.smtp_port') }}</h6>
               <p>{{ $t('settings.system.smtp_port_description') }}</p>
+
+              <h6>{{ $t('settings.system.smtp_encryption') }}</h6>
+              <p>{{ $t('settings.system.smtp_encryption_description') }}</p>
 
               <h6>{{ $t('settings.system.smtp_username') }}</h6>
               <p>{{ $t('settings.system.smtp_username_description') }}</p>
@@ -656,7 +843,52 @@ const handleDeleteAuthProvider = async (id) => {
               </svg>
 
               <div class="setting-group-body">
-                <h5 class="mb-4">{{ $t('settings.system.your_auth_providers') }}</h5>
+                <!-- Self Registration Settings -->
+                <h5 id="self_registration" class="mb-3">{{ $t('settings.system.self_registration') }}</h5>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="self_registration_enabled"
+                      v-model="settings.self_registration_enabled"
+                    />
+                    <label for="self_registration_enabled">
+                      {{ $t('settings.system.self_registration_enabled') }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="self-registration-options" v-if="settings.self_registration_enabled">
+                  <div class="setting-group-body-item">
+                    <div class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="self_registration_allow_any_domain"
+                        v-model="settings.self_registration_allow_any_domain"
+                      />
+                      <label for="self_registration_allow_any_domain">
+                        {{ $t('settings.system.self_registration_allow_any_domain') }}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="setting-group-body-item" v-if="!settings.self_registration_allow_any_domain">
+                    <label for="self_registration_allowed_domains">
+                      {{ $t('settings.system.self_registration_allowed_domains') }}
+                    </label>
+                    <input
+                      type="text"
+                      id="self_registration_allowed_domains"
+                      v-model="settings.self_registration_allowed_domains"
+                      :placeholder="$t('settings.system.self_registration_allowed_domains_placeholder')"
+                    />
+                    <p class="help-text">{{ $t('settings.system.self_registration_allowed_domains_help') }}</p>
+                  </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h5 id="auth_providers" class="mb-4">{{ $t('settings.system.your_auth_providers') }}</h5>
                 <div
                   class="setting-group-body-item auth-provider"
                   v-for="authProvider in authProviders"
@@ -713,6 +945,17 @@ const handleDeleteAuthProvider = async (id) => {
                             />
                             <label :for="`auth_provider_enabled_${authProvider.id}`">
                               {{ $t('settings.system.auth_provider_enabled') }}
+                            </label>
+                          </div>
+                          <div class="checkbox-container">
+                            <input
+                              type="checkbox"
+                              :id="`auth_provider_allow_registration_${authProvider.id}`"
+                              v-model="authProvider.allow_registration"
+                              :disabled="onLocalhost"
+                            />
+                            <label :for="`auth_provider_allow_registration_${authProvider.id}`">
+                              {{ $t('settings.system.auth_provider_allow_registration') }}
                             </label>
                           </div>
                         </div>
@@ -815,8 +1058,14 @@ const handleDeleteAuthProvider = async (id) => {
           </div>
           <div class="d-none d-md-block col ps-0">
             <div class="section-help">
+              <h6>{{ $t('settings.system.self_registration') }}</h6>
+              <p>{{ $t('settings.system.self_registration_description') }}</p>
+              <h6>{{ $t('settings.system.self_registration_allowed_domains') }}</h6>
+              <p>{{ $t('settings.system.self_registration_allowed_domains_description') }}</p>
               <h6>{{ $t('settings.system.auth_providers') }}</h6>
               <p>{{ $t('settings.system.auth_providers_description') }}</p>
+              <h6>{{ $t('settings.system.auth_provider_allow_registration') }}</h6>
+              <p>{{ $t('settings.system.auth_provider_allow_registration_description') }}</p>
               <h6>{{ $t('settings.system.provider_trust_warning') }}</h6>
               <p>{{ $t('settings.system.provider_trust_warning_description') }}</p>
             </div>
@@ -977,7 +1226,7 @@ const handleDeleteAuthProvider = async (id) => {
   font-size: 0.8rem;
   color: var(--panel-text-color);
   &:hover {
-    color: var(--danger-color);
+    color: var(--color-danger);
   }
   svg {
     width: 15px;
@@ -994,6 +1243,66 @@ const handleDeleteAuthProvider = async (id) => {
     width: 15px;
     height: 15px;
     margin-top: -2px;
+  }
+}
+
+.pattern-preview {
+  .preview-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-section-background-color-alt);
+    padding: 10px 15px;
+    border-radius: var(--panel-border-radius);
+    font-family: monospace;
+    
+    code {
+      flex: 1;
+      font-size: 1rem;
+      word-break: break-all;
+    }
+    
+    .refresh-preview {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 5px;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+.pattern-syntax-help {
+  margin-top: 1rem;
+  
+  .syntax-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+    
+    li {
+      padding: 4px 0;
+      
+      code {
+        background: var(--panel-section-background-color-alt);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        margin-right: 8px;
+      }
+    }
   }
 }
 </style>

@@ -7,7 +7,11 @@
 <h2>Hi {{ recipient_name }},</h2>
 
 <p>{{ sender_name }} is requesting files from you.</p>
+{% if isExistingUser %}
+<p>Click the button below to log in to your account and upload files for {{ sender_name }}.</p>
+{% else %}
 <p>Click the button below to accept the request and upload files for {{ sender_name }}.</p>
+{% endif %}
 
 {% if invite.message %}
   <hr>
@@ -17,7 +21,6 @@
 
 {% endblock %}
 
-{% block action_url %}{{ settings.application_url }}/?invite_token={{ token }}{% endblock %}
-{% block action_text %}
-	Accept Request
-{% endblock %}
+{% block action_url %}{% if isExistingUser %}{{ settings.application_url }}/?invite_id={{ invite.id }}{% else %}{{ settings.application_url }}/?invite_token={{ token }}{% endif %}{% endblock %}
+
+{% block action_text %}{% if isExistingUser %}Log In & Upload{% else %}Accept Request{% endif %}{% endblock %}

@@ -5,43 +5,27 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+
 use App\Models\Share;
 use App\Models\File;
 use App\Models\UploadSession;
-use App\Models\ChunkUpload;
+use App\Models\ReverseShareInvite;
 use Carbon\Carbon;
 use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class UploadsController extends Controller
 {
   /**
-   * Create an upload session for chunked file upload
+   * Verify if an upload session exists and is valid for resuming
+   * This is used by the frontend to check if a previous tus upload can be resumed
    */
-  public function createSession(Request $request)
+  public function verifyUpload(Request $request, string $uploadId)
   {
-    $validator = Validator::make($request->all(), [
-      'upload_id' => ['required', 'string'],
-      'filename' => ['required', 'string'],
-      'filesize' => ['required', 'numeric'],
-      'total_chunks' => ['required', 'numeric']
-    ]);
-
-    if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
-    }
-
     $user = Auth::user();
     if (!$user) {
       return response()->json([
@@ -50,66 +34,10 @@ class UploadsController extends Controller
       ], 401);
     }
 
-    // Create upload session
-    $session = UploadSession::create([
-      'upload_id' => $request->upload_id,
-      'user_id' => $user->id,
-      'filename' => $request->filename,
-      'filesize' => $request->filesize,
-      'filetype' => $request->filetype ?? 'unknown',
-      'total_chunks' => $request->total_chunks,
-      'chunks_received' => 0,
-      'status' => 'pending'
-    ]);
-
-    // Create temp directory for chunks
-    $tempDir = storage_path('app/chunks/' . $user->id . '/' . $request->upload_id);
-    if (!file_exists($tempDir)) {
-      mkdir($tempDir, 0777, true);
-    }
-
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Upload session created',
-      'data' => [
-        'session' => $session
-      ]
-    ]);
-  }
-
-  /**
-   * Upload a chunk of a file
-   */
-  public function uploadChunk(Request $request)
-  {
-    $validator = Validator::make($request->all(), [
-      'chunk' => ['required', 'file'],
-      'upload_id' => ['required', 'string'],
-      'chunk_index' => ['required', 'numeric'],
-      'total_chunks' => ['required', 'numeric']
-    ]);
-
-    if ($validator->fails()) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
-    }
-
-    $user = Auth::user();
-    if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
-    }
-
-    // Find the upload session
-    $session = UploadSession::where('upload_id', $request->upload_id)
+    // Check if the upload session exists and belongs to this user
+    $session = UploadSession::where('upload_id', $uploadId)
       ->where('user_id', $user->id)
+      ->whereIn('status', ['pending', 'complete'])
       ->first();
 
     if (!$session) {
@@ -119,177 +47,40 @@ class UploadsController extends Controller
       ], 404);
     }
 
-    // Get the chunk file
-    $chunk = $request->file('chunk');
-    $chunkIndex = $request->chunk_index;
-
-    // Store the chunk file
-    $chunkPath = 'chunks/' . $user->id . '/' . $request->upload_id . '/' . $chunkIndex;
-    move_uploaded_file($chunk->getPathname(), storage_path('app/' . $chunkPath));
-
-    // Record the chunk upload
-    ChunkUpload::create([
-      'upload_session_id' => $session->id,
-      'chunk_index' => $chunkIndex,
-      'chunk_size' => $chunk->getSize(),
-      'chunk_path' => $chunkPath,
-    ]);
-
-    // Update the upload session
-    $session->chunks_received += 1;
-    if ($session->chunks_received == $session->total_chunks) {
-      $session->status = 'complete';
-    }
-    $session->save();
-
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Chunk uploaded',
-      'data' => [
-        'chunk_index' => $chunkIndex,
-        'received_chunks' => $session->chunks_received,
-        'total_chunks' => $session->total_chunks,
-        'is_complete' => ($session->chunks_received == $session->total_chunks)
-      ]
-    ]);
-  }
-
-  /**
-   * Finalize a chunked upload by assembling the chunks into a single file
-   */
-  public function finalizeUpload(Request $request)
-  {
-    $validator = Validator::make($request->all(), [
-      'upload_id' => ['required', 'string'],
-      'filename' => ['required', 'string'],
-      'name' => ['string', 'max:255'],
-      'description' => ['max:500'],
-    ]);
-
-    if ($validator->fails()) {
+    // Also verify the file still exists on disk
+    $uploadPath = storage_path('app/uploads/' . $uploadId);
+    if (!file_exists($uploadPath)) {
+      // Clean up the orphaned session
+      $session->delete();
       return response()->json([
         'status' => 'error',
-        'message' => 'Validation failed',
-        'data' => [
-          'errors' => $validator->errors()
-        ]
-      ], 422);
-    }
-
-    $user = Auth::user();
-    if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
-    }
-
-    // Find the upload session
-    $session = UploadSession::where('upload_id', $request->upload_id)
-      ->where('user_id', $user->id)
-      ->first();
-
-    if (!$session) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Upload session not found'
+        'message' => 'Upload file not found'
       ], 404);
     }
 
-    // Check if all chunks are received
-    if ($session->chunks_received != $session->total_chunks) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Not all chunks received',
-        'data' => [
-          'received_chunks' => $session->chunks_received,
-          'total_chunks' => $session->total_chunks
-        ]
-      ], 400);
-    }
-
-    // Create directory for the assembled file
-    $tempAssembledFilePath = storage_path('app/temp/' . $user->id);
-    if (!file_exists($tempAssembledFilePath)) {
-      mkdir($tempAssembledFilePath, 0777, true);
-    }
-
-    // Path to the final assembled file
-    $uuid = Str::uuid();
-    $extension = pathinfo($request->filename, PATHINFO_EXTENSION);
-    $finalFilePath = $tempAssembledFilePath . '/' . $uuid . '.' . $extension;
-    $finalFileHandle = fopen($finalFilePath, 'wb');
-
-    // Get all chunks in proper order and concatenate them
-    $chunks = ChunkUpload::where('upload_session_id', $session->id)
-      ->orderBy('chunk_index', 'asc')
-      ->get();
-
-    foreach ($chunks as $chunk) {
-      $chunkFilePath = storage_path('app/' . $chunk->chunk_path);
-      $chunkContent = file_get_contents($chunkFilePath);
-      fwrite($finalFileHandle, $chunkContent);
-
-      // Clean up the chunk file after it's been used
-      unlink($chunkFilePath);
-    }
-
-    fclose($finalFileHandle);
-
-    // Create a file record in the database
-    $file = File::create([
-      'name' => $request->filename,
-      'type' => $session->filetype ?? 'unknown',
-      'size' => $session->filesize,
-      'temp_path' => 'temp/' . $user->id . '/' . $uuid . '.' . $extension
-    ]);
-
-    // If recipients are provided, process them
-    $recipients = [];
-    if ($request->has('recipients') && is_array($request->recipients)) {
-      $recipients = $request->recipients;
-    }
-
-    // Update the session to reflect completion
-    $session->status = 'processed';
-    $session->file_id = $file->id;
-    $session->save();
-
-    //tidy up left over folders and records
-    $chunks = ChunkUpload::where('upload_session_id', $session->id)->get();
-    foreach ($chunks as $chunk) {
-      $path = storage_path('app/' . $chunk->chunk_path);
-      $path = explode('/', $path);
-      unset($path[count($path) - 1]);
-      $path = implode('/', $path);
-      if (is_dir($path)) {
-        rmdir($path);
-      }
-    }
-
-    $session->chunks()->delete();
-    $session->delete();
-
     return response()->json([
       'status' => 'success',
-      'message' => 'Upload finalized',
+      'message' => 'Upload session valid',
       'data' => [
-        'file' => $file
+        'upload_id' => $uploadId,
+        'status' => $session->status,
+        'filename' => $session->filename,
+        'filesize' => $session->filesize
       ]
     ]);
   }
 
   /**
-   * Create a share from uploaded chunks
+   * Create a share from tusd-uploaded files
    */
-  public function createShareFromChunks(Request $request)
+  public function createShareFromUploads(Request $request)
   {
     $validator = Validator::make($request->all(), [
       'upload_id' => ['required', 'string'],
       'name' => ['string', 'max:255'],
       'description' => ['max:500'],
-      'fileInfo' => ['required', 'array'],
-      'fileInfo.*' => ['required', 'numeric', 'exists:files,id'],
+      'uploadIds' => ['required', 'array'],
+      'uploadIds.*' => ['required', 'string'],
       'expiry_date' => ['required', 'date']
     ]);
 
@@ -339,10 +130,33 @@ class UploadsController extends Controller
       mkdir($completePath, 0777, true);
     }
 
+    // Find files from upload sessions by tusd upload IDs
+    $sessions = UploadSession::whereIn('upload_id', $request->uploadIds)
+      ->where('user_id', $user->id)
+      ->where('status', 'complete')
+      ->get();
+
+    if ($sessions->count() !== count($request->uploadIds)) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Some uploads were not found or not completed'
+      ], 400);
+    }
+
+    // Get file records from sessions
+    $fileIds = $sessions->pluck('file_id')->filter()->toArray();
+    $files = File::whereIn('id', $fileIds)->get();
+
+    if ($files->count() === 0) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'No files found for the uploads'
+      ], 400);
+    }
+
     // Calculate total size of all files
     $totalSize = 0;
-    $fileCount = count($request->files);
-    $files = File::whereIn('id', $request->fileInfo)->get();
+    $fileCount = $files->count();
     foreach ($files as $file) {
       $totalSize += $file->size;
     }
@@ -373,11 +187,29 @@ class UploadsController extends Controller
       'password' => $password ? Hash::make($password) : null
     ]);
 
-    // Associate files with the share and move from temp to share directory
+    // Create a mapping from upload_id to file for path lookup
+    $uploadIdToFile = [];
+    foreach ($sessions as $session) {
+      if ($session->file_id) {
+        $uploadIdToFile[$session->upload_id] = $files->firstWhere('id', $session->file_id);
+      }
+    }
+
+    // Associate files with the share and move from tusd uploads to share directory
     foreach ($files as $file) {
-      // Move file from temp to share directory
+      // Move file from tusd uploads to share directory
       $sourcePath = storage_path('app/' . $file->temp_path);
-      $originalPath = $request->filePaths[$file->id] ?? '';
+      
+      // Find the upload_id for this file to get the original path
+      $uploadId = null;
+      foreach ($uploadIdToFile as $uid => $f) {
+        if ($f && $f->id === $file->id) {
+          $uploadId = $uid;
+          break;
+        }
+      }
+      
+      $originalPath = $request->filePaths[$uploadId] ?? '';
       $originalPath = explode('/', $originalPath);
       $originalPath = implode('/', array_slice($originalPath, 0, -1));
       $destPath = $completePath . '/' . $originalPath;
@@ -386,7 +218,26 @@ class UploadsController extends Controller
         mkdir($destPath, 0777, true);
       }
       
-      rename($sourcePath, $destPath . '/' . $file->name);
+      // Use sanitized filename from database for file operations
+      $sanitizedFilename = $file->name;
+      $destFile = $destPath . '/' . $sanitizedFilename;
+      
+      // Move file to share directory
+      // Use copy + unlink instead of rename to handle cross-filesystem moves
+      if (file_exists($sourcePath)) {
+        if (copy($sourcePath, $destFile)) {
+          unlink($sourcePath);
+        } else {
+          // Fallback to rename if copy fails
+          rename($sourcePath, $destFile);
+        }
+      }
+      
+      // Clean up tusd .info file
+      $infoPath = $sourcePath . '.info';
+      if (file_exists($infoPath)) {
+        unlink($infoPath);
+      }
 
       // Update file record
       $file->share_id = $share->id;
@@ -395,10 +246,16 @@ class UploadsController extends Controller
       $file->save();
     }
 
+    // Clean up upload sessions
+    foreach ($sessions as $session) {
+      $session->delete();
+    }
+
     // Dispatch job to create ZIP file
     CreateShareZip::dispatch($share);
 
     if ($user->is_guest) {
+      // Guest user flow (unchanged)
       $invite = $user->invite;
       $share->public = false;
       $share->invite_id = $invite->id;
@@ -425,7 +282,43 @@ class UploadsController extends Controller
       ])->withCookie($cookie);
     }
 
-    // Process recipients if provided
+    // Check if this existing user has an active reverse share invite
+    // (i.e., they accepted an invite by logging in and are now uploading)
+    $activeInvite = ReverseShareInvite::where('guest_user_id', $user->id)
+      ->where('recipient_email', $user->email)
+      ->whereNotNull('used_at')
+      ->whereNull('completed_at')
+      ->first();
+
+    if ($activeInvite) {
+      // Existing user uploading via reverse share invite
+      // Keep the share associated with their account but also notify the requester
+      $share->invite_id = $activeInvite->id;
+      $share->save();
+
+      // Send notification to the requester
+      if ($activeInvite->user) {
+        $this->sendShareCreatedEmail($share, [
+          'name' => $activeInvite->user->name,
+          'email' => $activeInvite->user->email
+        ]);
+      }
+
+      // Mark the invite as completed
+      $activeInvite->completed_at = now();
+      $activeInvite->guest_user_id = null; // Clear the link since upload is done
+      $activeInvite->save();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Share created',
+        'data' => [
+          'share' => $share
+        ]
+      ]);
+    }
+
+    // Process recipients if provided (normal share flow)
     if ($request->has('recipients') && is_array($request->recipients)) {
       foreach ($request->recipients as $recipient) {
         if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {

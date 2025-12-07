@@ -9,13 +9,15 @@ use App\Http\Middleware\NoUsersMiddleware as NoUsers;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharesController;
 use App\Http\Controllers\BackgroundsController;
-use App\Http\Middleware\maxRequestSize;
 use App\Services\SettingsService;
 use App\Http\Controllers\ThemesController;
 use App\Http\Controllers\AuthProvidersController;
 use App\Http\Controllers\UploadsController;
 use App\Http\Controllers\ReverseSharesController;
 use App\Http\Controllers\EmailTemplatesController;
+use App\Http\Controllers\TusdHooksController;
+use App\Http\Controllers\StatsController;
+use App\Http\Controllers\SelfRegistrationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -46,6 +48,12 @@ Route::group([], function ($router) {
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
         Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword');
         Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword');
+        
+        // Self-registration routes
+        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register');
+        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail');
+        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification');
+        Route::get('registration-settings', [SelfRegistrationController::class, 'getSettings'])->name('auth.registrationSettings');
     });
 
     //manage my profile [auth]
@@ -69,6 +77,9 @@ Route::group([], function ($router) {
 
         //delete a user
         Route::delete('/{id}', [UsersController::class, 'delete'])->name('users.delete');
+
+        //force reset a user's password
+        Route::post('/{id}/force-reset-password', [UsersController::class, 'forceResetPassword'])->name('users.forceResetPassword');
     });
 
 
@@ -77,12 +88,22 @@ Route::group([], function ($router) {
         //create or update a setting
         Route::put('/', [SettingsController::class, 'write'])->name('settings.write');
         Route::post('/logo', [SettingsController::class, 'writeLogo'])->name('settings.writeLogo');
+        Route::delete('/logo', [SettingsController::class, 'deleteLogo'])->name('settings.deleteLogo');
+        //favicon management
+        Route::post('/favicon', [SettingsController::class, 'writeFavicon'])->name('settings.writeFavicon');
+        Route::delete('/favicon', [SettingsController::class, 'deleteFavicon'])->name('settings.deleteFavicon');
+        Route::get('/favicon/status', [SettingsController::class, 'hasFavicon'])->name('settings.hasFavicon');
         //list background images
         Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
         //upload a background image
         Route::post('/backgrounds', [BackgroundsController::class, 'upload'])->name('backgrounds.upload');
         //delete a background image
         Route::delete('/backgrounds/{file}', [BackgroundsController::class, 'delete'])->name('backgrounds.delete');
+    });
+
+    //system stats [auth, admin]
+    Route::group(['prefix' => 'stats', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/', [StatsController::class, 'getStats'])->name('stats.get');
     });
 
     //read settings [auth]
@@ -95,10 +116,6 @@ Route::group([], function ($router) {
 
     //manage shares [auth]
     Route::group(['prefix' => 'shares', 'middleware' => ['auth']], function ($router) {
-
-        //create a new share
-        Route::post('/', [SharesController::class, 'create'])->name('shares.create')
-            ->middleware(maxRequestSize::class);
         //get my shares
         Route::get('/', [SharesController::class, 'myShares'])->name('shares.myShares');
 
@@ -113,6 +130,12 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+    });
+
+    //all shares [auth, admin]
+    Route::group(['prefix' => 'shares', 'middleware' => ['auth', Admin::class]], function ($router) {
+        //get all shares (admin only)
+        Route::get('/all', [SharesController::class, 'allShares'])->name('shares.allShares');
     });
 
     //manage themes [auth, admin]
@@ -141,12 +164,15 @@ Route::group([], function ($router) {
         Route::put('/', [EmailTemplatesController::class, 'update'])->name('email-templates.update');
     });
 
+
     //manage reverse shares [auth]
     Route::group(['prefix' => 'reverse-shares', 'middleware' => ['auth']], function ($router) {
         Route::post('/invite', [ReverseSharesController::class, 'createInvite'])->name('reverse-shares.createInvite');
+        // Accept invite by ID (for existing users who must log in first)
+        Route::post('/accept-by-id', [AuthController::class, 'acceptReverseShareInviteById'])->name('reverse-shares.acceptInviteById');
     });
 
-    //accept a reverse share invite [public]
+    //accept a reverse share invite [public] (for guests with token)
     Route::group(['prefix' => 'reverse-shares'], function ($router) {
         Route::get('/accept', [ AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
     });
@@ -162,27 +188,29 @@ Route::group([], function ($router) {
 
     //download shares [public]
     Route::any('/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
+    
+    //download specific file from share [public] - filepath can include nested directories
+    Route::get('/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
+        ->where('filepath', '.*')
+        ->name('shares.downloadFile');
 
     //use background image [public]
     Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
     Route::get('/backgrounds/{file}/thumb', [BackgroundsController::class, 'useThumb'])->name('backgrounds.useThumb');
     Route::get('/backgrounds/{file}', [BackgroundsController::class, 'use'])->name('backgrounds.use');
+
+    //serve favicon [public]
+    Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
 
 
-// Chunked upload routes
+// tusd webhook handler (called by tusd server, not authenticated via middleware)
+Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');
+
+// Upload routes (now using tusd for actual uploads)
 Route::group(['prefix' => 'uploads', 'middleware' => ['auth']], function ($router) {
-    // Create an upload session
-    Route::post('/create-session', [UploadsController::class, 'createSession'])->name('uploads.createSession');
-
-    // Upload a chunk
-    Route::post('/chunk', [UploadsController::class, 'uploadChunk'])
-        ->name('uploads.chunk')
-        ->middleware(maxRequestSize::class);
-
-    // Finalize an upload
-    Route::post('/finalize', [UploadsController::class, 'finalizeUpload'])->name('uploads.finalize');
-
-    // Create a share from chunks
-    Route::post('/create-share-from-chunks', [UploadsController::class, 'createShareFromChunks'])->name('uploads.createShareFromChunks');
+    // Verify if an upload session is still valid (for tus resume functionality)
+    Route::get('/verify/{uploadId}', [UploadsController::class, 'verifyUpload'])->name('uploads.verify');
+    // Create a share from uploaded files (after tusd uploads complete)
+    Route::post('/create-share-from-uploads', [UploadsController::class, 'createShareFromUploads'])->name('uploads.createShareFromUploads');
 });

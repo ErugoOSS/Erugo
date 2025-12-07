@@ -1,18 +1,26 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getUsers, createUser, deleteUser, updateUser } from '../../api'
-import { UserPen, Trash, UserPlus, CircleX, UserRoundCheck } from 'lucide-vue-next'
+import { ref, onMounted, defineEmits } from 'vue'
+import { getUsers, createUser, deleteUser, updateUser, forceResetPassword } from '../../api'
+import { UserPen, Trash, UserPlus, CircleX, UserRoundCheck, FolderOpen, KeyRound } from 'lucide-vue-next'
 import { store } from '../../store'
 import { useToast } from 'vue-toastification'
 import { niceDate } from '../../utils'
+import { useConfirmDialog } from '../../composables/useConfirmDialog'
+import { useSetting } from '../../composables/useSetting'
 
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
 
+const emit = defineEmits(['viewUserShares'])
+
 const toast = useToast()
+const confirmDialog = useConfirmDialog()
 const users = ref([])
 const errors = ref({})
+
+// Subscribe to self_registration_enabled setting - auto-updates when settings change
+const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
 
 const newUser = ref({})
 const editUser = ref({})
@@ -28,14 +36,20 @@ const loadUsers = () => {
   })
 }
 
-const handleDeleteUserClick = (id) => {
+const handleDeleteUserClick = async (id) => {
   if (id === store.userId) {
     toast.error(t.value('settings.users.cannot_delete_yourself'))
     return
   }
 
+  const confirmed = await confirmDialog.show({
+    title: t.value('settings.users.delete'),
+    message: t.value('confirm_delete_user'),
+    okText: t.value('settings.users.delete'),
+    cancelText: t.value('settings.close')
+  })
 
-  if (confirm(t.value('confirm_delete_user'))) {
+  if (confirmed) {
     deleteUser(id).then(
       (data) => {
         loadUsers()
@@ -77,6 +91,16 @@ const editUserFormActive = ref(false)
 const editUserFormClickOutside = (event) => {
   if (!event.target.closest('.user-form')) {
     editUserFormActive.value = false
+  }
+}
+
+const resetPasswordFormActive = ref(false)
+const resetPasswordUser = ref(null)
+
+const resetPasswordFormClickOutside = (event) => {
+  if (!event.target.closest('.user-form')) {
+    resetPasswordFormActive.value = false
+    resetPasswordUser.value = null
   }
 }
 
@@ -122,6 +146,36 @@ const getEmptyUser = () => {
     must_change_password: false
   }
 }
+
+const handleViewUserShares = (user) => {
+  emit('viewUserShares', user)
+}
+
+const handleForceResetPassword = (user) => {
+  if (user.id === store.userId) {
+    toast.error(t.value('settings.users.cannot_force_reset_own_password'))
+    return
+  }
+
+  resetPasswordUser.value = user
+  resetPasswordFormActive.value = true
+}
+
+const confirmForceResetPassword = () => {
+  if (!resetPasswordUser.value) return
+
+  forceResetPassword(resetPasswordUser.value.id).then(
+    (data) => {
+      loadUsers()
+      toast.success(t.value('settings.users.force_reset_password_success'))
+      resetPasswordFormActive.value = false
+      resetPasswordUser.value = null
+    },
+    (error) => {
+      toast.error(t.value('settings.users.force_reset_password_failed'))
+    }
+  )
+}
 </script>
 
 <template>
@@ -165,6 +219,14 @@ const getEmptyUser = () => {
               <UserPen />
               {{ $t('settings.users.edit') }}
             </button>
+            <button class="secondary" @click="handleViewUserShares(user)">
+              <FolderOpen />
+              {{ $t('settings.users.view_shares') }}
+            </button>
+            <button class="secondary" :disabled="user.id === store.userId" @click="handleForceResetPassword(user)">
+              <KeyRound />
+              {{ $t('settings.users.force_reset_password') }}
+            </button>
             <button class="secondary" :disabled="user.id === store.userId" @click="handleDeleteUserClick(user.id)">
               <Trash />
               {{ $t('settings.users.delete') }}
@@ -182,6 +244,8 @@ const getEmptyUser = () => {
         {{ $t('settings.users.add') }}
       </h2>
       <p v-html="$t('settings.users.add_user_description')"></p>
+      <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on') }}</p>
+      <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off') }}</p>
       <div class="input-container">
         <label for="new_user_email">{{ $t('settings.users.email') }}</label>
         <input
@@ -265,7 +329,7 @@ const getEmptyUser = () => {
           :class="{ error: errors.name }"
         />
         <div class="error-message" v-if="errors.name">
-          {{ errors.name }}
+          {{ errors.name }}c
         </div>
       </div>
 
@@ -285,6 +349,28 @@ const getEmptyUser = () => {
           {{ $t('settings.users.save_changes') }}
         </button>
         <button class="secondary close-button" @click="editUserFormActive = false">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-form-overlay" :class="{ active: resetPasswordFormActive }" @click="resetPasswordFormClickOutside">
+    <div class="user-form">
+      <h2>
+        <KeyRound />
+        {{ $t('settings.users.force_reset_password') }}
+      </h2>
+      <p v-if="resetPasswordUser">
+        {{ $t('settings.users.confirm_force_reset_password', { name: resetPasswordUser.name }) }}
+      </p>
+      <div class="button-bar">
+        <button @click="confirmForceResetPassword">
+          <KeyRound />
+          {{ $t('settings.users.force_reset_password') }}
+        </button>
+        <button class="secondary close-button" @click="resetPasswordFormActive = false; resetPasswordUser = null">
           <CircleX />
           {{ $t('settings.close') }}
         </button>

@@ -21,11 +21,17 @@ class EmailConfigService
   {
     $settings = $this->settings;
 
+    // Laravel's SMTP transport expects null for no encryption, not an empty string
+    $encryption = $settings['encryption'];
+    if ($encryption === '' || $encryption === null) {
+      $encryption = null;
+    }
+
     $config = [
       'transport' => 'smtp',
       'host' => $settings['host'],
       'port' => $settings['port'],
-      'encryption' => $settings['encryption'],
+      'encryption' => $encryption,
       'username' => $settings['username'],
       'password' => $settings['password'],
       'timeout' => null,

@@ -312,6 +312,24 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
 
+            // share URL generation settings
+            [
+                'key' => 'share_url_mode',
+                'value' => 'haiku',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'share_url_pattern',
+                'value' => '******',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+
             //email subjects
             [
                 'key' => 'email_subject_accountCreatedMail.twig',
@@ -390,6 +408,40 @@ class SettingsSeeder extends Seeder
                 'value' => 'If you\'re having trouble with the button above, copy and paste the URL below into your web browser.',
                 'previous_value' => null,
                 'group' => 'system.emails',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+
+            // Self-registration settings
+            [
+                'key' => 'self_registration_enabled',
+                'value' => 'false',
+                'previous_value' => null,
+                'group' => 'system.auth',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'self_registration_allow_any_domain',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.auth',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'self_registration_allowed_domains',
+                'value' => '',
+                'previous_value' => null,
+                'group' => 'system.auth',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'email_subject_emailVerificationMail.twig',
+                'value' => 'Verify your email address',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
                 'created_at' => now(),
                 'updated_at' => now()
             ]

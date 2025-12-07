@@ -253,4 +253,79 @@ class AuthController extends Controller
             'message' => 'Password reset failed'
         ], 400);
     }
+
+    /**
+     * Accept a reverse share invite by ID (for existing/authenticated users)
+     * This requires the user to be logged in and their email must match the invite's recipient_email
+     */
+    public function acceptReverseShareInviteById(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'invite_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'data' => [
+                    'errors' => $validator->errors()
+                ]
+            ], 422);
+        }
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $invite = ReverseShareInvite::find($request->invite_id);
+
+        if (!$invite) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invite not found'
+            ], 404);
+        }
+
+        // Verify the logged-in user's email matches the invite's recipient_email
+        if (strtolower($user->email) !== strtolower($invite->recipient_email)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This invite was sent to a different email address'
+            ], 403);
+        }
+
+        if ($invite->isExpired()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invite expired'
+            ], 400);
+        }
+
+        if ($invite->isUsed()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invite already used'
+            ], 400);
+        }
+
+        // Store the active invite ID on the user for the upload process to reference
+        // We'll use the session or a simple approach - store it in the invite itself
+        // by setting the guest_user_id to the current user's ID
+        $invite->guest_user_id = $user->id;
+        $invite->markAsUsed(); // Mark as used so UploadsController can find it
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Invite accepted. You can now upload files.',
+            'data' => [
+                'invite' => $invite
+            ]
+        ]);
+    }
 }

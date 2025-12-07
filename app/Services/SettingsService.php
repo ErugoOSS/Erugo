@@ -22,6 +22,9 @@ class SettingsService
       $value = (object)$value;
     }
 
+    if ($value === 'null' || $value === null) {
+      return null;
+    }
     if ($value === 'true') {
       return true;
     }

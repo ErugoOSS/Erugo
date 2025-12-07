@@ -12,7 +12,14 @@ class ReverseShareInvite extends Model
     'recipient_name',
     'recipient_email',
     'message',
-    'expires_at'
+    'expires_at',
+    'completed_at'
+  ];
+
+  protected $casts = [
+    'used_at' => 'datetime',
+    'completed_at' => 'datetime',
+    'expires_at' => 'datetime',
   ];
 
   public function user()
@@ -41,5 +48,14 @@ class ReverseShareInvite extends Model
     return $this->used_at !== null;
   }
 
-  
+  public function isCompleted()
+  {
+    return $this->completed_at !== null;
+  }
+
+  public function markAsCompleted()
+  {
+    $this->completed_at = now();
+    $this->save();
+  }
 }
