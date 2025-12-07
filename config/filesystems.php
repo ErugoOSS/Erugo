@@ -49,7 +49,7 @@ return [
 
         'backgrounds' => [
             'driver' => 'local',
-            'root' => public_path('backgrounds'),
+            'root' => storage_path('app/backgrounds'),
             'url' => env('APP_URL').'/backgrounds',
             'visibility' => 'public',
             'throw' => false,
@@ -84,6 +84,8 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('backgrounds') => storage_path('app/backgrounds'),
+        public_path('images') => storage_path('app/public/images'),
     ],
 
 ];

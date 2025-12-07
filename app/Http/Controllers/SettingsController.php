@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use App\Utils\FileHelper;
 class SettingsController extends Controller
 {
@@ -105,56 +106,125 @@ class SettingsController extends Controller
 
     public function writeLogo(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'logo' => 'required|image|mimes:png,svg|max:2048',
         ]);
 
+        if ($validator->fails()) {
+            // Map validation rule to error code for frontend translation
+            $failedRules = $validator->failed();
+            $errorCode = 'validation_failed';
+            
+            if (isset($failedRules['logo']['Max'])) {
+                $errorCode = 'file_too_large';
+            } elseif (isset($failedRules['logo']['Mimes'])) {
+                $errorCode = 'invalid_file_type';
+            } elseif (isset($failedRules['logo']['Image'])) {
+                $errorCode = 'invalid_image';
+            } elseif (isset($failedRules['logo']['Required'])) {
+                $errorCode = 'file_required';
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'error_code' => $errorCode,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
         $logo = $request->file('logo');
         
-        // Store the logo as logo.png in public/images (overwriting any existing logo)
-        $logoPath = public_path('images/logo.png');
-        file_put_contents($logoPath, file_get_contents($logo));
+        try {
+            // Store the logo as logo.png in storage/app/public/images (symlinked to public/images)
+            $stored = Storage::disk('public')->put('images/logo.png', file_get_contents($logo));
+            
+            if (!$stored) {
+                Log::error('Failed to store logo file');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to save logo file',
+                ], 500);
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Logo updated successfully',
-        ]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Logo updated successfully',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Logo upload error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to save logo: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function deleteLogo()
     {
-        $defaultLogoPath = public_path('images/_default-logo.png');
-        $logoPath = public_path('images/logo.png');
-        
-        if (!file_exists($defaultLogoPath)) {
+        try {
+            // Check if default logo exists in storage
+            if (!Storage::disk('public')->exists('images/_default-logo.png')) {
+                Log::error('Default logo not found in storage');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Default logo not found',
+                ], 404);
+            }
+            
+            // Copy the default logo to restore it
+            $defaultLogo = Storage::disk('public')->get('images/_default-logo.png');
+            Storage::disk('public')->put('images/logo.png', $defaultLogo);
+
+            // Update the logo setting to show the default logo filename
+            $logoSetting = Setting::where('key', 'logo')->where('group', 'ui.logo')->first();
+            if ($logoSetting) {
+                $logoSetting->previous_value = $logoSetting->value;
+                $logoSetting->value = 'erugo-logo.png';
+                $logoSetting->save();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Logo reset to default successfully',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Logo reset error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Default logo not found',
-            ], 404);
+                'message' => 'Failed to reset logo: ' . $e->getMessage(),
+            ], 500);
         }
-        
-        // Copy the default logo to restore it
-        copy($defaultLogoPath, $logoPath);
-
-        // Update the logo setting to show the default logo filename
-        $logoSetting = Setting::where('key', 'logo')->where('group', 'ui.logo')->first();
-        if ($logoSetting) {
-            $logoSetting->previous_value = $logoSetting->value;
-            $logoSetting->value = 'erugo-logo.png';
-            $logoSetting->save();
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Logo reset to default successfully',
-        ]);
     }
 
     public function writeFavicon(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'favicon' => 'required|file|mimes:png,svg|max:1024',
         ]);
+
+        if ($validator->fails()) {
+            // Map validation rule to error code for frontend translation
+            $failedRules = $validator->failed();
+            $errorCode = 'validation_failed';
+            
+            if (isset($failedRules['favicon']['Max'])) {
+                $errorCode = 'file_too_large';
+            } elseif (isset($failedRules['favicon']['Mimes'])) {
+                $errorCode = 'invalid_file_type';
+            } elseif (isset($failedRules['favicon']['Required'])) {
+                $errorCode = 'file_required';
+            } elseif (isset($failedRules['favicon']['File'])) {
+                $errorCode = 'invalid_file';
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'error_code' => $errorCode,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         $favicon = $request->file('favicon');
         $extension = strtolower($favicon->getClientOriginalExtension());

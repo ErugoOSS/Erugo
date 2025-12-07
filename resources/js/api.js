@@ -474,7 +474,9 @@ export const saveLogo = async (logoFile) => {
   })
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data.message)
+    const error = new Error(data.message)
+    error.code = data.error_code || 'unknown_error'
+    throw error
   }
   return data.data
 }
@@ -500,7 +502,9 @@ export const saveFavicon = async (faviconFile) => {
   })
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data.message)
+    const error = new Error(data.message)
+    error.code = data.error_code || 'unknown_error'
+    throw error
   }
   return data.data
 }

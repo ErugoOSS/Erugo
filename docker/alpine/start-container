@@ -35,6 +35,18 @@ if [ ! -f /var/www/html/storage/.setup-lock ]; then
     touch /var/www/html/storage/.setup-lock
 else
     echo "Setup already completed, skipping..."
+    
+    # Ensure new directories exist for upgrades from older versions
+    mkdir -p /var/www/html/storage/app/backgrounds/cache/thumbs
+    mkdir -p /var/www/html/storage/app/public/images
+    
+    # Copy default logo files if they don't exist (for upgrades)
+    if [ ! -f /var/www/html/storage/app/public/images/_default-logo.png ]; then
+        cp /var/www/html/storage_skell/app/public/images/_default-logo.png /var/www/html/storage/app/public/images/
+    fi
+    if [ ! -f /var/www/html/storage/app/public/images/logo.png ]; then
+        cp /var/www/html/storage_skell/app/public/images/logo.png /var/www/html/storage/app/public/images/
+    fi
 fi
 
 # Always ensure correct permissions on storage directory
@@ -116,14 +128,34 @@ su-exec erugo php artisan clear-compiled
 echo "Updating legacy share paths..."
 su-exec erugo php artisan update-legacy-share-paths
 
-# Migrate backgrounds from storage to public directory
+# Migrate backgrounds from old storage location (storage/app/public/backgrounds) to new location (storage/app/backgrounds)
 if [ -d /var/www/html/storage/app/public/backgrounds ] && [ "$(ls -A /var/www/html/storage/app/public/backgrounds 2>/dev/null)" ]; then
-    echo "Migrating backgrounds to public directory..."
-    mkdir -p /var/www/html/public/backgrounds
-    cp -rn /var/www/html/storage/app/public/backgrounds/* /var/www/html/public/backgrounds/ 2>/dev/null || true
-    chown -R erugo:erugo /var/www/html/public/backgrounds
+    echo "Migrating backgrounds from old storage location..."
+    mkdir -p /var/www/html/storage/app/backgrounds/cache/thumbs
+    # Copy files (not recursively overwriting existing)
+    cp -rn /var/www/html/storage/app/public/backgrounds/* /var/www/html/storage/app/backgrounds/ 2>/dev/null || true
+    # Remove old location after successful migration
+    rm -rf /var/www/html/storage/app/public/backgrounds
     echo "Backgrounds migration complete."
 fi
+
+# Create symlinks for public assets (images, backgrounds) pointing to storage
+echo "Creating storage symlinks..."
+# Remove any existing symlinks or directories that conflict
+rm -rf /var/www/html/public/storage 2>/dev/null || true
+rm -rf /var/www/html/public/backgrounds 2>/dev/null || true
+rm -rf /var/www/html/public/images 2>/dev/null || true
+
+# Create relative symlinks (works consistently in Docker and development)
+cd /var/www/html/public
+ln -s ../storage/app/public storage
+ln -s ../storage/app/backgrounds backgrounds
+ln -s ../storage/app/public/images images
+cd /var/www/html
+
+# Ensure correct ownership of symlinked directories
+chown -R erugo:erugo /var/www/html/storage/app/public
+chown -R erugo:erugo /var/www/html/storage/app/backgrounds
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

@@ -52,7 +52,7 @@ const faviconStatus = ref({
   has_custom_favicon: false,
   filename: null
 })
-const newFavicon = ref(null)
+const pendingFavicon = ref(null)  // File waiting to be uploaded on save
 
 const newBackgroundImage = ref(null)
 const backgroundImages = ref([])
@@ -116,14 +116,59 @@ const groupedThemes = computed(() => {
   }, {})
 })
 
+// Track object URLs for local file previews
+const logoObjectUrl = ref(null)
+const faviconObjectUrl = ref(null)
+
+// Watch for logo file changes to create/revoke object URLs
+watch(() => settings.value.logo, (newVal, oldVal) => {
+  // Revoke old URL if it exists
+  if (logoObjectUrl.value) {
+    URL.revokeObjectURL(logoObjectUrl.value)
+    logoObjectUrl.value = null
+  }
+  // Create new URL if new value is a File
+  if (newVal instanceof File) {
+    logoObjectUrl.value = URL.createObjectURL(newVal)
+  }
+}, { immediate: true })
+
+// Watch for favicon file changes to create/revoke object URLs
+watch(pendingFavicon, (newVal, oldVal) => {
+  // Revoke old URL if it exists
+  if (faviconObjectUrl.value) {
+    URL.revokeObjectURL(faviconObjectUrl.value)
+    faviconObjectUrl.value = null
+  }
+  // Create new URL if new value is a File
+  if (newVal instanceof File) {
+    faviconObjectUrl.value = URL.createObjectURL(newVal)
+  }
+}, { immediate: true })
+
 const logoPreview = computed(() => {
+  // If user has selected a new file, show local preview
+  if (settings.value.logo instanceof File && logoObjectUrl.value) {
+    return {
+      url: logoObjectUrl.value,
+      filename: settings.value.logo.name
+    }
+  }
+  // Otherwise show current server logo
   return {
     url: `/images/logo.png?t=${logoTimestamp.value}`
   }
 })
 
 const faviconPreview = computed(() => {
-  // Always show preview - default favicon if no custom one exists
+  // If user has selected a new file, show local preview
+  if (pendingFavicon.value instanceof File && faviconObjectUrl.value) {
+    return {
+      url: faviconObjectUrl.value,
+      filename: pendingFavicon.value.name
+    }
+  }
+  // Otherwise show current server favicon
   return {
     url: `/api/favicon?t=${faviconTimestamp.value}`,
     filename: faviconStatus.value.has_custom_favicon ? faviconStatus.value.filename : 'icon.svg'
@@ -152,11 +197,25 @@ const saveSettings = async () => {
   console.log('saving settings')
   saving.value = true
   try {
+    // Upload logo if user selected a new file
     if (settings.value.logo instanceof File) {
       await saveLogo(settings.value.logo)
       logoTimestamp.value = Date.now()
       // Update the logo in the browser by forcing a cache refresh
       updateBrowserLogo()
+      // Clear the File object after successful upload
+      settings.value.logo = settings.value.logo.name
+    }
+
+    // Upload favicon if user selected a new file
+    if (pendingFavicon.value instanceof File) {
+      await saveFavicon(pendingFavicon.value)
+      faviconTimestamp.value = Date.now()
+      // Update the favicon in the browser
+      updateBrowserFavicon()
+      // Clear pending and reload status
+      pendingFavicon.value = null
+      loadFaviconStatus()
     }
 
     // Don't save logo setting if it's just a string (from DB) - only save if it's a File object
@@ -176,7 +235,11 @@ const saveSettings = async () => {
     toast.success(t.value('settings.branding.settings_saved'))
   } catch (error) {
     saving.value = false
-    toast.error(t.value('settings.branding.failed_to_save_settings'))
+    // Use error code for specific translated message, fallback to generic
+    const errorKey = error.code 
+      ? `settings.branding.errors.${error.code}`
+      : 'settings.branding.failed_to_save_settings'
+    toast.error(t.value(errorKey, t.value('settings.branding.failed_to_save_settings')))
     console.error(error)
   }
 }
@@ -231,23 +294,7 @@ watch(newBackgroundImage, async () => {
   }
 })
 
-//watch newFavicon and upload it to the server
-watch(newFavicon, async () => {
-  if (newFavicon.value) {
-    saveFavicon(newFavicon.value)
-      .then((data) => {
-        faviconTimestamp.value = Date.now()
-        loadFaviconStatus()
-        newFavicon.value = null
-        toast.success(t.value('settings.branding.favicon_uploaded'))
-        // Update the favicon in the browser
-        updateBrowserFavicon()
-      })
-      .catch((error) => {
-        toast.error(t.value('settings.branding.favicon_upload_failed'))
-      })
-  }
-})
+// No auto-upload for favicon - it's saved with other settings in saveSettings()
 
 const handleDeleteFavicon = async () => {
   const reallyDelete = confirm(t.value('settings.branding.confirm_delete_favicon'))
@@ -358,6 +405,14 @@ const handleNavItemClicked = (item) => {
 }
 
 onBeforeUnmount(async () => {
+  // Clean up object URLs to prevent memory leaks
+  if (logoObjectUrl.value) {
+    URL.revokeObjectURL(logoObjectUrl.value)
+  }
+  if (faviconObjectUrl.value) {
+    URL.revokeObjectURL(faviconObjectUrl.value)
+  }
+  
   const activeTheme = await getActiveTheme()
   if (activeTheme) {
     injectThemeVariables('body', activeTheme.theme)
@@ -596,7 +651,7 @@ defineExpose({
                   <label for="logoFile">{{ $t('settings.branding.logo_image') }}</label>
                   <FileInput 
                     v-model="settings.logo" 
-                    accept="image/png"
+                    accept="image/png, image/svg+xml"
                     :preview="logoPreview"
                   >
                     <template #actions>
@@ -622,9 +677,9 @@ defineExpose({
                 <div class="setting-group-body-item mt-4">
                   <label for="faviconFile">{{ $t('settings.branding.favicon') }}</label>
                   <FileInput 
-                    v-model="newFavicon" 
+                    v-model="pendingFavicon" 
                     accept="image/png, image/svg+xml" 
-                    :label="$t('settings.branding.upload_favicon')"
+                    :label="faviconPreview.filename || $t('settings.branding.upload_favicon')"
                     :preview="faviconPreview"
                   >
                     <template #actions>

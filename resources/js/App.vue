@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
 
 
 //components
@@ -32,7 +32,8 @@ import { checkUrlHash, clearUrlHash } from './composables/useSettingsNavigation'
 const { t } = useTranslate()
 
 //static data
-const logoUrl = '/images/logo.png'
+const logoTimestamp = ref(Date.now())
+const logoUrl = computed(() => `/images/logo.png?t=${logoTimestamp.value}`)
 const allowReverseShares = ref(false)
 const logoWidth = ref(0)
 const showPoweredBy = ref(false)
