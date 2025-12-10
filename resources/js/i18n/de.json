@@ -431,10 +431,16 @@
       "download": "Herunterladen",
       "download_theme": "Theme herunterladen",
       "download_theme_description": "Laden Sie das ausgewählte Theme als JSON-Datei herunter. Damit können Sie ein neues Theme erstellen oder ein bestehendes Theme ändern.",
+      "errors": {
+        "file_too_large": "Hochladen des Favicons fehlgeschlagen‍‍‍‍‍‍‍‍‍ - Datei muss 1MB oder kleiner sein."
+      },
+      "failed_to_save_settings": "Die Einstellungen konnten nicht gespeichert werden.",
       "favicon": "Favicon",
       "favicon_description": "Laden Sie ein benutzerdefiniertes Favicon hoch, um das standardmäßige erugo-Symbol in der Browser-Registerkarte zu ersetzen.",
       "favicon_reset_failed": "Favicon kann nicht zurückgesetzt werden",
       "favicon_reset_success": "Favicon erfolgreich zurückgesetzt",
+      "favicon_upload_failed": "Hochladen des Favicons fehlgeschlagen",
+      "favicon_uploaded": "Favicon hochgeladen",
       "in_pixels": "In Pixel",
       "in_seconds": "Sekunden",
       "install_custom_theme": "Installieren Sie ein benutzerdefiniertes Theme\n",
@@ -511,8 +517,11 @@
       "baseTemplateDescription": "Steuert die Basisvorlage, von der alle anderen Vorlagen erben.",
       "error": "E-Mail-Vorlagen können nicht hochgeladen werden",
       "error_loading_templates": "Vorlagen konnten nicht geladen werden",
+      "error_saving_fallback": "Fallback-Text konnte nicht gespeichert werden",
       "error_saving_templates": "Vorlagen können nicht gespeichert werden",
+      "no_changes": "Keine Änderungen zu speichern",
       "passwordReset": "Passwort zurücksetzen",
+      "requiredFields": "Erforderliche Felder",
       "sections": {
         "action_text": "Text der Aktionsschaltfläche",
         "action_url": "Aktions-URL",
@@ -522,7 +531,8 @@
         "header": "Inhalt der Kopfzeile",
         "subject": "Thema"
       },
-      "success": "Vorlagen erfolgreich gespeichert"
+      "success": "Vorlagen erfolgreich gespeichert",
+      "validation_error": "{template}: Fehlende Pflichtfelder ({fields})"
     },
     "error": {
       "pruneExpiredShares": "Abgelaufene geteilte Dateien konnten nicht zur Löschung eingeplant werden!",

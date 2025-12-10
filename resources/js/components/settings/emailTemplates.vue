@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, defineExpose, inject } from 'vue'
-// import {} from 'lucide-vue-next'
+import { ref, onMounted, defineExpose, inject, computed } from 'vue'
+import { Check, X } from 'lucide-vue-next'
 import { getEmailTemplates, updateEmailTemplates, getSettingById, saveSettingsById } from '../../api'
 
 import { useToast } from 'vue-toastification'
@@ -17,7 +17,9 @@ const toast = useToast()
 
 const saving = ref(false)
 const emailTemplates = ref([])
+const originalTemplates = ref({}) // Store original state for dirty checking
 const fallbackText = ref('')
+const originalFallbackText = ref('')
 
 const emit = defineEmits(['navItemClicked'])
 
@@ -26,12 +28,19 @@ onMounted(async () => {
     const templates = await getEmailTemplates()
     console.log(templates)
     templates.forEach((template) => {
-      emailTemplates.value.push({
+      const templateData = {
         name: tidyTemplateName(template.name),
-        id: template.name,
+        id: template.id,
         content: template.content,
         variables: template.variables,
-        subject: template.subject
+        subject: template.subject,
+        requiredVariables: template.requiredVariables || []
+      }
+      emailTemplates.value.push(templateData)
+      // Store original state for dirty checking
+      originalTemplates.value[template.id] = JSON.stringify({
+        subject: template.subject,
+        variables: template.variables
       })
     })
   } catch (error) {
@@ -42,6 +51,7 @@ onMounted(async () => {
   try {
     const text = await getSettingById('email_template_fallback_text')
     fallbackText.value = text.value
+    originalFallbackText.value = text.value
   } catch (error) {
     console.error(error)
   }
@@ -63,16 +73,96 @@ const tidyTemplateName = (name) => {
   return result
 }
 
-const saveEmailTemplates = async () => {
-  try {
-    await updateEmailTemplates(emailTemplates.value)
-    await saveSettingsById({ email_template_fallback_text: fallbackText.value })
-    toast.success(t.value('settings.emailTemplates.success'))
-  } catch (error) {
-    console.error(error)
-    toast.error(t.value('settings.emailTemplates.error_saving_templates'))
-  }
+// Check if a template is dirty (has unsaved changes)
+const isTemplateDirty = (template) => {
+  const current = JSON.stringify({
+    subject: template.subject,
+    variables: template.variables
+  })
+  return current !== originalTemplates.value[template.id]
+}
 
+// Check if a specific variable is valid (non-empty string)
+const isVariableValid = (template, variableName) => {
+  if (variableName === 'subject') {
+    return template.subject && template.subject.trim() !== ''
+  }
+  return template.variables[variableName] && template.variables[variableName].trim() !== ''
+}
+
+// Validate a single template - returns array of invalid required variable names
+const getTemplateErrors = (template) => {
+  const errors = []
+  for (const varName of template.requiredVariables || []) {
+    if (!isVariableValid(template, varName)) {
+      errors.push(varName)
+    }
+  }
+  return errors
+}
+
+// Check if template is valid (all required variables have values)
+const isTemplateValid = (template) => {
+  return getTemplateErrors(template).length === 0
+}
+
+const saveEmailTemplates = async () => {
+  // Get dirty templates only
+  const dirtyTemplates = emailTemplates.value.filter(isTemplateDirty)
+  
+  // Validate dirty templates before saving
+  const invalidTemplates = []
+  for (const template of dirtyTemplates) {
+    const errors = getTemplateErrors(template)
+    if (errors.length > 0) {
+      invalidTemplates.push({ template, errors })
+    }
+  }
+  
+  if (invalidTemplates.length > 0) {
+    // Show error for each invalid template
+    for (const { template, errors } of invalidTemplates) {
+      const errorFields = errors.join(', ')
+      toast.error(t.value('settings.emailTemplates.validation_error', { 
+        template: template.name, 
+        fields: errorFields 
+      }))
+    }
+    return
+  }
+  
+  // Save dirty templates
+  if (dirtyTemplates.length > 0) {
+    try {
+      await updateEmailTemplates(dirtyTemplates)
+      // Update original state after successful save
+      for (const template of dirtyTemplates) {
+        originalTemplates.value[template.id] = JSON.stringify({
+          subject: template.subject,
+          variables: template.variables
+        })
+      }
+      toast.success(t.value('settings.emailTemplates.success'))
+    } catch (error) {
+      console.error(error)
+      toast.error(t.value('settings.emailTemplates.error_saving_templates'))
+    }
+  }
+  
+  // Save fallback text if changed
+  if (fallbackText.value !== originalFallbackText.value) {
+    try {
+      await saveSettingsById({ email_template_fallback_text: fallbackText.value })
+      originalFallbackText.value = fallbackText.value
+    } catch (error) {
+      console.error(error)
+      toast.error(t.value('settings.emailTemplates.error_saving_fallback'))
+    }
+  }
+  
+  if (dirtyTemplates.length === 0 && fallbackText.value === originalFallbackText.value) {
+    toast.info(t.value('settings.emailTemplates.no_changes'))
+  }
 }
 
 const handleNavItemClicked = (item) => {
@@ -86,6 +176,11 @@ const updateTemplate = (event, template) => {
     }
     return t
   })
+}
+
+// Format variable name for display
+const formatVariableName = (name) => {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 //define exposed methods
@@ -153,8 +248,18 @@ defineExpose({
           </div>
           <div class="d-none d-md-block col ps-0">
             <div class="section-help">
-              <h6>{{ $t(template.name) }}</h6>
-
+              <h6 class="mt-3">{{ $t('settings.emailTemplates.requiredFields') }}</h6>
+              <ul class="required-variables-list">
+                <li 
+                  v-for="varName in template.requiredVariables" 
+                  :key="varName"
+                  :class="{ valid: isVariableValid(template, varName), invalid: !isVariableValid(template, varName) }"
+                >
+                  <Check v-if="isVariableValid(template, varName)" class="status-icon" />
+                  <X v-else class="status-icon" />
+                  {{ formatVariableName(varName) }}
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -335,5 +440,34 @@ defineExpose({
 
 .section-help {
   word-break: break-word;
+}
+
+.required-variables-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+
+    &.valid {
+      color: var(--color-success, #22c55e);
+    }
+
+    &.invalid {
+      color: var(--color-danger, #ef4444);
+    }
+
+    .status-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+  }
 }
 </style>

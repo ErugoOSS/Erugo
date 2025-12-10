@@ -410,10 +410,16 @@
       "download": "Descarregar",
       "download_theme": "Descarregar Tema",
       "download_theme_description": "Descarregue o tema selecionado como ficheiro JSON. Este pode ser usado para criar um novo tema ou modificar o existente.",
+      "errors": {
+        "file_too_large": "Falha ao carregar o favicon‍‍‍‍‍‍‍‍‍‍‍‍ - o arquivo deve ter 1 MB ou menos."
+      },
+      "failed_to_save_settings": "Falha ao guardar as definições.",
       "favicon": "Favicon",
       "favicon_description": "Carregue um favicon personalizado para substituir o ícone erugo predefinido no separador do browser.",
       "favicon_reset_failed": "Falha ao repor o favicon",
       "favicon_reset_success": "Redefinição do favicon com êxito",
+      "favicon_upload_failed": "O carregamento do favicon falhou",
+      "favicon_uploaded": "Favicon carregado",
       "in_pixels": "Em pixels",
       "in_seconds": "segundos",
       "install_custom_theme": "Instalar um Tema Personalizado",
@@ -490,8 +496,11 @@
       "baseTemplateDescription": "Controla o modelo de base a partir do qual todos os outros modelos são herdados.",
       "error": "Não é possível carregar modelos de correio eletrónico",
       "error_loading_templates": "Falha no carregamento de modelos",
+      "error_saving_fallback": "Falha ao guardar o texto de recurso",
       "error_saving_templates": "Não é possível guardar modelos",
+      "no_changes": "Não há alterações a guardar",
       "passwordReset": "Redefinição da palavra-passe",
+      "requiredFields": "Campos obrigatórios",
       "sections": {
         "action_text": "Texto do botão de ação",
         "action_url": "Ação URL",
@@ -501,7 +510,8 @@
         "header": "Conteúdo do cabeçalho",
         "subject": "Assunto"
       },
-      "success": "Modelos guardados com sucesso"
+      "success": "Modelos guardados com sucesso",
+      "validation_error": "{template}: Campos obrigatórios em falta ({fields})"
     },
     "error": {
       "pruneExpiredShares": "Falha ao agendar a eliminação das transferências expiradas!",

@@ -431,10 +431,16 @@
       "download": "Download",
       "download_theme": "Download Theme",
       "download_theme_description": "Download the selected theme as a JSON file. This can be used to create a new theme or modify an existing one.",
+      "errors": {
+        "file_too_large": "Uploading favicon failed‌‌‍‍‌‌‌‍‌‌‌‍‍‌‌‌‌‌‌‌‍‍‌‌‌‍‌‌‌‌‌‍‌‍‌‌ - file must be 1MB or below."
+      },
+      "failed_to_save_settings": "Failed to save settings.",
       "favicon": "Favicon",
       "favicon_description": "Upload a custom favicon to replace the default  erugo icon in the browser tab.",
       "favicon_reset_failed": "Failed to reset favicon",
       "favicon_reset_success": "Favicon reset successfully",
+      "favicon_upload_failed": "Uploading favicon failed",
+      "favicon_uploaded": "Favicon uploaded",
       "in_pixels": "In pixels",
       "in_seconds": "seconds",
       "install_custom_theme": "Install a Custom Theme\n",
@@ -511,8 +517,11 @@
       "baseTemplateDescription": "Controls the base template from which all other templates inherit.",
       "error": "Failed to load email templates",
       "error_loading_templates": "Failed to load templates",
+      "error_saving_fallback": "Failed to save fallback text",
       "error_saving_templates": "Failed to save templates",
+      "no_changes": "No changes to save",
       "passwordReset": "Password Reset",
+      "requiredFields": "Required Fields",
       "sections": {
         "action_text": "Action button text",
         "action_url": "Action URL",
@@ -522,7 +531,8 @@
         "header": "Header content",
         "subject": "Subject"
       },
-      "success": "Templates saved successfully"
+      "success": "Templates saved successfully",
+      "validation_error": "{template}: Missing required fields ({fields})"
     },
     "error": {
       "pruneExpiredShares": "Failed to schedule expired shares for deletion!",

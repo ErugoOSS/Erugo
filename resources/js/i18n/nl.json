@@ -431,10 +431,16 @@
       "download": "Downloaden",
       "download_theme": "Thema downloaden",
       "download_theme_description": "Download het geselecteerde thema als een JSON-bestand. Dit kan worden gebruikt om een nieuw thema te maken of een bestaand thema te wijzigen.",
+      "errors": {
+        "file_too_large": "favicon uploaden mislukt‍‍‍‍‍‍‍‍‍‍ - bestand moet 1MB of kleiner zijn."
+      },
+      "failed_to_save_settings": "Mislukt bij het opslaan van instellingen.",
       "favicon": "Favicon",
       "favicon_description": "Upload een aangepast favicon om het standaard erugo-pictogram in het browsertabblad te vervangen.",
       "favicon_reset_failed": "Gefaald om favicon opnieuw in te stellen",
       "favicon_reset_success": "Favicon met succes gereset",
+      "favicon_upload_failed": "favicon uploaden mislukt",
+      "favicon_uploaded": "Favicon geüpload",
       "in_pixels": "In pixels",
       "in_seconds": "seconden",
       "install_custom_theme": "Een aangepast thema installeren\n",
@@ -511,8 +517,11 @@
       "baseTemplateDescription": "Bepaalt het basissjabloon waarvan alle andere sjablonen erven.",
       "error": "Kan geen e-mailsjablonen uploaden",
       "error_loading_templates": "Sjablonen niet geladen",
+      "error_saving_fallback": "Fout bij het opslaan van fallbacktekst",
       "error_saving_templates": "Sjablonen kunnen niet worden opgeslagen",
+      "no_changes": "Geen wijzigingen om op te slaan",
       "passwordReset": "Wachtwoord opnieuw instellen",
+      "requiredFields": "Verplichte velden",
       "sections": {
         "action_text": "Tekst actieknop",
         "action_url": "Actie URL",
@@ -522,7 +531,8 @@
         "header": "Inhoud koptekst",
         "subject": "Onderwerp"
       },
-      "success": "Sjablonen succesvol opgeslagen"
+      "success": "Sjablonen succesvol opgeslagen",
+      "validation_error": "{template}: Verplichte velden ontbreken ({fields})"
     },
     "error": {
       "pruneExpiredShares": "Kan verwijdering van verlopen aandelen niet plannen!",

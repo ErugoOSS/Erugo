@@ -431,10 +431,16 @@
       "download": "Scaricare",
       "download_theme": "Scarica il tema",
       "download_theme_description": "Scarica il tema selezionato come file JSON. Questo può essere utilizzato per creare un nuovo tema o modificarne uno esistente.",
+      "errors": {
+        "file_too_large": "Caricamento favicon non riuscito‍‍‍‍‍‍‍‍‍‍‍‍ - il file deve essere di 1MB o inferiore."
+      },
+      "failed_to_save_settings": "Impossibile salvare le impostazioni.",
       "favicon": "Favicon",
       "favicon_description": "Caricare una favicon personalizzata per sostituire l'icona predefinita di erugo nella scheda del browser.",
       "favicon_reset_failed": "Impossibile reimpostare la favicon",
       "favicon_reset_success": "Favicon resettata con successo",
+      "favicon_upload_failed": "Caricamento della favicon non riuscito",
+      "favicon_uploaded": "Favicon caricata",
       "in_pixels": "In pixel",
       "in_seconds": "secondi",
       "install_custom_theme": "Installare un tema personalizzato\n",
@@ -511,8 +517,11 @@
       "baseTemplateDescription": "Controlla il modello di base da cui ereditano tutti gli altri modelli.",
       "error": "Impossibile caricare i template di e-mail",
       "error_loading_templates": "Non è riuscito a caricare i modelli",
+      "error_saving_fallback": "Impossibile salvare il testo di fallback",
       "error_saving_templates": "Impossibile salvare i template",
+      "no_changes": "Nessuna modifica da salvare",
       "passwordReset": "Ripristino della password",
+      "requiredFields": "Campi obbligatori",
       "sections": {
         "action_text": "Testo del pulsante di azione",
         "action_url": "Azione URL",
@@ -522,7 +531,8 @@
         "header": "Contenuto dell'intestazione",
         "subject": "Oggetto"
       },
-      "success": "Modelli salvati con successo"
+      "success": "Modelli salvati con successo",
+      "validation_error": "{template}: Campi obbligatori mancanti ({fields})"
     },
     "error": {
       "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle condivisioni scadute!",

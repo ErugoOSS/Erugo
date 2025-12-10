@@ -15,15 +15,26 @@ class EmailTemplatesController extends Controller
     //load the content of each file
     $templates = [];
     foreach ($template_files as $template_file) {
+      $templateName = basename($template_file, '.twig');
       //skip 'layout.twig'
-      if (basename($template_file, '.twig') === 'layout') {
+      if ($templateName === 'layout') {
         continue;
       }
+      // Strip version suffix (e.g., V2, V3) from display name
+      $displayName = preg_replace('/V\d+$/', '', $templateName);
+      
+      // Get required variables from the original template (not customized)
+      $originalContent = file_get_contents($template_file);
+      $originalBlocks = $this->extractVariables($originalContent);
+      $requiredVariables = array_merge(['subject'], array_keys($originalBlocks));
+      
       $templates[] = [
-        'name' => basename($template_file, '.twig'),
+        'name' => $displayName,
+        'id' => $templateName,
         'content' => $this->getTemplateContent($template_file),
         'variables' => $this->extractVariables($this->getTemplateContent($template_file)),
-        'subject' => $this->getSubject(basename($template_file))
+        'subject' => $this->getSubject($templateName . '.twig'),
+        'requiredVariables' => $requiredVariables
       ];
     }
     return response()->json([
@@ -83,14 +94,32 @@ class EmailTemplatesController extends Controller
   {
     $templates = $request->all();
     foreach ($templates as $template) {
-      $validator = Validator::make($template, [
+      // Build dynamic validation rules based on original template
+      $originalPath = resource_path('views/emails/' . $template['id'] . '.twig');
+      if (!file_exists($originalPath)) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Template not found: ' . $template['id'],
+          'data' => []
+        ], 404);
+      }
+      $originalContent = file_get_contents($originalPath);
+      $originalBlocks = $this->extractVariables($originalContent);
+
+      $rules = [
         'content' => 'required|string',
         'id' => 'required|string',
         'subject' => 'required|string',
-        'variables.action_text' => 'required|string',
-        'variables.content' => 'required|string',
-        'variables.header' => 'required|string',
-      ]);
+      ];
+
+      // Only require blocks that exist in the original template
+      foreach (['header', 'content', 'action_text', 'action_url'] as $block) {
+        if (array_key_exists($block, $originalBlocks)) {
+          $rules["variables.$block"] = 'required|string';
+        }
+      }
+
+      $validator = Validator::make($template, $rules);
 
       if ($validator->fails()) {
         return response()->json([
@@ -116,21 +145,29 @@ class EmailTemplatesController extends Controller
   private function updateTemplate($template)
   {
     $template_file_path = storage_path('templates/emails/' . $template['id'] . '.twig');
-    $subjectSetting = Setting::where('key', 'email_subject_' . $template['id'] . '.twig')->first();
-    if ($subjectSetting) {
-      $subjectSetting->value = $template['subject'];
-      $subjectSetting->save();
-    }
+    Setting::updateOrCreate(
+      ['key' => 'email_subject_' . $template['id'] . '.twig'],
+      ['value' => $template['subject'], 'group' => 'system.emails.subjects']
+    );
     if (!file_exists(dirname($template_file_path))) {
       mkdir(dirname($template_file_path), 0755, true);
     }
     $date = date('Y-m-d H:i:s');
+
+    // Conditionally build block strings - only include if they exist in the template
+    $actionUrlBlock = isset($template['variables']['action_url'])
+      ? "{% block action_url %}{$template['variables']['action_url']}{% endblock %}"
+      : '';
+    $actionTextBlock = isset($template['variables']['action_text'])
+      ? "{% block action_text %}{$template['variables']['action_text']}{% endblock %}"
+      : '';
+
     $template_twig = <<<TWIG
       {% extends 'emails/layout' %}
       {% block header %}{$template['variables']['header']}{% endblock %}
       {% block content %}{$template['variables']['content']}{% endblock %}
-      {% block action_url %}{$template['variables']['action_url']}{% endblock %}
-      {% block action_text %}{$template['variables']['action_text']}{% endblock %}
+      {$actionUrlBlock}
+      {$actionTextBlock}
       {# file generated at {$date} #}
     TWIG;
 
