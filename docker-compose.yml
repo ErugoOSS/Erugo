@@ -1,32 +1,27 @@
 services:
-    laravel.test:
+    app:
         build:
-            context: './docker/8.3'
+            context: './docker/dev'
             dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.4/app'
+        image: 'erugo-dev/app'
         ports:
             - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
-            - '${TUSD_PORT:-1080}:1080'
+            - '${VITE_PORT:-5173}:5173'
         environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            SUPERVISOR_PHP_USER: 'erugo'
         volumes:
             - '.:/var/www/html'
+            # Use named volumes for platform-specific dependencies
+            # This prevents macOS node_modules from conflicting with Linux
+            - node_modules:/var/www/html/node_modules
+            - vendor:/var/www/html/vendor
         networks:
-            - sail
+            - erugo
 networks:
-    sail:
+    erugo:
         driver: bridge
 volumes:
-    sail-mysql:
+    node_modules:
         driver: local
-    sail-redis:
-        driver: local
-    sail-meilisearch:
+    vendor:
         driver: local

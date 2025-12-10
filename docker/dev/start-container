@@ -1,0 +1,196 @@
+#!/bin/sh
+
+echo "Erugo Development is starting..."
+echo "================================================"
+
+cat << 'EOF'
+██████████████    ████████  █████████████    █████ █████████████  █████████  
+   ███        ████ █████████████████████████    ████████████████████████████████
+    ████      █████████    ██████████  █████    █████████     █████████     ████
+     ████     ██████████████████████   █████    █████████     ████████      ████
+   ████   ██  █████████        █████   █████    █████████     █████████     ████
+ ████   ██████████ █████████████████    ████████████████████████████████████████
+███   ████  █████   ██████████ █████    █████████████ █████████████ ██████████  
+████████                                                       ████              
+ ██████                                              █████████████              
+                                                      ██████████                
+
+█████████████████████████████████████████████████████████████████████████████████
+EOF
+
+echo "https://erugo.app"
+echo "================================================"
+echo "[DEVELOPMENT MODE]"
+echo "================================================"
+
+export APP_URL=/
+export ASSET_URL=/
+
+# Ensure storage directories exist (for mounted volumes)
+echo "Ensuring storage directories exist..."
+mkdir -p /var/www/html/storage/app/private
+mkdir -p /var/www/html/storage/app/public/images
+mkdir -p /var/www/html/storage/app/uploads
+mkdir -p /var/www/html/storage/app/backgrounds/cache/thumbs
+mkdir -p /var/www/html/storage/framework/cache
+mkdir -p /var/www/html/storage/framework/sessions
+mkdir -p /var/www/html/storage/framework/views
+mkdir -p /var/www/html/storage/logs
+
+# Set correct permissions on storage directory
+echo "Setting storage permissions..."
+chown -R erugo:erugo /var/www/html/storage
+
+# Make sure php-fpm run directory exists and has correct permissions
+mkdir -p /run/php
+chown -R erugo:erugo /run/php
+
+# Make sure public directory has correct permissions
+chown -R erugo:erugo /var/www/html/public
+
+# Fix ownership on named volumes (they start as root-owned)
+echo "Fixing volume permissions..."
+chown -R erugo:erugo /var/www/html/node_modules 2>/dev/null || true
+chown -R erugo:erugo /var/www/html/vendor 2>/dev/null || true
+
+# Install composer dependencies if vendor directory is missing or empty
+if [ ! -d /var/www/html/vendor ] || [ ! -f /var/www/html/vendor/autoload.php ]; then
+    echo "Installing composer dependencies..."
+    if ! su-exec erugo composer install --no-interaction; then
+        echo "ERROR: Composer install failed!"
+        exit 1
+    fi
+fi
+
+# Install npm dependencies if node_modules is missing, empty, or has wrong platform binaries
+NEED_NPM_INSTALL=false
+
+if [ ! -d /var/www/html/node_modules ] || [ -z "$(ls -A /var/www/html/node_modules 2>/dev/null)" ]; then
+    NEED_NPM_INSTALL=true
+    echo "node_modules missing or empty, will install..."
+elif [ ! -d /var/www/html/node_modules/@rollup/rollup-linux-arm64-musl ] && [ ! -d /var/www/html/node_modules/@rollup/rollup-linux-x64-musl ]; then
+    # node_modules exists but was installed on a different platform (e.g., macOS)
+    echo "node_modules was installed on a different platform, reinstalling for Alpine Linux..."
+    rm -rf /var/www/html/node_modules
+    NEED_NPM_INSTALL=true
+fi
+
+if [ "$NEED_NPM_INSTALL" = true ]; then
+    echo "Installing npm dependencies..."
+    if ! su-exec erugo npm install; then
+        echo "ERROR: npm install failed!"
+        exit 1
+    fi
+fi
+
+# if the app.key file exists in storage, load its contents into the environment as APP_KEY, otherwise check .env
+if [ -f /var/www/html/storage/app.key ]; then
+    echo "App key already exists in storage, loading..."
+    export APP_KEY=$(cat /var/www/html/storage/app.key)
+elif [ -f /var/www/html/.env ]; then
+    # Try to get APP_KEY from .env
+    APP_KEY_FROM_ENV=$(grep "^APP_KEY=" /var/www/html/.env | cut -d'=' -f2-)
+    if [ -n "$APP_KEY_FROM_ENV" ]; then
+        echo "App key found in .env, using it..."
+        export APP_KEY="$APP_KEY_FROM_ENV"
+    else
+        # Generate a new key
+        echo "Generating app key..."
+        su-exec erugo php artisan key:generate --force --show >/var/www/html/storage/app.key
+        echo "App key generated, loading..."
+        export APP_KEY=$(cat /var/www/html/storage/app.key)
+    fi
+else
+    # Generate a new key
+    echo "Generating app key..."
+    su-exec erugo php artisan key:generate --force --show >/var/www/html/storage/app.key
+    echo "App key generated, loading..."
+    export APP_KEY=$(cat /var/www/html/storage/app.key)
+fi
+
+# if the jwt.secret file exists, load its contents into the environment as JWT_SECRET, otherwise generate a new one
+if [ -f /var/www/html/storage/jwt.secret ]; then
+    echo "JWT secret already exists, loading..."
+    export JWT_SECRET=$(cat /var/www/html/storage/jwt.secret)
+elif [ -f /var/www/html/.env ]; then
+    # Try to get JWT_SECRET from .env
+    JWT_SECRET_FROM_ENV=$(grep "^JWT_SECRET=" /var/www/html/.env | cut -d'=' -f2-)
+    if [ -n "$JWT_SECRET_FROM_ENV" ]; then
+        echo "JWT secret found in .env, using it..."
+        export JWT_SECRET="$JWT_SECRET_FROM_ENV"
+    else
+        echo "Generating JWT secret..."
+        su-exec erugo php -r "echo base64_encode(random_bytes(32));" >/var/www/html/storage/jwt.secret
+        echo "JWT secret generated, loading..."
+        export JWT_SECRET=$(cat /var/www/html/storage/jwt.secret)
+    fi
+else
+    echo "Generating JWT secret..."
+    su-exec erugo php -r "echo base64_encode(random_bytes(32));" >/var/www/html/storage/jwt.secret
+    echo "JWT secret generated, loading..."
+    export JWT_SECRET=$(cat /var/www/html/storage/jwt.secret)
+fi
+
+# does an environment variable DB_CONNECTION exist?
+if [ -z "$DB_CONNECTION" ]; then
+    echo "DB_CONNECTION environment variable not set, setting to sqlite..."
+    export DB_CONNECTION=sqlite
+    export DB_DATABASE=./storage/app/private/database.sqlite
+fi
+
+# Create an environment file for cron jobs
+echo "Creating environment file for cron jobs..."
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env.runtime
+
+# Create a temporary crontab file
+echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab
+
+# Prevent crontab from complaining about the cache directory
+mkdir -p /root/.cache/crontab
+
+# Install the crontab for the erugo user
+crontab -u erugo /tmp/erugo-crontab
+
+# Clean up
+rm /tmp/erugo-crontab
+
+# Always run migrations
+echo "Running migrations..."
+su-exec erugo php artisan migrate --force
+
+echo "Running seeds..."
+su-exec erugo php artisan db:seed --force
+
+echo "Clearing templates cache..."
+su-exec erugo php artisan view:clear
+
+echo "Clearing config cache..."
+su-exec erugo php artisan config:clear
+
+echo "Clearing route cache..."
+su-exec erugo php artisan route:clear
+
+echo "Clearing compiled classes..."
+su-exec erugo php artisan clear-compiled
+
+# Create symlinks for public assets (images, backgrounds) pointing to storage
+echo "Creating storage symlinks..."
+# Remove any existing symlinks or directories that conflict
+rm -rf /var/www/html/public/storage 2>/dev/null || true
+rm -rf /var/www/html/public/backgrounds 2>/dev/null || true
+rm -rf /var/www/html/public/images 2>/dev/null || true
+
+# Create relative symlinks (works consistently in Docker and development)
+cd /var/www/html/public
+ln -s ../storage/app/public storage
+ln -s ../storage/app/backgrounds backgrounds
+ln -s ../storage/app/public/images images
+cd /var/www/html
+
+# Ensure correct ownership of symlinked directories
+chown -R erugo:erugo /var/www/html/storage/app/public
+chown -R erugo:erugo /var/www/html/storage/app/backgrounds
+
+echo "Starting services..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+

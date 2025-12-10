@@ -1,0 +1,111 @@
+# Development Caddyfile for Laravel with Vite HMR support
+:80 {
+    root * /var/www/html/public
+
+    # Allow large file uploads (500MB)
+    request_body {
+        max_size 500MB
+    }
+
+    # Enable Gzip compression
+    encode gzip
+    
+    # Simplified logging
+    log {
+        output file /var/www/html/storage/logs/caddy.log
+        format json
+    }
+    
+    # Provide security headers
+    header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-XSS-Protection "1; mode=block"
+        
+        # Remove server header
+        -Server
+    }
+
+    # Cache static build assets (Vite-generated with hashes in filenames)
+    @build_assets {
+        path /build/*
+    }
+    header @build_assets Cache-Control "public, max-age=31536000, immutable"
+
+    # Cache other static assets with shorter duration (user-uploadable content)
+    @static {
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.mp4 *.webm *.webp
+        not path /build/*
+        not path /images/*
+        not path /backgrounds/*
+        not path /storage/*
+    }
+    header @static Cache-Control "public, max-age=86400"
+
+    # User-uploadable assets (logos, backgrounds) - short cache, allow revalidation
+    @user_assets {
+        path /images/* /backgrounds/* /storage/*
+    }
+    header @user_assets Cache-Control "public, max-age=300, must-revalidate"
+
+    # Proxy Vite dev server for HMR
+    @vite {
+        path /@vite/* /@fs/* /@id/* /node_modules/* /__vite_ping /resources/*
+    }
+    handle @vite {
+        reverse_proxy localhost:5173 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    # Vite HMR websocket
+    @vite_ws {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    handle @vite_ws {
+        reverse_proxy localhost:5173
+    }
+
+    # Proxy tusd uploads - must be handled before Laravel catches it
+    handle /files/* {
+        # CORS headers for tus uploads
+        header {
+            Access-Control-Allow-Origin *
+            Access-Control-Allow-Methods "POST, GET, OPTIONS, PATCH, DELETE, HEAD"
+            Access-Control-Allow-Headers "Authorization, Content-Type, Upload-Length, Upload-Offset, Tus-Resumable, Upload-Metadata, Upload-Defer-Length, Upload-Concat, Upload-Incomplete, Upload-Draft-Interop-Version, X-Requested-With, X-Request-ID, X-HTTP-Method-Override"
+            Access-Control-Expose-Headers "Upload-Offset, Location, Upload-Length, Tus-Version, Tus-Resumable, Tus-Max-Size, Tus-Extension, Upload-Metadata, Upload-Defer-Length, Upload-Concat, Upload-Incomplete, Upload-Draft-Interop-Version"
+            Access-Control-Max-Age "86400"
+        }
+        
+        # Handle preflight OPTIONS requests
+        @options method OPTIONS
+        handle @options {
+            respond 204
+        }
+        
+        reverse_proxy localhost:8080 {
+            header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {header.X-Forwarded-Host}
+        }
+    }
+
+    # Handle everything else with Laravel
+    handle {
+        # Handle static files first
+        file_server {
+            index index.php
+        }
+        
+        # Handle Laravel's front controller pattern
+        try_files {path} {path}/ /index.php?{query}
+        
+        # Enable PHP processing
+        php_fastcgi unix//run/php/php-fpm.sock
+    }
+}
+
