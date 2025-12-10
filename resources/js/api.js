@@ -1058,8 +1058,20 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
       // Check for previous uploads to resume
       upload.findPreviousUploads().then(async (previousUploads) => {
         console.log('[uploadFileWithTus] Found previous uploads:', previousUploads.length, previousUploads.map(u => u.uploadUrl))
-        if (previousUploads.length > 0) {
-          const previousUpload = previousUploads[0]
+        
+        // Filter out uploads with mismatched protocol (e.g., http:// when we're on https://)
+        const currentProtocol = window.location.protocol
+        const validPreviousUploads = previousUploads.filter(u => {
+          const uploadProtocol = new URL(u.uploadUrl).protocol
+          if (uploadProtocol !== currentProtocol) {
+            console.log('[uploadFileWithTus] Skipping previous upload with mismatched protocol:', u.uploadUrl, '(current:', currentProtocol, ')')
+            return false
+          }
+          return true
+        })
+        
+        if (validPreviousUploads.length > 0) {
+          const previousUpload = validPreviousUploads[0]
           console.log('[uploadFileWithTus] Attempting to resume from:', previousUpload.uploadUrl)
           // Extract upload ID from the previous upload URL
           const previousUploadId = previousUpload.uploadUrl.split('/').pop()

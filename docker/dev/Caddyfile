@@ -89,8 +89,9 @@
         }
         
         reverse_proxy localhost:8080 {
-            header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {header.X-Forwarded-Host}
+            # Pass through existing forwarded headers, or set defaults
+            header_up X-Forwarded-Proto {header.X-Forwarded-Proto:http}
+            header_up X-Forwarded-Host {header.X-Forwarded-Host:{host}}
         }
     }
 
