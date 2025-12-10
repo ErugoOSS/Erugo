@@ -54,11 +54,8 @@
     # Proxy tusd uploads - must be handled before Laravel catches it
     handle /files/* {
         reverse_proxy localhost:8080 {
-            # Pass through existing forwarded headers, or set defaults
-            # X-Forwarded-Proto: use incoming header if present, otherwise default to https
-            # (assumes production is always behind HTTPS-terminating proxy)
-            header_up X-Forwarded-Proto {header.X-Forwarded-Proto:https}
-            header_up X-Forwarded-Host {header.X-Forwarded-Host:{host}}
+            header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {header.X-Forwarded-Host}
         }
     }
 
