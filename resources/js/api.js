@@ -1012,8 +1012,10 @@ const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
  */
 export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
   const startUpload = (skipResume = false) => {
+    const tusdEndpoint = getTusdUrl()
+    console.log('[uploadFileWithTus] Creating tus.Upload with endpoint:', tusdEndpoint)
     const upload = new tus.Upload(file, {
-      endpoint: getTusdUrl(),
+      endpoint: tusdEndpoint,
       retryDelays: [0, 1000, 3000, 5000],
       chunkSize: 20 * 1024 * 1024, // 20MB chunks
       metadata: {
@@ -1055,8 +1057,10 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
     } else {
       // Check for previous uploads to resume
       upload.findPreviousUploads().then(async (previousUploads) => {
+        console.log('[uploadFileWithTus] Found previous uploads:', previousUploads.length, previousUploads.map(u => u.uploadUrl))
         if (previousUploads.length > 0) {
           const previousUpload = previousUploads[0]
+          console.log('[uploadFileWithTus] Attempting to resume from:', previousUpload.uploadUrl)
           // Extract upload ID from the previous upload URL
           const previousUploadId = previousUpload.uploadUrl.split('/').pop()
 
@@ -1072,11 +1076,11 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
 
             if (response.ok) {
               // Upload session exists in our backend, safe to resume
-              console.log('Resuming previous upload:', previousUploadId)
+              console.log('[uploadFileWithTus] Resuming previous upload:', previousUploadId, 'URL:', previousUpload.uploadUrl)
               upload.resumeFromPreviousUpload(previousUpload)
             } else {
               // Upload session doesn't exist (file was already shared), start fresh
-              console.log('Previous upload no longer valid, starting fresh')
+              console.log('[uploadFileWithTus] Previous upload no longer valid, starting fresh with endpoint:', tusdEndpoint)
               // Clear the stale fingerprint from localStorage
               clearTusFingerprint(previousUpload.uploadUrl)
             }
