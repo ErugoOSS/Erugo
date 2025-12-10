@@ -56,7 +56,8 @@ const getApiUrl = () => {
 
 const getTusdUrl = () => {
   // tusd is proxied through Caddy at /files/ in both dev and prod
-  return `${window.location.origin}/files/`
+  // Build URL explicitly from protocol and host to ensure HTTPS is respected
+  return `${window.location.protocol}//${window.location.host}/files/`
 }
 
 const niceFileName = name => {
