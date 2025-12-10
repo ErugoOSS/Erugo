@@ -13,10 +13,9 @@ import ThankGuestForUpload from './components/thankGuestForUpload.vue'
 import ReverseInvite from './components/reverseInvite.vue'
 import Background from './components/layout/background.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
-import MarkdownModal from './components/MarkdownModal.vue'
 
 //3rd party
-import { LogOut, Settings as SettingsIcon, MailPlus, AlertTriangle } from 'lucide-vue-next'
+import { LogOut, Settings as SettingsIcon, MailPlus } from 'lucide-vue-next'
 import { TolgeeProvider } from '@tolgee/vue'
 import { useToast } from 'vue-toastification'
 import { useTranslate } from '@tolgee/vue'
@@ -38,7 +37,6 @@ const allowReverseShares = ref(false)
 const logoWidth = ref(0)
 const showPoweredBy = ref(false)
 const setupNeeded = ref(false)
-const tusdAvailable = ref(true)
 
 //reactive data
 const auth = ref(null)
@@ -46,7 +44,6 @@ const downloadShareCode = ref('')
 const settingsPanel = ref(null)
 const toast = useToast()
 const reverseInvite = ref(null)
-const tusdHelpModal = ref(null)
 
 onMounted(() => {
 
@@ -54,8 +51,6 @@ onMounted(() => {
   logoWidth.value = domData().logo_width
   showPoweredBy.value = domData().show_powered_by
   setupNeeded.value = domData().setup_needed
-  tusdAvailable.value = domData().tusd_available !== false
-
 
   if (domError().length > 0) {
     console.log('error', domError())
@@ -209,19 +204,6 @@ watch(
 
 <template>
   <TolgeeProvider>
-    <!-- tusd unavailable warning: shows if tusd service is not running and user is logged in -->
-    <div class="tusd-warning" v-if="!tusdAvailable && store.isLoggedIn()">
-      <AlertTriangle class="tusd-warning-icon" />
-      <span>{{ $t('warnings.tusd_unavailable', 'Upload service unavailable. The tusd service is not running. File uploads will not work until this is resolved.') }}</span>
-      <a href="#" class="tusd-warning-link" @click.prevent="tusdHelpModal.open()">{{ $t('warnings.how_to_fix', 'How to fix') }}</a>
-    </div>
-    
-    <!-- tusd help modal -->
-    <MarkdownModal 
-      ref="tusdHelpModal" 
-      topic="tusd-unavailable" 
-      :title="$t('warnings.tusd_help_title', 'Upload Service Unavailable')" 
-    />
     <Background />
     <LanguageSelector />
     <div class="logo-container" v-if="store.mode !== 'setup'">
@@ -293,41 +275,5 @@ watch(
   height: 20px;
   margin-top: -5px;
   margin-left: -5px;
-}
-
-.tusd-warning {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background-color: #dc2626;
-  color: white;
-  font-weight: 500;
-  font-size: 14px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.tusd-warning-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.tusd-warning-link {
-  color: white;
-  text-decoration: underline;
-  font-weight: 600;
-  margin-left: 5px;
-  
-  &:hover {
-    opacity: 0.9;
-  }
 }
 </style>

@@ -6,17 +6,3 @@ services:
       - /Users/dean/erugo-storage/storage:/var/www/html/storage
     ports:
       - "9998:80"
-    networks:
-      - erugo
-  tusd:
-    image: tusproject/tusd:latest
-    restart: unless-stopped
-    command: -hooks-http http://app/api/tusd-hooks -upload-dir /data -base-path /files/ -behind-proxy
-    volumes:
-      - /Users/dean/erugo-storage/storage/app/uploads:/data
-    networks:
-      - erugo
-
-networks:
-  erugo:
-    driver: bridge

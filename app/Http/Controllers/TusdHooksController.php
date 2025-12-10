@@ -16,18 +16,19 @@ class TusdHooksController extends Controller
      * Handle incoming tusd hook requests
      * tusd sends different hook types: pre-create, post-create, post-receive, post-finish, post-terminate
      * 
-     * Security: This endpoint should only be called by the tusd container.
-     * We validate the request comes from internal Docker network IPs.
+     * Security: This endpoint should only be called by the tusd process.
+     * We validate the request comes from localhost or internal Docker network IPs.
      */
     public function handleHook(Request $request)
     {
-        // Security: Verify request is from internal network (tusd container)
+        // Security: Verify request is from internal network (tusd process)
         $clientIp = $request->ip();
         $allowedNetworks = [
             '172.', // Docker bridge networks
             '10.',  // Private network
             '192.168.', // Private network
-            '127.0.0.1', // Localhost
+            '127.0.0.1', // Localhost IPv4
+            '::1', // Localhost IPv6
         ];
         
         $isAllowed = false;

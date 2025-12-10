@@ -1,83 +1,66 @@
 # Upload Service (tusd) Not Available
 
-Erugo uses **tusd** for handling file uploads. This service runs as a separate container and must be included in your Docker Compose configuration.
+Erugo uses **tusd** for handling file uploads. This service runs inside the main Erugo container and should start automatically.
 
 ## Why am I seeing this?
 
-The Erugo application cannot connect to the tusd service. This usually means:
+The Erugo application cannot connect to the tusd upload service. This usually means:
 
-- The tusd service is not defined in your `docker-compose.yml`
-- The tusd container failed to start
-- There's a network connectivity issue between containers
+- The tusd process failed to start within the container
+- There's an issue with the container startup
 
 ## How to fix
 
-### 1. Check your docker-compose.yml
+### 1. Restart the container
 
-Make sure your `docker-compose.yml` includes the tusd service. It should look something like this:
+Try restarting the Erugo container:
 
-```yaml
-services:
-  app:
-    image: wardy784/erugo:latest-rc
-    restart: unless-stopped
-    volumes:
-      - ./erugo-storage:/var/www/html/storage
-    ports:
-      - "9994:80"
-    networks:
-      - erugo
-
-
-  tusd:
-    image: tusproject/tusd:latest
-    restart: unless-stopped
-    command: -hooks-http http://app/api/tusd-hooks -upload-dir /data/app/uploads -base-path /files/ -behind-proxy
-    user: "1000:1000"
-    volumes:
-      - ./erugo-storage:/data
-    networks:
-      - erugo
-
-networks:
-  erugo:
-    driver: bridge
+```bash
+docker compose restart
 ```
 
-**Important:** The tusd `volumes` path must point to the same host directory that Erugo uses (`./erugo-storage` in this example).
-
-### 2. Restart your containers
-
-After updating your `docker-compose.yml`, restart your containers:
+Or do a full restart:
 
 ```bash
 docker compose down
 docker compose up -d
 ```
 
-### 3. Check tusd is running
+### 2. Check container logs
 
-Verify the tusd container is running:
+Check the container logs for any tusd-related errors:
+
+```bash
+docker compose logs app
+```
+
+Look for lines mentioning "tusd" to identify any startup issues.
+
+### 3. Check container health
+
+Verify the container is running properly:
 
 ```bash
 docker compose ps
 ```
 
-You should see both `app` and `tusd` containers with status "Up".
+The container should show status "Up" and be healthy.
 
-### 4. Check for errors
+### 4. Check storage permissions
 
-If tusd isn't starting, check its logs:
+Ensure the storage directory has correct permissions:
 
 ```bash
-docker compose logs tusd
+# Check that the uploads directory exists and is writable
+docker compose exec app ls -la /var/www/html/storage/app/uploads
 ```
+
+If the directory doesn't exist or has wrong permissions, the tusd service may fail to start.
 
 ## Still having issues?
 
-- Make sure both containers are on the same Docker network
-- Ensure the volumes path exists and has correct permissions
-- Check that port 8080 isn't being blocked within the Docker network
+- Ensure you're using a recent version of the Erugo image
+- Check that your storage volume is mounted correctly
+- Verify there's enough disk space available
 
 For more help, visit the [Erugo documentation](https://erugo.app/docs) or open an issue on [GitHub](https://github.com/ErugoOSS/Erugo).
-

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
 use App\Models\User;
 use App\Mail\shareDownloadedMail;
@@ -10,21 +9,6 @@ use App\Models\Share;
 use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
 use App\Services\SettingsService;
-
-/**
- * Check if the tusd upload service is available
- * Attempts to connect to tusd on the internal Docker network
- */
-function checkTusdAvailable()
-{
-    try {
-        $response = Http::timeout(2)->head('http://tusd:8080/files/');
-        // tusd returns various status codes, but if we get any response it's running
-        return true;
-    } catch (\Exception $e) {
-        return false;
-    }
-}
 
 function getSettings()
 {
@@ -60,9 +44,6 @@ function getSettings()
     //grab the app url from env
     $appURL = env('APP_URL');
     $indexedSettings['api_url'] = $appURL;
-
-    // Check if tusd upload service is available
-    $indexedSettings['tusd_available'] = checkTusdAvailable();
 
     return $indexedSettings;
 }

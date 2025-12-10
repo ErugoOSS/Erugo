@@ -53,7 +53,7 @@
 
     # Proxy tusd uploads - must be handled before Laravel catches it
     handle /files/* {
-        reverse_proxy tusd:8080 {
+        reverse_proxy localhost:8080 {
             header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {header.X-Forwarded-Host}
         }

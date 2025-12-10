@@ -9,6 +9,7 @@ services:
         ports:
             - '${APP_PORT:-80}:80'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '${TUSD_PORT:-1080}:1080'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -19,17 +20,6 @@ services:
             - '.:/var/www/html'
         networks:
             - sail
-    tusd:
-        image: tusproject/tusd:latest
-        command: -hooks-http http://laravel.test/api/tusd-hooks -upload-dir /data -base-path /files/
-        volumes:
-            - './storage/app/uploads:/data'
-        ports:
-            - '${TUSD_PORT:-1080}:8080'
-        networks:
-            - sail
-        depends_on:
-            - laravel.test
 networks:
     sail:
         driver: bridge

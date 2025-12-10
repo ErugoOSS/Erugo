@@ -55,10 +55,11 @@ const getApiUrl = () => {
 }
 
 const getTusdUrl = () => {
-  // In development, tusd runs on port 1080 directly
+  // tusd runs inside the main container
+  // In development, tusd is exposed on port 1080
   // In production, tusd is proxied through Caddy at /files/
   if (import.meta.env.DEV) {
-    // Development: use tusd directly on port 1080
+    // Development: tusd is exposed on port 1080
     return `${window.location.protocol}//${window.location.hostname}:1080/files/`
   }
   // Production: use the /files/ path which is proxied to tusd

@@ -4,6 +4,8 @@ LABEL maintainer="Dean Ward"
 
 ARG WWWGROUP
 ARG NODE_VERSION=22
+# Multi-arch support - TARGETARCH is automatically set by Docker buildx
+ARG TARGETARCH
 
 WORKDIR /var/www/html
 
@@ -44,6 +46,18 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Download and install tusd for the correct architecture
+ENV TUSD_VERSION=2.6.0
+RUN TUSD_ARCH="${TARGETARCH}" && \
+    if [ "$TUSD_ARCH" = "amd64" ]; then TUSD_ARCH="amd64"; \
+    elif [ "$TUSD_ARCH" = "arm64" ]; then TUSD_ARCH="arm64"; \
+    else echo "Unsupported architecture: $TARGETARCH" && exit 1; fi && \
+    curl -L -o /tmp/tusd.tar.gz "https://github.com/tus/tusd/releases/download/v${TUSD_VERSION}/tusd_linux_${TUSD_ARCH}.tar.gz" && \
+    tar -xzf /tmp/tusd.tar.gz -C /tmp && \
+    mv /tmp/tusd_linux_${TUSD_ARCH}/tusd /usr/local/bin/tusd && \
+    chmod +x /usr/local/bin/tusd && \
+    rm -rf /tmp/tusd.tar.gz /tmp/tusd_linux_${TUSD_ARCH}
 
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 
