@@ -24,6 +24,13 @@ class DatabaseSeeder extends Seeder
         //run the query, ignore errors
         DB::unprepared($sql);
 
+        // Repair: Fix databases where multiple themes are active (caused by themes.sql bug)
+        // If Erugo 2026 is active alongside another theme, deactivate Erugo 2026
+        $activeThemes = Theme::where('active', true)->get();
+        if ($activeThemes->count() > 1 && $activeThemes->contains('name', 'Erugo 2026')) {
+            Theme::where('name', 'Erugo 2026')->update(['active' => false]);
+        }
+
         // Set default theme for fresh installs only
         // If no theme is currently active, set Erugo 2026 as the default
         if (!Theme::where('active', true)->exists()) {
