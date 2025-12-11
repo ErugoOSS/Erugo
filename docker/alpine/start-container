@@ -47,6 +47,14 @@ else
     if [ ! -f /var/www/html/storage/app/public/images/logo.png ]; then
         cp /var/www/html/storage_skell/app/public/images/logo.png /var/www/html/storage/app/public/images/
     fi
+    
+    # Copy default background files if they don't exist (for upgrades)
+    if [ ! -f /var/www/html/storage/app/public/images/_default-background.jpg ]; then
+        cp /var/www/html/storage_skell/app/public/images/_default-background.jpg /var/www/html/storage/app/public/images/
+    fi
+    if [ ! -f /var/www/html/storage/app/public/images/default-background.jpg ]; then
+        cp /var/www/html/storage_skell/app/public/images/default-background.jpg /var/www/html/storage/app/public/images/
+    fi
 fi
 
 # Always ensure correct permissions on storage directory
