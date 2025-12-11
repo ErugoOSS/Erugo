@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Utils\FileHelper;
+use App\Services\SettingsService;
 class SettingsController extends Controller
 {
     public function write(Request $request)
@@ -50,6 +51,9 @@ class SettingsController extends Controller
                 'errors' => $errors,
             ], 422);
         }
+
+        // Clear settings cache after successful save
+        app(SettingsService::class)->clearCache();
 
         return response()->json([
             'status' => 'success',
@@ -182,6 +186,9 @@ class SettingsController extends Controller
                 $logoSetting->previous_value = $logoSetting->value;
                 $logoSetting->value = 'erugo-logo.png';
                 $logoSetting->save();
+                
+                // Clear settings cache after modifying setting
+                app(SettingsService::class)->clearCache();
             }
 
             return response()->json([

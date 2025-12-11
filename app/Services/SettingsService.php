@@ -3,16 +3,37 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 
 class SettingsService
 {
+  private const CACHE_KEY = 'settings_all';
+
+  /**
+   * Get all settings from cache, or load from database if not cached.
+   */
+  protected function getAllCached(): array
+  {
+    return Cache::rememberForever(self::CACHE_KEY, function () {
+      return Setting::pluck('value', 'key')->toArray();
+    });
+  }
+
+  /**
+   * Clear the settings cache. Call this after settings are modified.
+   */
+  public function clearCache(): void
+  {
+    Cache::forget(self::CACHE_KEY);
+  }
+
   public function get($key)
   {
-    $setting = Setting::where('key', $key)->first();
-    if (!$setting) {
+    $settings = $this->getAllCached();
+    if (!array_key_exists($key, $settings)) {
       return null;
     }
-    return $this->convertToCorrectType($setting->value);
+    return $this->convertToCorrectType($settings[$key]);
   }
 
   public function convertToCorrectType($value)
@@ -48,7 +69,8 @@ class SettingsService
 
   public function getMany($keys)
   {
-    return Setting::whereIn('key', $keys)->pluck('value', 'key')->toArray();
+    $settings = $this->getAllCached();
+    return array_intersect_key($settings, array_flip($keys));
   }
 
   public function getGlobalViewData()
