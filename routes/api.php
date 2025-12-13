@@ -18,6 +18,7 @@ use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
+use App\Http\Controllers\BackupsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -164,6 +165,13 @@ Route::group([], function ($router) {
         Route::put('/', [EmailTemplatesController::class, 'update'])->name('email-templates.update');
     });
 
+    //manage database backups [auth, admin]
+    Route::group(['prefix' => 'backups', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/', [BackupsController::class, 'index'])->name('backups.index');
+        Route::post('/', [BackupsController::class, 'create'])->name('backups.create');
+        Route::get('/{filename}/download', [BackupsController::class, 'download'])->name('backups.download');
+        Route::delete('/{filename}', [BackupsController::class, 'delete'])->name('backups.delete');
+    });
 
     //manage reverse shares [auth]
     Route::group(['prefix' => 'reverse-shares', 'middleware' => ['auth']], function ($router) {

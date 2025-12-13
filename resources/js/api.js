@@ -1008,6 +1008,70 @@ export const updateEmailTemplates = async (templates) => {
   return data.data
 }
 
+// Database Backup Methods
+export const getBackups = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/backups`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const createBackup = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/backups`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const downloadBackup = async (filename) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/backups/${encodeURIComponent(filename)}/download`, {
+    method: 'GET'
+  })
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.message)
+  }
+  // Return the response blob for download
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  window.URL.revokeObjectURL(url)
+  document.body.removeChild(a)
+  return true
+}
+
+export const deleteBackup = async (filename) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/backups/${encodeURIComponent(filename)}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 // Private functions
 const buildAuthSuccessData = (data) => {
   const decoded = jwtDecode(data.data.access_token)

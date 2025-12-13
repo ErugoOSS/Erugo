@@ -287,6 +287,12 @@
       "auth_providers": "Fournisseurs d'authentification",
       "auth_providers_description": "Configurez les fournisseurs d'authentification par lesquels vous souhaitez que vos utilisateurs puissent s'authentifier.",
       "auth_providers_description_localhost": "La configuration de l'authentification externe n'est pas disponible sur localhost. Les fournisseurs OAuth ont besoin d'un nom de domaine entièrement qualifié (FQDN) pour fonctionner correctement. Veuillez accéder à Erugo via un domaine enregistré pour configurer ces paramètres.",
+      "backups": {
+        "actions": "Actions",
+        "created_at": "Créé",
+        "delete": "Supprimer",
+        "download": "Télécharger"
+      },
       "callback_url": "URL de rappel",
       "callback_url_description": "Utilisez l'URL de rappel fournie dans la configuration de votre fournisseur d'identité.",
       "chunked": "Morceaux",

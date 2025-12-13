@@ -14,7 +14,10 @@ import {
   EyeOff,
   Plus,
   Trash,
-  ExternalLink
+  ExternalLink,
+  Database,
+  Download,
+  Loader2
 } from 'lucide-vue-next'
 import {
   getSettingsByGroup,
@@ -23,13 +26,18 @@ import {
   bulkUpdateAuthProviders,
   getAvailableProviderTypes,
   deleteAuthProvider,
-  getCallbackUrl
+  getCallbackUrl,
+  getBackups,
+  createBackup,
+  downloadBackup,
+  deleteBackup
 } from '../../api'
 import HelpTip from '../helpTip.vue'
 
 import { useToast } from 'vue-toastification'
 import { mapSettings } from '../../utils'
 import { notifySettingsChanged } from '../../composables/useSetting'
+import { useConfirmDialog } from '../../composables/useConfirmDialog'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -40,6 +48,7 @@ const activateNewProviderForm = ref(false)
 const newProviderType = ref(null)
 const availableProviderTypes = ref([])
 const toast = useToast()
+const confirmDialog = useConfirmDialog()
 const onLocalhost = ref(false)
 
 const settings = ref({
@@ -225,11 +234,19 @@ const settingsLoaded = ref(false)
 const saving = ref(false)
 const authProviders = ref([])
 
+// Backup state
+const backups = ref([])
+const backupsLoading = ref(false)
+const backupCreating = ref(false)
+const backupDownloading = ref(null)
+const backupDeleting = ref(null)
+
 const emit = defineEmits(['navItemClicked'])
 
 onMounted(async () => {
   await loadSettings()
   await loadAuthProviders()
+  await loadBackups()
   onLocalhost.value = window.location.hostname === 'localhost'
 })
 
@@ -258,6 +275,80 @@ const loadAuthProviders = async () => {
   } catch (error) {
     console.error(error)
   }
+}
+
+// Backup methods
+const loadBackups = async () => {
+  backupsLoading.value = true
+  try {
+    const data = await getBackups()
+    backups.value = data.backups || []
+  } catch (error) {
+    console.error('Failed to load backups:', error)
+    toast.error(t.value('settings.system.backups.load_failed'))
+  } finally {
+    backupsLoading.value = false
+  }
+}
+
+const handleCreateBackup = async () => {
+  backupCreating.value = true
+  try {
+    const data = await createBackup()
+    toast.success(t.value('settings.system.backups.create_success'))
+    await loadBackups()
+  } catch (error) {
+    console.error('Failed to create backup:', error)
+    toast.error(t.value('settings.system.backups.create_failed'))
+  } finally {
+    backupCreating.value = false
+  }
+}
+
+const handleDownloadBackup = async (filename) => {
+  backupDownloading.value = filename
+  try {
+    await downloadBackup(filename)
+    toast.success(t.value('settings.system.backups.download_success'))
+  } catch (error) {
+    console.error('Failed to download backup:', error)
+    toast.error(t.value('settings.system.backups.download_failed'))
+  } finally {
+    backupDownloading.value = null
+  }
+}
+
+const handleDeleteBackup = async (filename) => {
+  const confirmed = await confirmDialog.show({
+    title: t.value('settings.system.backups.delete'),
+    message: t.value('settings.system.backups.delete_confirmation'),
+    okText: t.value('settings.system.backups.delete'),
+    cancelText: t.value('settings.close')
+  })
+
+  if (!confirmed) {
+    return
+  }
+  
+  backupDeleting.value = filename
+  try {
+    await deleteBackup(filename)
+    toast.success(t.value('settings.system.backups.delete_success'))
+    await loadBackups()
+  } catch (error) {
+    console.error('Failed to delete backup:', error)
+    toast.error(t.value('settings.system.backups.delete_failed'))
+  } finally {
+    backupDeleting.value = null
+  }
+}
+
+const formatBackupDate = (dateString) => {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(date)
 }
 
 const saveAuthProviders = async () => {
@@ -435,6 +526,12 @@ const handleDeleteAuthProvider = async (id) => {
             <a href="#" @click.prevent="handleNavItemClicked('auth')">
               <Fingerprint />
               {{ $t('settings.system.auth') }}
+            </a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('backups')">
+              <Database />
+              {{ $t('settings.system.backups.title') }}
             </a>
           </li>
         </ul>
@@ -1071,6 +1168,102 @@ const handleDeleteAuthProvider = async (id) => {
             </div>
           </div>
         </div>
+
+        <div class="row mb-5">
+          <div class="col-12 col-md-6 pe-0 ps-0 ps-md-3">
+            <div class="setting-group" id="backups">
+              <div class="setting-group-header">
+                <h3>
+                  <Database />
+                  {{ $t('settings.system.backups.title') }}
+                </h3>
+              </div>
+
+              <div class="setting-group-body">
+                <div class="setting-group-body-item">
+                  <div class="backup-actions mb-3">
+                    <button 
+                      @click="handleCreateBackup" 
+                      :disabled="backupCreating"
+                      class="create-backup-button"
+                    >
+                      <Loader2 v-if="backupCreating" class="spinner" />
+                      <Plus v-else />
+                      {{ $t('settings.system.backups.create_backup') }}
+                    </button>
+                    <button 
+                      @click="loadBackups" 
+                      :disabled="backupsLoading"
+                      class="refresh-backups-button"
+                    >
+                      <Loader2 v-if="backupsLoading" class="spinner" />
+                      {{ $t('settings.system.backups.refresh') }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <div v-if="backupsLoading && backups.length === 0" class="backups-loading">
+                    <Loader2 class="spinner" />
+                    {{ $t('settings.system.backups.loading') }}
+                  </div>
+                  
+                  <div v-else-if="backups.length === 0" class="no-backups">
+                    <p>{{ $t('settings.system.backups.no_backups') }}</p>
+                  </div>
+                  
+                  <div v-else class="backups-list">
+                    <table class="backups-table">
+                      <thead>
+                        <tr>
+                          <!-- <th>{{ $t('settings.system.backups.filename') }}</th> -->
+                          <th>{{ $t('settings.system.backups.created_at') }}</th>
+                          <th>{{ $t('settings.system.backups.size') }}</th>
+                          <th>{{ $t('settings.system.backups.actions') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="backup in backups" :key="backup.filename">
+                          <!-- <td class="backup-filename">{{ backup.filename }}</td> -->
+                          <td>{{ formatBackupDate(backup.created_at) }}</td>
+                          <td>{{ backup.size_formatted }}</td>
+                          <td class="backup-actions-cell">
+                            <button 
+                              @click="handleDownloadBackup(backup.filename)"
+                              :disabled="backupDownloading === backup.filename"
+                              class="icon-only"
+                              :title="$t('settings.system.backups.download')"
+                            >
+                              <Loader2 v-if="backupDownloading === backup.filename" class="spinner" />
+                              <Download v-else />
+                            </button>
+                            <button 
+                              @click="handleDeleteBackup(backup.filename)"
+                              :disabled="backupDeleting === backup.filename"
+                              class="icon-only delete-button secondary"
+                              :title="$t('settings.system.backups.delete')"
+                            >
+                              <Loader2 v-if="backupDeleting === backup.filename" class="spinner" />
+                              <Trash v-else />
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-md-block col ps-0">
+            <div class="section-help">
+              <h6>{{ $t('settings.system.backups.title') }}</h6>
+              <p>{{ $t('settings.system.backups.description') }}</p>
+              <h6>{{ $t('settings.system.backups.auto_backup') }}</h6>
+              <p>{{ $t('settings.system.backups.auto_backup_description') }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1303,6 +1496,99 @@ const handleDeleteAuthProvider = async (id) => {
         margin-right: 8px;
       }
     }
+  }
+}
+
+// Backup styles
+.backup-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.backups-loading,
+.no-backups {
+  padding: 20px;
+  text-align: center;
+  color: var(--panel-text-color-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.backups-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--input-border-color);
+  }
+  
+  th {
+    font-weight: 600;
+    color: var(--panel-text-color);
+    background: var(--panel-section-background-color-alt);
+  }
+  
+  td {
+    color: var(--panel-text-color);
+  }
+  
+  .backup-filename {
+    font-family: monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+  
+  .backup-actions-cell {
+    white-space: nowrap;
+    width: 1px;
+    
+    button {
+      margin-right: 5px;
+      
+      &.delete-button:hover {
+        color: var(--color-danger);
+      }
+      
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
