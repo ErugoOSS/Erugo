@@ -13,6 +13,7 @@ import ThankGuestForUpload from './components/thankGuestForUpload.vue'
 import ReverseInvite from './components/reverseInvite.vue'
 import Background from './components/layout/background.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
+import CommandPalette from './components/CommandPalette.vue'
 
 //3rd party
 import { LogOut, Settings as SettingsIcon, MailPlus } from 'lucide-vue-next'
@@ -265,6 +266,9 @@ watch(
 
     <!-- confirmation dialog: available globally -->
     <ConfirmDialog />
+
+    <!-- command palette: available when logged in -->
+    <CommandPalette v-if="store.isLoggedIn()" />
   </TolgeeProvider>
 </template>
 

@@ -369,6 +369,17 @@
       "unlimited": "Onbeperkt"
     }
   },
+  "commandPalette": {
+    "category": {
+      "branding": "Branding",
+      "navigation": "Navigatie",
+      "system": "Systeeminstellingen"
+    },
+    "navigate": "navigeren",
+    "noResults": "Geen resultaten gevonden",
+    "placeholder": "Zoekinstellingen...",
+    "select": "om te kiezen"
+  },
   "confirm_delete_user": "Weet je zeker dat je deze gebruiker wilt verwijderen?",
   "download": {
     "files": "{value, plural, one {Dowload bestand} other {Download {value} bestanden}}"

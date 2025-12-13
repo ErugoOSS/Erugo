@@ -369,6 +369,17 @@
       "unlimited": "Illimitato"
     }
   },
+  "commandPalette": {
+    "category": {
+      "branding": "Branding",
+      "navigation": "Navigazione",
+      "system": "Impostazioni di sistema"
+    },
+    "navigate": "per navigare",
+    "noResults": "Nessun risultato trovato",
+    "placeholder": "Impostazioni di ricerca...",
+    "select": "per selezionare"
+  },
   "confirm_delete_user": "Siete sicuri di voler eliminare questo utente?",
   "download": {
     "files": "{value, plural, one {Scaricare il file.} other {Scaricare i {value} file} }"
