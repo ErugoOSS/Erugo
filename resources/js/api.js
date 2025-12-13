@@ -492,6 +492,33 @@ export const resetLogo = async () => {
   return data
 }
 
+// Save settings during first-run setup (after authentication)
+export const saveFirstRunSettings = async (settings) => {
+  // Save text-based settings first
+  const settingsToSave = []
+  
+  if (settings.application_name) {
+    settingsToSave.push({ key: 'application_name', value: settings.application_name })
+  }
+  if (settings.application_url) {
+    settingsToSave.push({ key: 'application_url', value: settings.application_url })
+  }
+  
+  // Save text settings if any
+  if (settingsToSave.length > 0) {
+    await saveSettingsById(
+      Object.fromEntries(settingsToSave.map(s => [s.key, s.value]))
+    )
+  }
+  
+  // Upload logo if provided
+  if (settings.logo instanceof File) {
+    await saveLogo(settings.logo)
+  }
+  
+  return true
+}
+
 export const saveFavicon = async (faviconFile) => {
   const formData = new FormData()
   formData.append('favicon', faviconFile)

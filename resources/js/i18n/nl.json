@@ -880,6 +880,11 @@
     }
   },
   "setup": {
+    "account_created": "Account succesvol aangemaakt!",
+    "application_name": "Naam toepassing",
+    "application_name_placeholder": "Mijn bestandsdeling",
+    "application_url": "URL toepassing",
+    "application_url_placeholder": "https://files.example.com",
     "create_admin_account": "Admin-account aanmaken",
     "first_user": {
       "email": "E-mail",
@@ -887,7 +892,13 @@
       "password": "Wachtwoord",
       "password_confirmation": "Wachtwoord bevestigen"
     },
-    "intro": "Bedankt voor het installeren van Erugo! Maak je eerste admin gebruiker aan om te beginnen."
+    "intro": "Bedankt voor het installeren van Erugo! Maak je eerste admin gebruiker aan om te beginnen.",
+    "logo": "Logo",
+    "logo_placeholder": "Selecteer logoafbeelding (PNG of SVG)",
+    "save_and_login": "Instellingen opslaan en aanmelden",
+    "settings_saved": "Instellingen opgeslagen! Ik log je in...",
+    "skip_and_login": "Nu overslaan en aanmelden",
+    "step2_intro": "Geweldig! Je account is aangemaakt. Je kunt nu optioneel je instantie configureren of deze stap overslaan en inloggen."
   },
   "share": {
     "button": {

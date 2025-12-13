@@ -167,3 +167,5 @@ chown -R erugo:erugo /var/www/html/storage/app/backgrounds
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
+echo "================================================"

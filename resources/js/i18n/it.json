@@ -886,6 +886,11 @@
     }
   },
   "setup": {
+    "account_created": "Account creato con successo!",
+    "application_name": "Nome dell'applicazione",
+    "application_name_placeholder": "La mia condivisione di file",
+    "application_url": "URL dell'applicazione",
+    "application_url_placeholder": "https://files.example.com",
     "create_admin_account": "Creare un account amministratore",
     "first_user": {
       "email": "Email",
@@ -893,7 +898,13 @@
       "password": "Password",
       "password_confirmation": "Conferma la password"
     },
-    "intro": "Grazie per aver installato Erugo! Create il vostro primo utente amministratore per iniziare."
+    "intro": "Grazie per aver installato Erugo! Create il vostro primo utente amministratore per iniziare.",
+    "logo": "Logo",
+    "logo_placeholder": "Selezionare l'immagine del logo (PNG o SVG)",
+    "save_and_login": "Salva le impostazioni e accedi",
+    "settings_saved": "Impostazioni salvate! Accesso...",
+    "skip_and_login": "Salta e accedi ora",
+    "step2_intro": "Ottimo! L'account è stato creato. Ora è possibile configurare facoltativamente la propria istanza, oppure saltare questo passaggio ed effettuare il login."
   },
   "share": {
     "button": {

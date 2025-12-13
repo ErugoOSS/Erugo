@@ -886,6 +886,11 @@
     }
   },
   "setup": {
+    "account_created": "Account created successfully!",
+    "application_name": "Application Name",
+    "application_name_placeholder": "My File Sharing",
+    "application_url": "Application URL",
+    "application_url_placeholder": "https://files.example.com",
     "create_admin_account": "Create Admin Account",
     "first_user": {
       "email": "Email",
@@ -893,7 +898,13 @@
       "password": "Password",
       "password_confirmation": "Confirm Password"
     },
-    "intro": "Thank you for installing Erugo! Create your first admin user to get started."
+    "intro": "Thank you for installing Erugo! Create your first admin user to get started.",
+    "logo": "Logo",
+    "logo_placeholder": "Select logo image (PNG or SVG)",
+    "save_and_login": "Save Settings & Log In",
+    "settings_saved": "Settings saved! Logging you in...",
+    "skip_and_login": "Skip & Log In Now",
+    "step2_intro": "Great! Your account has been created. You can now optionally configure your instance, or skip this step and log in."
   },
   "share": {
     "button": {

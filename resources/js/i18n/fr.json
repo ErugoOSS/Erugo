@@ -433,6 +433,8 @@
     }
   },
   "setup": {
+    "application_name": "Nom de l'application",
+    "application_url": "URL de l'application",
     "create_admin_account": "Créer un compte administrateur",
     "first_user": {
       "email": "Mail",
@@ -440,7 +442,8 @@
       "password": "Mot de passe",
       "password_confirmation": "Confirmez le mot de passe"
     },
-    "intro": "Merci d'avoir installé Erugo ! Créez votre premier utilisateur administrateur pour commencer."
+    "intro": "Merci d'avoir installé Erugo ! Créez votre premier utilisateur administrateur pour commencer.",
+    "logo": "Logo"
   },
   "share": {
     "button": {

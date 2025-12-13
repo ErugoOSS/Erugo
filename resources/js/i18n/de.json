@@ -886,6 +886,11 @@
     }
   },
   "setup": {
+    "account_created": "Konto erfolgreich erstellt!",
+    "application_name": "Name der Anwendung",
+    "application_name_placeholder": "Meine Dateifreigabe",
+    "application_url": "URL der Anwendung",
+    "application_url_placeholder": "https://files.example.com",
     "create_admin_account": "Admin-Konto erstellen",
     "first_user": {
       "email": "E-Mail",
@@ -893,7 +898,13 @@
       "password": "Passwort",
       "password_confirmation": "Bestätigen Sie Ihr Passwort"
     },
-    "intro": "Vielen Dank für die Installation von Erugo! Erstellen Sie Ihren ersten Admin-Benutzer, um loszulegen."
+    "intro": "Vielen Dank für die Installation von Erugo! Erstellen Sie Ihren ersten Admin-Benutzer, um loszulegen.",
+    "logo": "Logo",
+    "logo_placeholder": "Logobild auswählen (PNG oder SVG)",
+    "save_and_login": "Einstellungen speichern & Anmelden",
+    "settings_saved": "Einstellungen gespeichert! Ich logge Sie ein...",
+    "skip_and_login": "Überspringen & Jetzt anmelden",
+    "step2_intro": "Sehr gut! Ihr Konto wurde erstellt. Sie können nun optional Ihre Instanz konfigurieren, oder diesen Schritt überspringen und sich anmelden."
   },
   "share": {
     "button": {

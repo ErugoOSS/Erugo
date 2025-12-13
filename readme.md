@@ -4,8 +4,15 @@
 
 # Erugo
 
-Erugo is a powerful, self-hosted file-sharing platform built with PHP and Laravel with a Vue.js frontend. It offers secure, customisable file-transfer capabilities through an elegant user interface, giving you complete control over your data while providing a seamless experience for both senders and recipients.
+**Your Self-Hosted File Sharing Platform**
 
+Erugo is a powerful, self-hosted file-sharing platform that puts you in **complete control** of your data. Built with PHP/Laravel and a Vue.js frontend, it offers secure, customisable file-transfer capabilities through an elegant user interface.
+
+### Why Self-Host?
+
+- **Your Data, Your Rules** — Files stay on your infrastructure. No third-party access, no data mining, no surprises.
+- **Deploy Anywhere** — Run on your own server, VPS, or even a Raspberry Pi. Docker makes setup a breeze.
+- **Open Source Forever** — MIT licensed. Inspect the code, contribute features, or fork it for your own needs.
 
 ### Support Erugo's Development
 
@@ -38,11 +45,11 @@ docker compose up -d
 
 ![Upload Interface](.github/images/screenshots/main-screen-with-files.png)
 
-_A clean, modern upload interface with file and folder support_
+_Effortless uploads with multiple file support, progress tracking, and folder support_
 
 ![My Shares](.github/images/screenshots/main-screen-with-password-form.png)
 
-_Optionally password protect your shares_
+_Password protect your shares for extra security_
 
 ![Settings](.github/images/screenshots/main-screen-with-reverse-share-req.png)
 
@@ -76,50 +83,53 @@ BoxToPlay offers premium VPS and game servers at competitive prices. They have g
 
 ## Key Features
 
-- **Effortless Deployment**: Easy to deploy on Docker with the provided docker-compose file
-- **Zero-Configuration**: Reasonable defaults out of the box, but easily customised via the web interface
-- **Human-Friendly Share Links**: Easy-to-read URLs like `you.com/shares/quiet-cloud-shrill-thunder`
-- **Maintains Folder Structure**: When uploading folders, the folder structure is maintained in the share link and subsequent downloads
-- **Reverse Share**: Users can invite guests to upload files to their account with a one-time reverse share token
-- **Secure Access Control**: Only authorized users can create shares, shares are publicly accessible or can be password protected
-- **Control Expiration**: Shares can be configured to expire after a configurable period of time at upload time. Admins can set maximum expiration times for shares
-- **Flexible Configuration**: Built-in themes and branding options, custom themes can be installed via the web interface, easily white-label your Erugo, set maximum upload sizes, maximum expiration times, and more
-- **Automatic Cleanup**: Shares are automatically deleted after a configurable period of time
-- **Email Support**: Full email support for notifications, password reset, and more
-- **Easy User Management**: Invite, edit, and remove users from the web interface
-- **Interactive Setup**: User-friendly first-run configuration when the web interface is first loaded
-- **Modern Interface**: Clean, intuitive web UI
-- **Open Source**: MIT licensed and ready for white-labeling
-- **Translations**: Erugo is fully translatable and supports multiple languages already
+### Effortless Uploads
+- Multiple file support with progress tracking
+- Folder uploads that maintain structure
+- Large file support with automatic resume
+- Drag and drop interface
+
+### Human-Friendly Share Links
+- Generate memorable URLs like `you.com/shares/quiet-cloud-shrill-thunder`
+- No more cryptic strings — easy to share and remember
+
+### Security & Access Control
+- Optional password protection for shares
+- Configurable expiration dates
+- Download limits per share
+- Only authorized users can create shares
+
+### Customizable Branding
+- Built-in themes (light and dark modes)
+- Custom themes via the web interface
+- Logo and color customization
+- Easy white-labeling for your organization
+
+### Powerful Dashboard
+- Track downloads and monitor activity
+- Manage shares, extend expiration, or revoke access
+- Easy user management with invite system
+
+### Additional Features
+- **Reverse Share** — Invite guests to upload files to your account with a one-time token
+- **Email Support** — Full email support for notifications, password reset, and more
+- **Interactive Setup** — User-friendly first-run configuration
+- **Zero-Configuration** — Reasonable defaults out of the box
+- **Automatic Cleanup** — Shares automatically deleted after expiration
+- **Translations** — Fully translatable with multiple languages supported
+
+## How It Works
+
+1. **Upload** — Drag and drop files or select them from your device
+2. **Configure** — Set optional password protection, expiration dates, and download limits
+3. **Share** — Get a clean, human-readable URL to share with anyone
+4. **Manage** — Track downloads, revoke access, or extend expiration dates from your dashboard
 
 ## Star History
 
 Give this repository a star to keep track of releases and updates. Stars are also great for motivating me to keep adding features!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=DeanWard/erugo&type=Date)](https://star-history.com/#DeanWard/erugo&Date)
-
-## Using Erugo
-
-### Creating a Share
-
-1. Log in to the web interface
-2. Select files for upload
-3. Share the generated link with your recipient
-
-### Downloading Files
-
-Recipients simply need to:
-
-1. Click the share link
-2. Download the files through the web interface
-
-### Manage your shares
-
-1. Log in to the web interface
-2. Click on the cog icon in the bottom right corner
-3. Click on the "My Shares" tab
-
-You can extend share expiration, expire shares, set maximum downloads, and more.
 
 ## Customization
 
@@ -202,7 +212,7 @@ Erugo is released under the MIT License, ensuring maximum flexibility for both p
 
 ---
 
-🚀 **Ready to start? Download Erugo and begin sharing files securely in minutes!**
+🚀 **Ready to take control of your file sharing? Deploy Erugo in minutes and start sharing securely!**
 
 ## Disclaimer
 
