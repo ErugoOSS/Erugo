@@ -1116,6 +1116,29 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
       headers: {
         Authorization: `Bearer ${store.jwt}`
       },
+      // Refresh token before each request if it's about to expire
+      // This prevents long uploads from failing due to token expiration
+      onBeforeRequest: function (req) {
+        const now = new Date()
+        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
+
+        // Only attempt refresh if token is expiring soon
+        if (store.jwtExpires && store.jwtExpires < fiveMinutesFromNow) {
+          // Return a Promise so tus waits for the refresh to complete
+          return refresh()
+            .then(refreshData => {
+              store.authSuccess(refreshData)
+              console.log('[uploadFileWithTus] Token refreshed successfully')
+              // Update header with new token
+              req.setHeader('Authorization', `Bearer ${store.jwt}`)
+            })
+            .catch(e => {
+              console.error('[uploadFileWithTus] Failed to refresh token:', e)
+              // Don't modify header on failure, use existing token
+            })
+        }
+        // No refresh needed - don't touch headers, let static config apply
+      },
       onError: (error) => {
         console.error('tus upload error:', error)
         onError(error)
