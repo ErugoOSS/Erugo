@@ -15,7 +15,8 @@ import {
   Play,
   Clock9,
   Lock,
-  LockOpen
+  LockOpen,
+  RotateCcw
 } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, simpleUUID } from '../utils'
 import { getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
@@ -65,10 +66,80 @@ const passwordFormErrors = ref({
 
 const recipients = ref([])
 
+// Interrupted upload detection
+const UPLOAD_STATE_KEY = 'erugo_upload_in_progress'
+const showInterruptedUploadPanel = ref(false)
+const interruptedUploadInfo = ref(null)
+
+// Save upload state to localStorage when upload starts
+const saveUploadState = () => {
+  const state = {
+    timestamp: Date.now(),
+    fileCount: uploadBasket.value.length,
+    totalSize: totalSize.value,
+    files: uploadBasket.value.map(f => ({
+      name: f.name,
+      size: f.size,
+      path: f.path || '',
+      fullPath: f.fullPath || f.name
+    })),
+    shareName: shareName.value,
+    shareDescription: shareDescription.value
+  }
+  try {
+    localStorage.setItem(UPLOAD_STATE_KEY, JSON.stringify(state))
+  } catch (e) {
+    console.warn('Failed to save upload state to localStorage:', e)
+  }
+}
+
+// Clear upload state from localStorage
+const clearUploadState = () => {
+  try {
+    localStorage.removeItem(UPLOAD_STATE_KEY)
+  } catch (e) {
+    console.warn('Failed to clear upload state from localStorage:', e)
+  }
+}
+
+// Check for interrupted upload on mount
+const checkForInterruptedUpload = () => {
+  try {
+    const savedState = localStorage.getItem(UPLOAD_STATE_KEY)
+    if (savedState) {
+      const state = JSON.parse(savedState)
+      // Only show if the saved state is less than 7 days old
+      const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+      if (Date.now() - state.timestamp < maxAge) {
+        interruptedUploadInfo.value = state
+        showInterruptedUploadPanel.value = true
+      } else {
+        // Clear old state
+        clearUploadState()
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to check for interrupted upload:', e)
+    clearUploadState()
+  }
+}
+
+const dismissInterruptedUploadPanel = () => {
+  showInterruptedUploadPanel.value = false
+}
+
+const dismissAndClearInterruptedUpload = () => {
+  showInterruptedUploadPanel.value = false
+  clearUploadState()
+}
+
 onMounted(async () => {
   //grab the max share size from the health check
   const health = await getHealth()
   maxShareSize.value = health.max_share_size
+
+  // Check for interrupted upload
+  checkForInterruptedUpload()
 })
 
 const showFilePicker = () => {
@@ -244,6 +315,12 @@ const uploadFiles = async () => {
     return
   }
 
+  // Save upload state to localStorage so we can detect interrupted uploads
+  saveUploadState()
+
+  // Dismiss the interrupted upload panel if it's showing (user is resuming)
+  showInterruptedUploadPanel.value = false
+
   //before we try uploading lets just check we're logged in still
   await getMyProfile()
 
@@ -313,6 +390,8 @@ const doTusUpload = async (uploadId) => {
       },
       (result) => {
         document.title = pageTitleAtStart
+        // Clear the interrupted upload state on successful completion
+        clearUploadState()
         if (store.isGuest()) {
           thankGuestForUpload()
         } else {
@@ -890,6 +969,65 @@ const filesByDirectory = computed(() => {
       </div>
     </div>
   </div>
+
+  <!-- Interrupted Upload Panel -->
+  <div
+    class="user-form-overlay interrupted-upload-panel"
+    :class="{ active: showInterruptedUploadPanel }"
+    @click="(e) => !e.target.closest('.user-form') && dismissInterruptedUploadPanel()"
+  >
+    <div class="user-form">
+      <h2>
+        <RotateCcw />
+        {{ $t('uploader.interrupted_upload.title', 'Interrupted Upload Detected') }}
+      </h2>
+
+      <div class="interrupted-upload-content">
+        <p>
+          {{ $t('uploader.interrupted_upload.description', 'It looks like you had an upload in progress that was interrupted.') }}
+        </p>
+
+        <div class="interrupted-upload-details" v-if="interruptedUploadInfo">
+          <div class="detail-row">
+            <strong>{{ $t('uploader.interrupted_upload.files', 'Files') }}:</strong>
+            <span>{{ interruptedUploadInfo.fileCount }}</span>
+          </div>
+          <div class="detail-row">
+            <strong>{{ $t('uploader.interrupted_upload.total_size', 'Total Size') }}:</strong>
+            <span>{{ niceFileSize(interruptedUploadInfo.totalSize) }}</span>
+          </div>
+          <div class="detail-row" v-if="interruptedUploadInfo.shareName">
+            <strong>{{ $t('uploader.interrupted_upload.share_name', 'Share Name') }}:</strong>
+            <span>{{ interruptedUploadInfo.shareName }}</span>
+          </div>
+        </div>
+
+        <div class="interrupted-upload-instructions">
+          <p>
+            <strong>{{ $t('uploader.interrupted_upload.how_to_resume', 'To resume your upload:') }}</strong>
+          </p>
+          <ol>
+            <li>{{ $t('uploader.interrupted_upload.step1', 'Select the same files you were uploading before') }}</li>
+            <li>{{ $t('uploader.interrupted_upload.step2', 'Click Upload - the upload will automatically continue from where it left off') }}</li>
+          </ol>
+          <p class="note">
+            {{ $t('uploader.interrupted_upload.note', 'Note: For resume to work, the files must be identical to the ones you were uploading (same name, size, and content).') }}
+          </p>
+        </div>
+      </div>
+
+      <div class="button-bar">
+        <button @click="dismissInterruptedUploadPanel">
+          <Check />
+          {{ $t('uploader.interrupted_upload.got_it', 'Got it') }}
+        </button>
+        <button class="secondary" @click="dismissAndClearInterruptedUpload">
+          <X />
+          {{ $t('uploader.interrupted_upload.start_fresh', 'Start Fresh') }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -970,6 +1108,74 @@ const filesByDirectory = computed(() => {
     .user-form {
       transform: translate(-50%, 0%);
     }
+  }
+}
+
+// Interrupted upload panel specific styles
+.interrupted-upload-panel {
+  .user-form {
+    max-width: min(550px, 100vw);
+  }
+
+  h2 {
+    justify-content: flex-start;
+  }
+
+  .interrupted-upload-content {
+    width: 100%;
+    text-align: left;
+
+    p {
+      margin: 0 0 12px 0;
+      line-height: 1.5;
+    }
+
+    .interrupted-upload-details {
+      background: var(--panel-item-background-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+
+        strong {
+          color: var(--panel-text-color);
+          opacity: 0.8;
+        }
+
+        span {
+          color: var(--panel-text-color);
+        }
+      }
+    }
+
+    .interrupted-upload-instructions {
+      ol {
+        margin: 8px 0 12px 0;
+        padding-left: 20px;
+
+        li {
+          margin: 6px 0;
+          line-height: 1.4;
+        }
+      }
+
+      .note {
+        font-size: 0.9em;
+        opacity: 0.7;
+        font-style: italic;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .button-bar {
+    width: 100%;
+    display: flex;
+    gap: 10px;
   }
 }
 </style>
