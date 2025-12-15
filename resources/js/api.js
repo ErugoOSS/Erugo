@@ -1373,40 +1373,90 @@ export const uploadFilesInChunks = async (
   cleanupWatcher()
 
   // All files have been uploaded, now create the share
-  try {
-    const filePaths = {}
-    results.forEach((r) => {
-      filePaths[r.uploadId] = r.fullPath
-    })
+  // Use retry logic to handle race condition where backend post-finish hooks
+  // may still be processing (especially with many small files)
+  const filePaths = {}
+  results.forEach((r) => {
+    filePaths[r.uploadId] = r.fullPath
+  })
 
-    const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${store.jwt}`
-      },
-      body: JSON.stringify({
-        upload_id: uploadId,
-        name: shareName,
-        description: shareDescription,
-        recipients: recipients,
-        uploadIds: results.map((r) => r.uploadId),
-        filePaths: filePaths,
-        expiry_date: expiryDate,
-        password: password,
-        password_confirm: passwordConfirm
+  const uploadIds = results.map((r) => r.uploadId)
+  const maxRetries = 5
+  const baseDelayMs = 500
+
+  console.log('[createShare] Starting share creation', {
+    fileCount: results.length,
+    uploadIds: uploadIds,
+    totalSize: results.reduce((sum, r) => sum + (r.filesize || 0), 0)
+  })
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      console.log(`[createShare] Attempt ${attempt + 1}/${maxRetries}`)
+
+      const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${store.jwt}`
+        },
+        body: JSON.stringify({
+          upload_id: uploadId,
+          name: shareName,
+          description: shareDescription,
+          recipients: recipients,
+          uploadIds: uploadIds,
+          filePaths: filePaths,
+          expiry_date: expiryDate,
+          password: password,
+          password_confirm: passwordConfirm
+        })
       })
-    })
 
-    if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json()
+        console.log('[createShare] Success on attempt', attempt + 1)
+        onComplete(data)
+        return
+      }
+
       const data = await response.json()
-      throw new Error(data.message || 'Failed to create share from uploads')
-    }
+      const errorMessage = data.message || 'Failed to create share from uploads'
 
-    const data = await response.json()
-    onComplete(data)
-  } catch (error) {
-    onError(error)
+      // Check if this is the "not completed" error - worth retrying
+      if (errorMessage.includes('not found or not completed') && attempt < maxRetries - 1) {
+        const delayMs = baseDelayMs * Math.pow(2, attempt) // 500ms, 1000ms, 2000ms, 4000ms
+        console.log(`[createShare] Upload sessions not ready, retrying in ${delayMs}ms...`, {
+          attempt: attempt + 1,
+          maxRetries,
+          error: errorMessage
+        })
+        await new Promise(resolve => setTimeout(resolve, delayMs))
+        continue
+      }
+
+      // Non-retryable error or out of retries
+      console.error('[createShare] Failed after retries or non-retryable error', {
+        attempt: attempt + 1,
+        error: errorMessage
+      })
+      throw new Error(errorMessage)
+
+    } catch (error) {
+      // Network errors or thrown errors from above
+      if (attempt === maxRetries - 1) {
+        console.error('[createShare] Final attempt failed', { error: error.message })
+        onError(error)
+        return
+      }
+
+      // If it's a network error, might be worth retrying
+      if (!error.message.includes('not found or not completed')) {
+        console.error('[createShare] Unexpected error, not retrying', { error: error.message })
+        onError(error)
+        return
+      }
+    }
   }
 }
