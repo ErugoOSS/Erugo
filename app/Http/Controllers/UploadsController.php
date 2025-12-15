@@ -176,7 +176,23 @@ class UploadsController extends Controller
     }
 
     // Get file records from sessions
-    $fileIds = $sessions->pluck('file_id')->filter()->toArray();
+    // Handle both regular uploads and bundle uploads
+    $fileIds = [];
+    $isBundleUpload = false;
+
+    foreach ($sessions as $session) {
+      if ($session->is_bundle && $session->bundle_file_ids) {
+        // Bundle upload - get all file IDs from the bundle
+        $bundleFileIds = $session->getBundleFileIdsArray();
+        $fileIds = array_merge($fileIds, $bundleFileIds);
+        $isBundleUpload = true;
+      } elseif ($session->file_id) {
+        // Regular upload
+        $fileIds[] = $session->file_id;
+      }
+    }
+
+    $fileIds = array_filter($fileIds);
     $files = File::whereIn('id', $fileIds)->get();
 
     if ($files->count() === 0) {
@@ -185,6 +201,11 @@ class UploadsController extends Controller
         'message' => 'No files found for the uploads'
       ], 400);
     }
+
+    Log::info('createShareFromUploads: Processing files', [
+      'file_count' => $files->count(),
+      'is_bundle' => $isBundleUpload
+    ]);
 
     // Calculate total size of all files
     $totalSize = 0;
@@ -219,10 +240,10 @@ class UploadsController extends Controller
       'password' => $password ? Hash::make($password) : null
     ]);
 
-    // Create a mapping from upload_id to file for path lookup
+    // Create a mapping from upload_id to file for path lookup (for non-bundle uploads)
     $uploadIdToFile = [];
     foreach ($sessions as $session) {
-      if ($session->file_id) {
+      if (!$session->is_bundle && $session->file_id) {
         $uploadIdToFile[$session->upload_id] = $files->firstWhere('id', $session->file_id);
       }
     }
@@ -232,18 +253,34 @@ class UploadsController extends Controller
       // Move file from tusd uploads to share directory
       $sourcePath = storage_path('app/' . $file->temp_path);
       
-      // Find the upload_id for this file to get the original path
-      $uploadId = null;
-      foreach ($uploadIdToFile as $uid => $f) {
-        if ($f && $f->id === $file->id) {
-          $uploadId = $uid;
-          break;
+      // Determine the original path based on whether this is a bundle file or not
+      if ($isBundleUpload) {
+        // For bundle files, the path is embedded in temp_path after '_extracted/'
+        // e.g., 'uploads/abc123_extracted/folder/file.txt' -> 'folder/file.txt'
+        $tempPathParts = explode('_extracted/', $file->temp_path);
+        if (count($tempPathParts) > 1) {
+          $bundleFilePath = $tempPathParts[1];
+          $pathParts = explode('/', $bundleFilePath);
+          array_pop($pathParts); // Remove filename
+          $originalPath = implode('/', $pathParts);
+        } else {
+          $originalPath = '';
         }
+      } else {
+        // For regular uploads, use the filePaths from the request
+        $uploadId = null;
+        foreach ($uploadIdToFile as $uid => $f) {
+          if ($f && $f->id === $file->id) {
+            $uploadId = $uid;
+            break;
+          }
+        }
+        
+        $originalPath = $request->filePaths[$uploadId] ?? '';
+        $originalPath = explode('/', $originalPath);
+        $originalPath = implode('/', array_slice($originalPath, 0, -1));
       }
-      
-      $originalPath = $request->filePaths[$uploadId] ?? '';
-      $originalPath = explode('/', $originalPath);
-      $originalPath = implode('/', array_slice($originalPath, 0, -1));
+
       $destPath = $completePath . '/' . $originalPath;
 
       if (!file_exists($destPath)) {
@@ -265,10 +302,12 @@ class UploadsController extends Controller
         }
       }
       
-      // Clean up tusd .info file
-      $infoPath = $sourcePath . '.info';
-      if (file_exists($infoPath)) {
-        unlink($infoPath);
+      // Clean up tusd .info file (only for non-bundle files)
+      if (!$isBundleUpload) {
+        $infoPath = $sourcePath . '.info';
+        if (file_exists($infoPath)) {
+          unlink($infoPath);
+        }
       }
 
       // Update file record
@@ -278,8 +317,15 @@ class UploadsController extends Controller
       $file->save();
     }
 
-    // Clean up upload sessions
+    // Clean up upload sessions and bundle extraction directories
     foreach ($sessions as $session) {
+      if ($session->is_bundle) {
+        // Clean up the extraction directory
+        $extractDir = storage_path('app/uploads/' . $session->upload_id . '_extracted');
+        if (is_dir($extractDir)) {
+          $this->recursiveDelete($extractDir);
+        }
+      }
       $session->delete();
     }
 
@@ -381,5 +427,31 @@ class UploadsController extends Controller
         'recipient' => $recipient
       ]);
     }
+  }
+
+  /**
+   * Recursively delete a directory and its contents
+   */
+  private function recursiveDelete(string $dir): bool
+  {
+    if (!is_dir($dir)) {
+      return false;
+    }
+
+    $items = scandir($dir);
+    foreach ($items as $item) {
+      if ($item === '.' || $item === '..') {
+        continue;
+      }
+
+      $path = $dir . '/' . $item;
+      if (is_dir($path)) {
+        $this->recursiveDelete($path);
+      } else {
+        unlink($path);
+      }
+    }
+
+    return rmdir($dir);
   }
 }

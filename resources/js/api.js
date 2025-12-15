@@ -5,6 +5,235 @@ import { useToast } from 'vue-toastification'
 import debounce from './debounce'
 import * as tus from 'tus-js-client'
 import { watch } from 'vue'
+import JSZip from 'jszip'
+
+// Bundling configuration for small files
+const BUNDLE_CONFIG = {
+  minFileCount: 50,        // Minimum number of files to trigger bundling
+  maxFileSizeBytes: 102400, // Files under 100KB are considered "small"
+  minSmallFileRatio: 0.7   // At least 70% of files must be small to trigger bundling
+}
+
+/**
+ * Check if the files should be bundled based on count and size distribution
+ */
+const shouldBundleFiles = (files) => {
+  if (files.length < BUNDLE_CONFIG.minFileCount) {
+    return false
+  }
+
+  const smallFileCount = files.filter(f => f.size <= BUNDLE_CONFIG.maxFileSizeBytes).length
+  const smallFileRatio = smallFileCount / files.length
+
+  const shouldBundle = smallFileRatio >= BUNDLE_CONFIG.minSmallFileRatio
+
+  console.log('[shouldBundleFiles]', {
+    totalFiles: files.length,
+    smallFileCount,
+    smallFileRatio: (smallFileRatio * 100).toFixed(1) + '%',
+    threshold: (BUNDLE_CONFIG.minSmallFileRatio * 100) + '%',
+    willBundle: shouldBundle
+  })
+
+  return shouldBundle
+}
+
+/**
+ * Bundle multiple files into a single zip file
+ * Preserves file paths in the zip structure
+ * @returns {Promise<{blob: Blob, manifest: Object}>} The zip blob and manifest of files
+ */
+const bundleFilesIntoZip = async (files, onProgress) => {
+  const zip = new JSZip()
+  const manifest = {
+    version: 1,
+    files: []
+  }
+
+  console.log('[bundleFilesIntoZip] Starting to bundle', files.length, 'files')
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    // Use fullPath if available (for folder uploads), otherwise just the name
+    const filePath = file.fullPath || file.name
+
+    // Add to zip - JSZip handles the folder structure automatically from the path
+    zip.file(filePath, file)
+
+    // Track in manifest
+    manifest.files.push({
+      path: filePath,
+      originalName: file.name,
+      size: file.size,
+      type: file.type || 'application/octet-stream'
+    })
+
+    if (onProgress) {
+      onProgress({
+        phase: 'bundling',
+        current: i + 1,
+        total: files.length,
+        percentage: Math.round(((i + 1) / files.length) * 100)
+      })
+    }
+  }
+
+  // Add manifest to the zip
+  zip.file('__erugo_manifest__.json', JSON.stringify(manifest, null, 2))
+
+  console.log('[bundleFilesIntoZip] Generating zip...')
+
+  // Generate the zip blob
+  const blob = await zip.generateAsync(
+    { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+    (metadata) => {
+      if (onProgress) {
+        onProgress({
+          phase: 'compressing',
+          percentage: Math.round(metadata.percent)
+        })
+      }
+    }
+  )
+
+  console.log('[bundleFilesIntoZip] Bundle complete', {
+    originalFileCount: files.length,
+    bundleSize: blob.size,
+    originalTotalSize: files.reduce((sum, f) => sum + f.size, 0)
+  })
+
+  return { blob, manifest }
+}
+
+/**
+ * Upload files as a bundle (zipped together)
+ * Used when there are many small files to avoid tusd hook overload
+ */
+const uploadBundledFiles = async (
+  files,
+  uploadId,
+  shareName,
+  shareDescription,
+  recipients,
+  expiryDate,
+  password,
+  passwordConfirm,
+  onProgress,
+  onComplete,
+  onError
+) => {
+  try {
+    // Phase 1: Bundle the files
+    onProgress({
+      phase: 'bundling',
+      percentage: 0,
+      message: 'Preparing files...'
+    })
+
+    const { blob, manifest } = await bundleFilesIntoZip(files, (bundleProgress) => {
+      onProgress({
+        phase: bundleProgress.phase,
+        percentage: bundleProgress.percentage,
+        message: bundleProgress.phase === 'bundling'
+          ? `Preparing files (${bundleProgress.current}/${bundleProgress.total})...`
+          : `Compressing (${bundleProgress.percentage}%)...`
+      })
+    })
+
+    // Create a File object from the blob for tus upload
+    const bundleFile = new File([blob], '__erugo_bundle__.zip', {
+      type: 'application/zip'
+    })
+
+    console.log('[uploadBundledFiles] Bundle created', {
+      originalFiles: files.length,
+      bundleSize: bundleFile.size
+    })
+
+    // Phase 2: Upload the bundle
+    onProgress({
+      phase: 'uploading',
+      percentage: 0,
+      uploadedBytes: 0,
+      totalBytes: bundleFile.size,
+      currentFile: 1,
+      totalFiles: 1,
+      currentFileName: `Bundle (${files.length} files)`
+    })
+
+    const uploadResult = await new Promise((resolve, reject) => {
+      const upload = uploadFileWithTus(
+        bundleFile,
+        (progress) => {
+          onProgress({
+            phase: 'uploading',
+            percentage: progress.percentage,
+            uploadedBytes: progress.uploadedBytes,
+            totalBytes: progress.totalBytes,
+            currentFile: 1,
+            totalFiles: 1,
+            currentFileName: `Bundle (${files.length} files)`
+          })
+        },
+        (result) => {
+          resolve(result)
+        },
+        (error) => {
+          reject(error)
+        },
+        // Pass bundle metadata to tus
+        {
+          isBundle: 'true',
+          bundleFileCount: String(files.length)
+        }
+      )
+    })
+
+    console.log('[uploadBundledFiles] Bundle uploaded', uploadResult)
+
+    // Phase 3: Create the share
+    onProgress({
+      phase: 'creating',
+      percentage: 100,
+      message: 'Creating share...'
+    })
+
+    const apiUrl = getApiUrl()
+    const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${store.jwt}`
+      },
+      body: JSON.stringify({
+        upload_id: uploadId,
+        name: shareName,
+        description: shareDescription,
+        recipients: recipients,
+        uploadIds: [uploadResult.uploadId],
+        filePaths: {}, // Not needed for bundles, paths are in the manifest
+        expiry_date: expiryDate,
+        password: password,
+        password_confirm: passwordConfirm,
+        isBundle: true
+      })
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'Failed to create share from bundle')
+    }
+
+    const data = await response.json()
+    console.log('[uploadBundledFiles] Share created successfully')
+    onComplete(data)
+
+  } catch (error) {
+    console.error('[uploadBundledFiles] Error:', error)
+    onError(error)
+  }
+}
 
 const apiUrl = getApiUrl()
 const toast = useToast()
@@ -1100,9 +1329,10 @@ const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
  * @param {Function} onProgress - Progress callback function
  * @param {Function} onComplete - Complete callback function (receives upload URL)
  * @param {Function} onError - Error callback function
+ * @param {Object} extraMetadata - Optional additional metadata to include
  * @returns {tus.Upload} - The tus upload instance (can be used for pause/resume/abort)
  */
-export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
+export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMetadata = {}) => {
   const startUpload = (skipResume = false) => {
     const tusdEndpoint = getTusdUrl()
     console.log('[uploadFileWithTus] Creating tus.Upload with endpoint:', tusdEndpoint)
@@ -1113,7 +1343,8 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
       removeFingerprintOnSuccess: true, // Clean up fingerprint after successful upload
       metadata: {
         filename: file.name,
-        filetype: file.type || 'application/octet-stream'
+        filetype: file.type || 'application/octet-stream',
+        ...extraMetadata
       },
       headers: {
         Authorization: `Bearer ${store.jwt}`
@@ -1276,6 +1507,27 @@ export const uploadFilesInChunks = async (
   onComplete,
   onError
 ) => {
+  // Check if we should bundle the files (many small files)
+  const useBundle = shouldBundleFiles(files)
+
+  if (useBundle) {
+    console.log('[uploadFilesInChunks] Using bundled upload for', files.length, 'files')
+    return uploadBundledFiles(
+      files,
+      uploadId,
+      shareName,
+      shareDescription,
+      recipients,
+      expiryDate,
+      password,
+      passwordConfirm,
+      onProgress,
+      onComplete,
+      onError
+    )
+  }
+
+  // Standard upload flow for normal file counts/sizes
   const totalSize = files.reduce((total, file) => total + file.size, 0)
   let uploadedSize = 0
   const results = []

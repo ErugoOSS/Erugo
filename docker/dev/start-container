@@ -36,6 +36,7 @@ mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/logs
+mkdir -p /var/www/html/storage/database
 
 # Set correct permissions on storage directory
 echo "Setting storage permissions..."
@@ -52,6 +53,7 @@ chown -R erugo:erugo /var/www/html/public
 echo "Fixing volume permissions..."
 chown -R erugo:erugo /var/www/html/node_modules 2>/dev/null || true
 chown -R erugo:erugo /var/www/html/vendor 2>/dev/null || true
+chown -R erugo:erugo /var/www/html/storage/database 2>/dev/null || true
 
 # Install composer dependencies if vendor directory is missing or empty
 if [ ! -d /var/www/html/vendor ] || [ ! -f /var/www/html/vendor/autoload.php ]; then
@@ -75,13 +77,13 @@ elif [ ! -d /var/www/html/node_modules/@rollup/rollup-linux-arm64-musl ] && [ ! 
     NEED_NPM_INSTALL=true
 fi
 
-if [ "$NEED_NPM_INSTALL" = true ]; then
+# if [ "$NEED_NPM_INSTALL" = true ]; then
     echo "Installing npm dependencies..."
     if ! su-exec erugo npm install; then
         echo "ERROR: npm install failed!"
         exit 1
     fi
-fi
+# fi
 
 # if the app.key file exists in storage, load its contents into the environment as APP_KEY, otherwise check .env
 if [ -f /var/www/html/storage/app.key ]; then
@@ -135,7 +137,11 @@ fi
 if [ -z "$DB_CONNECTION" ]; then
     echo "DB_CONNECTION environment variable not set, setting to sqlite..."
     export DB_CONNECTION=sqlite
-    export DB_DATABASE=./storage/app/private/database.sqlite
+fi
+
+# Set default DB_DATABASE if not set (use named volume path for WAL support)
+if [ -z "$DB_DATABASE" ]; then
+    export DB_DATABASE=/var/www/html/storage/database/database.sqlite
 fi
 
 # Create an environment file for cron jobs

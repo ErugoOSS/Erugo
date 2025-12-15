@@ -15,6 +15,8 @@ services:
             # This prevents macOS node_modules from conflicting with Linux
             - node_modules:/var/www/html/node_modules
             - vendor:/var/www/html/vendor
+            # SQLite database in named volume to support WAL mode properly
+            - database:/var/www/html/storage/database
         networks:
             - erugo
 networks:
@@ -24,4 +26,6 @@ volumes:
     node_modules:
         driver: local
     vendor:
+        driver: local
+    database:
         driver: local

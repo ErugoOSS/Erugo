@@ -23,8 +23,30 @@ class UploadSession extends Model
         'total_chunks',
         'chunks_received',
         'status',
-        'file_id'
+        'file_id',
+        'is_bundle',
+        'bundle_file_ids'
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'is_bundle' => 'boolean'
+    ];
+
+    /**
+     * Get the bundle file IDs as an array
+     */
+    public function getBundleFileIdsArray(): array
+    {
+        if (!$this->bundle_file_ids) {
+            return [];
+        }
+        return json_decode($this->bundle_file_ids, true) ?? [];
+    }
 
     /**
      * Get the user that owns the upload session.

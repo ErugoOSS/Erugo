@@ -286,15 +286,34 @@ class TusdHooksController extends Controller
             $filesize = $payload['Event']['Upload']['Size'] ?? 0;
             $filetype = $metadata['filetype'] ?? 'application/octet-stream';
             $storagePath = $payload['Event']['Upload']['Storage']['Path'] ?? null;
+            $isBundle = ($metadata['isBundle'] ?? 'false') === 'true';
 
             // Find the upload session
-            $session = UploadSession::where('upload_id', $uploadId)->first();
+            // For very small/fast uploads, post-finish may arrive before post-create completes
+            // So we retry a few times with a small delay
+            $session = null;
+            $maxRetries = 10;
+            for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+                $session = UploadSession::where('upload_id', $uploadId)->first();
+                if ($session) {
+                    break;
+                }
+                if ($attempt < $maxRetries - 1) {
+                    usleep(100000); // 100ms
+                }
+            }
 
             if (!$session) {
-                Log::warning('tusd post-finish: Upload session not found', [
-                    'upload_id' => $uploadId
+                Log::warning('tusd post-finish: Upload session not found after retries', [
+                    'upload_id' => $uploadId,
+                    'attempts' => $maxRetries
                 ]);
                 return response()->json(['ok' => true]);
+            }
+
+            // Handle bundle uploads differently
+            if ($isBundle) {
+                return $this->handleBundleUpload($uploadId, $session, $metadata);
             }
 
             // Sanitize filename for storage
@@ -330,6 +349,140 @@ class TusdHooksController extends Controller
             ]);
 
             return response()->json(['ok' => true]); // Don't fail the upload
+        }
+    }
+
+    /**
+     * Handle a bundle upload - extract the zip and create File records for each file
+     */
+    protected function handleBundleUpload(string $uploadId, UploadSession $session, array $metadata)
+    {
+        try {
+            $bundlePath = storage_path('app/uploads/' . $uploadId);
+            $extractDir = storage_path('app/uploads/' . $uploadId . '_extracted');
+
+            Log::info('tusd post-finish: Processing bundle upload', [
+                'upload_id' => $uploadId,
+                'bundle_path' => $bundlePath
+            ]);
+
+            // Create extraction directory
+            if (!file_exists($extractDir)) {
+                mkdir($extractDir, 0755, true);
+            }
+
+            // Open and extract the zip
+            $zip = new \ZipArchive();
+            $result = $zip->open($bundlePath);
+
+            if ($result !== true) {
+                Log::error('tusd post-finish: Failed to open bundle zip', [
+                    'upload_id' => $uploadId,
+                    'error_code' => $result
+                ]);
+                $session->status = 'failed';
+                $session->save();
+                return response()->json(['ok' => true]);
+            }
+
+            // Read the manifest
+            $manifestContent = $zip->getFromName('__erugo_manifest__.json');
+            if (!$manifestContent) {
+                Log::error('tusd post-finish: Bundle manifest not found', [
+                    'upload_id' => $uploadId
+                ]);
+                $zip->close();
+                $session->status = 'failed';
+                $session->save();
+                return response()->json(['ok' => true]);
+            }
+
+            $manifest = json_decode($manifestContent, true);
+            if (!$manifest || !isset($manifest['files'])) {
+                Log::error('tusd post-finish: Invalid bundle manifest', [
+                    'upload_id' => $uploadId
+                ]);
+                $zip->close();
+                $session->status = 'failed';
+                $session->save();
+                return response()->json(['ok' => true]);
+            }
+
+            // Extract all files
+            $zip->extractTo($extractDir);
+            $zip->close();
+
+            // Delete the manifest file from extracted directory
+            $manifestPath = $extractDir . '/__erugo_manifest__.json';
+            if (file_exists($manifestPath)) {
+                unlink($manifestPath);
+            }
+
+            // Create File records for each file in the manifest
+            $fileIds = [];
+            foreach ($manifest['files'] as $fileInfo) {
+                $filePath = $fileInfo['path'];
+                $extractedFilePath = $extractDir . '/' . $filePath;
+
+                if (!file_exists($extractedFilePath)) {
+                    Log::warning('tusd post-finish: Bundle file not found after extraction', [
+                        'upload_id' => $uploadId,
+                        'file_path' => $filePath
+                    ]);
+                    continue;
+                }
+
+                $sanitizedFilename = FileHelper::sanitizeFilename($fileInfo['originalName']);
+
+                // Create file record - store relative path for bundle files
+                $file = File::create([
+                    'name' => $sanitizedFilename,
+                    'original_name' => $fileInfo['originalName'],
+                    'type' => $fileInfo['type'] ?? 'application/octet-stream',
+                    'size' => $fileInfo['size'],
+                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $filePath
+                ]);
+
+                $fileIds[] = $file->id;
+            }
+
+            // Update session with bundle info
+            // We store the file IDs as JSON in a special way - the first file_id points to a pseudo-record
+            // and we store the actual IDs in the session metadata
+            $session->status = 'complete';
+            $session->chunks_received = 1;
+            $session->is_bundle = true;
+            $session->bundle_file_ids = json_encode($fileIds);
+            $session->save();
+
+            // Delete the original zip file to save space
+            if (file_exists($bundlePath)) {
+                unlink($bundlePath);
+            }
+            // Also delete the .info file
+            $infoPath = $bundlePath . '.info';
+            if (file_exists($infoPath)) {
+                unlink($infoPath);
+            }
+
+            Log::info('tusd post-finish: Bundle extracted successfully', [
+                'upload_id' => $uploadId,
+                'file_count' => count($fileIds)
+            ]);
+
+            return response()->json(['ok' => true]);
+
+        } catch (\Exception $e) {
+            Log::error('tusd post-finish: Bundle extraction error', [
+                'upload_id' => $uploadId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $session->status = 'failed';
+            $session->save();
+
+            return response()->json(['ok' => true]);
         }
     }
 

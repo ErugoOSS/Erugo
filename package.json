@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.9",
+    "jszip": "^3.10.1",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@tolgee/format-icu": "^6.2.2",
     "@tolgee/vue": "^6.2.2",
