@@ -131,12 +131,44 @@ class UploadsController extends Controller
     }
 
     // Find files from upload sessions by tusd upload IDs
-    $sessions = UploadSession::whereIn('upload_id', $request->uploadIds)
-      ->where('user_id', $user->id)
-      ->where('status', 'complete')
-      ->get();
+    // Use retry loop to handle race condition where post-finish hooks
+    // may still be processing when this endpoint is called (especially with many small files)
+    $expectedCount = count($request->uploadIds);
+    $maxRetries = 5;
+    $sessions = null;
 
-    if ($sessions->count() !== count($request->uploadIds)) {
+    for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+      $sessions = UploadSession::whereIn('upload_id', $request->uploadIds)
+        ->where('user_id', $user->id)
+        ->where('status', 'complete')
+        ->get();
+
+      if ($sessions->count() === $expectedCount) {
+        // All sessions found and complete
+        break;
+      }
+
+      if ($attempt < $maxRetries - 1) {
+        // Wait with exponential backoff: 100ms, 200ms, 400ms, 800ms
+        $delayMs = 100 * pow(2, $attempt);
+        usleep($delayMs * 1000);
+
+        Log::debug('Waiting for upload sessions to complete', [
+          'attempt' => $attempt + 1,
+          'found' => $sessions->count(),
+          'expected' => $expectedCount,
+          'delay_ms' => $delayMs
+        ]);
+      }
+    }
+
+    if ($sessions->count() !== $expectedCount) {
+      Log::warning('Upload sessions not complete after retries', [
+        'found' => $sessions->count(),
+        'expected' => $expectedCount,
+        'upload_ids' => $request->uploadIds
+      ]);
+
       return response()->json([
         'status' => 'error',
         'message' => 'Some uploads were not found or not completed'
