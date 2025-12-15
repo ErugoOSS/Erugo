@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import { useToast } from 'vue-toastification'
 import debounce from './debounce'
 import * as tus from 'tus-js-client'
+import { watch } from 'vue'
 
 const apiUrl = getApiUrl()
 const toast = useToast()
@@ -1109,6 +1110,7 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError) => {
       endpoint: tusdEndpoint,
       retryDelays: [0, 1000, 3000, 5000],
       chunkSize: 20 * 1024 * 1024, // 20MB chunks
+      removeFingerprintOnSuccess: true, // Clean up fingerprint after successful upload
       metadata: {
         filename: file.name,
         filetype: file.type || 'application/octet-stream'
@@ -1277,7 +1279,38 @@ export const uploadFilesInChunks = async (
   const totalSize = files.reduce((total, file) => total + file.size, 0)
   let uploadedSize = 0
   const results = []
-  const uploads = [] // Store upload instances for pause/resume
+
+  // Track the currently active upload for pause/resume
+  let currentUpload = null
+  let stopWatcher = null
+
+  // Set up a watcher on uploadController.pause to handle pause/resume
+  const setupPauseWatcher = () => {
+    stopWatcher = watch(
+      () => uploadController.pause,
+      (isPaused) => {
+        if (currentUpload) {
+          if (isPaused) {
+            console.log('[uploadFilesInChunks] Pause detected, aborting current upload')
+            currentUpload.abort()
+          } else {
+            console.log('[uploadFilesInChunks] Resume detected, starting upload')
+            currentUpload.start()
+          }
+        }
+      }
+    )
+  }
+
+  // Clean up the watcher when done
+  const cleanupWatcher = () => {
+    if (stopWatcher) {
+      stopWatcher()
+      stopWatcher = null
+    }
+  }
+
+  setupPauseWatcher()
 
   // Process each file sequentially
   for (let i = 0; i < files.length; i++) {
@@ -1285,25 +1318,14 @@ export const uploadFilesInChunks = async (
 
     try {
       const result = await new Promise((resolve, reject) => {
-        const checkPause = () => {
+        // Wait for unpause before starting if currently paused
+        const waitForUnpauseAndStart = () => {
           if (uploadController.pause) {
-            // Pause all active uploads
-            uploads.forEach((u) => u.abort())
-            setTimeout(checkPause, 1000)
-            return true
+            // Check again in a bit
+            setTimeout(waitForUnpauseAndStart, 500)
+            return
           }
-          return false
-        }
-
-        if (checkPause()) {
-          // Wait for unpause before starting
-          const waitForUnpause = setInterval(() => {
-            if (!uploadController.pause) {
-              clearInterval(waitForUnpause)
-              startUpload()
-            }
-          }, 1000)
-          return
+          startUpload()
         }
 
         const startUpload = () => {
@@ -1325,25 +1347,30 @@ export const uploadFilesInChunks = async (
             },
             (uploadResult) => {
               uploadResult.fullPath = file.fullPath
+              currentUpload = null
               resolve(uploadResult)
             },
             (error) => {
+              currentUpload = null
               reject(error)
             }
           )
-          uploads.push(upload)
+          currentUpload = upload
         }
 
-        startUpload()
+        waitForUnpauseAndStart()
       })
 
       results.push(result)
       uploadedSize += file.size
     } catch (error) {
+      cleanupWatcher()
       onError(error)
       return // Stop on first error
     }
   }
+
+  cleanupWatcher()
 
   // All files have been uploaded, now create the share
   try {
