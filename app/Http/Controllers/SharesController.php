@@ -19,6 +19,19 @@ use Illuminate\Support\Facades\Hash;
 
 class SharesController extends Controller
 {
+  /**
+   * Symfony's Content-Disposition filename cannot contain "/" or "\".
+   * Also strip basic header-breaking characters.
+   */
+  private function sanitizeDownloadFilename(string $filename, string $fallback = 'download'): string
+  {
+    $sanitized = str_replace(['/', '\\'], '-', $filename);
+    $sanitized = str_replace(["\r", "\n"], '', $sanitized);
+    $sanitized = trim($sanitized);
+
+    return $sanitized !== '' ? $sanitized : $fallback;
+  }
+
   public function read($shareId)
   {
     $share = Share::where('long_id', $shareId)->with(['files', 'user'])->first();
@@ -159,7 +172,10 @@ class SharesController extends Controller
 
         $this->createDownloadRecord($share);
 
-        return response()->download($sharePath . '/' . $share->files[0]->name, $share->files[0]->display_name);
+        return response()->download(
+          $sharePath . '/' . $share->files[0]->name,
+          $this->sanitizeDownloadFilename($share->files[0]->display_name)
+        );
       } else {
         return redirect()->to('/shares/' . $shareId);
       }
@@ -181,7 +197,10 @@ class SharesController extends Controller
       if (file_exists($filename)) {
         $this->createDownloadRecord($share);
 
-        return response()->download($filename, $share->name . '.zip');
+        return response()->download(
+          $filename,
+          $this->sanitizeDownloadFilename($share->name, 'share') . '.zip'
+        );
       } else {
         //something went wrong, show the failed view
         return view('shares.failed', [
@@ -253,7 +272,10 @@ class SharesController extends Controller
         
         if (file_exists($filePath)) {
           $this->createDownloadRecord($share);
-          return response()->download($filePath, $file->display_name);
+          return response()->download(
+            $filePath,
+            $this->sanitizeDownloadFilename($file->display_name)
+          );
         }
       }
       return response()->json(['error' => 'File not found'], 404);
@@ -333,7 +355,7 @@ class SharesController extends Controller
       $zip->close();
     }, 200, [
       'Content-Type' => $mimeType,
-      'Content-Disposition' => 'attachment; filename="' . $foundFile->display_name . '"',
+      'Content-Disposition' => 'attachment; filename="' . $this->sanitizeDownloadFilename($foundFile->display_name) . '"',
       'Content-Length' => $fileSize,
       'X-Accel-Buffering' => 'no', // Disable proxy buffering for streaming
     ]);
