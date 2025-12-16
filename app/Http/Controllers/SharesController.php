@@ -199,7 +199,7 @@ class SharesController extends Controller
 
         return response()->download(
           $filename,
-          $this->sanitizeDownloadFilename($share->name, 'share') . '.zip'
+          $this->sanitizeDownloadFilename($share->name ?? '', 'share') . '.zip'
         );
       } else {
         //something went wrong, show the failed view
