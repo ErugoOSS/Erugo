@@ -9,6 +9,7 @@ use App\Jobs\sendDeletionWarningEmails;
 use App\Jobs\pruneLogs;
 use App\Jobs\updateLegacySharePaths;
 use App\Jobs\backUpDatabase;
+use App\Services\SettingsService;
 
 //daily jobs
 Schedule::job(cleanExpiredShares::class)->daily();
@@ -51,3 +52,8 @@ Artisan::command('update-legacy-share-paths', function () {
 Artisan::command('back-up-database', function () {
     backUpDatabase::dispatch();
 })->purpose('Back up the database');
+
+Artisan::command('clear-settings-cache', function () {
+    app(SettingsService::class)->clearCache();
+    $this->info('Settings cache cleared.');
+})->purpose('Clear the settings cache');

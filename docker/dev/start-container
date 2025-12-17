@@ -167,6 +167,9 @@ su-exec erugo php artisan migrate --force
 echo "Running seeds..."
 su-exec erugo php artisan db:seed --force
 
+echo "Clearing settings cache..."
+su-exec erugo php artisan clear-settings-cache
+
 echo "Clearing templates cache..."
 su-exec erugo php artisan view:clear
 
