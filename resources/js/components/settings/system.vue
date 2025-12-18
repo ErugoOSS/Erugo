@@ -861,6 +861,10 @@ const handleDeleteAuthProvider = async (id) => {
               </div>
 
               <div class="setting-group-body">
+                <!-- Hidden decoy fields to prevent browser password save prompts -->
+                <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+                <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
+                
                 <div class="setting-group-body-item">
                   <label for="smtp_host">{{ $t('settings.system.smtp_host') }}</label>
                   <input type="text" id="smtp_host" v-model="settings.smtp_host" />
@@ -879,11 +883,11 @@ const handleDeleteAuthProvider = async (id) => {
                 </div>
                 <div class="setting-group-body-item">
                   <label for="smtp_username">{{ $t('settings.system.smtp_username') }}</label>
-                  <input type="text" id="smtp_username" v-model="settings.smtp_username" />
+                  <input type="text" id="smtp_username" v-model="settings.smtp_username" autocomplete="off" />
                 </div>
                 <div class="setting-group-body-item">
                   <label for="smtp_password">{{ $t('settings.system.smtp_password') }}</label>
-                  <input type="password" id="smtp_password" v-model="settings.smtp_password" />
+                  <input type="password" id="smtp_password" v-model="settings.smtp_password" autocomplete="new-password" />
                 </div>
                 <div class="setting-group-body-item">
                   <label for="smtp_sender_name">{{ $t('settings.system.smtp_sender_name') }}</label>
