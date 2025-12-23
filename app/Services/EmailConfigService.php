@@ -32,10 +32,15 @@ class EmailConfigService
       'host' => $settings['host'],
       'port' => $settings['port'],
       'encryption' => $encryption,
-      'username' => $settings['username'],
-      'password' => $settings['password'],
       'timeout' => null,
     ];
+
+    // Only add authentication credentials if they are actually provided
+    // This allows SMTP relays that don't require authentication to work
+    if (!empty($settings['username']) && !empty($settings['password'])) {
+      $config['username'] = $settings['username'];
+      $config['password'] = $settings['password'];
+    }
 
     $mailer = Mail::build($config);
 
