@@ -42,6 +42,12 @@ class EmailConfigService
       $config['password'] = $settings['password'];
     }
 
+    // Set EHLO domain from the sender email address to avoid 'localhost' issues
+    // with some SMTP relays (e.g., Gmail SMTP relay)
+    if (!empty($settings['from_address']) && strpos($settings['from_address'], '@') !== false) {
+      $config['local_domain'] = explode('@', $settings['from_address'])[1];
+    }
+
     $mailer = Mail::build($config);
 
     return $mailer;
