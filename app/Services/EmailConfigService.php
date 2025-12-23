@@ -37,7 +37,10 @@ class EmailConfigService
 
     // Only add authentication credentials if they are actually provided
     // This allows SMTP relays that don't require authentication to work
-    if (!empty($settings['username']) && !empty($settings['password'])) {
+    // Note: We also check for the string "null" because the frontend converts null values to "null" strings
+    $hasUsername = !empty($settings['username']) && $settings['username'] !== 'null';
+    $hasPassword = !empty($settings['password']) && $settings['password'] !== 'null';
+    if ($hasUsername && $hasPassword) {
       $config['username'] = $settings['username'];
       $config['password'] = $settings['password'];
     }
