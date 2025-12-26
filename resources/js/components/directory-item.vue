@@ -1,7 +1,7 @@
 <script setup>
-import { Folder, Trash, File } from 'lucide-vue-next'
+import { Folder, Trash, File, Loader, Check, Clock } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, niceFileName, getApiUrl } from '../utils'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const apiUrl = getApiUrl()
 
@@ -25,8 +25,40 @@ const props = defineProps({
   currentPath: {
     type: String,
     default: ''
+  },
+  // Upload state props
+  isUploading: {
+    type: Boolean,
+    default: false
+  },
+  currentUploadingFile: {
+    type: String,
+    default: ''
+  },
+  currentFileProgress: {
+    type: Number,
+    default: 0
+  },
+  completedFiles: {
+    type: Array,
+    default: () => []
   }
 })
+
+// Determine upload status for a file
+const getFileStatus = (file) => {
+  const filePath = file.fullPath || file.name
+  if (props.completedFiles.includes(filePath)) {
+    return 'completed'
+  }
+  if (props.currentUploadingFile === filePath) {
+    return 'uploading'
+  }
+  if (props.isUploading) {
+    return 'waiting'
+  }
+  return 'idle'
+}
 
 const openDirectories = ref([])
 
@@ -74,7 +106,12 @@ function getDirectories(structure) {
     <div v-if="structure.files && structure.files.length" class="root-files">
       <div 
         class="upload-basket-item" 
-        :class="{ 'clickable': readOnly && shareCode }"
+        :class="{ 
+          'clickable': readOnly && shareCode,
+          'is-uploading': getFileStatus(file) === 'uploading',
+          'is-completed': getFileStatus(file) === 'completed',
+          'is-waiting': getFileStatus(file) === 'waiting'
+        }"
         v-for="file in structure.files" 
         :key="file.fullPath || file.name"
         @click="readOnly && shareCode ? downloadFile(file) : null"
@@ -90,7 +127,20 @@ function getDirectories(structure) {
             {{ niceFileType(file.type) }}
           </div>
         </div>
-        <div class="hover-actions" v-if="!readOnly">
+        <!-- Upload status indicator -->
+        <div class="upload-status" v-if="isUploading">
+          <template v-if="getFileStatus(file) === 'waiting'">
+            <Clock class="status-icon waiting" />
+          </template>
+          <template v-else-if="getFileStatus(file) === 'uploading'">
+            <Loader class="status-icon uploading spin" />
+            <span class="progress-text">{{ Math.round(currentFileProgress) }}%</span>
+          </template>
+          <template v-else-if="getFileStatus(file) === 'completed'">
+            <Check class="status-icon completed" />
+          </template>
+        </div>
+        <div class="hover-actions" v-if="!readOnly && !isUploading">
           <button class="icon-only" @click="$emit('remove-file', file)">
             <Trash />
           </button>
@@ -110,7 +160,12 @@ function getDirectories(structure) {
         <div class="directory-files" v-if="dirContent.files && dirContent.files.length">
           <div 
             class="upload-basket-item" 
-            :class="{ 'clickable': readOnly && shareCode }"
+            :class="{ 
+              'clickable': readOnly && shareCode,
+              'is-uploading': getFileStatus(file) === 'uploading',
+              'is-completed': getFileStatus(file) === 'completed',
+              'is-waiting': getFileStatus(file) === 'waiting'
+            }"
             v-for="file in dirContent.files" 
             :key="file.fullPath || file.name"
             @click="readOnly && shareCode ? downloadFile(file, dirName) : null"
@@ -129,7 +184,20 @@ function getDirectories(structure) {
                 {{ niceFileType(file.type) }}
               </div>
             </div>
-            <div class="hover-actions" v-if="!readOnly">
+            <!-- Upload status indicator -->
+            <div class="upload-status" v-if="isUploading">
+              <template v-if="getFileStatus(file) === 'waiting'">
+                <Clock class="status-icon waiting" />
+              </template>
+              <template v-else-if="getFileStatus(file) === 'uploading'">
+                <Loader class="status-icon uploading spin" />
+                <span class="progress-text">{{ Math.round(currentFileProgress) }}%</span>
+              </template>
+              <template v-else-if="getFileStatus(file) === 'completed'">
+                <Check class="status-icon completed" />
+              </template>
+            </div>
+            <div class="hover-actions" v-if="!readOnly && !isUploading">
               <button class="icon-only" @click="$emit('remove-file', file)">
                 <Trash />
               </button>
@@ -146,6 +214,10 @@ function getDirectories(structure) {
           :read-only="readOnly"
           :share-code="shareCode"
           :current-path="currentPath ? `${currentPath}/${dirName}` : dirName"
+          :is-uploading="isUploading"
+          :current-uploading-file="currentUploadingFile"
+          :current-file-progress="currentFileProgress"
+          :completed-files="completedFiles"
         />
       </div>
     </template>
@@ -179,6 +251,67 @@ function getDirectories(structure) {
   
   &:hover {
     background-color: var(--panel-section-background-color-alt, rgba(255, 255, 255, 0.05));
+  }
+}
+
+// Upload status styles
+.upload-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 0.85em;
+  
+  .status-icon {
+    width: 16px;
+    height: 16px;
+    
+    &.waiting {
+      opacity: 0.5;
+    }
+    
+    &.uploading {
+      color: var(--accent-color, #3b82f6);
+    }
+    
+    &.completed {
+      color: var(--success-color, #22c55e);
+    }
+    
+    &.spin {
+      animation: spin 1s linear infinite;
+    }
+  }
+  
+  .progress-text {
+    min-width: 40px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-color, #3b82f6);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.upload-basket-item {
+  &.is-uploading {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  &.is-completed {
+    opacity: 0.7;
+  }
+  
+  &.is-waiting {
+    opacity: 0.6;
   }
 }
 </style>

@@ -46,6 +46,46 @@ const currentFileIndex = ref(0)
 const totalFiles = ref(0)
 const currentChunk = ref(0)
 const totalChunks = ref(0)
+const currentFileProgress = ref(0)
+const currentFileUploadedBytes = ref(0)
+const currentFileTotalBytes = ref(0)
+const currentFilePath = ref('')
+const completedFiles = ref([])
+const uploadStartTime = ref(null)
+const uploadTick = ref(0) // Reactive trigger for time-based computed properties
+let uploadTickInterval = null
+
+// Speed calculation baseline (reset on pause/resume to keep speed accurate)
+const speedBaselineTime = ref(null)
+const speedBaselineBytes = ref(0)
+const accumulatedElapsedTime = ref(0) // Track total elapsed time across pause/resume cycles
+const lastKnownSpeed = ref(0) // Store speed before pausing
+
+// Upload speed and time tracking
+const uploadSpeed = computed(() => {
+  // eslint-disable-next-line no-unused-vars
+  const _ = uploadTick.value // Force reactivity on tick
+  // When paused (no baseline time), return the last known speed
+  if (!speedBaselineTime.value) return lastKnownSpeed.value
+  const bytesSinceBaseline = uploadedBytes.value - speedBaselineBytes.value
+  if (bytesSinceBaseline <= 0) return lastKnownSpeed.value
+  const elapsedSeconds = (Date.now() - speedBaselineTime.value) / 1000
+  if (elapsedSeconds <= 0) return lastKnownSpeed.value
+  return bytesSinceBaseline / elapsedSeconds // bytes per second
+})
+
+const timeElapsed = computed(() => {
+  // eslint-disable-next-line no-unused-vars
+  const _ = uploadTick.value // Force reactivity on tick
+  if (!speedBaselineTime.value) return accumulatedElapsedTime.value
+  return accumulatedElapsedTime.value + (Date.now() - speedBaselineTime.value) / 1000 // seconds
+})
+
+const timeRemaining = computed(() => {
+  if (uploadSpeed.value <= 0 || totalBytes.value === 0) return 0
+  const bytesRemaining = totalBytes.value - uploadedBytes.value
+  return bytesRemaining / uploadSpeed.value // seconds
+})
 const expiryValue = ref(domData().default_expiry_time)
 const expiryUnit = ref('days')
 const maxExpiryTime = ref(domData().max_expiry_time)
@@ -307,6 +347,16 @@ const uploadFiles = async () => {
   const uploadId = simpleUUID()
   currentlyUploading.value = true
   isPaused.value = false
+  uploadStartTime.value = Date.now()
+  // Initialize speed baseline for accurate speed calculation
+  speedBaselineTime.value = Date.now()
+  speedBaselineBytes.value = 0
+  accumulatedElapsedTime.value = 0
+  // Start tick interval for updating time-based computed properties
+  if (uploadTickInterval) clearInterval(uploadTickInterval)
+  uploadTickInterval = setInterval(() => {
+    uploadTick.value++
+  }, 1000)
   uploadController.resumeUpload()
 
   if (totalSize.value > maxShareSize.value) {
@@ -385,11 +435,33 @@ const doTusUpload = async (uploadId) => {
           totalChunks.value = progress.totalChunks
         }
 
+        // Per-file progress and tracking
+        if (progress.currentFileProgress !== undefined) {
+          currentFileProgress.value = progress.currentFileProgress
+          currentFileUploadedBytes.value = progress.currentFileUploadedBytes
+          currentFileTotalBytes.value = progress.currentFileTotalBytes
+        }
+
+        // Track current file path and completed files
+        if (progress.currentFilePath) {
+          // If the file changed, mark the previous one as completed
+          if (currentFilePath.value && currentFilePath.value !== progress.currentFilePath) {
+            if (!completedFiles.value.includes(currentFilePath.value)) {
+              completedFiles.value.push(currentFilePath.value)
+            }
+          }
+          currentFilePath.value = progress.currentFilePath
+        }
+
         //set the page title to the progress
         document.title = `${Math.round(progress.percentage)}% - ${currentFileName.value}`
       },
       (result) => {
         document.title = pageTitleAtStart
+        // Mark the last file as completed
+        if (currentFilePath.value && !completedFiles.value.includes(currentFilePath.value)) {
+          completedFiles.value.push(currentFilePath.value)
+        }
         // Clear the interrupted upload state on successful completion
         clearUploadState()
         if (store.isGuest()) {
@@ -419,6 +491,11 @@ const doTusUpload = async (uploadId) => {
 }
 
 const resetUploadState = () => {
+  // Stop the tick interval
+  if (uploadTickInterval) {
+    clearInterval(uploadTickInterval)
+    uploadTickInterval = null
+  }
   setTimeout(() => {
     uploadProgress.value = 0
     uploadedBytes.value = 0
@@ -428,6 +505,17 @@ const resetUploadState = () => {
     totalFiles.value = 0
     currentChunk.value = 0
     totalChunks.value = 0
+    currentFileProgress.value = 0
+    currentFileUploadedBytes.value = 0
+    currentFileTotalBytes.value = 0
+    currentFilePath.value = ''
+    completedFiles.value = []
+    uploadStartTime.value = null
+    speedBaselineTime.value = null
+    speedBaselineBytes.value = 0
+    accumulatedElapsedTime.value = 0
+    lastKnownSpeed.value = 0
+    uploadTick.value = 0
   }, 1000)
 }
 
@@ -475,8 +563,18 @@ const togglePause = () => {
   isPaused.value = !isPaused.value
   console.log(isPaused.value ? 'Upload paused' : 'Upload resumed')
   if (isPaused.value) {
+    // Pausing: save current speed before stopping
+    lastKnownSpeed.value = uploadSpeed.value
+    // Accumulate elapsed time so far
+    if (speedBaselineTime.value) {
+      accumulatedElapsedTime.value += (Date.now() - speedBaselineTime.value) / 1000
+    }
+    speedBaselineTime.value = null // Stop time tracking while paused
     uploadController.pauseUpload()
   } else {
+    // Resuming: reset baseline for fresh speed calculation
+    speedBaselineTime.value = Date.now()
+    speedBaselineBytes.value = uploadedBytes.value
     uploadController.resumeUpload()
   }
 }
@@ -665,7 +763,7 @@ const handleDropzoneClick = (e) => {
   }
 }
 
-// Add this computed property to organize files by directory
+
 const filesByDirectory = computed(() => {
   const structure = {}
 
@@ -724,8 +822,30 @@ const filesByDirectory = computed(() => {
     </div>
     <div class="max-size-label">{{ niceFileSize(totalSize) }} / {{ niceFileSize(maxShareSize) }}</div>
 
-    <div>
+
       <div class="progress-bar-container" :class="{ visible: currentlyUploading }">
+
+        <div class="progress-bar-text">
+          <template v-if="uploadProgress < 100">
+            <div class="progress-item percentage-text">
+              {{ Math.round(uploadProgress) }}%
+            </div>
+            <div class="progress-item upload-speed-text ">
+              {{ niceFileSize(uploadSpeed) }}/s
+            </div>
+            <div class="progress-item time-remaining-text">
+              {{ Math.round(timeRemaining) }}s remaining
+            </div>
+            
+            <div v-if="currentFileName" class="progress-item file-name-text">
+              {{ currentFileIndex }} / {{ totalFiles }}
+            </div>
+          </template>
+          <template v-else>
+            {{ $t('Processing uploaded files') }}
+          </template>
+        </div>
+
         <div class="progress-bar">
           <div class="progress-bar-fill" :style="{ width: `${uploadProgress}%` }"></div>
         </div>
@@ -733,27 +853,8 @@ const filesByDirectory = computed(() => {
           <Pause v-if="!isPaused" />
           <Play v-else />
         </div>
-        <div class="progress-bar-text">
-          <template v-if="uploadProgress < 100">
-            {{ Math.round(uploadProgress) }}%
-            <div class="progress-bar-text-sub">
-              {{ niceFileSize(uploadedBytes) }} /
-              {{ niceFileSize(totalBytes) }}
-            </div>
-            <div v-if="currentFileName" class="progress-bar-text-sub">
-              {{ $t('File') }}: {{ currentFileIndex }} / {{ totalFiles }} - {{ currentFileName }}
-            </div>
-          </template>
-          <template v-else>
-            {{ $t('Processing uploaded files') }}
-            <div class="progress-bar-text-sub">
-              {{ niceFileSize(uploadedBytes) }} /
-              {{ niceFileSize(totalBytes) }}
-            </div>
-          </template>
-        </div>
       </div>
-    </div>
+
   </div>
   <div class="expiry-settings-container">
     <span class="expiry-label" @click="toggleExpirySettings">
@@ -845,7 +946,15 @@ const filesByDirectory = computed(() => {
       ref="dropzone"
     >
       <template v-if="uploadBasket.length > 0">
-        <directory-item :structure="filesByDirectory" :is-root="true" @remove-file="removeFile" />
+        <directory-item 
+          :structure="filesByDirectory" 
+          :is-root="true" 
+          @remove-file="removeFile"
+          :is-uploading="currentlyUploading"
+          :current-uploading-file="currentFilePath"
+          :current-file-progress="currentFileProgress"
+          :completed-files="completedFiles"
+        />
       </template>
 
       <div class="upload-basket-empty" v-else>

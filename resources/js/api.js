@@ -1594,7 +1594,11 @@ export const uploadFilesInChunks = async (
                 totalBytes: totalSize,
                 currentFile: i + 1,
                 totalFiles: files.length,
-                currentFileName: file.name
+                currentFileName: file.name,
+                currentFilePath: file.fullPath || file.name,
+                currentFileProgress: progress.percentage,
+                currentFileUploadedBytes: progress.uploadedBytes,
+                currentFileTotalBytes: progress.totalBytes
               })
             },
             (uploadResult) => {
