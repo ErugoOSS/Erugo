@@ -194,7 +194,7 @@ const setShowDeletedSharesAll = (value) => {
 }
 
 const goToHelp = () => {
-  window.open('https://new.erugo.app/docs/configuration/', '_blank')
+  window.open('https://erugo.app/docs/', '_blank')
 }
 
 const handleViewUserShares = (user) => {
