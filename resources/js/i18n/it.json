@@ -1,12 +1,22 @@
 {
+  "Account Created": "Account creato",
   "Add Files": "Aggiungi file",
   "Add Folders": "Aggiungi cartelle",
   "Add Recipient": "Aggiungi destinatario",
+  "Email Verification": "Verifica dell'e-mail",
   "Message to share recipients (optional)": "Messaggio per i destinatari della condivisione (facoltativo)",
   "No files added yet": "Nessun file aggiunto",
   "No recipients": "Nessun destinatario",
+  "Password Reset": "Ripristino della password",
   "Powered by": "Powered by",
   "Reverse Share": "Condivisione inversa",
+  "Reverse Share Invite": "Invito ad azioni inverse",
+  "Share Created": "Condividi Creato",
+  "Share Deleted Warning": "Condividi Avviso cancellato",
+  "Share Deletion Warning": "Condividi Avviso di cancellazione",
+  "Share Downloaded": "Condividi Scaricati",
+  "Share Expired Warning": "Condividi Avviso scaduto",
+  "Share Expiry Warning": "Avviso di scadenza delle azioni",
   "Share Name": "Nome Condivisione",
   "Share URL": "URL della condivisione",
   "We'll provide you with a link instead": {
@@ -418,7 +428,8 @@
     "allShares": {
       "allUsers": "Tutti gli utenti",
       "filterByUser": "Filtrare per utente",
-      "noShares": "Non ci sono azioni da mostrare"
+      "noShares": "Non ci sono azioni da mostrare",
+      "owner": "Proprietario"
     },
     "authProvidersSavedSuccessfully": "Fornitori di autorizzazioni salvati con successo",
     "branding": {
@@ -992,6 +1003,19 @@
       "years": "Anno/i"
     },
     "guest_share_created": "Grazie! I file sono stati inviati con successo. Tra pochi istanti verrà effettuato il logout.",
+    "interrupted_upload": {
+      "description": "Sembra che il caricamento in corso sia stato interrotto.",
+      "files": "File",
+      "got_it": "Capito",
+      "how_to_resume": "Per riprendere il caricamento:",
+      "note": "Nota: affinché la ripresa funzioni, i file devono essere identici a quelli caricati (stesso nome, dimensioni e contenuto).",
+      "share_name": "Nome Condivisione",
+      "start_fresh": "Iniziare da capo",
+      "step1": "Selezionate gli stessi file che stavate caricando prima",
+      "step2": "Fare clic su Upload: il caricamento continuerà automaticamente dal punto in cui è stato interrotto.",
+      "title": "Rilevato un caricamento interrotto",
+      "total_size": "Dimensione totale"
+    },
     "password_confirmation_required": "È richiesta la conferma della password",
     "password_mismatch": "Le password non corrispondono",
     "password_required": "La password è necessaria per proteggere la condivisione",

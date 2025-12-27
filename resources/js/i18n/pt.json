@@ -1,12 +1,22 @@
 {
+  "Account Created": "Conta criada",
   "Add Files": "Adicionar Ficheiros",
   "Add Folders": "Adicionar Pastas",
   "Add Recipient": "Adicionar Destinatário",
+  "Email Verification": "Verificação de correio eletrónico",
   "Message to share recipients (optional)": "Mensagem para partilhar destinatários (opcional)",
   "No files added yet": "Ainda não tem ficheiros adicionados",
   "No recipients": "Sem destinatários",
+  "Password Reset": "Redefinição da palavra-passe",
   "Powered by": "Powered by",
   "Reverse Share": "Pedir Transferência",
+  "Reverse Share Invite": "Convite para a emissão de acções invertidas",
+  "Share Created": "Partilhar criado",
+  "Share Deleted Warning": "Partilhar Aviso apagado",
+  "Share Deletion Warning": "Partilhar Aviso de eliminação",
+  "Share Downloaded": "Partilhar Descarregado",
+  "Share Expired Warning": "Partilhar Aviso de expiração",
+  "Share Expiry Warning": "Aviso de expiração de acções",
   "Share Name": "Nome de partilha",
   "Share URL": "Endereço de partilha",
   "We'll provide you with a link instead": {
@@ -397,7 +407,8 @@
     "allShares": {
       "allUsers": "Todos os utilizadores",
       "filterByUser": "Filtrar por utilizador",
-      "noShares": "Não há acções para mostrar"
+      "noShares": "Não há acções para mostrar",
+      "owner": "Proprietário"
     },
     "authProvidersSavedSuccessfully": "Fornecedores de autenticação alterados com sucesso",
     "branding": {
@@ -963,6 +974,19 @@
       "years": "Ano(s)"
     },
     "guest_share_created": "Obrigado! Os seus ficheiros foram enviados com sucesso. Dentro de alguns instantes, a sessão será encerrada.",
+    "interrupted_upload": {
+      "description": "Parece que tinha um carregamento em curso que foi interrompido.",
+      "files": "Ficheiros",
+      "got_it": "Já está",
+      "how_to_resume": "Para retomar o carregamento:",
+      "note": "Nota: Para que o resumo funcione, os ficheiros têm de ser idênticos aos que estava a carregar (mesmo nome, tamanho e conteúdo).",
+      "share_name": "Nome de partilha",
+      "start_fresh": "Começar de novo",
+      "step1": "Selecione os mesmos ficheiros que carregou anteriormente",
+      "step2": "Clique em Upload - a transferência continuará automaticamente a partir do ponto onde ficou",
+      "title": "Upload interrompido detectado",
+      "total_size": "Tamanho Total"
+    },
     "password_confirmation_required": "Confirmação da palavra-passe necessária",
     "password_mismatch": "As palavras-passe não coincidem",
     "password_required": "É necessária uma palavra-passe para proteger a partilha",

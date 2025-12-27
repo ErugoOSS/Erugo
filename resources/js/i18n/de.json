@@ -1,12 +1,22 @@
 {
+  "Account Created": "Konto erstellt",
   "Add Files": "Dateien hinzufügen",
   "Add Folders": "Ordner hinzufügen",
   "Add Recipient": "Empfänger hinzufügen",
+  "Email Verification": "E-Mail-Überprüfung",
   "Message to share recipients (optional)": "Nachricht an die gemeinsamen Empfänger (optional)",
   "No files added yet": "Noch keine Dateien hinzugefügt",
   "No recipients": "Keine Empfänger",
+  "Password Reset": "Passwort zurücksetzen",
   "Powered by": "Powered by",
   "Reverse Share": "Umgekehrte Aufteilung",
+  "Reverse Share Invite": "Reverse Share Invite",
+  "Share Created": "Teilen Erstellt",
+  "Share Deleted Warning": "Gelöschte Warnung teilen",
+  "Share Deletion Warning": "Warnung vor der Löschung von Aktien",
+  "Share Downloaded": "Heruntergeladene Freigabe",
+  "Share Expired Warning": "Anteil Abgelaufene Warnung",
+  "Share Expiry Warning": "Warnung vor dem Verfall von Aktien",
   "Share Name": "Name der Freigabe",
   "Share URL": "URL teilen",
   "We'll provide you with a link instead": {
@@ -418,7 +428,8 @@
     "allShares": {
       "allUsers": "Alle Benutzer",
       "filterByUser": "Filter nach Benutzer",
-      "noShares": "Es gibt keine Aktien zu zeigen"
+      "noShares": "Es gibt keine Aktien zu zeigen",
+      "owner": "Eigentümer"
     },
     "authProvidersSavedSuccessfully": "Auth-Provider erfolgreich gespeichert",
     "branding": {
@@ -992,6 +1003,19 @@
       "years": "Jahr(e)"
     },
     "guest_share_created": "Dankeschön! Ihre Dateien wurden erfolgreich gesendet. In wenigen Augenblicken werden Sie abgemeldet.",
+    "interrupted_upload": {
+      "description": "Es sieht so aus, als hätten Sie einen Upload durchgeführt, der unterbrochen wurde.",
+      "files": "Dateien",
+      "got_it": "Verstanden",
+      "how_to_resume": "Um den Upload fortzusetzen:",
+      "note": "Hinweis: Damit die Wiederaufnahme funktioniert, müssen die Dateien mit denen identisch sein, die Sie hochgeladen haben (gleicher Name, Größe und Inhalt).",
+      "share_name": "Name der Freigabe",
+      "start_fresh": "Neu anfangen",
+      "step1": "Wählen Sie die gleichen Dateien, die Sie zuvor hochgeladen haben",
+      "step2": "Klicken Sie auf Hochladen - der Upload wird automatisch an der Stelle fortgesetzt, an der er unterbrochen wurde.",
+      "title": "Unterbrochener Upload erkannt",
+      "total_size": "Gesamtgröße"
+    },
     "password_confirmation_required": "Passwortbestätigung erforderlich",
     "password_mismatch": "Passwörter stimmen nicht überein",
     "password_required": "Zum Schutz der Freigabe ist ein Passwort erforderlich",

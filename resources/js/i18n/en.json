@@ -1,12 +1,22 @@
 {
+  "Account Created": "Account Created",
   "Add Files": "Add Files",
   "Add Folders": "Add Folders",
   "Add Recipient": "Add Recipient",
+  "Email Verification": "Email Verification",
   "Message to share recipients (optional)": "Message to share recipients (optional)",
   "No files added yet": "No files added yet",
   "No recipients": "No recipients",
+  "Password Reset": "Password Reset",
   "Powered by": "Powered by",
   "Reverse Share": "Reverse Share",
+  "Reverse Share Invite": "Reverse Share Invite",
+  "Share Created": "Share Created",
+  "Share Deleted Warning": "Share Deleted Warning",
+  "Share Deletion Warning": "Share Deletion Warning",
+  "Share Downloaded": "Share Downloaded",
+  "Share Expired Warning": "Share Expired Warning",
+  "Share Expiry Warning": "Share Expiry Warning",
   "Share Name": "Share Name",
   "Share URL": "Share URL",
   "We'll provide you with a link instead": {
@@ -418,7 +428,8 @@
     "allShares": {
       "allUsers": "All users",
       "filterByUser": "Filter by user",
-      "noShares": "There are no shares to show"
+      "noShares": "There are no shares to show",
+      "owner": "Owner"
     },
     "authProvidersSavedSuccessfully": "Auth providers saved successfully",
     "branding": {
@@ -992,6 +1003,19 @@
       "years": "Year(s)"
     },
     "guest_share_created": "Thank you! Your files have been sent successfully. In a few moments you will be logged out.",
+    "interrupted_upload": {
+      "description": "It looks like you had an upload in progress that was interrupted.",
+      "files": "Files",
+      "got_it": "Got it",
+      "how_to_resume": "To resume your upload:",
+      "note": "Note: For resume to work, the files must be identical to the ones you were uploading (same name, size, and content).",
+      "share_name": "Share Name",
+      "start_fresh": "Start Fresh",
+      "step1": "Select the same files you were uploading before",
+      "step2": "Click Upload - the upload will automatically continue from where it left off",
+      "title": "Interrupted Upload Detected",
+      "total_size": "Total Size"
+    },
     "password_confirmation_required": "Password confirmation required",
     "password_mismatch": "Passwords don't match",
     "password_required": "Password is required to protect share",

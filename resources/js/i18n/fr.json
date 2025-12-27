@@ -1,12 +1,22 @@
 {
+  "Account Created": "Compte créé",
   "Add Files": "Ajouter fichier(s)",
   "Add Folders": "Ajouter dossier(s)",
   "Add Recipient": "Ajouter destinataire(s)",
+  "Email Verification": "Vérification de l'adresse mail",
   "Message to share recipients (optional)": "Message au(x) destinataire(s) du partage (facultatif)",
   "No files added yet": "Aucun fichier ajouté",
   "No recipients": "Pas de destinataire(s)",
+  "Password Reset": "Réinitialiser le mot de passe",
   "Powered by": "Propulsé par",
   "Reverse Share": "Partage inversé",
+  "Reverse Share Invite": "Invitation au partage inversé",
+  "Share Created": "Partage créé",
+  "Share Deleted Warning": "Avertissement de suppression de partage",
+  "Share Deletion Warning": "Avertissement de suppression d'actions",
+  "Share Downloaded": "Partage téléchargé",
+  "Share Expired Warning": "Avertissement de partage expiré",
+  "Share Expiry Warning": "Avertissement d’expiration de partage",
   "Share Name": "Nom du partage",
   "Share URL": "Partager l'URL",
   "We'll provide you with a link instead": {
@@ -52,9 +62,9 @@
     "please_enter_password_and_confirm_password": "Veuillez saisir un mot de passe et le confirmer",
     "please_enter_verification_code": "Veuillez saisir le code de vérification à 6 chiffres",
     "please_fill_all_fields": "Veuillez remplir tous les champs",
-    "register": "Registre",
-    "registering": "S'inscrire...",
-    "registration_failed": "Échec de l'enregistrement",
+    "register": "S'inscrire",
+    "registering": "Inscription en cours…",
+    "registration_failed": "L’inscription a échoué",
     "registration_successful": "Inscription réussie ! Veuillez vérifier votre e-mail pour le code de vérification.",
     "request_reset": "Demande de réinitialisation",
     "resend_code": "Renvoyer le code",
@@ -81,7 +91,7 @@
       "status": "Statut"
     },
     "auth": {
-      "acceptMarketing": "Envoyez-moi les mises à jour des produits et les nouvelles",
+      "acceptMarketing": "Recevoir les mises à jour et les actualités du produit",
       "acceptPrivacy": "J'accepte les",
       "acceptTerms": "J'accepte les",
       "confirmPassword": "Confirmez le mot de passe",
@@ -90,8 +100,8 @@
       "createInstance": "Créer une instance maintenant",
       "description": "Connectez-vous ou créez un compte pour connecter votre instance à Erugo Connect afin de faciliter le routage des domaines.",
       "email": "Adresse électronique",
-      "emailPlaceholder": "you@example.com",
-      "emailRequired": "L'adresse électronique est requise",
+      "emailPlaceholder": "toi@exemple.com",
+      "emailRequired": "L'adresse mail est requise",
       "forgotPassword": "Vous avez oublié votre mot de passe ?",
       "forgotPasswordDescription": "Saisissez votre adresse électronique et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
       "forgotPasswordTitle": "Réinitialiser le mot de passe",
@@ -111,7 +121,7 @@
       "registerButton": "Créer un compte",
       "registerDescription": "Créez un nouveau compte Erugo Connect pour commencer.",
       "registerInstead": "Créer un",
-      "resetEmailSent": "Si un compte existe avec cet email, un lien de réinitialisation du mot de passe a été envoyé.",
+      "resetEmailSent": "Si un compte existe avec ce mail, un lien de réinitialisation du mot de passe a été envoyé.",
       "sendResetLink": "Envoyer le lien de réinitialisation",
       "termsLink": "Conditions d'utilisation",
       "title": "Se connecter à Erugo Connect"
@@ -156,20 +166,20 @@
     "disconnectFailed": "Échec de la déconnexion du tunnel",
     "disconnected": "Tunnel déconnecté",
     "emailVerification": {
-      "checkFailed": "Échec de la vérification de l'état de la vérification",
+      "checkFailed": "Échec de la vérification du statut",
       "checkStatus": "Vérifier le statut de la vérification",
       "description": "Nous avons envoyé un courriel de vérification à votre adresse. Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification pour continuer.",
       "didntReceive": "Vous n'avez pas reçu l'e-mail ?",
       "instructions": "Que faire ensuite ?",
       "resend": "Renvoyer l'e-mail de vérification",
       "resendFailed": "Échec du renvoi de l'e-mail de vérification",
-      "resent": "Courriel de vérification envoyé !",
-      "sentTo": "Courriel de vérification envoyé à",
+      "resent": "Mail de vérification envoyé !",
+      "sentTo": "Mail de vérification envoyé à",
       "step1": "Vérifiez votre boîte de réception (et votre dossier spam)",
       "step2": "Cliquez sur le lien de vérification contenu dans l'e-mail",
       "step3": "Revenez ici et cliquez sur \"Vérifier l'état\".",
       "stillPending": "L'adresse électronique n'a pas encore été vérifiée. Veuillez vérifier votre boîte de réception.",
-      "title": "Vérifier votre adresse électronique",
+      "title": "Vérifier votre email",
       "verified": "Email vérifié ! Vous pouvez maintenant continuer."
     },
     "errorLoadingStatus": "Échec du chargement de l'état de Cloud Connect",
@@ -185,11 +195,11 @@
       "suggestions": "Alternatives disponibles",
       "title": "Configurer votre instance"
     },
-    "instanceAlreadyLinked": "Cette installation d'Erugo est déjà enregistrée sous un autre compte utilisateur. Si vous avez créé un nouveau compte, veuillez vous connecter en utilisant votre ancien compte pour vous connecter à votre instance déjà revendiquée.",
+    "instanceAlreadyLinked": "Cette installation d’Erugo est déjà enregistrée sur un autre compte utilisateur. Si vous avez créé un nouveau compte, veuillez vous connecter avec votre compte précédent afin de vous connecter à votre instance déjà associée.",
     "instanceCreateFailed": "Échec de la création de l'instance",
     "instanceCreated": "Instance créée avec succès !",
     "instances": {
-      "cancelSubdomainEdit": "Fermer",
+      "cancelSubdomainEdit": "Annuler",
       "confirmDelete": "Supprimer l'instance",
       "confirmDeleteCurrent": "Déconnecter et supprimer",
       "confirmLink": "Instance de liaison",
@@ -220,21 +230,21 @@
       "regenerateToken": "Régénérer le jeton",
       "regenerateTokenTitle": "Régénérer le jeton",
       "regenerateTokenWarning": "La régénération du jeton invalidera le jeton actuel. Vous devrez reconnecter cette instance.",
-      "save": "Enregistrer",
+      "save": "Enregistrer les modifications",
       "subdomainWarning": "Le changement de sous-domaine modifiera l'URL de votre instance. Vous devrez peut-être vous reconnecter.",
       "tokenCopied": "Jeton copié dans le presse-papiers",
       "tokenRegenerateFailed": "Échec de la régénération du jeton",
       "tokenRegenerated": "Token régénéré avec succès",
-      "tokenRegeneratedDescription": "Votre nouveau jeton d'instance est indiqué ci-dessous. Veillez à le copier maintenant - vous ne pourrez plus le voir !",
+      "tokenRegeneratedDescription": "Votre nouveau jeton d’instance est affiché ci-dessous. Assurez-vous de le copier maintenant : vous ne pourrez plus le consulter par la suite !",
       "tokenRegeneratedTitle": "Nouveau jeton généré",
       "updateFailed": "Échec de la mise à jour de l'instance",
       "updateSuccess": "L'instance a été mise à jour avec succès"
     },
     "introduction": {
-      "description": "Erugo Connect donne à votre instance auto-hébergée une URL publique en quelques secondes.\nPas de port forwarding, pas de reverse proxies, pas de DNS, juste un partage sans effort.",
-      "description_2": "Erugo Connect crée un tunnel sécurisé entre votre instance Erugo et notre système de routage réseau. Lorsqu'un utilisateur accède à votre domaine erugo.cloud, nous transmettons de manière sécurisée la demande au serveur web de votre instance par le biais de ce tunnel. Cela vous permet de rendre votre instance disponible en ligne sans avoir à gérer le transfert de port, les proxies inversés, le DNS ou la configuration SSL - nous nous occupons de tout pour vous.",
+      "description": "Erugo Connect fournit à votre instance auto-hébergée une URL publique en quelques secondes.\nAucune redirection de port, aucun proxy inverse, aucun casse-tête DNS : un partage simple et sans effort.",
+      "description_2": "Erugo Connect crée un tunnel sécurisé entre votre instance Erugo et notre système de routage réseau. Lorsqu’un utilisateur accède à votre domaine erugo.cloud, nous relayons la requête de manière sécurisée via ce tunnel jusqu’au serveur web de votre instance. Cela vous permet de rendre votre instance accessible en ligne sans avoir à gérer la redirection de ports, les proxys inverses, le DNS ou la configuration SSL — nous nous occupons de tout pour vous.",
       "description_2.1": "Erugo Connect utilise WireGuard sous le capot - une technologie VPN open-source très respectée et largement utilisée par la communauté des auto-hébergeurs. Vous pouvez en savoir plus sur WireGuard",
-      "description_3": "Erugo a été créé pour vous redonner le contrôle de vos données. Nous croyons fermement en ce principe fondamental, et Erugo Connect est conçu pour défendre votre droit à la propriété de vos données. Connecter votre instance à notre réseau ne nous donne pas accès à vos données ou à vos parts. Le tunnel est initié par votre instance et est entièrement contrôlé par vous.",
+      "description_3": "Erugo a été créé pour vous redonner le contrôle de vos données. Nous croyons fermement en ce principe fondamental, et Erugo Connect est conçu pour garantir votre droit à la propriété de vos données. La connexion de votre instance à notre réseau ne nous donne aucun accès à vos données ni à vos partages. Le tunnel est initié par votre instance et reste entièrement sous votre contrôle.",
       "description_4": "Erugo Connect est totalement optionnel. Il s'agit d'une fonction de commodité conçue pour faciliter l'installation - ce n'est pas une exigence pour utiliser Erugo avec succès.",
       "learnMore": "En savoir plus.",
       "title_2": "Comment cela fonctionne-t-il ?",
@@ -266,14 +276,14 @@
       "confirmDowngrade": "Rétrogradation",
       "confirmReactivate": "Réactiver",
       "confirmUpgrade": "Mettre à niveau maintenant",
-      "downgradeMessage": "Votre plan sera déclassé à la fin de votre période de facturation actuelle ({date}). Jusqu'à cette date, vous conserverez les caractéristiques de votre plan actuel.",
-      "downgradeTitle": "Plan de déclassement",
+      "downgradeMessage": "Votre abonnement sera déclassé à la fin de votre période de facturation actuelle ({date}). Jusqu'à cette date, vous conserverez les caractéristiques de votre plan actuel.",
+      "downgradeTitle": "Rétrograder l’abonnement",
       "from": "De",
       "reactivateMessage": "Votre abonnement sera réactivé et se poursuivra normalement. Aucun frais supplémentaire ne sera facturé jusqu'à la prochaine date de facturation.",
       "reactivateTitle": "Réactiver l'abonnement",
       "to": "Pour",
       "upgradeMessage": "La différence au prorata vous sera facturée immédiatement. Les nouvelles caractéristiques de votre plan seront disponibles immédiatement.",
-      "upgradeTitle": "Plan de mise à niveau"
+      "upgradeTitle": "Passer à l’offre supérieure"
     },
     "planManagement": {
       "changePlan": "Plan de changement",
@@ -285,7 +295,7 @@
       "free": "Gratuit",
       "manage": "Gérer",
       "selected": "SÉLECTIONNÉ",
-      "title": "Gérer votre plan"
+      "title": "Gérer votre abonnement"
     },
     "ready": {
       "connect": "Se connecter",
@@ -303,7 +313,7 @@
       "disconnected": "Déconnecté",
       "domain": "Domaine",
       "noInstance": "Vous n'avez pas encore créé d'instance",
-      "noPlan": "Pas de plan sélectionné",
+      "noPlan": "Aucun abonnement sélectionné",
       "notLoggedIn": "Non connecté",
       "plan": "Plan"
     },
@@ -311,7 +321,7 @@
     "subdomainNotAvailable": "Veuillez choisir un sous-domaine disponible",
     "subscription": {
       "bandwidth": "{count} Largeur de bande Mbps",
-      "bandwidthUnlimited": "Largeur de bande illimitée",
+      "bandwidthUnlimited": "Trafic illimité",
       "business": {
         "customDomains": "{count} domaines personnalisés",
         "instances": "Jusqu'à {count} instances",
@@ -323,16 +333,16 @@
       "cancellationScheduledMessage": "Votre abonnement Erugo Connect sera annulé à la fin de votre période de facturation ({date}).",
       "cancellationScheduledTitle": "L'annulation de votre abonnement est prévue",
       "customDomains": "{count} domaines personnalisés par instance",
-      "description": "Sélectionnez un plan d'abonnement pour activer Cloud Connect pour votre instance.",
-      "description_read_only": "Erugo Connect est disponible gratuitement pour une utilisation basique ou personnelle. Si vous avez besoin de plus de bande passante ou de domaines personnalisés, vous pouvez choisir l'un de nos plans payants.",
+      "description": "Sélectionnez un abonnement afin d’activer Cloud Connect pour votre instance.",
+      "description_read_only": "Erugo Connect est disponible gratuitement pour un usage basique ou personnel. Si vous avez besoin de plus de bande passante ou de domaines personnalisés, vous pouvez choisir l’un de nos abonnements payants.",
       "freePlanSelected": "Plan gratuit activé !",
       "instances": "{count, plural, one {1 instance} other {Jusqu'à {count} instances} }",
-      "loadPlansFailed": "Échec du chargement des plans d'abonnement",
-      "loadingPlans": "Chargement des plans disponibles...",
+      "loadPlansFailed": "Échec du chargement des abonnements",
+      "loadingPlans": "Chargement des abonnements disponibles…",
       "loggedInAs": "Inscrit en tant que",
       "month": "mois",
       "noCustomDomains": "Pas de domaines personnalisés",
-      "planChanged": "Votre plan a été mis à jour",
+      "planChanged": "Votre abonnement a été mis à jour",
       "pollingNote": "Effectuez votre paiement dans la nouvelle fenêtre. Cette page sera mise à jour automatiquement.",
       "pro": {
         "customDomain": "{count} domaine personnalisé",
@@ -345,7 +355,7 @@
       "stopWaiting": "Fermer",
       "subdomain": "Sous-domaine gratuit inclus",
       "subscribe": "S'abonner",
-      "title": "Choisissez votre plan",
+      "title": "Choisissez votre abonnement",
       "transfer": "{count} Go de transfert/mois",
       "transferUnlimited": "Transfert illimité",
       "waitingForPayment": "En attente de paiement..."
@@ -357,13 +367,13 @@
       "in": "En",
       "instances": "Instances",
       "loading": "Chargement des données d'utilisation...",
-      "maxBandwidth": "Largeur de bande maximale",
+      "maxBandwidth": "Bande passante maximale",
       "maxInstances": "Instances maximales",
       "maxTransfer": "Transfert maximal",
       "noData": "Pas de données d'utilisation disponibles",
       "out": "Sortie",
       "periodStart": "Période commencée",
-      "planLimits": "Limites du régime",
+      "planLimits": "Limites de l’abonnement",
       "total": "Total",
       "transfer": "Transfert pour cette période",
       "unlimited": "Illimité"
@@ -418,7 +428,8 @@
     "allShares": {
       "allUsers": "Tous les utilisateurs",
       "filterByUser": "Filtrer par utilisateur",
-      "noShares": "Il n'y a pas d'actions à montrer"
+      "noShares": "Il n’y a aucun partage à afficher",
+      "owner": "Propriétaire"
     },
     "authProvidersSavedSuccessfully": "Les fournisseurs d'authentification ont été sauvegardés avec succès",
     "branding": {
@@ -447,7 +458,7 @@
       },
       "failed_to_save_settings": "L'enregistrement des paramètres a échoué.",
       "favicon": "Favicon",
-      "favicon_description": "Téléchargez un favicon personnalisé pour remplacer l'icône erugo par défaut dans l'onglet du navigateur.",
+      "favicon_description": "Envoyez un favicon personnalisé pour remplacer l’icône Erugo par défaut dans l’onglet du navigateur. »",
       "favicon_reset_failed": "Échec de la réinitialisation du favicon",
       "favicon_reset_success": "Favicon réinitialisé avec succès",
       "favicon_upload_failed": "Le téléchargement du favicon a échoué",
@@ -459,7 +470,7 @@
       "install_custom_theme_description_2": "Si vous téléchargez un thème à partir du web, assurez-vous que vous avez confiance en la source et que vous avez vérifié que le thème ne contient pas de code malveillant avant de l'installer.",
       "install_theme": "Installer le thème",
       "logo": "Logo",
-      "logo_and_favicon": "Logo",
+      "logo_and_favicon": "Logo et favicon",
       "logo_description": "Affichez le logo de votre entreprise au format PNG dans le coin supérieur gauche. Définissez la largeur souhaitée en pixels - la hauteur s'ajustera automatiquement pour maintenir le rapport hauteur/largeur. Utilisez une image source dont la largeur est au moins égale à la largeur d'affichage pour garantir la qualité.",
       "logo_image": "Image du logo",
       "logo_reset_failed": "Échec de la réinitialisation du logo",
@@ -581,12 +592,12 @@
     },
     "stats": {
       "downloads": {
-        "all_time": "Téléchargements de tous les temps",
-        "chart_title": "Les téléchargements au fil du temps",
+        "all_time": "Nombre total de téléchargements",
+        "chart_title": "Évolution des téléchargements",
         "days_option": "{days} jours",
         "downloads": "téléchargements",
         "downloads_in_period": "Téléchargements ({days} jours)",
-        "time_period": "Période de temps :",
+        "time_period": "Période:",
         "title": "Télécharger l'activité",
         "top_shares": "Actions les plus téléchargées",
         "unique_downloaders": "Téléchargeurs uniques"
@@ -631,17 +642,17 @@
       "nav": {
         "downloads": "Téléchargements",
         "file_types": "Types de fichiers",
-        "shares": "Partage",
+        "shares": "Partages",
         "storage": "Stockage",
         "users": "Utilisateurs"
       },
       "refresh": "Rafraîchir",
       "shares": {
-        "active_shares": "Actions actives",
+        "active_shares": "Partages actifs",
         "deleted": "Supprimé",
         "expired": "Expiré",
         "last_7_days": "7 derniers jours",
-        "per_share": "par action",
+        "per_share": "par partage",
         "protected": "Protégé",
         "title": "Statistiques de partage",
         "total_files": "Total des dossiers",
@@ -653,7 +664,7 @@
         "free": "gratuit",
         "of": "de",
         "of_disk": "de disque",
-        "share_storage": "Stockage d'actions",
+        "share_storage": "Stockage des partages",
         "title": "Aperçu du stockage",
         "used": "utilisé"
       },
@@ -665,7 +676,7 @@
         "title": "Statistiques sur les utilisateurs",
         "top_users": "Utilisateurs les plus actifs",
         "total_users": "Total des utilisateurs",
-        "with_shares": "Utilisateurs avec actions"
+        "with_shares": "Utilisateurs disposant de partages"
       }
     },
     "success": {
@@ -764,7 +775,7 @@
       "pattern_token_escape": "Caractère littéral (escape)",
       "pattern_token_hex": "Hexadécimal (0-9, A-F)",
       "pattern_token_lowercase": "Lettre minuscule (a-z)",
-      "pattern_token_range": "Gamme/classe de caractères",
+      "pattern_token_range": "Plage/classe de caractères",
       "pattern_token_uppercase": "Lettre majuscule (A-Z)",
       "provider_trust_warning": "Avertissement : confiance du fournisseur d'authentification",
       "provider_trust_warning_description": "Veillez à ne configurer et à n'activer que des fournisseurs d'authentification en qui vous avez confiance. Les fournisseurs d'authentification disposent de privilèges d'accès élevés à votre application et aux données des utilisateurs. L'ajout de fournisseurs non fiables ou compromis peut entraîner des accès non autorisés, des violations de données ou des prises de contrôle de comptes.",
@@ -799,7 +810,7 @@
       "share_url_pattern": "Modèle",
       "share_url_pattern_description": "Définissez un motif à l'aide de la syntaxe de motif Erugo. Utilisez des jetons spéciaux pour les caractères aléatoires ou incluez des caractères littéraux pour les préfixes et les séparateurs.",
       "share_url_pattern_placeholder": "par exemple, ES-####-AAA ou [A-Z][0-9]***.",
-      "share_url_pattern_preview": "Avant-première",
+      "share_url_pattern_preview": "Aperçu",
       "share_url_pattern_syntax": "Syntaxe du motif",
       "share_url_prefix": "Préfixe URL",
       "share_url_prefix_description": "Préfixe facultatif ajouté à toutes les URL de partage pour l'image de marque (par exemple, \"acme\" produit \"acme-autumn-breeze\"). Laisser vide pour ne pas avoir de préfixe.",
@@ -818,7 +829,7 @@
       "show_language_selector_description": "Permet d'activer la visibilité de la liste déroulante de sélection de la langue dans le coin supérieur droit de l'application. Lorsque cette option est activée, les utilisateurs peuvent rapidement passer d'une langue à l'autre.",
       "smtp": "SMTP",
       "smtp_encryption": "Chiffrement SMTP",
-      "smtp_encryption_description": "Si votre serveur nécessite un cryptage TLS ou SSL ou aucun cryptage.",
+      "smtp_encryption_description": "Indique si votre serveur nécessite TLS, SSL ou aucune forme de chiffrement.",
       "smtp_encryption_none": "Aucun",
       "smtp_host": "Hôte SMTP",
       "smtp_host_description": "L'adresse du serveur mail sortant. Elle est utilisée pour envoyer des notifications et d'autres mails du système aux utilisateurs.",
@@ -869,8 +880,8 @@
       "add_user_description": "Nous enverrons un mail à l'utilisateur avec un lien pour définir son mot de passe.",
       "add_user_self_registration_tip_off": "L'auto-enregistrement est actuellement désactivé pour l'authentification par courriel. Activez-la pour permettre aux utilisateurs de créer leurs propres comptes au lieu de les ajouter manuellement.",
       "add_user_self_registration_tip_off_short": "L'auto-enregistrement est désactivé. Cliquez ici pour gérer.",
-      "add_user_self_registration_tip_on": "L'auto-inscription est activée. Les utilisateurs peuvent créer leur propre compte.",
-      "add_user_self_registration_tip_on_short": "L'auto-inscription est activée. Cliquez ici pour gérer.",
+      "add_user_self_registration_tip_on": "L'auto-enregistrement est activé. Les utilisateurs peuvent créer leur propre compte.",
+      "add_user_self_registration_tip_on_short": "L'auto-enregistrement est activée. Cliquez ici pour gérer.",
       "admin": "Administrateur",
       "admin_help_text": "Faire de l'utilisateur un administrateur.",
       "admin_help_text_2": "L'utilisateur aura les mêmes privilèges que vous.\n",
@@ -916,7 +927,7 @@
       "user_created_successfully": "Utilisateur créé avec succès",
       "user_deleted_successfully": "L'utilisateur a été supprimé avec succès",
       "user_updated_successfully": "Mise à jour de l'utilisateur réussie",
-      "view_shares": "Voir les actions",
+      "view_shares": "Voir les partages",
       "you": "Vous"
     }
   },
@@ -992,6 +1003,19 @@
       "years": "An(s)"
     },
     "guest_share_created": "Merci ! Vos fichiers ont bien été envoyés. Vous serez déconnecté dans quelques instants.",
+    "interrupted_upload": {
+      "description": "Il semble qu'un téléchargement en cours ait été interrompu.",
+      "files": "Fichiers",
+      "got_it": "Compris",
+      "how_to_resume": "Pour reprendre votre téléchargement :",
+      "note": "Remarque : pour que la reprise fonctionne, les fichiers doivent être identiques à ceux que vous avez téléchargés (même nom, même taille et même contenu).",
+      "share_name": "Nom du partage",
+      "start_fresh": "Repartir à zéro",
+      "step1": "Sélectionnez les mêmes fichiers que ceux que vous avez téléchargés précédemment",
+      "step2": "Cliquez sur Télécharger - le téléchargement se poursuivra automatiquement là où il s'est arrêté.",
+      "title": "Téléchargement interrompu détecté",
+      "total_size": "Taille totale"
+    },
     "password_confirmation_required": "Confirmation du mot de passe requise",
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "password_required": "Un mot de passe est nécessaire pour protéger le partage",
@@ -1003,6 +1027,6 @@
   "warnings": {
     "how_to_fix": "Comment réparer",
     "tusd_help_title": "Service de téléchargement indisponible",
-    "tusd_unavailable": "Le service Upload n'est pas disponible. Le service tusd ne fonctionne pas. Les téléchargements de fichiers ne fonctionneront pas tant que ce problème n'aura pas été résolu."
+    "tusd_unavailable": "Service d’envoi de fichiers indisponible. Le service tusd n’est pas en cours d’exécution. Les téléversements de fichiers ne fonctionneront pas tant que ce problème ne sera pas résolu. »"
   }
 }

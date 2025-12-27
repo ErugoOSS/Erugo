@@ -1,12 +1,22 @@
 {
+  "Account Created": "Account aangemaakt",
   "Add Files": "Bestanden toevoegen",
   "Add Folders": "Mappen toevoegen",
   "Add Recipient": "Ontvanger Toevoegen",
+  "Email Verification": "E-mail verificatie",
   "Message to share recipients (optional)": "Bericht om te delen naar ontvanger (OPTIONEEL)",
   "No files added yet": "Nog geen bestanden toegevoegd",
   "No recipients": "Geen ontvangers",
+  "Password Reset": "Wachtwoord opnieuw instellen",
   "Powered by": "Aangedreven door",
   "Reverse Share": "Omgekeerd delen",
+  "Reverse Share Invite": "Omgekeerde aandelenuitnodiging",
+  "Share Created": "Deel Gemaakt",
+  "Share Deleted Warning": "Deel Verwijderde Waarschuwing",
+  "Share Deletion Warning": "Waarschuwing voor schrapping",
+  "Share Downloaded": "Gedownload aandeel",
+  "Share Expired Warning": "Deel Waarschuwing verlopen",
+  "Share Expiry Warning": "Waarschuwing voor verlopen aandelen",
   "Share Name": "Naam",
   "Share URL": "Gedeelde link",
   "We'll provide you with a link instead": {
@@ -418,7 +428,8 @@
     "allShares": {
       "allUsers": "Alle gebruikers",
       "filterByUser": "Filter op gebruiker",
-      "noShares": "Er zijn geen aandelen om te laten zien"
+      "noShares": "Er zijn geen aandelen om te laten zien",
+      "owner": "Eigenaar"
     },
     "authProvidersSavedSuccessfully": "Auth providers succesvol opgeslagen",
     "branding": {
@@ -986,6 +997,19 @@
       "years": "Jaar/jaren"
     },
     "guest_share_created": "Hartelijk dank! Je bestanden zijn succesvol verzonden. Over enkele ogenblikken wordt u uitgelogd.",
+    "interrupted_upload": {
+      "description": "Het lijkt erop dat je een upload aan de gang had die werd onderbroken.",
+      "files": "Bestanden",
+      "got_it": "Ik heb het",
+      "how_to_resume": "Uw upload hervatten:",
+      "note": "Opmerking: Om cv te laten werken, moeten de bestanden identiek zijn aan de bestanden die je aan het uploaden was (zelfde naam, grootte en inhoud).",
+      "share_name": "Naam",
+      "start_fresh": "Fris beginnen",
+      "step1": "Selecteer dezelfde bestanden die u eerder hebt geüpload",
+      "step2": "Klik op Uploaden - het uploaden gaat automatisch verder vanaf het punt waar het was gebleven",
+      "title": "Onderbroken upload gedetecteerd",
+      "total_size": "Totale grootte"
+    },
     "password_confirmation_required": "Wachtwoordbevestiging vereist",
     "password_mismatch": "Wachtwoorden komen niet overeen",
     "password_required": "Wachtwoord is nodig om delen te beveiligen",
