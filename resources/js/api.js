@@ -1406,12 +1406,18 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
       upload.findPreviousUploads().then(async (previousUploads) => {
         console.log('[uploadFileWithTus] Found previous uploads:', previousUploads.length, previousUploads.map(u => u.uploadUrl))
         
-        // Filter out uploads with mismatched protocol (e.g., http:// when we're on https://)
+        // Filter out uploads with mismatched protocol or host (including port)
+        // This prevents resume attempts when the site is accessed from a different URL
         const currentProtocol = window.location.protocol
+        const currentHost = window.location.host
         const validPreviousUploads = previousUploads.filter(u => {
-          const uploadProtocol = new URL(u.uploadUrl).protocol
-          if (uploadProtocol !== currentProtocol) {
+          const uploadUrl = new URL(u.uploadUrl)
+          if (uploadUrl.protocol !== currentProtocol) {
             console.log('[uploadFileWithTus] Skipping previous upload with mismatched protocol:', u.uploadUrl, '(current:', currentProtocol, ')')
+            return false
+          }
+          if (uploadUrl.host !== currentHost) {
+            console.log('[uploadFileWithTus] Skipping previous upload with mismatched host:', u.uploadUrl, '(current:', currentHost, ')')
             return false
           }
           return true
