@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 
-import { unsplashImages } from '../../unsplashImages'
 import { getBackgroundImages } from '../../api'
 import { domData } from '../../domData'
 
