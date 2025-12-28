@@ -22,17 +22,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
-
-        try {
-            $settingsService = new SettingsService();
-            $settings = $settingsService->getGlobalViewData();
-            View::share('settings', $settings);
-        } catch (\Exception $e) {
-            //do nothing
-        }
-
-
+        // Use a view composer for email templates so settings are loaded fresh each time.
+        // This is important for queue workers which are long-running processes -
+        // View::share() would capture stale values from when the worker started.
+        View::composer('emails.*', function ($view) {
+            try {
+                $settingsService = app(SettingsService::class);
+                $settings = $settingsService->getGlobalViewData();
+                $view->with('settings', $settings);
+            } catch (\Exception $e) {
+                // If settings can't be loaded, provide empty defaults
+                $view->with('settings', []);
+            }
+        });
 
         View::prependLocation(storage_path('templates'));
     }
