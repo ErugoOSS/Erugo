@@ -13,7 +13,7 @@
   "Reverse Share Invite": "Invitation au partage inversé",
   "Share Created": "Partage créé",
   "Share Deleted Warning": "Avertissement de suppression de partage",
-  "Share Deletion Warning": "Avertissement de suppression d'actions",
+  "Share Deletion Warning": "Avertissement de suppression de partage",
   "Share Downloaded": "Partage téléchargé",
   "Share Expired Warning": "Avertissement de partage expiré",
   "Share Expiry Warning": "Avertissement d’expiration de partage",
@@ -599,7 +599,7 @@
         "downloads_in_period": "Téléchargements ({days} jours)",
         "time_period": "Période:",
         "title": "Télécharger l'activité",
-        "top_shares": "Actions les plus téléchargées",
+        "top_shares": "Partages les plus téléchargés",
         "unique_downloaders": "Téléchargeurs uniques"
       },
       "error_loading": "Échec du chargement des statistiques du système",
@@ -623,7 +623,7 @@
         "categories_title": "Catégories",
         "disk_usage_description": "Affiche l'utilisation totale de l'espace disque. Envisagez de nettoyer les anciens partages si l'utilisation est élevée.",
         "disk_usage_title": "Utilisation du disque",
-        "downloads_description": "Suivre l'activité de téléchargement de toutes les actions sur la période choisie.",
+        "downloads_description": "Suivez l’activité de téléchargement sur l’ensemble de vos partages pendant la période sélectionnée.",
         "downloads_title": "Télécharger l'activité",
         "file_types_description": "Répartition des fichiers par catégorie sur l'ensemble des partages.",
         "file_types_title": "Type de fichier Distribution",
@@ -633,7 +633,7 @@
         "shares_title": "Statistiques de partage",
         "storage_description": "Surveillez l'utilisation du disque de votre serveur et l'espace consommé par les partages.",
         "storage_title": "Aperçu du stockage",
-        "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des actions.",
+        "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des partages.",
         "unique_downloaders_title": "Téléchargeurs uniques",
         "users_description": "Vue d'ensemble des comptes d'utilisateurs et de leurs niveaux d'activité.",
         "users_title": "Statistiques sur les utilisateurs"
@@ -656,7 +656,7 @@
         "protected": "Protégé",
         "title": "Statistiques de partage",
         "total_files": "Total des dossiers",
-        "total_shares": "Total des actions"
+        "total_shares": "Total des partages"
       },
       "storage": {
         "available_space": "Espace disponible",
@@ -672,7 +672,7 @@
         "active": "Actif",
         "admins": "Administrateurs",
         "guests": "Invités",
-        "shares": "actions",
+        "shares": "partages",
         "title": "Statistiques sur les utilisateurs",
         "top_users": "Utilisateurs les plus actifs",
         "total_users": "Total des utilisateurs",
@@ -798,7 +798,7 @@
       "share_expired_warning_emails": "Mails d'avertissement \"Partage expiré\"",
       "share_expired_warning_emails_description": "Alerter les utilisateurs lorsque leurs partages ont atteint leur date d'expiration et ne sont plus accessibles aux destinataires. Aide les utilisateurs à se tenir au courant de l'état de leurs partages.",
       "share_expiry_warning_emails": "Mails d'avertissement \"Expiration d'un partage\" ",
-      "share_expiry_warning_emails_description": "Envoyez des notifications proactives aux utilisateurs lorsque leurs actions approchent de l'expiration. Ils ont ainsi la possibilité de prolonger l'accès si nécessaire.",
+      "share_expiry_warning_emails_description": "Envoyez des notifications proactives aux utilisateurs lorsque leurs partages approchent de l'expiration. Ils ont ainsi la possibilité de prolonger l'accès si nécessaire.",
       "share_url_generation": "Génération d'URL de partage",
       "share_url_mode": "Mode de génération d'URL",
       "share_url_mode_description": "Choisissez la façon dont les URL de partage sont générées. Le mode Haïku permet de créer des combinaisons de mots mémorables (par exemple, \"automne-brise-silence-lune\"). Le mode Pattern vous permet de définir un format personnalisé à l'aide de la syntaxe Erugo Pattern.",
@@ -855,7 +855,7 @@
       "name": "Nom"
     },
     "title": {
-      "allShares": "Toutes les actions",
+      "allShares": "Toutes les partages",
       "branding": "Identité visuelle et interface utilisateur",
       "cloudConnect": "Erugo Connect",
       "emailTemplates": "Modèles de mail",
