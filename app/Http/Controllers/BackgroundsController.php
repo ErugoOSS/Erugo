@@ -80,15 +80,14 @@ class BackgroundsController extends Controller
         try {
             $file = $request->file('background_image');
             $fileName = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            $safeFilename = basename($fileName);
+            $safeFilename = FileHelper::sanitizeFilename($fileName);
             $file->storeAs('', $safeFilename, 'backgrounds');
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Background file uploaded successfully',
                 'data' => [
-                    'file' => $safeFilename . '.' . $extension,
+                    'file' => $safeFilename,
                 ]
             ]);
         } catch (\Exception $e) {

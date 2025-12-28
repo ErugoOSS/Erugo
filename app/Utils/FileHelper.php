@@ -108,8 +108,8 @@ class FileHelper
             return false;
         }
         
-        // Only allow alphanumeric characters, dots, hyphens, underscores, spaces, and forward slashes for subdirectories
-        if (!preg_match('/^[a-zA-Z0-9._\-\/\s]+$/', $path)) {
+        // Only allow alphanumeric characters, dots, hyphens, underscores, spaces, parentheses, and forward slashes for subdirectories
+        if (!preg_match('/^[a-zA-Z0-9._\-\/\s()]+$/', $path)) {
             return false;
         }
         
