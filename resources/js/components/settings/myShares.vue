@@ -9,7 +9,8 @@ import {
   MessageCircleQuestion,
   Rocket,
   Lock,
-  LockOpen
+  LockOpen,
+  ArrowLeftRight
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
@@ -145,10 +146,13 @@ defineExpose({
         </tr>
       </thead>
       <tbody>
-        <tr v-for="share in shares" :key="share.id">
+        <tr v-for="share in shares" :key="share.id" :class="{ 'reverse-share': share.shared_with_me }">
           <td width="1" style="white-space: nowrap">
             <div class="slide-text">
-              <strong class="content">{{ share.name }}</strong>
+              <strong class="content">
+                <ArrowLeftRight v-if="share.shared_with_me" class="reverse-share-icon" />
+                {{ share.name }}
+              </strong>
             </div>
             <a :href="`/shares/${share.long_id}`" target="_blank" class="share_long_id">
               <SquareArrowOutUpRight />
@@ -473,5 +477,20 @@ td {
     height: 1rem;
     margin-top: -2px;
   }
+}
+
+.reverse-share {
+  background: var(--panel-section-background-color-alt);
+  border-radius: 5px;
+  padding: 5px 10px;
+  gap: 5px;
+}
+
+.reverse-share-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 5px;
+  vertical-align: middle;
+  opacity: 0.7;
 }
 </style>

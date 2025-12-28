@@ -109,6 +109,30 @@ class SharesController extends Controller
     return $share;
   }
 
+  /**
+   * Check if a user can manage a share.
+   * A user can manage a share if they are an admin, the owner, or if they created the invite for this share.
+   */
+  private function canManageShare(Share $share, $user): bool
+  {
+    // Admins can manage any share
+    if ($user->admin) {
+      return true;
+    }
+
+    // User is the owner of the share
+    if ($share->user_id == $user->id) {
+      return true;
+    }
+
+    // User created the invite that resulted in this share
+    if ($share->invite && $share->invite->user_id == $user->id) {
+      return true;
+    }
+
+    return false;
+  }
+
   private function checkShareAccess(Share $share)
   {
     if (!$share->public) {
@@ -374,7 +398,13 @@ class SharesController extends Controller
 
     $showDeleted = $request->input('show_deleted', false);
 
-    $shares = Share::where('user_id', $user->id)->orderBy('created_at', 'desc')->with('files');
+    // Include shares the user owns OR shares created for them via reverse share invites
+    $shares = Share::where(function ($query) use ($user) {
+      $query->where('user_id', $user->id)
+        ->orWhereHas('invite', function ($q) use ($user) {
+          $q->where('user_id', $user->id);
+        });
+    })->orderBy('created_at', 'desc')->with(['files', 'invite']);
     if ($showDeleted === 'false') {
       $shares = $shares->where('status', '!=', 'deleted');
     }
@@ -383,8 +413,11 @@ class SharesController extends Controller
       'status' => 'success',
       'message' => 'My shares',
       'data' => [
-        'shares' => $shares->map(function ($share) {
-          return $this->formatSharePrivate($share);
+        'shares' => $shares->map(function ($share) use ($user) {
+          $formatted = $this->formatSharePrivate($share);
+          // Flag shares that were created for the user (reverse shares) vs by the user
+          $formatted->shared_with_me = $share->invite && $share->invite->user_id == $user->id && $share->user_id != $user->id;
+          return $formatted;
         })
       ]
     ]);
@@ -404,7 +437,7 @@ class SharesController extends Controller
     $showDeleted = $request->input('show_deleted', false);
     $userId = $request->input('user_id', null);
 
-    $shares = Share::orderBy('created_at', 'desc')->with(['files', 'user']);
+    $shares = Share::orderBy('created_at', 'desc')->with(['files', 'user', 'invite.user']);
     
     if ($showDeleted === 'false') {
       $shares = $shares->where('status', '!=', 'deleted');
@@ -422,8 +455,14 @@ class SharesController extends Controller
       'data' => [
         'shares' => $shares->map(function ($share) {
           $formatted = $this->formatSharePrivate($share);
-          $formatted->user_name = $share->user ? $share->user->name : 'Unknown User';
-          $formatted->user_email = $share->user ? $share->user->email : '';
+          // For reverse shares, show the invite creator's info; otherwise show the share owner
+          if ($share->invite && $share->invite->user) {
+            $formatted->user_name = $share->invite->user->name;
+            $formatted->user_email = $share->invite->user->email;
+          } else {
+            $formatted->user_name = $share->user ? $share->user->name : 'Unknown User';
+            $formatted->user_email = $share->user ? $share->user->email : '';
+          }
           return $formatted;
         })
       ]
@@ -446,7 +485,7 @@ class SharesController extends Controller
         'message' => 'Share not found'
       ], 404);
     }
-    if ($share->user_id != $user->id) {
+    if (!$this->canManageShare($share, $user)) {
       return response()->json([
         'status' => 'error',
         'message' => 'Unauthorized'
@@ -481,7 +520,7 @@ class SharesController extends Controller
         'message' => 'Share not found'
       ], 404);
     }
-    if ($share->user_id != $user->id) {
+    if (!$this->canManageShare($share, $user)) {
       return response()->json([
         'status' => 'error',
         'message' => 'Unauthorized'
@@ -514,7 +553,7 @@ class SharesController extends Controller
         'message' => 'Share not found'
       ], 404);
     }
-    if ($share->user_id != $user->id) {
+    if (!$this->canManageShare($share, $user)) {
       return response()->json([
         'status' => 'error',
         'message' => 'Unauthorized'
@@ -545,7 +584,13 @@ class SharesController extends Controller
       ], 401);
     }
 
-    $shares = Share::where('user_id', $user->id)->where('expires_at', '<', Carbon::now())->get();
+    // Include shares the user owns OR shares created for them via reverse share invites
+    $shares = Share::where(function ($query) use ($user) {
+      $query->where('user_id', $user->id)
+        ->orWhereHas('invite', function ($q) use ($user) {
+          $q->where('user_id', $user->id);
+        });
+    })->where('expires_at', '<', Carbon::now())->get();
     cleanSpecificShares::dispatch($shares->pluck('id')->toArray(), $user->id);
 
     return response()->json([
