@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import { getBackgroundImages } from '../../api'
 import { domData } from '../../domData'
@@ -41,10 +41,8 @@ const changeBackground = () => {
   if (!useMyBackgrounds.value || backgroundFiles.value.length === 0) {
     return
   }
-  currentBackgroundIndex.value++
-  if (currentBackgroundIndex.value >= backgroundFiles.value.length) {
-    currentBackgroundIndex.value = 0
-  }
+  //randomly select a background image
+  currentBackgroundIndex.value = Math.floor(Math.random() * backgroundFiles.value.length)
 }
 </script>
 <template>
