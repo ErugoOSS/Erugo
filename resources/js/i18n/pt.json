@@ -9,6 +9,7 @@
   "No recipients": "Sem destinatários",
   "Password Reset": "Redefinição da palavra-passe",
   "Powered by": "Powered by",
+  "Processing uploaded files": "Processando os ficheiros carregados",
   "Reverse Share": "Pedir Transferência",
   "Reverse Share Invite": "Convite para a emissão de acções invertidas",
   "Share Created": "Partilhar criado",
@@ -990,6 +991,8 @@
     "password_confirmation_required": "Confirmação da palavra-passe necessária",
     "password_mismatch": "As palavras-passe não coincidem",
     "password_required": "É necessária uma palavra-passe para proteger a partilha",
+    "time_remaining_suffix": "s",
+    "time_remaining_text": "restantes",
     "upload_mode_swapped": "Modo de carregamento alterado para {value}"
   },
   "uploading": {

@@ -9,6 +9,7 @@
   "No recipients": "No recipients",
   "Password Reset": "Password Reset",
   "Powered by": "Powered by",
+  "Processing uploaded files": "Processing uploaded files",
   "Reverse Share": "Reverse Share",
   "Reverse Share Invite": "Reverse Share Invite",
   "Share Created": "Share Created",
@@ -1019,6 +1020,8 @@
     "password_confirmation_required": "Password confirmation required",
     "password_mismatch": "Passwords don't match",
     "password_required": "Password is required to protect share",
+    "time_remaining_suffix": "s",
+    "time_remaining_text": "remaining",
     "upload_mode_swapped": "Upload mode changed to {value}"
   },
   "uploading": {

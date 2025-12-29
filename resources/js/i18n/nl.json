@@ -9,6 +9,7 @@
   "No recipients": "Geen ontvangers",
   "Password Reset": "Wachtwoord opnieuw instellen",
   "Powered by": "Aangedreven door",
+  "Processing uploaded files": "Verwerken van geüploade bestanden",
   "Reverse Share": "Omgekeerd delen",
   "Reverse Share Invite": "Omgekeerde aandelenuitnodiging",
   "Share Created": "Deel Gemaakt",
@@ -1013,6 +1014,8 @@
     "password_confirmation_required": "Wachtwoordbevestiging vereist",
     "password_mismatch": "Wachtwoorden komen niet overeen",
     "password_required": "Wachtwoord is nodig om delen te beveiligen",
+    "time_remaining_suffix": "s",
+    "time_remaining_text": "overgebleven",
     "upload_mode_swapped": "Uploadmodus gewijzigd in {value}"
   },
   "uploading": {

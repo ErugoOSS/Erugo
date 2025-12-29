@@ -834,7 +834,7 @@ const filesByDirectory = computed(() => {
               {{ niceFileSize(uploadSpeed) }}/s
             </div>
             <div class="progress-item time-remaining-text">
-              {{ Math.round(timeRemaining) }}s remaining
+              {{ Math.round(timeRemaining) }}{{ $t('uploader.time_remaining_suffix', 's') }} {{ t('uploader.time_remaining_text', 'remaining') }}
             </div>
             
             <div v-if="currentFileName" class="progress-item file-name-text">

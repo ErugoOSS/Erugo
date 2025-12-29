@@ -6,9 +6,10 @@
   "Email Verification": "Vérification de l'adresse mail",
   "Message to share recipients (optional)": "Message au(x) destinataire(s) du partage (facultatif)",
   "No files added yet": "Aucun fichier ajouté",
-  "No recipients": "Pas de destinataire(s)",
+  "No recipients": "Pas de destinataire(s) ?",
   "Password Reset": "Réinitialiser le mot de passe",
   "Powered by": "Propulsé par",
+  "Processing uploaded files": "Traitement des fichiers téléchargés",
   "Reverse Share": "Partage inversé",
   "Reverse Share Invite": "Invitation au partage inversé",
   "Share Created": "Partage créé",
@@ -20,7 +21,7 @@
   "Share Name": "Nom du partage",
   "Share URL": "Partager l'URL",
   "We'll provide you with a link instead": {
-    "": "Nous vous fournirons un lien à la place"
+    "": "Nous vous fournirons un lien à la place."
   },
   "auth": {
     "back_to_login": "Retour à la connexion",
@@ -592,11 +593,11 @@
     },
     "stats": {
       "downloads": {
-        "all_time": "Nombre total de téléchargements",
+        "all_time": "Nombre total de téléchargement(s)",
         "chart_title": "Évolution des téléchargements",
         "days_option": "{days} jours",
-        "downloads": "téléchargements",
-        "downloads_in_period": "Téléchargements ({days} jours)",
+        "downloads": "téléchargement(s)",
+        "downloads_in_period": "Téléchargement(s) ({days} jours)",
         "time_period": "Période:",
         "title": "Télécharger l'activité",
         "top_shares": "Partages les plus téléchargés",
@@ -644,16 +645,16 @@
         "file_types": "Types de fichiers",
         "shares": "Partages",
         "storage": "Stockage",
-        "users": "Utilisateurs"
+        "users": "Utilisateur(s)"
       },
       "refresh": "Rafraîchir",
       "shares": {
         "active_shares": "Partages actifs",
         "deleted": "Supprimé",
-        "expired": "Expiré",
+        "expired": "Expiré(s)",
         "last_7_days": "7 derniers jours",
         "per_share": "par partage",
-        "protected": "Protégé",
+        "protected": "Protégé(s)",
         "title": "Statistiques de partage",
         "total_files": "Total des dossiers",
         "total_shares": "Total des partages"
@@ -676,7 +677,7 @@
         "title": "Statistiques sur les utilisateurs",
         "top_users": "Utilisateurs les plus actifs",
         "total_users": "Total des utilisateurs",
-        "with_shares": "Utilisateurs disposant de partages"
+        "with_shares": "Utilisateur(s) disposant de partage(s)"
       }
     },
     "success": {
@@ -1019,6 +1020,8 @@
     "password_confirmation_required": "Confirmation du mot de passe requise",
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "password_required": "Un mot de passe est nécessaire pour protéger le partage",
+    "time_remaining_suffix": "s",
+    "time_remaining_text": "restant",
     "upload_mode_swapped": "Le mode de téléchargement est passé à {value}\n"
   },
   "uploading": {
