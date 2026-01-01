@@ -250,6 +250,12 @@ const handleUserFilterChange = (event) => {
       </div>
       <div class="settings-tabs-wrapper">
         <div class="settings-tabs-container">
+          <div class="settings-tab" :class="{ active: activeTab === 'about' }" @click="setActiveTab('about')">
+            <h2>
+              <Info />
+              {{ $t('settings.title.about') }}
+            </h2>
+          </div>
           <div
             class="settings-tab"
             :class="{ active: activeTab === 'stats' }"
@@ -328,12 +334,7 @@ const handleUserFilterChange = (event) => {
               {{ $t('settings.title.myProfile') }}
             </h2>
           </div>
-          <div class="settings-tab" :class="{ active: activeTab === 'about' }" @click="setActiveTab('about')">
-            <h2>
-              <Info />
-              {{ $t('settings.title.about') }}
-            </h2>
-          </div>
+          
           <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
         </div>
         <div class="settings-tabs-content-container">

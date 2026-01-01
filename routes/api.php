@@ -102,6 +102,11 @@ Route::group([], function ($router) {
         Route::delete('/backgrounds/{file}', [BackgroundsController::class, 'delete'])->name('backgrounds.delete');
     });
 
+    //system info [auth] - available to all authenticated users
+    Route::get('/system-info', [StatsController::class, 'getSystemInfo'])
+        ->middleware(['auth'])
+        ->name('stats.systemInfo');
+
     //system stats [auth, admin]
     Route::group(['prefix' => 'stats', 'middleware' => ['auth', Admin::class]], function ($router) {
         Route::get('/', [StatsController::class, 'getStats'])->name('stats.get');
