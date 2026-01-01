@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { Info, ExternalLink, Server, Database, HardDrive, Loader2 } from 'lucide-vue-next'
 import { domData } from '../../domData'
 import { getSystemInfo } from '../../api'
+import { store } from '../../store'
 
 const version = ref('unknown')
 const systemInfo = ref(null)
@@ -12,11 +13,16 @@ onMounted(async () => {
   const data = domData()
   version.value = data.version || 'unknown'
   
-  try {
-    systemInfo.value = await getSystemInfo()
-  } catch (error) {
-    console.error('Failed to load system info:', error)
-  } finally {
+  // Only fetch system info for admins
+  if (store.isAdmin()) {
+    try {
+      systemInfo.value = await getSystemInfo()
+    } catch (error) {
+      console.error('Failed to load system info:', error)
+    } finally {
+      loading.value = false
+    }
+  } else {
     loading.value = false
   }
 })
@@ -116,7 +122,7 @@ const OpenExternalLink = (url) => {
                   </div>
                 </div>
 
-                <div class="system-info-section">
+                <div class="system-info-section" v-if="store.isAdmin()">
                   <h4>{{ $t('settings.about.system_info') }}</h4>
                   
                   <div v-if="loading" class="loading-state">

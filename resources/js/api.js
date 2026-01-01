@@ -833,7 +833,7 @@ export const getBackgroundImages = async () => {
 }
 
 export const getSystemInfo = async () => {
-  const response = await fetchWithAuth(`${apiUrl}/api/system-info`, {
+  const response = await fetchWithAuth(`${apiUrl}/api/stats/system-info`, {
     method: 'GET',
     headers: {
       ...addJsonHeader()
