@@ -27,6 +27,28 @@ echo "================================================"
 export APP_URL=/
 export ASSET_URL=/
 
+# Increment patch version to account for Komodo's pre-increment tagging
+# Handles formats like: 0.0.18, v1.2.3, RC 0.0.18
+if [ -n "$APP_VERSION" ] && [ "$APP_VERSION" != "unknown" ]; then
+    # Extract the version number part (last occurrence of X.Y.Z pattern)
+    VERSION_NUM=$(echo "$APP_VERSION" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1)
+    
+    if [ -n "$VERSION_NUM" ]; then
+        # Split into major.minor.patch
+        MAJOR=$(echo "$VERSION_NUM" | cut -d. -f1)
+        MINOR=$(echo "$VERSION_NUM" | cut -d. -f2)
+        PATCH=$(echo "$VERSION_NUM" | cut -d. -f3)
+        
+        # Increment patch
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION_NUM="${MAJOR}.${MINOR}.${NEW_PATCH}"
+        
+        # Replace the old version number with the new one in the full string
+        export APP_VERSION=$(echo "$APP_VERSION" | sed "s/${VERSION_NUM}/${NEW_VERSION_NUM}/")
+        echo "Version: $APP_VERSION"
+    fi
+fi
+
 # First time setup check
 if [ ! -f /var/www/html/storage/.setup-lock ]; then
     echo "[First time setup] Copying storage skeleton contents..."
