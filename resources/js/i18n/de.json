@@ -417,6 +417,12 @@
     "success": "Einladung zur umgekehrten Freigabe gesendet!"
   },
   "settings": {
+    "about": {
+      "description": "Informationen über Ihre Erugo-Installation.",
+      "title": "Über Erugo",
+      "version": "Version",
+      "visit_website": "Besuchen Sie erugo.app"
+    },
     "account": {
       "change_password": "Mein Passwort ändern",
       "create_link": "Link",
@@ -523,6 +529,7 @@
       "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden."
     },
     "description": {
+      "about": "Informationen über Ihre Erugo-Installation",
       "allShares": "Anzeigen und Verwalten von Freigaben durch alle Benutzer",
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihre eigenen Branding-Anpassungen hinzu.",
       "cloudConnect": "Verbinden Sie Ihre Instanz mit der Erugo Cloud für einfaches Domain-Routing",
@@ -856,6 +863,7 @@
       "name": "Name"
     },
     "title": {
+      "about": "Über",
       "allShares": "Alle Aktien",
       "branding": "Branding & Benutzeroberfläche",
       "cloudConnect": "Erugo Verbinden",

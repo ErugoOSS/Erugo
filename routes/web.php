@@ -45,6 +45,9 @@ function getSettings()
     $appURL = env('APP_URL');
     $indexedSettings['api_url'] = $appURL;
 
+    // Add app version
+    $indexedSettings['version'] = config('app.version');
+
     return $indexedSettings;
 }
 

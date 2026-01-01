@@ -417,6 +417,12 @@
     "success": "Uitnodiging voor omgekeerd delen verzonden!"
   },
   "settings": {
+    "about": {
+      "description": "Informatie over uw Erugo installatie.",
+      "title": "Over Erugo",
+      "version": "Versie",
+      "visit_website": "Bezoek erugo.app"
+    },
     "account": {
       "change_password": "Mijn wachtwoord wijzigen",
       "create_link": "Link",
@@ -523,6 +529,7 @@
       "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
     },
     "description": {
+      "about": "Informatie over uw Erugo installatie",
       "allShares": "Aandelen van alle gebruikers bekijken en beheren",
       "branding": "Pas de UI van je erugo instantie aan en voeg je eigen branding toe.",
       "cloudConnect": "Verbind je instantie met Erugo Cloud voor eenvoudige domeinroutering",
@@ -784,6 +791,12 @@
       "select_auth_provider": "Selecteer een auth provider",
       "self_registration": "Zelfregistratie",
       "self_registration_allow_any_domain": "Registratie vanaf elk e-maildomein toestaan",
+      "self_registration_allowed_domains": "Toegestane e-maildomeinen",
+      "self_registration_allowed_domains_description": "Als domeinbeperkingen zijn ingeschakeld, kunnen alleen gebruikers met e-mailadressen van de opgegeven domeinen zich registreren. Dit is handig om de registratie te beperken tot je organisatie.",
+      "self_registration_allowed_domains_help": "Voer domeinen in, gescheiden door komma's (bijv. bedrijf.com, partner.org)",
+      "self_registration_allowed_domains_placeholder": "voorbeeld.com, bedrijf.org",
+      "self_registration_description": "Gebruikers toestaan om hun eigen account aan te maken. Als deze optie is ingeschakeld, wordt er een optie 'Account aanmaken' weergegeven op de aanmeldingspagina. Gebruikers moeten hun e-mailadres verifiëren voordat ze kunnen inloggen.",
+      "self_registration_enabled": "Zelfregistratie inschakelen",
       "share_deleted_emails": "\"E-mail\" Aandeel verwijderd",
       "share_deleted_emails_description": "Stel gebruikers op de hoogte wanneer hun links permanent uit het systeem zijn verwijderd. Dit bevestigt de voltooiing van de levenscyclus van de inhoud voor beveiligings- en nalevingsdoeleinden.",
       "share_deletion_warning_emails": "\"Waarschuwingsmails \"Delen verwijderen",
@@ -850,6 +863,7 @@
       "name": "Naam"
     },
     "title": {
+      "about": "Over",
       "allShares": "Alle Aandelen",
       "branding": "Branding & UI",
       "cloudConnect": "Erugo aansluiten",

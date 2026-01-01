@@ -23,6 +23,10 @@ LABEL maintainer="Dean Ward"
 # Multi-arch support - TARGETARCH is automatically set by Docker buildx
 ARG TARGETARCH
 
+# Version passed from build system (e.g., Komodo)
+ARG VERSION=unknown
+ENV APP_VERSION=${VERSION}
+
 WORKDIR /var/www/html
 
 ENV TZ=UTC

@@ -30,6 +30,7 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
+import About from './settings/about.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 import { useSetting } from '../composables/useSetting'
@@ -62,7 +63,8 @@ const tabContents = ref({
   users: ref(null),
   myProfile: ref(null),
   myShares: ref(null),
-  allShares: ref(null)
+  allShares: ref(null),
+  about: ref(null)
 })
 
 onMounted(() => {
@@ -150,7 +152,8 @@ const getSettingsTitle = () => {
       myProfile: 'My Profile',
       myShares: 'My Shares',
       allShares: 'All Shares',
-      emailTemplates: 'Email Templates'
+      emailTemplates: 'Email Templates',
+      about: 'About'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
   }
@@ -172,6 +175,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
+    case 'about':
+      return t.value('settings.title.about')
     default:
       return t.value('settings.title.erugo')
   }
@@ -321,6 +326,12 @@ const handleUserFilterChange = (event) => {
             <h2>
               <User />
               {{ $t('settings.title.myProfile') }}
+            </h2>
+          </div>
+          <div class="settings-tab" :class="{ active: activeTab === 'about' }" @click="setActiveTab('about')">
+            <h2>
+              <Info />
+              {{ $t('settings.title.about') }}
             </h2>
           </div>
           <div class="settings-tab-spacer" v-if="store.isAdmin()"></div>
@@ -559,6 +570,25 @@ const handleUserFilterChange = (event) => {
               </div>
               <div class="tab-content-body">
                 <MyShares ref="mySharesPanel" v-if="store.settingsOpen" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'about'"
+              class="settings-tab-content"
+              ref="tabContents.about"
+              key="about"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Info />
+                  <span>
+                    {{ $t('settings.title.about') }}
+                    <small>{{ $t('settings.description.about') }}</small>
+                  </span>
+                </h2>
+              </div>
+              <div class="tab-content-body">
+                <About v-if="store.settingsOpen" @navItemClicked="handleNavItemClicked" />
               </div>
             </div>
           </Transition>

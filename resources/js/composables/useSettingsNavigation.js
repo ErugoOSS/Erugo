@@ -11,7 +11,8 @@ const VALID_TABS = [
   'users',
   'allShares',
   'myShares',
-  'myProfile'
+  'myProfile',
+  'about'
 ]
 
 /**

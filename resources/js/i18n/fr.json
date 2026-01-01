@@ -417,6 +417,12 @@
     "success": "Invitation au partage inversé envoyée !"
   },
   "settings": {
+    "about": {
+      "description": "Informations sur votre installation Erugo.",
+      "title": "À propos d'Erugo",
+      "version": "Version",
+      "visit_website": "Visitez erugo.app"
+    },
     "account": {
       "change_password": "Modifier mon mot de passe",
       "create_link": "Lier",
@@ -523,6 +529,7 @@
       "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée."
     },
     "description": {
+      "about": "Informations sur votre installation Erugo",
       "allShares": "Visualiser et gérer les partages de tous les utilisateurs",
       "branding": "Personnalisez l'interface utilisateur et l’identité visuelle de votre instance erugo.",
       "cloudConnect": "Connectez votre instance à Erugo Cloud pour faciliter le routage des domaines",
@@ -649,8 +656,8 @@
       },
       "refresh": "Rafraîchir",
       "shares": {
-        "active_shares": "Partages actifs",
-        "deleted": "Supprimé",
+        "active_shares": "Partage(s) actif(s)",
+        "deleted": "Supprimé(s)",
         "expired": "Expiré(s)",
         "last_7_days": "7 derniers jours",
         "per_share": "par partage",
@@ -662,12 +669,12 @@
       "storage": {
         "available_space": "Espace disponible",
         "disk_usage": "Utilisation du disque",
-        "free": "gratuit",
+        "free": "libre",
         "of": "de",
         "of_disk": "de disque",
-        "share_storage": "Stockage des partages",
+        "share_storage": "Stockage utilisé par les partages\n",
         "title": "Aperçu du stockage",
-        "used": "utilisé"
+        "used": "utilisé(s)"
       },
       "users": {
         "active": "Actif",
@@ -856,10 +863,11 @@
       "name": "Nom"
     },
     "title": {
+      "about": "A propos de",
       "allShares": "Toutes les partages",
       "branding": "Identité visuelle et interface utilisateur",
       "cloudConnect": "Erugo Connect",
-      "emailTemplates": "Modèles de mail",
+      "emailTemplates": "Modèles de mails",
       "linked_accounts": "Comptes liés",
       "manage": "Gérer",
       "myProfile": "Mon profil",
@@ -1021,7 +1029,7 @@
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "password_required": "Un mot de passe est nécessaire pour protéger le partage",
     "time_remaining_suffix": "s",
-    "time_remaining_text": "restant",
+    "time_remaining_text": "restant(es)",
     "upload_mode_swapped": "Le mode de téléchargement est passé à {value}\n"
   },
   "uploading": {

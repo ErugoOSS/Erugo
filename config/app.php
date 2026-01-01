@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | This value is the version of your application, typically set via the
+    | APP_VERSION environment variable during Docker builds.
+    |
+    */
+
+    'version' => env('APP_VERSION', 'unknown'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

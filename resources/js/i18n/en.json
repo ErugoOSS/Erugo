@@ -417,6 +417,12 @@
     "success": "Reverse share invite sent!"
   },
   "settings": {
+    "about": {
+      "description": "Information about your Erugo installation.",
+      "title": "About Erugo",
+      "version": "Version",
+      "visit_website": "Visit erugo.app"
+    },
     "account": {
       "change_password": "Change my password",
       "create_link": "Link",
@@ -523,6 +529,7 @@
       "pruneExpiredShares": "Are you sure you want to delete your expired shares? This cannot be undone."
     },
     "description": {
+      "about": "Information about your Erugo installation",
       "allShares": "View and manage shares by all users",
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
       "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing",
@@ -856,6 +863,7 @@
       "name": "Name"
     },
     "title": {
+      "about": "About",
       "allShares": "All Shares",
       "branding": "Branding & UI",
       "cloudConnect": "Erugo Connect",
