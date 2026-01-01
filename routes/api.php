@@ -105,6 +105,7 @@ Route::group([], function ($router) {
     //system stats [auth, admin]
     Route::group(['prefix' => 'stats', 'middleware' => ['auth', Admin::class]], function ($router) {
         Route::get('/', [StatsController::class, 'getStats'])->name('stats.get');
+        Route::get('/system-info', [StatsController::class, 'getSystemInfo'])->name('stats.systemInfo');
     });
 
     //read settings [auth]

@@ -832,6 +832,20 @@ export const getBackgroundImages = async () => {
   return data.data
 }
 
+export const getSystemInfo = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/stats/system-info`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const saveBackgroundImage = async (backgroundImage) => {
   const formData = new FormData()
   formData.append('background_image', backgroundImage)

@@ -11,6 +11,101 @@ use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller
 {
+    /**
+     * Get system information for the About page
+     * Available to all authenticated users
+     */
+    public function getSystemInfo()
+    {
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'php_version' => PHP_VERSION,
+                'laravel_version' => app()->version(),
+                'database_driver' => config('database.default'),
+                'database_version' => $this->getDatabaseVersion(),
+                'server_os' => PHP_OS_FAMILY,
+                'timezone' => config('app.timezone'),
+                'max_upload_size' => $this->getMaxUploadSize(),
+                'storage' => $this->getStorageStats(),
+            ]
+        ]);
+    }
+
+    /**
+     * Get the database version string
+     */
+    private function getDatabaseVersion()
+    {
+        try {
+            $driver = config('database.default');
+            
+            switch ($driver) {
+                case 'sqlite':
+                    $version = DB::select('SELECT sqlite_version() as version');
+                    return $version[0]->version ?? 'Unknown';
+                case 'mysql':
+                    $version = DB::select('SELECT VERSION() as version');
+                    return $version[0]->version ?? 'Unknown';
+                case 'pgsql':
+                    $version = DB::select('SHOW server_version');
+                    return $version[0]->server_version ?? 'Unknown';
+                default:
+                    return 'Unknown';
+            }
+        } catch (\Exception $e) {
+            return 'Unknown';
+        }
+    }
+
+    /**
+     * Get the maximum upload size based on PHP settings
+     */
+    private function getMaxUploadSize()
+    {
+        $uploadMax = $this->parseSize(ini_get('upload_max_filesize'));
+        $postMax = $this->parseSize(ini_get('post_max_size'));
+        $memoryLimit = $this->parseSize(ini_get('memory_limit'));
+        
+        // -1 means no limit
+        if ($memoryLimit == -1) {
+            $memoryLimit = PHP_INT_MAX;
+        }
+        
+        $maxBytes = min($uploadMax, $postMax, $memoryLimit);
+        
+        return [
+            'bytes' => $maxBytes,
+            'formatted' => $this->formatBytes($maxBytes),
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+        ];
+    }
+
+    /**
+     * Parse PHP size string (e.g., "128M") to bytes
+     */
+    private function parseSize($size)
+    {
+        $size = trim($size);
+        $unit = strtolower(substr($size, -1));
+        $value = (int) $size;
+        
+        switch ($unit) {
+            case 'g':
+                $value *= 1024 * 1024 * 1024;
+                break;
+            case 'm':
+                $value *= 1024 * 1024;
+                break;
+            case 'k':
+                $value *= 1024;
+                break;
+        }
+        
+        return $value;
+    }
+
     public function getStats(Request $request)
     {
         $days = $request->input('days', 30);

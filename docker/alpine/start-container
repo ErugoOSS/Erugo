@@ -100,7 +100,7 @@ fi
 
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
-env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" | sed 's/=\(.*\)/="\1"/' > /var/www/html/.env
 
 # Create a temporary crontab file
 echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab
