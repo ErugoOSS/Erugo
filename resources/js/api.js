@@ -1386,6 +1386,15 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
         }
         // No refresh needed - don't touch headers, let static config apply
       },
+      // Ensure upload URL uses the correct origin regardless of what tusd returns
+      // This handles cases where reverse proxy headers aren't forwarded correctly
+      onAfterResponse: function (req, res) {
+        const location = res.getHeader('Location')
+        if (location) {
+          const uploadId = location.split('/').pop()
+          this.url = getTusdUrl() + uploadId
+        }
+      },
       onError: (error) => {
         console.error('tus upload error:', error)
         onError(error)
