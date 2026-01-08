@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\AuthProvider;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\URL;
+use App\Services\SettingsService;
 
 /**
  * Controller responsible for managing authentication providers
@@ -17,12 +17,21 @@ use Illuminate\Support\Facades\URL;
  */
 class AuthProvidersController extends Controller
 {
-
-
-
-  public function __construct()
+  /**
+   * Build the callback URL for an auth provider using the application_url setting
+   * 
+   * @param string $uuid UUID of the auth provider
+   * @return string The callback URL
+   */
+  private function buildCallbackUrl($uuid)
   {
-    URL::forceScheme('https');
+    $settingsService = app(SettingsService::class);
+    $applicationUrl = $settingsService->get('application_url');
+    
+    // Remove trailing slash if present
+    $applicationUrl = rtrim($applicationUrl, '/');
+    
+    return $applicationUrl . '/auth/provider/' . $uuid . '/callback';
   }
 
   /**
@@ -60,7 +69,7 @@ class AuthProvidersController extends Controller
         'icon' => $class::getIcon(),
         'information_url' => $class::getInformationUrl(),
         'uuid' => $authProvider->uuid,
-        'callback_url' => route('social.provider.callback', ['provider' => $authProvider->uuid])
+        'callback_url' => $this->buildCallbackUrl($authProvider->uuid)
       ];
     });
 
@@ -102,7 +111,7 @@ class AuthProvidersController extends Controller
       'status' => 'success',
       'message' => 'Callback URL fetched successfully',
       'data' => [
-        'callbackUrl' => route('social.provider.callback', ['provider' => $uuid])
+        'callbackUrl' => $this->buildCallbackUrl($uuid)
       ]
     ]);
   }
