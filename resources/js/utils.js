@@ -60,7 +60,6 @@ const getTusdUrl = () => {
   const protocol = window.location.protocol
   const host = window.location.host
   const url = `${protocol}//${host}/files/`
-  console.log('[getTusdUrl] protocol:', protocol, 'host:', host, 'final URL:', url)
   return url
 }
 
