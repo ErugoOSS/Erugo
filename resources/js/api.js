@@ -9,9 +9,9 @@ import JSZip from 'jszip'
 
 // Bundling configuration for small files
 const BUNDLE_CONFIG = {
-  minFileCount: 50,        // Minimum number of files to trigger bundling
+  minFileCount: 50, // Minimum number of files to trigger bundling
   maxFileSizeBytes: 102400, // Files under 100KB are considered "small"
-  minSmallFileRatio: 0.7   // At least 70% of files must be small to trigger bundling
+  minSmallFileRatio: 0.7 // At least 70% of files must be small to trigger bundling
 }
 
 /**
@@ -22,7 +22,7 @@ const shouldBundleFiles = (files) => {
     return false
   }
 
-  const smallFileCount = files.filter(f => f.size <= BUNDLE_CONFIG.maxFileSizeBytes).length
+  const smallFileCount = files.filter((f) => f.size <= BUNDLE_CONFIG.maxFileSizeBytes).length
   const smallFileRatio = smallFileCount / files.length
 
   const shouldBundle = smallFileRatio >= BUNDLE_CONFIG.minSmallFileRatio
@@ -31,7 +31,7 @@ const shouldBundleFiles = (files) => {
     totalFiles: files.length,
     smallFileCount,
     smallFileRatio: (smallFileRatio * 100).toFixed(1) + '%',
-    threshold: (BUNDLE_CONFIG.minSmallFileRatio * 100) + '%',
+    threshold: BUNDLE_CONFIG.minSmallFileRatio * 100 + '%',
     willBundle: shouldBundle
   })
 
@@ -134,9 +134,10 @@ const uploadBundledFiles = async (
       onProgress({
         phase: bundleProgress.phase,
         percentage: bundleProgress.percentage,
-        message: bundleProgress.phase === 'bundling'
-          ? `Preparing files (${bundleProgress.current}/${bundleProgress.total})...`
-          : `Compressing (${bundleProgress.percentage}%)...`
+        message:
+          bundleProgress.phase === 'bundling'
+            ? `Preparing files (${bundleProgress.current}/${bundleProgress.total})...`
+            : `Compressing (${bundleProgress.percentage}%)...`
       })
     })
 
@@ -228,7 +229,6 @@ const uploadBundledFiles = async (
     const data = await response.json()
     console.log('[uploadBundledFiles] Share created successfully')
     onComplete(data)
-
   } catch (error) {
     console.error('[uploadBundledFiles] Error:', error)
     onError(error)
@@ -726,26 +726,24 @@ export const resetLogo = async () => {
 export const saveFirstRunSettings = async (settings) => {
   // Save text-based settings first
   const settingsToSave = []
-  
+
   if (settings.application_name) {
     settingsToSave.push({ key: 'application_name', value: settings.application_name })
   }
   if (settings.application_url) {
     settingsToSave.push({ key: 'application_url', value: settings.application_url })
   }
-  
+
   // Save text settings if any
   if (settingsToSave.length > 0) {
-    await saveSettingsById(
-      Object.fromEntries(settingsToSave.map(s => [s.key, s.value]))
-    )
+    await saveSettingsById(Object.fromEntries(settingsToSave.map((s) => [s.key, s.value])))
   }
-  
+
   // Upload logo if provided
   if (settings.logo instanceof File) {
     await saveLogo(settings.logo)
   }
-  
+
   return true
 }
 
@@ -1207,7 +1205,6 @@ export const createFirstUser = async (user) => {
   return data.data
 }
 
-
 export const getEmailTemplates = async () => {
   const response = await fetchWithAuth(`${apiUrl}/api/email-templates`, {
     method: 'GET',
@@ -1349,9 +1346,32 @@ const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
 export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMetadata = {}) => {
   const startUpload = (skipResume = false) => {
     const tusdEndpoint = getTusdUrl()
-    console.log('[uploadFileWithTus] Creating tus.Upload with endpoint:', tusdEndpoint)
+
+    // Create a custom httpStack that rewrites URLs to use the correct origin
+    // This handles reverse proxies that don't forward X-Forwarded-Host properly
+    const defaultHttpStack = new tus.DefaultHttpStack()
+    const urlRewritingHttpStack = {
+      createRequest: (method, url) => {
+        // Rewrite URL to use correct origin if it's a /files/ request
+        if (url.includes('/files/')) {
+          try {
+            const parsedUrl = new URL(url)
+
+            const uploadId = parsedUrl.pathname.split('/').pop()
+            const fixedUrl = tusdEndpoint + uploadId
+            url = fixedUrl
+          } catch (e) {
+            // If parsing fails, use original URL
+          }
+        }
+        return defaultHttpStack.createRequest(method, url)
+      },
+      getName: () => 'UrlRewritingHttpStack'
+    }
+
     const upload = new tus.Upload(file, {
       endpoint: tusdEndpoint,
+      httpStack: urlRewritingHttpStack,
       retryDelays: [0, 1000, 3000, 5000],
       chunkSize: 20 * 1024 * 1024, // 20MB chunks
       removeFingerprintOnSuccess: true, // Clean up fingerprint after successful upload
@@ -1373,13 +1393,12 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
         if (store.jwtExpires && store.jwtExpires < fiveMinutesFromNow) {
           // Return a Promise so tus waits for the refresh to complete
           return refresh()
-            .then(refreshData => {
+            .then((refreshData) => {
               store.authSuccess(refreshData)
-              console.log('[uploadFileWithTus] Token refreshed successfully')
               // Update header with new token
               req.setHeader('Authorization', `Bearer ${store.jwt}`)
             })
-            .catch(e => {
+            .catch((e) => {
               console.error('[uploadFileWithTus] Failed to refresh token:', e)
               // Don't modify header on failure, use existing token
             })
@@ -1418,28 +1437,23 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
     } else {
       // Check for previous uploads to resume
       upload.findPreviousUploads().then(async (previousUploads) => {
-        console.log('[uploadFileWithTus] Found previous uploads:', previousUploads.length, previousUploads.map(u => u.uploadUrl))
-        
         // Filter out uploads with mismatched protocol or host (including port)
         // This prevents resume attempts when the site is accessed from a different URL
         const currentProtocol = window.location.protocol
         const currentHost = window.location.host
-        const validPreviousUploads = previousUploads.filter(u => {
+        const validPreviousUploads = previousUploads.filter((u) => {
           const uploadUrl = new URL(u.uploadUrl)
           if (uploadUrl.protocol !== currentProtocol) {
-            console.log('[uploadFileWithTus] Skipping previous upload with mismatched protocol:', u.uploadUrl, '(current:', currentProtocol, ')')
             return false
           }
           if (uploadUrl.host !== currentHost) {
-            console.log('[uploadFileWithTus] Skipping previous upload with mismatched host:', u.uploadUrl, '(current:', currentHost, ')')
             return false
           }
           return true
         })
-        
+
         if (validPreviousUploads.length > 0) {
           const previousUpload = validPreviousUploads[0]
-          console.log('[uploadFileWithTus] Attempting to resume from:', previousUpload.uploadUrl)
           // Extract upload ID from the previous upload URL
           const previousUploadId = previousUpload.uploadUrl.split('/').pop()
 
@@ -1455,17 +1469,14 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
 
             if (response.ok) {
               // Upload session exists in our backend, safe to resume
-              console.log('[uploadFileWithTus] Resuming previous upload:', previousUploadId, 'URL:', previousUpload.uploadUrl)
               upload.resumeFromPreviousUpload(previousUpload)
             } else {
               // Upload session doesn't exist (file was already shared), start fresh
-              console.log('[uploadFileWithTus] Previous upload no longer valid, starting fresh with endpoint:', tusdEndpoint)
               // Clear the stale fingerprint from localStorage
               clearTusFingerprint(previousUpload.uploadUrl)
             }
           } catch (e) {
             // If verification fails, be safe and start fresh
-            console.warn('Could not verify previous upload, starting fresh:', e)
             clearTusFingerprint(previousUpload.uploadUrl)
           }
         }
@@ -1491,12 +1502,10 @@ const clearTusFingerprint = (uploadUrl) => {
         // The value is a JSON string containing the uploadUrl
         if (value && value.includes(uploadUrl)) {
           localStorage.removeItem(key)
-          console.log('Cleared stale tus fingerprint:', key)
         }
       }
     }
   } catch (e) {
-    console.warn('Could not clear stale tus fingerprint:', e)
   }
 }
 
@@ -1531,7 +1540,6 @@ export const uploadFilesInChunks = async (
   const useBundle = shouldBundleFiles(files)
 
   if (useBundle) {
-    console.log('[uploadFilesInChunks] Using bundled upload for', files.length, 'files')
     return uploadBundledFiles(
       files,
       uploadId,
@@ -1563,10 +1571,8 @@ export const uploadFilesInChunks = async (
       (isPaused) => {
         if (currentUpload) {
           if (isPaused) {
-            console.log('[uploadFilesInChunks] Pause detected, aborting current upload')
             currentUpload.abort()
           } else {
-            console.log('[uploadFilesInChunks] Resume detected, starting upload')
             currentUpload.start()
           }
         }
@@ -1659,17 +1665,9 @@ export const uploadFilesInChunks = async (
   const uploadIds = results.map((r) => r.uploadId)
   const maxRetries = 5
   const baseDelayMs = 500
-
-  console.log('[createShare] Starting share creation', {
-    fileCount: results.length,
-    uploadIds: uploadIds,
-    totalSize: results.reduce((sum, r) => sum + (r.filesize || 0), 0)
-  })
-
+  
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      console.log(`[createShare] Attempt ${attempt + 1}/${maxRetries}`)
-
       const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
         method: 'POST',
         headers: {
@@ -1692,7 +1690,6 @@ export const uploadFilesInChunks = async (
 
       if (response.ok) {
         const data = await response.json()
-        console.log('[createShare] Success on attempt', attempt + 1)
         onComplete(data)
         return
       }
@@ -1703,33 +1700,21 @@ export const uploadFilesInChunks = async (
       // Check if this is the "not completed" error - worth retrying
       if (errorMessage.includes('not found or not completed') && attempt < maxRetries - 1) {
         const delayMs = baseDelayMs * Math.pow(2, attempt) // 500ms, 1000ms, 2000ms, 4000ms
-        console.log(`[createShare] Upload sessions not ready, retrying in ${delayMs}ms...`, {
-          attempt: attempt + 1,
-          maxRetries,
-          error: errorMessage
-        })
-        await new Promise(resolve => setTimeout(resolve, delayMs))
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
         continue
       }
 
       // Non-retryable error or out of retries
-      console.error('[createShare] Failed after retries or non-retryable error', {
-        attempt: attempt + 1,
-        error: errorMessage
-      })
       throw new Error(errorMessage)
-
     } catch (error) {
       // Network errors or thrown errors from above
       if (attempt === maxRetries - 1) {
-        console.error('[createShare] Final attempt failed', { error: error.message })
         onError(error)
         return
       }
 
       // If it's a network error, might be worth retrying
       if (!error.message.includes('not found or not completed')) {
-        console.error('[createShare] Unexpected error, not retrying', { error: error.message })
         onError(error)
         return
       }
