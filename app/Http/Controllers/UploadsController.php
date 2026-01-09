@@ -15,6 +15,7 @@ use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
+use App\Services\ClamavScanner;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -206,6 +207,74 @@ class UploadsController extends Controller
       'file_count' => $files->count(),
       'is_bundle' => $isBundleUpload
     ]);
+
+    // --- Antivirus scan with ClamAV (enabled when CLAMAV_URL is set) ---
+    try {
+      /** @var \App\Services\ClamavScanner $scanner */
+      $scanner = app(ClamavScanner::class);
+
+      foreach ($files as $file) {
+        if (!$file->temp_path) {
+          continue;
+        }
+
+        $clean = $scanner->scanPath($file->temp_path);
+        if (!$clean) {
+          // Clean up physical files and sessions before returning
+          foreach ($files as $cleanupFile) {
+            if ($cleanupFile->temp_path) {
+              $abs = storage_path('app/' . $cleanupFile->temp_path);
+              if (file_exists($abs)) {
+                @unlink($abs);
+              }
+              // Clean up tusd .info file for non-bundle uploads
+              $info = $abs . '.info';
+              if (file_exists($info)) {
+                @unlink($info);
+              }
+            }
+          }
+
+          // Clean up bundle extraction directories if present
+          foreach ($sessions as $session) {
+            if ($session->is_bundle) {
+              $extractDir = storage_path('app/uploads/' . $session->upload_id . '_extracted');
+              if (is_dir($extractDir)) {
+                $this->recursiveDelete($extractDir);
+              }
+            }
+            $session->delete();
+          }
+
+          // Delete DB file records for this failed share creation
+          try {
+            \App\Models\File::whereIn('id', $fileIds)->delete();
+          } catch (\Throwable $dbEx) {
+            Log::warning('Failed to delete file records after AV rejection', [
+              'error' => $dbEx->getMessage(),
+            ]);
+          }
+
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Uploaded file failed antivirus scan and was rejected.',
+          ], 422);
+        }
+      }
+    } catch (\Throwable $e) {
+      Log::error('ClamAV scan failed during share creation', [
+        'error' => $e->getMessage(),
+      ]);
+
+      // Fail closed if AV is configured
+      if (env('CLAMAV_URL')) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Antivirus scan failed; upload rejected.',
+        ], 500);
+      }
+    }
+
 
     // Calculate total size of all files
     $totalSize = 0;
