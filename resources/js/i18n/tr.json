@@ -1,0 +1,461 @@
+{
+  "Add Files": "Dosya ekle",
+  "Add Folders": "Klasör ekle",
+  "Add Recipient": "Alıcı Ekle",
+  "Message to share recipients (optional)": "Paylaşım Alıcıları (İsteğe Bağlı)",
+  "No files added yet": "Henüz dosya eklenmedi",
+  "No recipients": "Alıcı yok",
+  "Powered by": "Tarafından desteklenmektedir",
+  "Reverse Share": "Ters Pay",
+  "Share Name": "Paylaşım Adı",
+  "Share URL": "Paylaş URL",
+  "We'll provide you with a link instead": {
+    "": "Bunun yerine size bir bağlantı sağlayacağız"
+  },
+  "auth": {
+    "back_to_login": "Giriş yapmak için geri dön",
+    "confirm_end_guest_session": "Bu oturumu bitirmek istediğinden emin misiniz? ",
+    "confirm_password": "Şifreyi onaylayın",
+    "email": "E -posta",
+    "end_guest_session": "Misafir Oturumu Son",
+    "failed_to_accept_invite": "Bu davet kodu geçerli değil. ",
+    "failed_to_reset_password": "Şifreyi sıfırlayamadı",
+    "failed_to_send_password_reset_email": "Şifre sıfırlama e -postası gönderilemedi",
+    "forgot_password": "Parolanızı mı unuttunuz",
+    "forgot_password_create_password": "Parola Oluştur",
+    "forgot_password_create_password_description": "Lütfen yeni şifrenizi girin. ",
+    "guest_warning": "Sol taraf formunu kullanarak yüklediğiniz dosyalar doğrudan sizi davet eden kişiyle paylaşılır.",
+    "invalid_email_or_password": "giriş başarısız oldu",
+    "invite_accepted": "Ters paylaşım davet edildi. ",
+    "login": "Giriş yapmak",
+    "login_successful": "Başarıyla oturum açmış",
+    "login_with": "Giriş yapmak",
+    "logout": "Oturum açma",
+    "or": "Veya",
+    "password": "Şifre",
+    "password_reset_email_sent": "Parola Sıfırlama E -posta Gönderildi",
+    "password_reset_successfully": "Parola başarıyla sıfırlama",
+    "password_set": "Parola başarıyla ayarlandı!",
+    "password_set_description": "Şifreniz ayarlandı. ",
+    "passwords_do_not_match": "Parolalar eşleşmiyor",
+    "please_enter_email": "Lütfen bir e -posta adresi girin",
+    "please_enter_email_and_password": "Lütfen e -posta ve şifre girin",
+    "please_enter_email_to_reset_password": "Şifrenizi sıfırlamak için lütfen e -postanızı girin",
+    "please_enter_password_and_confirm_password": "Lütfen bir şifre girin ve şifre onaylayın",
+    "request_reset": "Sıfırlama isteği",
+    "save_new_password": "Yeni Şifre Kaydet",
+    "welcome": "Hoş geldin"
+  },
+  "button": {
+    "reverse_share_invite": "Ters paylaşım isteği oluşturun",
+    "reverse_share_invite_send": "İstek gönder",
+    "share": {
+      "password_protect": "Şifre koruma"
+    }
+  },
+  "confirm_delete_user": "Bu kullanıcıyı silmek istediğinizden emin misiniz?",
+  "download": {
+    "files": "{value, çoğul, bir {indir # file} diğer {indir {değer} dosyaları}}}"
+  },
+  "email": "E -posta",
+  "full_name": "Ad Soyad",
+  "guest": {
+    "upload_success": "Başarılı yükleyin!",
+    "upload_success_message": "Bu dosyaları isteyen kişi, indirme bağlantısı içeren bir e -posta alır."
+  },
+  "invite": {
+    "labels": {
+      "message": "Alıcıya mesaj"
+    },
+    "message": "Mesaj (isteğe bağlı)"
+  },
+  "limit": "Sınırlamak",
+  "message": {
+    "from": "{Name} 'dan mesaj"
+  },
+  "processing_uploaded_files": "Yüklenen dosyaları işleme",
+  "reverse_invite_send": {
+    "error": "Ters Paylaşım Gönderilemiyor",
+    "success": "Ters Paylaşım Davet Gönderildi!"
+  },
+  "settings": {
+    "account": {
+      "change_password": "Şifremi değiştir",
+      "create_link": "Bağlantı",
+      "email": "E -posta adresim",
+      "linked_accounts_description": "Daha kolay oturum açma için hesabınızı harici bir sağlayıcıya bağlayın. ",
+      "myProfile_description": "E -posta adresinizi güncelleyin veya adınızı değiştirin. ",
+      "name": "Tam Adımım",
+      "unlink": "Bağırmak"
+    },
+    "authProvidersSavedSuccessfully": "Auth sağlayıcılar başarılı bir şekilde kaydedildi",
+    "branding": {
+      "background_images": "Arka plan görüntüleri",
+      "background_images_description": "Unflash varsayılanlarını değiştirmek için özel arka plan resimlerini yükleyin. ",
+      "background_slideshow_speed": "Görüntü değiştirme aralığı",
+      "background_slideshow_speed_1_day": "Bir gün",
+      "background_slideshow_speed_1_hour": "1 saat",
+      "background_slideshow_speed_2_hours": "2 saat",
+      "background_slideshow_speed_3_minutes": "3 dakika",
+      "background_slideshow_speed_5_minutes": "5 dakika",
+      "background_slideshow_speed_description": "Arka plan görüntüsünün rastgele ne sıklıkta değiştiğini değiştirin (bunun yalnızca birden fazla arka plan resminiz varsa bir etkisi vardır). ",
+      "background_slideshow_speed_off": "Devre dışı bırakmak",
+      "delete": "Silmek",
+      "delete_theme": "Tema Sil",
+      "delete_theme_description": "Seçilen temayı silin. ",
+      "download": "İndirmek",
+      "download_theme": "İndir Tema",
+      "download_theme_description": "Seçilen temayı bir JSON dosyası olarak indirin. ",
+      "in_pixels": "Piksel olarak",
+      "in_seconds": "saniye",
+      "install_custom_theme": "Özel bir tema kurun\n",
+      "install_custom_theme_description": "Bir JSON dosyasından özel bir tema yükleyin.\n\n",
+      "install_custom_theme_description_2": "Web'den bir tema indirirseniz, lütfen kaynağa güvendiğinizden emin olun ve yüklemeden önce kötü amaçlı kod için temayı kontrol ettiğinizden emin olun.",
+      "install_theme": "Tema yükleyin",
+      "logo": "Logo",
+      "logo_description": "Şirket logonuzu sol üst köşedeki PNG formatında görüntüleyin. ",
+      "logo_image": "Logo görüntüsü",
+      "logo_width": "Logo genişliği",
+      "other_ui_settings": "Diğer",
+      "select_theme": "Tema seçin",
+      "select_theme_description": "Önceden yapılmış bir dizi tema veya yüklediğiniz bir temayı seçin.",
+      "settings_saved": "Marka ayarları başarıyla kaydedildi",
+      "show_powered_by": "Erugo tarafından desteklenen gösteri",
+      "show_powered_by_description": "Sayfanın altındaki \"Erugo tarafından Powered\" metnini gösterin veya gizleyin. \n",
+      "theme": "Temalar",
+      "theme_description": "Önceden yapılmış bir dizi tema veya yüklediğiniz bir temayı seçin.",
+      "theme_file": "Tema dosyası",
+      "theme_name": "Tema Adı",
+      "upload_background_image": "Arka Plan Görüntüsünü Yükle",
+      "use_my_backgrounds": "Arka planlarımı kullan",
+      "use_my_backgrounds_description": "Yüklediğiniz arka planları kullanın. "
+    },
+    "button": {
+      "branding": {
+        "save": "Marka ayarlarını kaydet"
+      },
+      "emailTemplates": {
+        "save": "E -posta Şablonlarını Kaydet"
+      },
+      "myProfile": {
+        "save": "Profil Değişikliklerini Kaydet"
+      },
+      "myShares": {
+        "create": "Payı Oluştur",
+        "pruneExpired": "Süresi dolmuş hisse senetlerini sil"
+      },
+      "system": {
+        "save": "Sistem ayarlarını kaydet"
+      },
+      "users": {
+        "add": "Kullanıcı ekle"
+      }
+    },
+    "close": "Kapalı",
+    "confirm": {
+      "pruneExpiredShares": "Süresi dolmuş hisselerinizi silmek istediğinizden emin misiniz? "
+    },
+    "description": {
+      "branding": "Erugo örneğinizin UI'sini özelleştirin ve kendi markanızı ekleyin.",
+      "emailTemplates": "E -posta şablonlarını yönetin",
+      "myProfile": "Hesabınızı yönetin.",
+      "myShares": "Hisselerinizi yönetin.",
+      "system": "Erugo örneğinizin davranışını yönetin.",
+      "users": "Kullanıcılarınızı yönetin."
+    },
+    "emailTemplates": {
+      "accountCreated": "Hesap Oluşturuldu",
+      "accountCreatedDescription": "Bir yönetici hesaplarını oluşturduğunda yeni kullanıcılara gönderilir. ",
+      "baseTemplate": "Temel şablon",
+      "baseTemplateDescription": "Diğer tüm şablonların miras aldığı temel şablonu kontrol eder.",
+      "error": "E -posta şablonları yüklenemedi",
+      "error_loading_templates": "Şablonları yükleyemedi",
+      "error_saving_templates": "Şablonları kaydedemedi",
+      "passwordReset": "Parola Sıfırlama",
+      "sections": {
+        "action_text": "Eylem düğmesi metni",
+        "action_url": "Eylem url",
+        "content": "Mesaj İçeriği",
+        "fallbackText": "Geri Alım Bağlantı Açıklama Metni",
+        "fallbackTextDescription": "Eylem düğmelerini düzgün bir şekilde görüntüleyemeyen e -posta istemcileri için, e -postanın altına bir geri dönüş bağlantısı ekliyoruz. ",
+        "header": "Başlık içeriği",
+        "subject": "Ders"
+      },
+      "success": "Şablonlar başarıyla kaydedildi"
+    },
+    "error": {
+      "pruneExpiredShares": "Silme için süresi dolmuş hisse planlanamadı!",
+      "shareExpired": "Hisse süresi dolamadı",
+      "shareExtended": "Payı genişletemedi"
+    },
+    "help": {
+      "auth_provider": {
+        "title": "Auth Sağlayıcı Bilgileri"
+      },
+      "downloadLimit": {
+        "description": "Sağ taraf numarasını tıklayıp yeni sınırda yazarak herhangi bir paylaşım için indirme sınırını ayarlayabilirsiniz. ",
+        "description2": "Kutunun dışına tıkladığınızda değişiklikler otomatik olarak kaydedilecektir.",
+        "title": "Limit Yardım İndir"
+      }
+    },
+    "invite": {
+      "message": "Mesaj (isteğe bağlı)"
+    },
+    "loading": "Paylaşım yükleme ...",
+    "noShares": "Paylaşınız yok. ",
+    "provider": {
+      "edit": "Düzenlemek",
+      "view": "Görüş"
+    },
+    "reverse_invite": {
+      "description": "Aşağıda ayrıntılarını girerek bir kişiden dosyaları isteyin. "
+    },
+    "settingsSavedSuccessfully": "Ayarlar başarıyla kaydedildi",
+    "share": {
+      "password": "Şifre paylaşın",
+      "password_confirm": "Paylaş parolayı onaylayın",
+      "password_protect_description": "Paylaşınız için bir şifre oluşturun. ",
+      "remove_password": "Parolayı Kaldır"
+    },
+    "success": {
+      "pruneExpiredShares": "Süresi dolmuş hisse senetlerinin silinmesi planlanmıştır ve arka planda işlenecektir.",
+      "shareExpired": "Hisse süresi doldu",
+      "shareExtended": "Paylaşım"
+    },
+    "system": {
+      "allow_chunked_uploads": "Yığınla yükleme moduna izin verin",
+      "allow_chunked_uploads_description": "Yığınla Yükleme Modu, dosyaları sırayla aktarılan daha küçük segmentlere ayırır. ",
+      "allow_direct_uploads": "Doğrudan Yükleme Moduna İzin Ver",
+      "allow_direct_uploads_description": "Doğrudan Yükle Modu dosyaları tek bir kesintisiz istekte iletir. ",
+      "allow_reverse_shares": "Ters hisse senetlerine izin ver",
+      "allow_reverse_shares_description": "Kayıtlı kullanıcılarınızın ters hisse talepleri gönderme iznine sahip olup olmayacağını belirler. \n\n\n\n\n",
+      "application_name": "Uygulama Adı",
+      "application_name_description": "Başlık çubuklarında, diyaloglarda ve diğer arabirim öğelerinde görünen uygulamanızın görüntülenen adını özelleştirin. ",
+      "application_url": "Uygulama URL'si",
+      "application_url_description": "Uygulamanızın temel URL'si. ",
+      "auth": "Kimlik belgesi",
+      "auth_provider_config_base_url": "Temel url",
+      "auth_provider_config_client_id": "Müşteri Kimliği",
+      "auth_provider_config_client_secret": "Müşteri sırrı",
+      "auth_provider_config_tenant": "Kiracı kimliği",
+      "auth_provider_enabled": "Olanak vermek",
+      "auth_provider_name": "Sağlayıcı adı",
+      "auth_provider_type": "Sağlayıcı türü",
+      "auth_providers": "Auth sağlayıcılar",
+      "auth_providers_description": "Kullanıcılarınızın kimlik doğrulaması yapabilmesini istediğiniz auth sağlayıcıları yapılandırın.",
+      "auth_providers_description_localhost": "Harici kimlik doğrulama yapılandırması Localhost'ta kullanılamıyor. ",
+      "callback_url": "Geri arama URL'si",
+      "callback_url_description": "Kimlik Sağlayıcı yapılandırmanızda sağlanan geri arama URL'sini kullanın.",
+      "chunked": "Yığın",
+      "chunked_uploads_disabled_but_default": "Varsayılan yükleme modunu yığın olarak ayarladınız, ancak yığın yüklemeler devre dışı bırakıldı!",
+      "clean_files_after": "Sonra dosyaları temizleyin",
+      "clean_files_after_description": "Dosyalar sistemden silinmeden önce bir hisse süresi sona ermesinden ne kadar sonra.",
+      "days": "Günler",
+      "default_expiry_time": "Varsayılan sona erme saati",
+      "default_language": "Varsayılan dil",
+      "default_language_description": "Varsayılan olarak tüm kullanıcılar için uygulama arayüzü boyunca kullanılacak birincil dili ayarlayın. ",
+      "default_upload_mode": "Varsayılan Yükleme Modu",
+      "default_upload_mode_description": "Varsayılan olarak hangi modun seçilmesi gerektiğini ayarlayın. ",
+      "delete_auth_provider": "Bu sağlayıcıyı sil",
+      "direct": "Yönlendirmek",
+      "direct_uploads_disabled_but_default": "Varsayılan yükleme modunu yönlendirecek şekilde ayarladınız, ancak doğrudan yüklemeler devre dışı bırakıldı!",
+      "disabled": "Engelli",
+      "emails": "Bildirimler",
+      "enable_share_deleted_emails": "Silinen E -postaları Paylaşın Etkinleştir",
+      "enable_share_deletion_warning_emails": "Paylaşım Uyarı E -postalarını Etkinleştir",
+      "enable_share_downloaded_emails": "İndirilen e -postaları paylaşın",
+      "enable_share_expired_warning_emails": "Paylaşılan e -postaları etkinleştirin",
+      "enable_share_expiry_warning_emails": "Paylaşım Expiry uyarısı e -postalarını etkinleştirin",
+      "enabled": "Etkinleştirilmiş",
+      "general": "Genel",
+      "languages": {
+        "dutch": "Flemenkçe",
+        "english": "İngilizce",
+        "french": "Fransızca",
+        "german": "Almanca",
+        "italian": "İtalyan",
+        "portuguese": "Portekizce"
+      },
+      "login_message": "Giriş mesajı",
+      "login_message_description": "Oturum açma ekranında görüntülenecek özel bir mesaj veya duyuru ekleyin. ",
+      "max_expiry_time": "Maksimum son kullanma süresi",
+      "max_expiry_time_description": "Bir kullanıcının oluşturulma üzerine paylaşım sona erme için seçebileceği maksimum gün sayısını ayarlayın. ",
+      "max_share_size": "Maksimum hisse büyüklüğü",
+      "max_share_size_description": "Bir kullanıcının oluşturabileceği maksimum bir paylaşım boyutunu ayarlayın. ",
+      "provider_trust_warning": "Uyarı: Auth sağlayıcı güveni",
+      "provider_trust_warning_description": "Yalnızca güvendiğiniz Auth sağlayıcıları yapılandırdığınızdan ve etkinleştirdiğinizden emin olun. ",
+      "reverse_shares": "Ters Hisse Senetleri",
+      "select_auth_provider": "Auth sağlayıcı seçin",
+      "share_deleted_emails": "\"Silinen paylaş\" e -postaları",
+      "share_deleted_emails_description": "Hisseleri sistemden kalıcı olarak silindiğinde kullanıcıları bilgilendirin. ",
+      "share_deletion_warning_emails": "\"Silinme paylaş\" uyarı e -postaları",
+      "share_deletion_warning_emails_description": "Süresi dolmuş hisselerinin kalıcı silinmesi planlandığında kullanıcılara önceden bildirim sağlayın. ",
+      "share_downloaded_emails": "\"Paylaşım İndirildi\" e -postaları",
+      "share_downloaded_emails_description": "Paylaşılan içerikleri ilk kez indirildiğinde hisse sahiplerine bildirin. ",
+      "share_expired_warning_emails": "\"Paylaşım süresi doldu\" uyarı e -postaları",
+      "share_expired_warning_emails_description": "Hisse senetleri son kullanma tarihine ulaştığında ve artık alıcılar tarafından erişilemediğinde kullanıcılara uyarı. ",
+      "share_expiry_warning_emails": "\"Paylaş Sonu",
+      "share_expiry_warning_emails_description": "Hisseleri sona erdiğinde kullanıcılara proaktif bildirimler gönderin. ",
+      "shares": "Hisse senetleri",
+      "show_deleted_shares": "Silinmiş hisseleri göster",
+      "show_language_selector": "Dil seçicisini göster",
+      "show_language_selector_description": "Uygulamanın sağ üst köşesindeki dil seçimi açılır menüsünün görünürlüğünü değiştirin. ",
+      "smtp": "SMTP",
+      "smtp_host": "SMTP Host",
+      "smtp_host_description": "Giden e -posta hizmetinizin sunucu adresi. ",
+      "smtp_password": "SMTP şifresi",
+      "smtp_password_description": "SMTP sunucunuzla kimlik doğrulaması yapmak için kullanılan şifre. ",
+      "smtp_port": "SMTP bağlantı noktası",
+      "smtp_port_description": "SMTP sunucunuza bağlanmak için kullanılan bağlantı noktası numarası. ",
+      "smtp_sender_address": "SMTP Gönderen Adresi",
+      "smtp_sender_address_description": "Tüm sistem e -postaları için gönderen olarak kullanılacak e -posta adresi. ",
+      "smtp_sender_name": "SMTP Gönderen Adı",
+      "smtp_sender_name_description": "Sistem e -postalarının göndereni olarak görünecek ekran adı. ",
+      "smtp_username": "SMTP Kullanıcı Adı",
+      "smtp_username_description": "SMTP sunucunuzla kimlik doğrulaması yapmak için gerekli kullanıcı adı. ",
+      "upload_modes": "Modları Yükle",
+      "your_auth_providers": "Auth sağlayıcılarınız"
+    },
+    "system_auth_provider_info_link": "{Name} hakkında",
+    "table": {
+      "actions": "Eylem",
+      "dates": "Tarihler",
+      "downloads": "İndirme",
+      "files": "Dosyalar",
+      "name": "İsim"
+    },
+    "title": {
+      "branding": "Marka ve UI",
+      "emailTemplates": "E -posta Şablonları",
+      "linked_accounts": "Bağlantılı Hesaplar",
+      "manage": "Üstesinden gelmek",
+      "myProfile": "Hesabım",
+      "myShares": "Hisse Senetlerim",
+      "reverse_invite": "Ters paylaşım isteği oluşturun",
+      "share": {
+        "password_protect": "Şifre Koruma Paylaşımı"
+      },
+      "system": "Sistem ayarları",
+      "users": "Kullanıcılar",
+      "users.edit": "Düzenle {name}"
+    },
+    "users": {
+      "account": "Hesap türü",
+      "actions": "Eylem",
+      "active": "Aktif",
+      "add": "Kullanıcı ekle",
+      "add_user_description": "Şifrelerini ayarlamak için kullanıcıya bir bağlantı içeren bir e -posta göndereceğiz.",
+      "admin": "Yönetici",
+      "admin_help_text": "Kullanıcıyı bir yönetici yapın.",
+      "admin_help_text_2": "Kullanıcı sizinle aynı ayrıcalıklara sahip olacaktır.",
+      "cannot_delete_yourself": "Kendini silemezsin",
+      "close": "İptal etmek",
+      "created": "Yaratılmış",
+      "current_password": "Mevcut Şifre",
+      "current_password_required": "Mevcut şifre gerekli",
+      "delete": "Silmek",
+      "edit": "Düzenlemek",
+      "edit_my_profile": "Profilimi düzenle",
+      "email": "E -posta",
+      "failed_to_create_user": "Kullanıcı oluşturulamadı",
+      "failed_to_delete_user": "Kullanıcıyı silemedi",
+      "failed_to_update_user": "Kullanıcıyı güncelleyemedi",
+      "id": "İD",
+      "leave_blank_to_keep_same_password": "Aynı şifreyi tutmak için boş bırakın.",
+      "link_provider_confirm": "Hesabınızı gerçekten bu sağlayıcıya mı bağlıyorsunuz?",
+      "linked": "Hesap bağlantılı",
+      "name": "İsim",
+      "not_linked": "Hesap bağlantılı değil",
+      "password": "Yeni Şifre",
+      "password_confirmation": "Yeni şifreyi onaylayın",
+      "password_confirmation_mismatch": "Parola ve şifre onayı eşleşmeli",
+      "password_min_length": "Parola en az {uzunluk} karakterler uzun olmalıdır.",
+      "password_required": "Şifre gereklidir",
+      "password_update_failed": "Şifre Güncellemesi Başarısız Oldu",
+      "password_updated": "Şifre Güncellendi",
+      "profile_errors": "Lütfen girişinizi kontrol edin",
+      "profile_update_failed": "Profilinizi güncelleyemedi",
+      "profile_updated": "Profiliniz güncellendi",
+      "provider_unlink_failed": "Hesabınızdan sağlayıcıyı kaldıramadı",
+      "provider_unlinked": "Sağlayıcı hesabınızdan bağlantılı kaldı",
+      "save_changes": "Değişiklikleri Kaydet",
+      "send_invite": "İstek gönder",
+      "unlink_provider_confirm": "Hesabınızı bu sağlayıcıdan gerçekten mi buluyorsunuz?",
+      "update_password": "Şifreyi güncelle",
+      "user": "Kullanıcı",
+      "user_created_successfully": "Kullanıcı başarıyla oluşturuldu",
+      "user_deleted_successfully": "Kullanıcı başarıyla silindi",
+      "user_updated_successfully": "Kullanıcı başarıyla güncellendi",
+      "you": "Sen"
+    }
+  },
+  "setup": {
+    "create_admin_account": "Yönetici Hesabı Oluştur",
+    "first_user": {
+      "email": "E -posta",
+      "name": "Ad Soyad",
+      "password": "Şifre",
+      "password_confirmation": "Şifreyi onaylayın"
+    },
+    "intro": "Erugo'yu yüklediğiniz için teşekkür ederiz! "
+  },
+  "share": {
+    "button": {
+      "expireNow": "Şimdi Süresi Doldur",
+      "extend": "Uzatmak"
+    },
+    "contains": {
+      "count": "{değer, çoğul, biri {içerir: # file} Diğer {İçerikler: {değer} dosyaları}}}"
+    },
+    "created": "Yaratılmış",
+    "data_loading": "Yükleme ...",
+    "deleted": "Silinmiş",
+    "deletes": "Silme",
+    "download": {
+      "invalid_password": "Paylaş şifre geçersiz",
+      "password_required": "Bu payı indirmek için şifreyi girmelisiniz.",
+      "password_required_short": "Şifre girin"
+    },
+    "download_limit_reached": "İndir Limit ulaşıldı",
+    "download_limit_reached.message": "İndirmeye çalıştığınız paylaşım indirme sınırına ulaştı. ",
+    "expired": "Hisse süresi doldu",
+    "expired.message": "İndirmeye çalıştığınız paylaşım süresi doldu. ",
+    "expires": "Sona erer",
+    "expires.in": "{Günler} {günler, çoğul, bir {gün} diğer {gün}}, {saat} {saatler, çoğul, bir {saat} diğer {saat}}, {dakika} {dakika, çoğul, bir {dakika} Diğer {dakika}}",
+    "files": {
+      "count": "{değer, çoğul, bir {# dosya} Diğer {# files}}",
+      "including": "içermek:"
+    },
+    "not_found": "Aradığınız paylaşım bulunamadı. ",
+    "passwordNotProtected": "Açık",
+    "passwordProtected": "Şifre korumalı"
+  },
+  "total_size": "Toplam boyut",
+  "upload": {
+    "files": "{value, çoğul, bir { # file} diğer { # dosyaları yükle}}}",
+    "upload_mode_not_supported": "Geçerli yükleme modu seçilmedi! "
+  },
+  "uploader": {
+    "current_mode": {
+      "chunked": "Yıkılmış yükleme modu",
+      "direct": "Doğrudan Yükleme Modu"
+    },
+    "expiry_label": "Paylaşın süresi {value} {birim} (Değiştir)",
+    "expiry_max_value": "Max: {değer}",
+    "expiry_too_long": "Girdiğiniz son kullanma süresi maksimum sınırı aşar. ",
+    "expiry_unit": {
+      "days": "Gün (ler)",
+      "months": "Ay (lar)",
+      "weeks": "Hafta (lar)",
+      "years": "Yıl (lar)"
+    },
+    "guest_share_created": "Teşekkür ederim! ",
+    "password_confirmation_required": "Şifre Onayı Gerekli",
+    "password_mismatch": "Parolalar eşleşmiyor",
+    "password_required": "Payı korumak için şifre gereklidir",
+    "upload_mode_swapped": "Yükleme modu {value} olarak değiştirildi"
+  },
+  "uploading": {
+    "files": "{değer, çoğul, bir {yükleme # file} diğer { # dosyaları yükleme}}}"
+  }
+}
