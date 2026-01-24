@@ -16,6 +16,14 @@ import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import { useTranslate } from '@tolgee/vue'
+import { getShareRecipients, updateShareRecipients, resendShareRecipientEmails } from '../../api'
+
+
+const showRecipientsModal = ref(false)
+const recipientsShare = ref(null)
+const recipientsEmails = ref([''])
+const recipientsLoading = ref(false)
+
 
 const { t } = useTranslate()
 
@@ -32,6 +40,40 @@ onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
   loadShares()
 })
+
+
+const openRecipients = async (share) => {
+  recipientsShare.value = share
+  recipientsLoading.value = true
+  showRecipientsModal.value = true
+
+  const res = await getShareRecipients(share.id)
+  const json = await res.json()
+
+  recipientsEmails.value = (json?.data?.recipients || []).map(r => r.email)
+  if (!recipientsEmails.value.length) recipientsEmails.value = ['']
+
+  recipientsLoading.value = false
+}
+
+const saveRecipients = async () => {
+  const emails = recipientsEmails.value
+    .map(e => (e || '').trim())
+    .filter(Boolean)
+
+  const res = await updateShareRecipients(recipientsShare.value.id, emails)
+  // show toast based on res.ok
+}
+
+const resendRecipients = async () => {
+  const res = await resendShareRecipientEmails(recipientsShare.value.id)
+  // show toast based on res.ok
+}
+
+const addRecipientRow = () => recipientsEmails.value.push('')
+const removeRecipientRow = (idx) => recipientsEmails.value.splice(idx, 1)
+
+
 
 const loadShares = async () => {
   shares.value = await getMyShares(showDeletedShares.value)
@@ -239,6 +281,7 @@ defineExpose({
               <CalendarX2 />
               {{ $t('share.button.expireNow') }}
             </button>
+
             <button
               @click="handleExtendShareClick(share)"
               class="secondary"
@@ -247,6 +290,11 @@ defineExpose({
               <CalendarPlus />
               {{ $t('share.button.extend') }}
             </button>
+            <button 
+              class="secondary" 
+              @click="openRecipients(share)">Recipients
+            </button>
+
             <button
               @click="downloadShare(share)"
               class="secondary icon-only"
@@ -266,6 +314,22 @@ defineExpose({
     <div v-else class="center-message">
       <p>{{ $t('settings.loading') }}</p>
     </div>
+
+    <div v-if="recipientsLoading">Loading…</div>
+
+<div v-else>
+  <div v-for="(email, idx) in recipientsEmails" :key="idx" class="d-flex gap-2 mb-2">
+    <input v-model="recipientsEmails[idx]" type="email" class="form-control" placeholder="email@example.com" />
+    <button class="btn btn-outline-danger" @click="removeRecipientRow(idx)" :disabled="recipientsEmails.length === 1">Remove</button>
+  </div>
+
+  <button class="btn btn-outline-primary" @click="addRecipientRow">Add</button>
+</div>
+
+<button class="btn btn-secondary" @click="showRecipientsModal = false">Close</button>
+<button class="btn btn-primary" @click="saveRecipients">Save</button>
+<button class="btn btn-outline-primary" @click="resendRecipients">Resend</button>
+
   </div>
 </template>
 
