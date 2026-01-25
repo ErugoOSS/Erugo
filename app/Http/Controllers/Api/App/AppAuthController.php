@@ -585,8 +585,9 @@ class AppAuthController extends Controller
         $providerInstance = new $providerClass($provider);
         
         // Get the redirect URL with the state parameter
-        // We use a special app-callback URL that will redirect to the native app
-        $callbackUrl = url('/auth/provider/' . $provider->uuid . '/app-callback');
+        // We use the same callback URL as the web flow - the state parameter 
+        // will be used to identify this as an app flow and redirect accordingly
+        $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
         $authorizationUrl = $providerInstance->getAuthorizationUrl($state, $callbackUrl);
 
         return response()->json([
@@ -657,7 +658,8 @@ class AppAuthController extends Controller
             $providerClass = $this->getProviderClass($provider->provider_class);
             $providerInstance = new $providerClass($provider);
             
-            $callbackUrl = url('/auth/provider/' . $provider->uuid . '/app-callback');
+            // Use the same callback URL that was used in the authorization request
+            $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
             $authProviderUser = $providerInstance->exchangeCodeForUser($request->code, $callbackUrl);
 
             // Handle account linking if this was a link action
@@ -841,7 +843,9 @@ class AppAuthController extends Controller
         $providerClass = $this->getProviderClass($provider->provider_class);
         $providerInstance = new $providerClass($provider);
         
-        $callbackUrl = url('/auth/provider/' . $provider->uuid . '/app-callback');
+        // Use the same callback URL as the web flow - the state parameter 
+        // will be used to identify this as an app flow and redirect accordingly
+        $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
         $authorizationUrl = $providerInstance->getAuthorizationUrl($state, $callbackUrl);
 
         return response()->json([

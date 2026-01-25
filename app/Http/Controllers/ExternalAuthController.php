@@ -113,6 +113,25 @@ class ExternalAuthController extends Controller
             return redirect('/')->with('error', 'Provider not found');
         }
 
+        // Check if this is an app flow by looking up the state in AppAuthState
+        $state = request()->input('state');
+        $code = request()->input('code');
+        
+        if ($state && $code) {
+            $authState = AppAuthState::where('state', $state)->first();
+            
+            if ($authState && !$authState->isExpired() && $authState->provider_id === $provider->id) {
+                // This is an app flow - redirect to the native app with the code
+                $callbackScheme = $authState->callback_scheme;
+                $redirectUrl = $callbackScheme . '://auth-callback?' . http_build_query([
+                    'code' => $code,
+                    'state' => $state,
+                ]);
+                
+                return redirect()->away($redirectUrl);
+            }
+        }
+
         // Get user information from the provider
         $authProviderUser = $this->getAuthProviderUser($provider);
 
