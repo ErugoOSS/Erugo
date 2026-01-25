@@ -16,7 +16,7 @@ import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import { useTranslate } from '@tolgee/vue'
-import RecipientsModal from '../shares/recipientsModal.vue'
+import RecipientsModal from '../shares/recipients.vue'
 
 import {
   getMyShares,

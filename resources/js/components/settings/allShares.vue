@@ -1,5 +1,5 @@
 <script setup>
-import RecipientsModal from '../shares/RecipientsModal.vue'
+import RecipientsModal from '../shares/recipients.vue'
 
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
 import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
