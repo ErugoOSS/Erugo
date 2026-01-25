@@ -123,7 +123,7 @@ class OIDCAuthProvider extends BaseAuthProvider
 
     // Get the authorization endpoint from OIDC discovery
     $client->setHttpUpgradeInsecureRequests(false);
-    $authEndpoint = $client->getProviderConfigValue('authorization_endpoint');
+    $authEndpoint = $client->getProviderConfigValuePublic('authorization_endpoint');
 
     // Build the authorization URL manually with our state
     $params = [
@@ -157,10 +157,10 @@ class OIDCAuthProvider extends BaseAuthProvider
     $client->addScope(['openid', 'email', 'profile']);
 
     // Get the token endpoint from OIDC discovery
-    $tokenEndpoint = $client->getProviderConfigValue('token_endpoint');
+    $tokenEndpoint = $client->getProviderConfigValuePublic('token_endpoint');
 
     // Exchange the code for tokens
-    $response = $client->fetchURL($tokenEndpoint, [
+    $response = $client->fetchURLPublic($tokenEndpoint, [
       'grant_type' => 'authorization_code',
       'code' => $code,
       'redirect_uri' => $callbackUrl,
