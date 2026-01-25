@@ -156,11 +156,12 @@ class OIDCAuthProvider extends BaseAuthProvider
     $client->setRedirectURL($callbackUrl);
     $client->addScope(['openid', 'email', 'profile']);
 
-    // Get the token endpoint from OIDC discovery
+    // Get the token endpoint and userinfo endpoint from OIDC discovery
     $tokenEndpoint = $client->getProviderConfigValuePublic('token_endpoint');
+    $userinfoEndpoint = $client->getProviderConfigValuePublic('userinfo_endpoint');
 
-    // Exchange the code for tokens
-    $response = $client->fetchURLPublic($tokenEndpoint, [
+    // Exchange the code for tokens using Laravel's HTTP client
+    $tokenResponse = \Illuminate\Support\Facades\Http::asForm()->post($tokenEndpoint, [
       'grant_type' => 'authorization_code',
       'code' => $code,
       'redirect_uri' => $callbackUrl,
@@ -168,24 +169,36 @@ class OIDCAuthProvider extends BaseAuthProvider
       'client_secret' => $this->client_secret,
     ]);
 
-    $tokenData = json_decode($response);
-
-    if (!$tokenData || isset($tokenData->error)) {
-      $error = $tokenData->error ?? 'Unknown error';
-      \Log::error("OIDC token exchange failed: " . $error);
+    if (!$tokenResponse->successful()) {
+      \Log::error("OIDC token exchange failed: " . $tokenResponse->body());
       $this->throwAuthFailureException();
     }
 
-    // Set the access token and get user info
-    $client->setAccessToken($tokenData->access_token);
-    $userInfo = $client->requestUserInfo();
+    $tokenData = $tokenResponse->json();
+    $accessToken = $tokenData['access_token'] ?? null;
+
+    if (!$accessToken) {
+      \Log::error("OIDC token exchange returned no access token");
+      $this->throwAuthFailureException();
+    }
+
+    // Get user info using the access token
+    $userResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
+      ->get($userinfoEndpoint);
+
+    if (!$userResponse->successful()) {
+      \Log::error("OIDC user info request failed: " . $userResponse->body());
+      $this->throwAuthFailureException();
+    }
+
+    $userInfo = $userResponse->json();
 
     $userdata = [
-      'sub' => $userInfo->sub,
-      'name' => $userInfo->name,
-      'email' => $userInfo->email,
-      'avatar' => $userInfo->picture ?? null,
-      'verified' => $userInfo->email_verified ?? false
+      'sub' => $userInfo['sub'],
+      'name' => $userInfo['name'] ?? $userInfo['preferred_username'] ?? $userInfo['email'],
+      'email' => $userInfo['email'],
+      'avatar' => $userInfo['picture'] ?? null,
+      'verified' => $userInfo['email_verified'] ?? false
     ];
 
     return new AuthProviderUser($userdata);
