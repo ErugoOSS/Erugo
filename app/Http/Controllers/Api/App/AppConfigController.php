@@ -48,6 +48,7 @@ class AppConfigController extends Controller
                     'id' => $provider->id,
                     'uuid' => $provider->uuid,
                     'name' => $provider->name,
+                    'type' => $provider->provider_class,
                     'icon' => $class::getIcon(),
                     'allow_registration' => (bool) $provider->allow_registration,
                 ];
