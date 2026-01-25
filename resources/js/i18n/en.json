@@ -712,7 +712,8 @@
       "pruneExpiredShares": "Expired shares have been scheduled for deletion and will be processed in the background.",
       "shareExpired": "Share expired",
       "shareExtended": "Share extended",
-      "shareEmailResent": "Share email resent successfully"
+      "shareEmailResent": "Share email resent successfully",
+      "shareRecipientsSaved": "Share recipients saved successfully"
     },
     "system": {
       "allow_chunked_uploads": "Allow chunked upload mode",
