@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\Rules\Password as PasswordRules;
 use Carbon\Carbon;
@@ -587,6 +588,8 @@ class AppAuthController extends Controller
         // Get the redirect URL with the state parameter
         // We use the same callback URL as the web flow - the state parameter 
         // will be used to identify this as an app flow and redirect accordingly
+        // Force HTTPS for the callback URL as OAuth providers require exact URL matching
+        URL::forceScheme('https');
         $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
         $authorizationUrl = $providerInstance->getAuthorizationUrl($state, $callbackUrl);
 
@@ -659,6 +662,8 @@ class AppAuthController extends Controller
             $providerInstance = new $providerClass($provider);
             
             // Use the same callback URL that was used in the authorization request
+            // Force HTTPS to match the URL used in the authorization request
+            URL::forceScheme('https');
             $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
             $authProviderUser = $providerInstance->exchangeCodeForUser($request->code, $callbackUrl);
 
@@ -845,6 +850,8 @@ class AppAuthController extends Controller
         
         // Use the same callback URL as the web flow - the state parameter 
         // will be used to identify this as an app flow and redirect accordingly
+        // Force HTTPS for the callback URL as OAuth providers require exact URL matching
+        URL::forceScheme('https');
         $callbackUrl = route('social.provider.callback', ['provider' => $provider->uuid]);
         $authorizationUrl = $providerInstance->getAuthorizationUrl($state, $callbackUrl);
 
