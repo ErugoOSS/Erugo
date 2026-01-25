@@ -16,6 +16,7 @@ import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import { useTranslate } from '@tolgee/vue'
+import RecipientsModal from '../shares/recipientsModal.vue'
 
 import {
   getMyShares,
@@ -23,9 +24,6 @@ import {
   extendShare,
   setDownloadLimit,
   pruneExpiredShares,
-  getShareRecipients,
-  updateShareRecipients,
-  resendShareRecipientEmails
 } from '../../api'
 
 
@@ -47,102 +45,12 @@ onMounted(async () => {
 })
 
 const recipientsModalOpen = ref(false)
-const recipientsLoading = ref(false)
 const selectedShare = ref(null)
-const recipientEmails = ref([{ name: '', email: '' }])
-const recipientsError = ref('')
 
-const openRecipientsModal = async (share) => {
+const openRecipientsModal = (share) => {
   selectedShare.value = share
-  recipientsError.value = ''
-  recipientsLoading.value = true
   recipientsModalOpen.value = true
-
-  try {
-    const res = await getShareRecipients(share.id)
-    const json = await res.json().catch(() => ({}))
-
-    if (!res.ok) {
-      recipientsError.value = json?.message || `Failed to load recipients (${res.status})`
-      recipientEmails.value = [{ name: '', email: '' }]
-      return
-    }
-
-    const data = json?.data?.recipients || []
-    recipientEmails.value = data.length
-      ? data.map(r => ({ name: r.name || '', email: r.email || '' }))
-      : [{ name: '', email: '' }]
-  } catch (e) {
-    recipientsError.value = 'Failed to load recipients'
-    recipientEmails.value = [{ name: '', email: '' }]
-  } finally {
-    recipientsLoading.value = false
-  }
 }
-
-
-const closeRecipientsModal = () => {
-  recipientsModalOpen.value = false
-  selectedShare.value = null
-  recipientEmails.value = [{ name: '', email: '' }]
-  recipientsError.value = ''
-}
-
-const addRecipientRow = () => recipientEmails.value.push({ name: '', email: '' })
-const removeRecipientRow = (idx) => {
-  if (recipientEmails.value.length === 1) return
-  recipientEmails.value.splice(idx, 1)
-}
-
-const saveRecipients = async () => {
-  if (!selectedShare.value) return
-  recipientsError.value = ''
-
-  const payload = recipientEmails.value
-    .map(r => ({
-      name: (r?.name || '').trim(),
-      email: (r?.email || '').trim().toLowerCase()
-    }))
-    .filter(r => r.email)
-    .filter((r, idx, arr) => arr.findIndex(x => x.email === r.email) === idx)
-
-  try {
-    const res = await updateShareRecipients(selectedShare.value.id, payload)
-    const json = await res.json().catch(() => ({}))
-
-    if (!res.ok) {
-      recipientsError.value = json?.message || `Unable to save recipients (${res.status})`
-      return
-    }
-
-    // re-load from server to reflect canonical saved data
-    recipientEmails.value = payload.length ? payload : [{ name: '', email: '' }]
-    toast.success('Recipients saved')
-  } catch (e) {
-    recipientsError.value = 'Unable to save recipients'
-  }
-}
-
-
-const resendRecipients = async () => {
-  if (!selectedShare.value) return
-  recipientsError.value = ''
-
-  try {
-    const res = await resendShareRecipientEmails(selectedShare.value.id)
-    const json = await res.json().catch(() => ({}))
-
-    if (!res.ok) {
-      recipientsError.value = json?.message || `Unable to resend emails (${res.status})`
-      return
-    }
-
-    toast.success('Emails resent')
-  } catch (e) {
-    recipientsError.value = 'Unable to resend emails'
-  }
-}
-
 
 
 //const removeRecipientRow = (idx) => recipientsEmails.value.splice(idx, 1)
@@ -366,7 +274,6 @@ defineExpose({
             </button>
             
 
-
             <button class="secondary" @click="openRecipientsModal(share)">
                 {{ ($t && $t('share.button.recipients')) || 'Recipients' }}
             </button>
@@ -392,39 +299,12 @@ defineExpose({
       <p>{{ $t('settings.loading') }}</p>
     </div>
 
-  
-    <div v-if="recipientsLoading">Loading…</div>
-      <div class="recipients-modal-overlay" :class="{ active: recipientsModalOpen }" @click.self="closeRecipientsModal">
-        <div class="recipients-modal-form">
-          <div class="recipients-modal-header">
-            <h3>Recipients</h3>
-            <button class="close-btn icon-only secondary" @click="closeRecipientsModal">×</button>
-          </div>
+    <RecipientsModal
+      :modelValue="recipientsModalOpen"
+      :share="selectedShare"
+      @update:modelValue="recipientsModalOpen = $event"
+    />
 
-          <div class="recipients-modal-content">
-            <div v-if="recipientsLoading">Loading…</div>
-            <div v-else>
-              <div v-if="recipientsError" class="error">{{ recipientsError }}</div>
-
-              <div v-for="(r, idx) in recipientEmails" :key="idx" class="recipient-row">
-                <input v-model="r.name" type="text" placeholder="Name (optional)" />
-                <input v-model="r.email" type="email" placeholder="email@example.com" />
-                <button class="secondary" @click="removeRecipientRow(idx)" :disabled="recipientEmails.length === 1">
-                  Remove
-                </button>
-              </div>
-
-              <button class="secondary" @click="addRecipientRow">Add</button>
-            </div>
-          </div>
-
-          <div class="button-bar">
-            <button class="secondary" @click="closeRecipientsModal">Close</button>
-            <button class="secondary" @click="saveRecipients" :disabled="recipientsLoading">Save</button>
-            <button class="clear-button" @click="resendRecipients" :disabled="recipientsLoading">Resend</button>
-          </div>
-        </div>
-      </div>
 
   </div>
 </template>

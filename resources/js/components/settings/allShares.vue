@@ -1,4 +1,6 @@
 <script setup>
+import RecipientsModal from '../shares/RecipientsModal.vue'
+
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
 import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
 import {
@@ -28,6 +30,15 @@ const loadedShares = ref(false)
 const shares = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
+
+const recipientsModalOpen = ref(false)
+const selectedShare = ref(null)
+
+const openRecipientsModal = (share) => {
+  selectedShare.value = share
+  recipientsModalOpen.value = true
+}
+
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
@@ -269,6 +280,13 @@ defineExpose({
     <div v-else class="center-message">
       <p>{{ $t('settings.loading') }}</p>
     </div>
+
+ 
+    <RecipientsModal
+      :modelValue="recipientsModalOpen"
+      :share="selectedShare"
+      @update:modelValue="recipientsModalOpen = $event"
+    />
 
 
 
