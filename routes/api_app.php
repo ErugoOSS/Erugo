@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\App\AppUserController;
 use App\Http\Controllers\Api\App\AppSharesController;
 use App\Http\Controllers\Api\App\AppUploadsController;
 use App\Http\Controllers\Api\App\AppReverseSharesController;
+use App\Http\Controllers\StatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,4 +133,14 @@ Route::post('/reverse-shares/accept', 'AppReverseSharesController@accept')
 Route::group(['prefix' => 'reverse-shares', 'middleware' => ['auth']], function () {
     Route::post('/invite', 'AppReverseSharesController@invite')->name('app.reverseShares.invite');
     Route::post('/accept-by-id', 'AppReverseSharesController@acceptById')->name('app.reverseShares.acceptById');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Statistics Routes (Admin Only)
+|--------------------------------------------------------------------------
+*/
+Route::group(['prefix' => 'stats', 'middleware' => ['auth', Admin::class]], function () {
+    Route::get('/', [StatsController::class, 'getStats'])->name('app.stats.get');
+    Route::get('/system-info', [StatsController::class, 'getSystemInfo'])->name('app.stats.systemInfo');
 });
