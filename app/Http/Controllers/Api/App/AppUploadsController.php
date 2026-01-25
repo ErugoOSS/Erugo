@@ -1,0 +1,486 @@
+<?php
+
+namespace App\Http\Controllers\Api\App;
+
+use App\Http\Controllers\Controller;
+use App\Models\Share;
+use App\Models\File;
+use App\Models\UploadSession;
+use App\Models\ReverseShareInvite;
+use App\Models\Setting;
+use App\Jobs\CreateShareZip;
+use App\Mail\shareCreatedMail;
+use App\Jobs\sendEmail;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+
+class AppUploadsController extends Controller
+{
+    /**
+     * Verify if an upload session exists and is valid for resuming
+     * This is used by the app to check if a previous TUS upload can be resumed
+     */
+    public function verify(Request $request, string $uploadId): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'AUTH_UNAUTHORIZED',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Check if the upload session exists and belongs to this user
+        $session = UploadSession::where('upload_id', $uploadId)
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'complete'])
+            ->first();
+
+        if (!$session) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'UPLOAD_SESSION_NOT_FOUND',
+                'message' => 'Upload session not found'
+            ], 404);
+        }
+
+        // Also verify the file still exists on disk
+        $uploadPath = storage_path('app/uploads/' . $uploadId);
+        if (!file_exists($uploadPath)) {
+            // Clean up the orphaned session
+            $session->delete();
+            return response()->json([
+                'status' => 'error',
+                'code' => 'UPLOAD_FILE_NOT_FOUND',
+                'message' => 'Upload file not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Upload session valid',
+            'data' => [
+                'upload_id' => $uploadId,
+                'status' => $session->status,
+                'filename' => $session->filename,
+                'filesize' => $session->filesize
+            ]
+        ]);
+    }
+
+    /**
+     * Create a share from TUS-uploaded files
+     * 
+     * Request body:
+     * - upload_ids: array (required) - Array of TUS upload IDs
+     * - name: string (optional) - Share name
+     * - description: string (optional) - Share description
+     * - expiry_days: integer (optional) - Days until expiry (uses default if not provided)
+     * - password: string (optional) - Password to protect the share
+     * - download_limit: integer (optional) - Maximum downloads allowed (null = unlimited)
+     * - recipients: array (optional) - Array of {name, email} recipients to notify
+     * - file_paths: object (optional) - Map of upload_id to relative file path
+     */
+    public function createShare(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'upload_ids' => ['required', 'array'],
+            'upload_ids.*' => ['required', 'string'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'max:500'],
+            'expiry_days' => ['nullable', 'integer', 'min:1'],
+            'password' => ['nullable', 'string'],
+            'download_limit' => ['nullable', 'integer', 'min:1'],
+            'recipients' => ['nullable', 'array'],
+            'recipients.*.name' => ['required_with:recipients', 'string'],
+            'recipients.*.email' => ['required_with:recipients', 'email'],
+            'file_paths' => ['nullable', 'array'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'VALIDATION_ERROR',
+                'message' => 'Validation failed',
+                'data' => [
+                    'errors' => $validator->errors()
+                ]
+            ], 422);
+        }
+
+        // Calculate expiry date from expiry_days (or use default)
+        $maxExpiryTime = Setting::where('key', 'max_expiry_time')->first()?->value;
+        $defaultExpiryTime = Setting::where('key', 'default_expiry_time')->first()?->value ?? 7;
+        
+        $expiryDays = $request->expiry_days ?? (int) $defaultExpiryTime;
+        
+        // Validate against max expiry
+        if ($maxExpiryTime !== null && $expiryDays > (int) $maxExpiryTime) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_EXPIRY_TOO_LONG',
+                'message' => 'Expiry days exceeds maximum allowed',
+                'data' => [
+                    'max_expiry_days' => (int) $maxExpiryTime
+                ]
+            ], 400);
+        }
+        
+        $expiryDate = Carbon::now()->addDays($expiryDays);
+
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'AUTH_UNAUTHORIZED',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Generate a unique long ID for the share
+        $longId = app('App\Http\Controllers\SharesController')->generateLongId();
+
+        // Create the share destination directory
+        $sharePath = $user->id . '/' . $longId;
+        $completePath = storage_path('app/shares/' . $sharePath);
+
+        if (!file_exists($completePath)) {
+            mkdir($completePath, 0777, true);
+        }
+
+        // Find files from upload sessions by TUS upload IDs
+        // Use retry loop to handle race condition where post-finish hooks
+        // may still be processing when this endpoint is called
+        $expectedCount = count($request->upload_ids);
+        $maxRetries = 5;
+        $sessions = null;
+
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            $sessions = UploadSession::whereIn('upload_id', $request->upload_ids)
+                ->where('user_id', $user->id)
+                ->where('status', 'complete')
+                ->get();
+
+            if ($sessions->count() === $expectedCount) {
+                break;
+            }
+
+            if ($attempt < $maxRetries - 1) {
+                $delayMs = 100 * pow(2, $attempt);
+                usleep($delayMs * 1000);
+
+                Log::debug('Waiting for upload sessions to complete', [
+                    'attempt' => $attempt + 1,
+                    'found' => $sessions->count(),
+                    'expected' => $expectedCount,
+                    'delay_ms' => $delayMs
+                ]);
+            }
+        }
+
+        if ($sessions->count() !== $expectedCount) {
+            Log::warning('Upload sessions not complete after retries', [
+                'found' => $sessions->count(),
+                'expected' => $expectedCount,
+                'upload_ids' => $request->upload_ids
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'code' => 'UPLOADS_NOT_COMPLETE',
+                'message' => 'Some uploads were not found or not completed'
+            ], 400);
+        }
+
+        // Get file records from sessions
+        // Handle both regular uploads and bundle uploads
+        $fileIds = [];
+        $isBundleUpload = false;
+
+        foreach ($sessions as $session) {
+            if ($session->is_bundle && $session->bundle_file_ids) {
+                $bundleFileIds = $session->getBundleFileIdsArray();
+                $fileIds = array_merge($fileIds, $bundleFileIds);
+                $isBundleUpload = true;
+            } elseif ($session->file_id) {
+                $fileIds[] = $session->file_id;
+            }
+        }
+
+        $fileIds = array_filter($fileIds);
+        $files = File::whereIn('id', $fileIds)->get();
+
+        if ($files->count() === 0) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'NO_FILES_FOUND',
+                'message' => 'No files found for the uploads'
+            ], 400);
+        }
+
+        Log::info('AppUploadsController::createShare: Processing files', [
+            'file_count' => $files->count(),
+            'is_bundle' => $isBundleUpload
+        ]);
+
+        // Calculate total size of all files
+        $totalSize = 0;
+        $fileCount = $files->count();
+        foreach ($files as $file) {
+            $totalSize += $file->size;
+        }
+
+        // Create the share record
+        $share = Share::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'expires_at' => $expiryDate,
+            'user_id' => $user->id,
+            'path' => $sharePath,
+            'long_id' => $longId,
+            'size' => $totalSize,
+            'file_count' => $fileCount,
+            'status' => 'pending',
+            'password' => $request->password ? Hash::make($request->password) : null,
+            'download_limit' => $request->download_limit,
+        ]);
+
+        // Create a mapping from upload_id to file for path lookup (for non-bundle uploads)
+        $uploadIdToFile = [];
+        foreach ($sessions as $session) {
+            if (!$session->is_bundle && $session->file_id) {
+                $uploadIdToFile[$session->upload_id] = $files->firstWhere('id', $session->file_id);
+            }
+        }
+
+        // Associate files with the share and move from TUS uploads to share directory
+        foreach ($files as $file) {
+            $sourcePath = storage_path('app/' . $file->temp_path);
+
+            // Determine the original path based on whether this is a bundle file or not
+            if ($isBundleUpload) {
+                $tempPathParts = explode('_extracted/', $file->temp_path);
+                if (count($tempPathParts) > 1) {
+                    $bundleFilePath = $tempPathParts[1];
+                    $pathParts = explode('/', $bundleFilePath);
+                    array_pop($pathParts);
+                    $originalPath = implode('/', $pathParts);
+                } else {
+                    $originalPath = '';
+                }
+            } else {
+                $uploadId = null;
+                foreach ($uploadIdToFile as $uid => $f) {
+                    if ($f && $f->id === $file->id) {
+                        $uploadId = $uid;
+                        break;
+                    }
+                }
+
+                $filePaths = $request->file_paths ?? [];
+                $originalPath = $filePaths[$uploadId] ?? '';
+                $originalPath = explode('/', $originalPath);
+                $originalPath = implode('/', array_slice($originalPath, 0, -1));
+            }
+
+            $destPath = $completePath . '/' . $originalPath;
+
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0777, true);
+            }
+
+            $sanitizedFilename = $file->name;
+            $destFile = $destPath . '/' . $sanitizedFilename;
+
+            if (file_exists($sourcePath)) {
+                if (copy($sourcePath, $destFile)) {
+                    unlink($sourcePath);
+                } else {
+                    rename($sourcePath, $destFile);
+                }
+            }
+
+            // Clean up TUS .info file (only for non-bundle files)
+            if (!$isBundleUpload) {
+                $infoPath = $sourcePath . '.info';
+                if (file_exists($infoPath)) {
+                    unlink($infoPath);
+                }
+            }
+
+            // Update file record
+            $file->share_id = $share->id;
+            $file->full_path = $originalPath;
+            $file->temp_path = null;
+            $file->save();
+        }
+
+        // Clean up upload sessions and bundle extraction directories
+        foreach ($sessions as $session) {
+            if ($session->is_bundle) {
+                $extractDir = storage_path('app/uploads/' . $session->upload_id . '_extracted');
+                if (is_dir($extractDir)) {
+                    $this->recursiveDelete($extractDir);
+                }
+            }
+            $session->delete();
+        }
+
+        // Dispatch job to create ZIP file
+        CreateShareZip::dispatch($share);
+
+        // Handle guest user flow
+        if ($user->is_guest) {
+            $invite = $user->invite;
+            $share->public = false;
+            $share->invite_id = $invite->id;
+            $share->user_id = null;
+            $share->save();
+
+            if ($invite->user) {
+                $this->sendShareCreatedEmail($share, $invite->user);
+            } else {
+                Log::error('Guest user has no invite user', ['user_id' => $user->id]);
+            }
+
+            $invite->guest_user_id = null;
+            $invite->save();
+
+            // Log the user out and delete the guest user
+            Auth::logout();
+            $user->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Share created',
+                'data' => [
+                    'share_created' => true,
+                    'guest_session_ended' => true
+                ]
+            ]);
+        }
+
+        // Check if this existing user has an active reverse share invite
+        $activeInvite = ReverseShareInvite::where('guest_user_id', $user->id)
+            ->where('recipient_email', $user->email)
+            ->whereNotNull('used_at')
+            ->whereNull('completed_at')
+            ->first();
+
+        if ($activeInvite) {
+            $share->invite_id = $activeInvite->id;
+            $share->save();
+
+            if ($activeInvite->user) {
+                $this->sendShareCreatedEmail($share, [
+                    'name' => $activeInvite->user->name,
+                    'email' => $activeInvite->user->email
+                ]);
+            }
+
+            $activeInvite->completed_at = now();
+            $activeInvite->guest_user_id = null;
+            $activeInvite->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Share created',
+                'data' => [
+                    'share' => $this->formatShare($share)
+                ]
+            ]);
+        }
+
+        // Process recipients if provided (normal share flow)
+        if ($request->has('recipients') && is_array($request->recipients)) {
+            foreach ($request->recipients as $recipient) {
+                if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {
+                    $this->sendShareCreatedEmail($share, $recipient);
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Share created',
+            'data' => [
+                'share' => $this->formatShare($share)
+            ]
+        ]);
+    }
+
+    /**
+     * Send email notification that a share has been created
+     */
+    private function sendShareCreatedEmail(Share $share, $recipient): void
+    {
+        $user = Auth::user();
+        if ($recipient) {
+            // Handle both array and object recipients
+            $email = is_array($recipient) ? $recipient['email'] : $recipient->email;
+            sendEmail::dispatch($email, shareCreatedMail::class, [
+                'user' => $user,
+                'share' => $share,
+                'recipient' => $recipient
+            ]);
+        }
+    }
+
+    /**
+     * Format share for response
+     */
+    private function formatShare(Share $share): array
+    {
+        return [
+            'id' => $share->id,
+            'long_id' => $share->long_id,
+            'name' => $share->name,
+            'description' => $share->description,
+            'expires_at' => $share->expires_at,
+            'download_limit' => $share->download_limit,
+            'download_count' => $share->download_count,
+            'size' => $share->size,
+            'file_count' => $share->file_count,
+            'status' => $share->status,
+            'public' => (bool) $share->public,
+            'path' => $share->path,
+            'created_at' => $share->created_at,
+            'updated_at' => $share->updated_at,
+            'password_protected' => $share->password ? true : false,
+        ];
+    }
+
+    /**
+     * Recursively delete a directory and its contents
+     */
+    private function recursiveDelete(string $dir): bool
+    {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $items = scandir($dir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $dir . '/' . $item;
+            if (is_dir($path)) {
+                $this->recursiveDelete($path);
+            } else {
+                unlink($path);
+            }
+        }
+
+        return rmdir($dir);
+    }
+}

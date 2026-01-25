@@ -131,3 +131,7 @@ Route::get('/auth/provider/{provider}/callback', [ExternalAuthController::class,
 //auth provider link account
 Route::get('/auth/provider/{provider}/link', [ExternalAuthController::class, 'linkAccount'])
     ->name('social.provider.link');
+
+//auth provider callback for native apps (redirects to custom URL scheme)
+Route::get('/auth/provider/{providerUuid}/app-callback', [ExternalAuthController::class, 'appCallback'])
+    ->name('social.provider.app-callback');

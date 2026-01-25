@@ -102,6 +102,95 @@ class OIDCAuthProvider extends BaseAuthProvider
     return new AuthProviderUser($userdata);
   }
 
+  /**
+   * Get the authorization URL for the OAuth flow with explicit state and callback URL
+   * Used by the App API for native app OAuth flows
+   */
+  public function getAuthorizationUrl(string $state, string $callbackUrl): string
+  {
+    if (!$this->client_id || !$this->base_url) {
+      $this->throwMissingDataException();
+    }
+
+    $client = new ErugoOpenIDConnectclient(
+      $this->base_url,
+      $this->client_id,
+      $this->client_secret
+    );
+
+    $client->setRedirectURL($callbackUrl);
+    $client->addScope(['openid', 'email', 'profile']);
+
+    // Get the authorization endpoint from OIDC discovery
+    $client->setHttpUpgradeInsecureRequests(false);
+    $authEndpoint = $client->getProviderConfigValue('authorization_endpoint');
+
+    // Build the authorization URL manually with our state
+    $params = [
+      'response_type' => 'code',
+      'client_id' => $this->client_id,
+      'redirect_uri' => $callbackUrl,
+      'scope' => 'openid email profile',
+      'state' => $state,
+    ];
+
+    return $authEndpoint . '?' . http_build_query($params);
+  }
+
+  /**
+   * Exchange an authorization code for user information
+   * Used by the App API for native app OAuth flows
+   */
+  public function exchangeCodeForUser(string $code, string $callbackUrl): AuthProviderUser
+  {
+    if (!$this->client_id || !$this->client_secret || !$this->base_url) {
+      $this->throwMissingDataException();
+    }
+
+    $client = new ErugoOpenIDConnectclient(
+      $this->base_url,
+      $this->client_id,
+      $this->client_secret
+    );
+
+    $client->setRedirectURL($callbackUrl);
+    $client->addScope(['openid', 'email', 'profile']);
+
+    // Get the token endpoint from OIDC discovery
+    $tokenEndpoint = $client->getProviderConfigValue('token_endpoint');
+
+    // Exchange the code for tokens
+    $response = $client->fetchURL($tokenEndpoint, [
+      'grant_type' => 'authorization_code',
+      'code' => $code,
+      'redirect_uri' => $callbackUrl,
+      'client_id' => $this->client_id,
+      'client_secret' => $this->client_secret,
+    ]);
+
+    $tokenData = json_decode($response);
+
+    if (!$tokenData || isset($tokenData->error)) {
+      $error = $tokenData->error ?? 'Unknown error';
+      \Log::error("OIDC token exchange failed: " . $error);
+      $this->throwAuthFailureException();
+    }
+
+    // Set the access token and get user info
+    $client->setAccessToken($tokenData->access_token);
+    $userInfo = $client->requestUserInfo();
+
+    $userdata = [
+      'sub' => $userInfo->sub,
+      'name' => $userInfo->name,
+      'email' => $userInfo->email,
+      'avatar' => $userInfo->picture ?? null,
+      'verified' => $userInfo->email_verified ?? false
+    ];
+
+    return new AuthProviderUser($userdata);
+  }
+
 
   public static function getIcon(): string
   {

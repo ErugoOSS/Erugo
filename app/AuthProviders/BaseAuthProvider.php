@@ -28,6 +28,32 @@ class BaseAuthProvider implements AuthProviderInterface
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * Get the authorization URL for the OAuth flow with explicit state and callback URL
+     * Used by the App API for native app OAuth flows
+     *
+     * @param string $state The state token to include in the authorization URL
+     * @param string $callbackUrl The callback URL to redirect to after authorization
+     * @return string The authorization URL
+     */
+    public function getAuthorizationUrl(string $state, string $callbackUrl): string
+    {
+        throw new \Exception('Not implemented');
+    }
+
+    /**
+     * Exchange an authorization code for user information
+     * Used by the App API for native app OAuth flows
+     *
+     * @param string $code The authorization code from the OAuth callback
+     * @param string $callbackUrl The callback URL used in the authorization request
+     * @return AuthProviderUser The user information from the OAuth provider
+     */
+    public function exchangeCodeForUser(string $code, string $callbackUrl): AuthProviderUser
+    {
+        throw new \Exception('Not implemented');
+    }
+
     protected function throwMissingDataException()
     {
         throw new AuthProviderMissingDataException('Missing required data');

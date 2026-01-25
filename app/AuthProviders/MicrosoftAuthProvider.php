@@ -108,6 +108,84 @@ class MicrosoftAuthProvider extends BaseAuthProvider
     }
   }
 
+  /**
+   * Get the authorization URL for the OAuth flow with explicit state and callback URL
+   * Used by the App API for native app OAuth flows
+   */
+  public function getAuthorizationUrl(string $state, string $callbackUrl): string
+  {
+    if (!$this->client_id) {
+      $this->throwMissingDataException();
+    }
+
+    $params = [
+      'client_id' => $this->client_id,
+      'redirect_uri' => $callbackUrl,
+      'response_type' => 'code',
+      'scope' => 'openid profile email User.Read',
+      'state' => $state,
+      'response_mode' => 'query',
+      'prompt' => 'select_account',
+    ];
+
+    $baseUrl = 'https://login.microsoftonline.com/' . $this->tenant . '/oauth2/v2.0/authorize';
+    return $baseUrl . '?' . http_build_query($params);
+  }
+
+  /**
+   * Exchange an authorization code for user information
+   * Used by the App API for native app OAuth flows
+   */
+  public function exchangeCodeForUser(string $code, string $callbackUrl): AuthProviderUser
+  {
+    if (!$this->client_id || !$this->client_secret) {
+      $this->throwMissingDataException();
+    }
+
+    // Exchange the code for tokens
+    $tokenUrl = 'https://login.microsoftonline.com/' . $this->tenant . '/oauth2/v2.0/token';
+    $tokenResponse = \Illuminate\Support\Facades\Http::asForm()->post($tokenUrl, [
+      'code' => $code,
+      'client_id' => $this->client_id,
+      'client_secret' => $this->client_secret,
+      'redirect_uri' => $callbackUrl,
+      'grant_type' => 'authorization_code',
+      'scope' => 'openid profile email User.Read',
+    ]);
+
+    if (!$tokenResponse->successful()) {
+      Log::error("Microsoft token exchange failed: " . $tokenResponse->body());
+      $this->throwAuthFailureException();
+    }
+
+    $tokenData = $tokenResponse->json();
+    $accessToken = $tokenData['access_token'] ?? null;
+
+    if (!$accessToken) {
+      Log::error("Microsoft token exchange returned no access token");
+      $this->throwAuthFailureException();
+    }
+
+    // Get user info using the access token
+    $userResponse = \Illuminate\Support\Facades\Http::withToken($accessToken)
+      ->get('https://graph.microsoft.com/v1.0/me');
+
+    if (!$userResponse->successful()) {
+      Log::error("Microsoft user info request failed: " . $userResponse->body());
+      $this->throwAuthFailureException();
+    }
+
+    $userInfo = $userResponse->json();
+
+    return new AuthProviderUser([
+      'sub' => $userInfo['id'],
+      'name' => $userInfo['displayName'],
+      'email' => $userInfo['mail'] ?? $userInfo['userPrincipalName'],
+      'avatar' => null, // Microsoft Graph requires a separate call for avatar
+      'verified' => true // Microsoft accounts are verified
+    ]);
+  }
+
   public static function getIcon(): string
   {
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M 5 4 C 4.448 4 4 4.447 4 5 L 4 24 L 24 24 L 24 4 L 5 4 z M 26 4 L 26 24 L 46 24 L 46 5 C 46 4.447 45.552 4 45 4 L 26 4 z M 4 26 L 4 45 C 4 45.553 4.448 46 5 46 L 24 46 L 24 26 L 4 26 z M 26 26 L 26 46 L 45 46 C 45.552 46 46 45.553 46 45 L 46 26 L 26 26 z"></path></svg>';

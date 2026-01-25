@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\SettingsService;
 use App\Models\AuthProvider;
 use App\Models\UserAuthProvider;
+use App\Models\AppAuthState;
 use Jumbojett\OpenIDConnectClient;
 
 /**
@@ -384,5 +385,89 @@ class ExternalAuthController extends Controller
 
         // Redirect to home with the cookie
         return redirect('/')->withCookie($cookie);
+    }
+
+    /**
+     * Handle OAuth callback for native apps
+     * 
+     * This receives the OAuth callback from the provider, looks up the state,
+     * and redirects to the native app using the custom URL scheme.
+     *
+     * @param string $providerUuid The UUID of the authentication provider
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
+     */
+    public function appCallback($providerUuid)
+    {
+        $state = request()->input('state');
+        $code = request()->input('code');
+        $error = request()->input('error');
+        $errorDescription = request()->input('error_description');
+
+        // If there's an error from the OAuth provider
+        if ($error) {
+            return $this->appCallbackError('OAuth error: ' . ($errorDescription ?: $error));
+        }
+
+        if (!$state) {
+            return $this->appCallbackError('Missing state parameter');
+        }
+
+        if (!$code) {
+            return $this->appCallbackError('Missing authorization code');
+        }
+
+        // Look up the state
+        $authState = AppAuthState::where('state', $state)->first();
+
+        if (!$authState) {
+            return $this->appCallbackError('Invalid or expired state token');
+        }
+
+        if ($authState->isExpired()) {
+            $authState->delete();
+            return $this->appCallbackError('State token has expired');
+        }
+
+        // Verify the provider matches
+        $provider = AuthProvider::where('uuid', $providerUuid)->first();
+        if (!$provider || $provider->id !== $authState->provider_id) {
+            return $this->appCallbackError('Provider mismatch');
+        }
+
+        // Build the redirect URL for the native app
+        $callbackScheme = $authState->callback_scheme;
+        $redirectUrl = $callbackScheme . '://auth-callback?' . http_build_query([
+            'code' => $code,
+            'state' => $state,
+        ]);
+
+        // Redirect to the native app
+        return redirect()->away($redirectUrl);
+    }
+
+    /**
+     * Return an error page for app callback errors
+     *
+     * @param string $message The error message
+     * @return \Illuminate\Http\Response
+     */
+    private function appCallbackError($message)
+    {
+        // For app callbacks, we show a simple error page since we can't redirect to the app
+        return response()->view('shares.failed', [
+            'error_message' => $message,
+            'settings' => $this->getBasicSettings()
+        ], 400);
+    }
+
+    /**
+     * Get basic settings for error pages
+     */
+    private function getBasicSettings()
+    {
+        return [
+            'application_name' => $this->settings->get('application_name') ?? 'Erugo',
+            'api_url' => env('APP_URL'),
+        ];
     }
 }
