@@ -398,44 +398,36 @@ class UploadsController extends Controller
     }
 
     // Process recipients if provided (normal share flow)
-    /*if ($request->has('recipients') && is_array($request->recipients)) {
-      foreach ($request->recipients as $recipient) {
-        if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {
-          $this->sendShareCreatedEmail($share, $recipient);
-        }
-      }
-    }*/
     if ($request->has('recipients') && is_array($request->recipients)) {
       foreach ($request->recipients as $recipient) {
-        // recipient may be array {name,email} or string email depending on UI;
-        // store email only.
-        $email = null;
+        
+          $email = null;
+          $name = null;
 
-        if (is_array($recipient) && isset($recipient['email'])) {
-          $email = $recipient['email'];
-        } elseif (is_string($recipient)) {
-          $email = $recipient;
-        }
+          if (is_array($recipient)) {
+              $email = $recipient['email'] ?? null;
+              $name  = $recipient['name'] ?? null;
+          } elseif (is_string($recipient)) {
+              $email = $recipient;
+          }
 
-        if (!$email) {
-          continue;
-        }
+          if (!$email) continue;
 
-        // Save recipient for resend/edit (email only)
         ShareRecipient::updateOrCreate(
-          ['share_id' => $share->id, 'email' => $email],
-          []
+            ['share_id' => $share->id, 'email' => $email],
+            ['name' => $name]
         );
 
-        // Maintain existing mail template expectations: pass name as email if needed
         $this->sendShareCreatedEmail($share, [
-          'name' => $email,
-          'email' => $email,
+            'name' => $name ?: $email,
+            'email' => $email,
         ]);
 
+
         ShareRecipient::where('share_id', $share->id)
-          ->where('email', $email)
-          ->update(['last_emailed_at' => now()]);
+            ->where('email', $email)
+            ->update(['last_emailed_at' => now()]);
+
       }
     }
 

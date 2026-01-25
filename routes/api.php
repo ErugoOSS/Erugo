@@ -133,9 +133,12 @@ Route::group([], function ($router) {
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
         
-        Route::get('/shares/{id}/recipients', [SharesController::class, 'getRecipients']);
-        Route::put('/shares/{id}/recipients', [SharesController::class, 'updateRecipients']);
-        Route::post('/shares/{id}/recipients/resend', [SharesController::class, 'resendRecipientEmails']);
+
+        Route::get('/{id}/recipients', [SharesController::class, 'getRecipients']);
+        Route::put('/{id}/recipients', [SharesController::class, 'updateRecipients']);
+        Route::post('/{id}/recipients/resend', [SharesController::class, 'resendRecipientEmails']);
+
+
     });
 
     //all shares [auth, admin]

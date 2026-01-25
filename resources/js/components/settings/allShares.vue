@@ -246,6 +246,10 @@ defineExpose({
               <CalendarPlus />
               {{ $t('share.button.extend') }}
             </button>
+
+            <button class="secondary" @click="openRecipientsModal(share)">
+              {{ ($t && $t('share.button.recipients')) || 'Recipients' }}
+            </button>
             <button
               @click="downloadShare(share)"
               class="secondary icon-only"
@@ -265,6 +269,9 @@ defineExpose({
     <div v-else class="center-message">
       <p>{{ $t('settings.loading') }}</p>
     </div>
+
+
+
   </div>
 </template>
 

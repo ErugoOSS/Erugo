@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose } from 'vue'
-import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
+
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -16,13 +16,18 @@ import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import { useTranslate } from '@tolgee/vue'
-import { getShareRecipients, updateShareRecipients, resendShareRecipientEmails } from '../../api'
 
+import {
+  getMyShares,
+  expireShare,
+  extendShare,
+  setDownloadLimit,
+  pruneExpiredShares,
+  getShareRecipients,
+  updateShareRecipients,
+  resendShareRecipientEmails
+} from '../../api'
 
-const showRecipientsModal = ref(false)
-const recipientsShare = ref(null)
-const recipientsEmails = ref([''])
-const recipientsLoading = ref(false)
 
 
 const { t } = useTranslate()
@@ -41,37 +46,106 @@ onMounted(async () => {
   loadShares()
 })
 
+const recipientsModalOpen = ref(false)
+const recipientsLoading = ref(false)
+const selectedShare = ref(null)
+const recipientEmails = ref([{ name: '', email: '' }])
+const recipientsError = ref('')
 
-const openRecipients = async (share) => {
-  recipientsShare.value = share
+const openRecipientsModal = async (share) => {
+  selectedShare.value = share
+  recipientsError.value = ''
   recipientsLoading.value = true
-  showRecipientsModal.value = true
+  recipientsModalOpen.value = true
 
-  const res = await getShareRecipients(share.id)
-  const json = await res.json()
+  try {
+    const res = await getShareRecipients(share.id)
+    const json = await res.json().catch(() => ({}))
 
-  recipientsEmails.value = (json?.data?.recipients || []).map(r => r.email)
-  if (!recipientsEmails.value.length) recipientsEmails.value = ['']
+    if (!res.ok) {
+      recipientsError.value = json?.message || `Failed to load recipients (${res.status})`
+      recipientEmails.value = [{ name: '', email: '' }]
+      return
+    }
 
-  recipientsLoading.value = false
+    const data = json?.data?.recipients || []
+    recipientEmails.value = data.length
+      ? data.map(r => ({ name: r.name || '', email: r.email || '' }))
+      : [{ name: '', email: '' }]
+  } catch (e) {
+    recipientsError.value = 'Failed to load recipients'
+    recipientEmails.value = [{ name: '', email: '' }]
+  } finally {
+    recipientsLoading.value = false
+  }
+}
+
+
+const closeRecipientsModal = () => {
+  recipientsModalOpen.value = false
+  selectedShare.value = null
+  recipientEmails.value = [{ name: '', email: '' }]
+  recipientsError.value = ''
+}
+
+const addRecipientRow = () => recipientEmails.value.push({ name: '', email: '' })
+const removeRecipientRow = (idx) => {
+  if (recipientEmails.value.length === 1) return
+  recipientEmails.value.splice(idx, 1)
 }
 
 const saveRecipients = async () => {
-  const emails = recipientsEmails.value
-    .map(e => (e || '').trim())
-    .filter(Boolean)
+  if (!selectedShare.value) return
+  recipientsError.value = ''
 
-  const res = await updateShareRecipients(recipientsShare.value.id, emails)
-  // show toast based on res.ok
+  const payload = recipientEmails.value
+    .map(r => ({
+      name: (r?.name || '').trim(),
+      email: (r?.email || '').trim().toLowerCase()
+    }))
+    .filter(r => r.email)
+    .filter((r, idx, arr) => arr.findIndex(x => x.email === r.email) === idx)
+
+  try {
+    const res = await updateShareRecipients(selectedShare.value.id, payload)
+    const json = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      recipientsError.value = json?.message || `Unable to save recipients (${res.status})`
+      return
+    }
+
+    // re-load from server to reflect canonical saved data
+    recipientEmails.value = payload.length ? payload : [{ name: '', email: '' }]
+    toast.success('Recipients saved')
+  } catch (e) {
+    recipientsError.value = 'Unable to save recipients'
+  }
 }
+
 
 const resendRecipients = async () => {
-  const res = await resendShareRecipientEmails(recipientsShare.value.id)
-  // show toast based on res.ok
+  if (!selectedShare.value) return
+  recipientsError.value = ''
+
+  try {
+    const res = await resendShareRecipientEmails(selectedShare.value.id)
+    const json = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      recipientsError.value = json?.message || `Unable to resend emails (${res.status})`
+      return
+    }
+
+    toast.success('Emails resent')
+  } catch (e) {
+    recipientsError.value = 'Unable to resend emails'
+  }
 }
 
-const addRecipientRow = () => recipientsEmails.value.push('')
-const removeRecipientRow = (idx) => recipientsEmails.value.splice(idx, 1)
+
+
+//const removeRecipientRow = (idx) => recipientsEmails.value.splice(idx, 1)
 
 
 
@@ -290,9 +364,11 @@ defineExpose({
               <CalendarPlus />
               {{ $t('share.button.extend') }}
             </button>
-            <button 
-              class="secondary" 
-              @click="openRecipients(share)">Recipients
+            
+
+
+            <button class="secondary" @click="openRecipientsModal(share)">
+                {{ ($t && $t('share.button.recipients')) || 'Recipients' }}
             </button>
 
             <button
@@ -303,6 +379,7 @@ defineExpose({
             >
               <HardDriveDownload style="margin-right: 0" />
             </button>
+
           </td>
         </tr>
       </tbody>
@@ -315,20 +392,39 @@ defineExpose({
       <p>{{ $t('settings.loading') }}</p>
     </div>
 
+  
     <div v-if="recipientsLoading">Loading…</div>
+      <div class="recipients-modal-overlay" :class="{ active: recipientsModalOpen }" @click.self="closeRecipientsModal">
+        <div class="recipients-modal-form">
+          <div class="recipients-modal-header">
+            <h3>Recipients</h3>
+            <button class="close-btn icon-only secondary" @click="closeRecipientsModal">×</button>
+          </div>
 
-<div v-else>
-  <div v-for="(email, idx) in recipientsEmails" :key="idx" class="d-flex gap-2 mb-2">
-    <input v-model="recipientsEmails[idx]" type="email" class="form-control" placeholder="email@example.com" />
-    <button class="btn btn-outline-danger" @click="removeRecipientRow(idx)" :disabled="recipientsEmails.length === 1">Remove</button>
-  </div>
+          <div class="recipients-modal-content">
+            <div v-if="recipientsLoading">Loading…</div>
+            <div v-else>
+              <div v-if="recipientsError" class="error">{{ recipientsError }}</div>
 
-  <button class="btn btn-outline-primary" @click="addRecipientRow">Add</button>
-</div>
+              <div v-for="(r, idx) in recipientEmails" :key="idx" class="recipient-row">
+                <input v-model="r.name" type="text" placeholder="Name (optional)" />
+                <input v-model="r.email" type="email" placeholder="email@example.com" />
+                <button class="secondary" @click="removeRecipientRow(idx)" :disabled="recipientEmails.length === 1">
+                  Remove
+                </button>
+              </div>
 
-<button class="btn btn-secondary" @click="showRecipientsModal = false">Close</button>
-<button class="btn btn-primary" @click="saveRecipients">Save</button>
-<button class="btn btn-outline-primary" @click="resendRecipients">Resend</button>
+              <button class="secondary" @click="addRecipientRow">Add</button>
+            </div>
+          </div>
+
+          <div class="button-bar">
+            <button class="secondary" @click="closeRecipientsModal">Close</button>
+            <button class="secondary" @click="saveRecipients" :disabled="recipientsLoading">Save</button>
+            <button class="clear-button" @click="resendRecipients" :disabled="recipientsLoading">Resend</button>
+          </div>
+        </div>
+      </div>
 
   </div>
 </template>
@@ -557,4 +653,73 @@ td {
   vertical-align: middle;
   opacity: 0.7;
 }
+
+.recipients-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+}
+
+.recipients-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recipients-modal-form {
+  width: min(900px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+  background: var(--panel-section-background-color);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.recipients-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recipients-modal-content {
+  padding: 10px 0;
+}
+
+.recipient-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.email-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+.button-bar {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.error {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: rgba(255, 0, 0, 0.08);
+}
+
+
 </style>

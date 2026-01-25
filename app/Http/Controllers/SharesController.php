@@ -46,133 +46,122 @@ class SharesController extends Controller
   // Returns an empty list if the share is expired
   // Deletes recipient records if the share is expired
   // GET /api/shares/{id}/recipients
+
   public function getRecipients($id)
-  {
+{
     $user = Auth::user();
-    if (!$user) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
-    }
+    if (!$user) return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
 
     $share = Share::find($id);
-    if (!$share) {
-      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
-    }
+    if (!$share) return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
 
     if (!$this->canManageShare($share, $user)) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
-    }
-
-    // If expired, purge recipients and return empty
-    if ($this->shareIsExpired($share)) {
-      $share->recipients()->delete();
-      return response()->json(['status' => 'success', 'data' => ['recipients' => []]]);
-    }
-
-    $recipients = $share->recipients()
-      ->orderBy('created_at', 'asc')
-      ->get(['email', 'last_emailed_at']);
-
-    return response()->json([
-      'status' => 'success',
-      'data' => [
-        'recipients' => $recipients,
-      ],
-    ]);
-  }
-  // Update the list of recipients for a share by share ID 
-  // Requires authentication and authorization to manage the share
-  // Replaces the existing recipient list with the provided list
-  // Validates email format and ensures uniqueness
-  public function updateRecipients(Request $request, $id)
-  {
-    $user = Auth::user();
-    if (!$user) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
-    }
-
-    $share = Share::find($id);
-    if (!$share) {
-      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
-    }
-
-    if (!$this->canManageShare($share, $user)) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
     if ($this->shareIsExpired($share)) {
-      $share->recipients()->delete();
-      return response()->json(['status' => 'error', 'message' => 'Share has expired'], 422);
+        $share->recipients()->delete();
+        return response()->json(['status' => 'success', 'data' => ['recipients' => []]]);
+    }
+
+    $recipients = $share->recipients()->orderBy('created_at')->get(['email', 'name', 'last_emailed_at']);
+
+
+    return response()->json(['status' => 'success', 'data' => ['recipients' => $recipients]]);
+}
+
+public function updateRecipients(Request $request, $id)
+{
+    $user = Auth::user();
+    if (!$user) return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+
+    $share = Share::find($id);
+    if (!$share) return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+
+    if (!$this->canManageShare($share, $user)) {
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($this->shareIsExpired($share)) {
+        $share->recipients()->delete();
+        return response()->json(['status' => 'error', 'message' => 'Share has expired'], 422);
     }
 
     $validated = $request->validate([
-      'recipients' => ['required', 'array'],
-      'recipients.*' => ['required', 'email:rfc,dns'],
+        'recipients' => ['required', 'array'],
+        'recipients.*.email' => ['required', 'email:rfc,dns'],
+        'recipients.*.name'  => ['nullable', 'string', 'max:255'],
     ]);
 
-    $emails = array_values(array_unique(array_map('strtolower', $validated['recipients'])));
+    // Normalise + dedupe by email
+    $incoming = collect($validated['recipients'])
+        ->map(function ($r) {
+            return [
+                'email' => strtolower(trim($r['email'] ?? '')),
+                'name'  => isset($r['name']) ? trim($r['name']) : null,
+            ];
+        })
+        ->filter(fn ($r) => $r['email'] !== '')
+        ->unique('email')
+        ->values();
 
-    // Replace list (data minimisation: keep only current desired recipients)
+    $emails = $incoming->pluck('email')->all();
+
+    // Replace: remove recipients no longer present
     $share->recipients()->whereNotIn('email', $emails)->delete();
 
-    foreach ($emails as $email) {
-      ShareRecipient::updateOrCreate(
-        ['share_id' => $share->id, 'email' => $email],
-        []
-      );
+    // Upsert current recipients
+    foreach ($incoming as $r) {
+        ShareRecipient::updateOrCreate(
+            ['share_id' => $share->id, 'email' => $r['email']],
+            ['name' => $r['name']]
+        );
     }
 
     return response()->json(['status' => 'success', 'message' => 'Recipients updated']);
-  }
+}
 
-  // Resend share created emails to all recipients of a share by share ID
-  // Requires authentication and authorization to manage the share
-  // Uses existing email job dispatching mechanism 
-  // Updates last_emailed_at timestamp for each recipient 
-  // Returns count of emails resent
-  public function resendRecipientEmails($id)
-  {
+
+public function resendRecipientEmails($id)
+{
     $user = Auth::user();
-    if (!$user) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
-    }
+    if (!$user) return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
 
     $share = Share::find($id);
-    if (!$share) {
-      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
-    }
+    if (!$share) return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
 
     if (!$this->canManageShare($share, $user)) {
-      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
     if ($this->shareIsExpired($share)) {
-      $share->recipients()->delete();
-      return response()->json(['status' => 'error', 'message' => 'Share has expired'], 422);
+        $share->recipients()->delete();
+        return response()->json(['status' => 'error', 'message' => 'Share has expired'], 422);
     }
 
     $recipients = $share->recipients()->get();
     if ($recipients->isEmpty()) {
-      return response()->json(['status' => 'error', 'message' => 'No recipients found'], 422);
+        return response()->json(['status' => 'error', 'message' => 'No recipients found'], 422);
     }
 
     foreach ($recipients as $r) {
-      // Use existing queued email job used in repo
-      sendEmail::dispatch($r->email, shareCreatedMail::class, [
-        'user' => $user,
-        'share' => $share,
-        'recipient' => ['name' => $r->email, 'email' => $r->email],
-      ]);
+        sendEmail::dispatch($r->email, shareCreatedMail::class, [
+            'user' => $user,
+            'share' => $share,
+            'recipient' => [
+                'name'  => $r->name ?: $r->email,
+                'email' => $r->email,
+            ],
+        ]);
 
-      $r->last_emailed_at = now();
-      $r->save();
+        $r->last_emailed_at = now();
+        $r->save();
     }
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Recipient emails resent',
-      'data' => ['recipient_count' => $recipients->count()],
-    ]);
-  }
+
+    return response()->json(['status' => 'success', 'message' => 'Recipient emails resent']);
+}
+
 
 
   public function read($shareId)

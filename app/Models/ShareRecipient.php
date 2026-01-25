@@ -9,6 +9,7 @@ class ShareRecipient extends Model
     protected $fillable = [
         'share_id',
         'email',
+        'name',
         'last_emailed_at',
     ];
 
