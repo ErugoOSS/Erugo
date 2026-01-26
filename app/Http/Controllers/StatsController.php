@@ -20,6 +20,7 @@ class StatsController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
+                'erugo_version' => config('app.version', '1.0.0'),
                 'php_version' => PHP_VERSION,
                 'laravel_version' => app()->version(),
                 'database_driver' => config('database.default'),
@@ -108,7 +109,7 @@ class StatsController extends Controller
 
     public function getStats(Request $request)
     {
-        $days = $request->input('days', 30);
+        $days = (int) $request->input('days', 30);
         
         // Storage stats
         $storageStats = $this->getStorageStats();
@@ -272,7 +273,15 @@ class StatsController extends Controller
             }])
             ->orderByDesc('shares_count')
             ->limit(5)
-            ->get(['id', 'name', 'email']);
+            ->get(['id', 'name', 'email'])
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'shares_count' => $user->shares_count,
+                ];
+            });
         
         return [
             'total' => $totalUsers,
