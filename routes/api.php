@@ -208,6 +208,18 @@ Route::group([], function ($router) {
     Route::get('/backgrounds/{file}/thumb', [BackgroundsController::class, 'useThumb'])->name('backgrounds.useThumb');
     Route::get('/backgrounds/{file}', [BackgroundsController::class, 'use'])->name('backgrounds.use');
 
+    /*
+     * === ConvertX backend-to-backend integration (public; token-auth inside controller) ===
+     * POST /api/integrations/convertx/share
+     * Header auth:
+     *   - X-Erugo-Api-Token: <CONVERTX_INTEGRATION_TOKEN>
+     *     OR
+     *   - Authorization: Bearer <CONVERTX_INTEGRATION_TOKEN>
+     */
+    Route::post('/integrations/convertx/share', [SharesController::class, 'createFromConvertx'])
+        ->name('integrations.convertx.share');
+
+
     //serve favicon [public]
     Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
