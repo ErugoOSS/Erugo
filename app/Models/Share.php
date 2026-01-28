@@ -8,6 +8,8 @@ use App\Models\Setting;
 use App\Mail\shareDeletedWarningMail;
 use App\Jobs\sendEmail;
 use App\Services\SettingsService;
+use App\Models\ShareRecipient;
+
 class Share extends Model
 {
 
@@ -42,6 +44,11 @@ class Share extends Model
     'path',
     'user_id',
   ];
+
+  public function recipients()
+  {
+    return $this->hasMany(ShareRecipient::class);
+  }
 
   public function files()
   {
@@ -134,6 +141,9 @@ class Share extends Model
 
       $this->status = 'deleted';
       $this->save();
+      // Delete saved recipient emails (retention control)
+      $this->recipients()->delete();
+
 
       if ($this->invite) {
         $this->invite->delete();

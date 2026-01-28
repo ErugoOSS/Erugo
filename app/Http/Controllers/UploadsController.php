@@ -17,6 +17,7 @@ use App\Jobs\sendEmail;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Models\ShareRecipient;
 
 class UploadsController extends Controller
 {
@@ -419,11 +420,37 @@ class UploadsController extends Controller
     // Process recipients if provided (normal share flow)
     if ($request->has('recipients') && is_array($request->recipients)) {
       foreach ($request->recipients as $recipient) {
-        if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {
-          $this->sendShareCreatedEmail($share, $recipient);
-        }
+        
+          $email = null;
+          $name = null;
+
+          if (is_array($recipient)) {
+              $email = $recipient['email'] ?? null;
+              $name  = $recipient['name'] ?? null;
+          } elseif (is_string($recipient)) {
+              $email = $recipient;
+          }
+
+          if (!$email) continue;
+
+        ShareRecipient::updateOrCreate(
+            ['share_id' => $share->id, 'email' => $email],
+            ['name' => $name]
+        );
+
+        $this->sendShareCreatedEmail($share, [
+            'name' => $name ?: $email,
+            'email' => $email,
+        ]);
+
+
+        ShareRecipient::where('share_id', $share->id)
+            ->where('email', $email)
+            ->update(['last_emailed_at' => now()]);
+
       }
     }
+
 
     return response()->json([
       'status' => 'success',

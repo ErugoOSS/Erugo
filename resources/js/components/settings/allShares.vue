@@ -1,4 +1,6 @@
 <script setup>
+import RecipientsModal from '../shares/recipients.vue'
+
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
 import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
 import {
@@ -28,6 +30,15 @@ const loadedShares = ref(false)
 const shares = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
+
+const recipientsModalOpen = ref(false)
+const selectedShare = ref(null)
+
+const openRecipientsModal = (share) => {
+  selectedShare.value = share
+  recipientsModalOpen.value = true
+}
+
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
@@ -246,6 +257,10 @@ defineExpose({
               <CalendarPlus />
               {{ $t('share.button.extend') }}
             </button>
+
+            <button class="secondary" @click="openRecipientsModal(share)">
+              {{ ($t && $t('share.button.recipients')) || 'Recipients' }}
+            </button>
             <button
               @click="downloadShare(share)"
               class="secondary icon-only"
@@ -265,6 +280,16 @@ defineExpose({
     <div v-else class="center-message">
       <p>{{ $t('settings.loading') }}</p>
     </div>
+
+ 
+    <RecipientsModal
+      :modelValue="recipientsModalOpen"
+      :share="selectedShare"
+      @update:modelValue="recipientsModalOpen = $event"
+    />
+
+
+
   </div>
 </template>
 

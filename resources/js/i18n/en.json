@@ -711,7 +711,9 @@
     "success": {
       "pruneExpiredShares": "Expired shares have been scheduled for deletion and will be processed in the background.",
       "shareExpired": "Share expired",
-      "shareExtended": "Share extended"
+      "shareExtended": "Share extended",
+      "shareEmailResent": "Share email resent successfully",
+      "shareRecipientsSaved": "Share recipients saved successfully"
     },
     "system": {
       "allow_chunked_uploads": "Allow chunked upload mode",
@@ -985,7 +987,8 @@
   "share": {
     "button": {
       "expireNow": "Expire Now",
-      "extend": "Extend"
+      "extend": "Extend",
+      "recipients": "Recipients"
     },
     "contains": {
       "count": "{value, plural, one {# file} other {{value} files}}"
