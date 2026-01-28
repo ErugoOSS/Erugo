@@ -422,12 +422,38 @@ class TusdHooksController extends Controller
             $fileIds = [];
             foreach ($manifest['files'] as $fileInfo) {
                 $filePath = $fileInfo['path'];
-                $extractedFilePath = $extractDir . '/' . $filePath;
+                
+                // Sanitize the file path to prevent path traversal attacks
+                // Remove ../ sequences and normalize path
+                $safePath = $this->sanitizeBundlePath($filePath);
+                if ($safePath === null) {
+                    Log::warning('tusd post-finish: Skipping file with dangerous path', [
+                        'upload_id' => $uploadId,
+                        'file_path' => $filePath
+                    ]);
+                    continue;
+                }
+                
+                $extractedFilePath = $extractDir . '/' . $safePath;
+                
+                // Verify the resolved path is within the extraction directory
+                $resolvedPath = realpath($extractedFilePath);
+                $resolvedExtractDir = realpath($extractDir);
+                
+                if ($resolvedPath === false || $resolvedExtractDir === false ||
+                    strpos($resolvedPath, $resolvedExtractDir) !== 0) {
+                    Log::warning('tusd post-finish: Path traversal attempt in bundle', [
+                        'upload_id' => $uploadId,
+                        'file_path' => $filePath,
+                        'resolved_path' => $resolvedPath
+                    ]);
+                    continue;
+                }
 
                 if (!file_exists($extractedFilePath)) {
                     Log::warning('tusd post-finish: Bundle file not found after extraction', [
                         'upload_id' => $uploadId,
-                        'file_path' => $filePath
+                        'file_path' => $safePath
                     ]);
                     continue;
                 }
@@ -440,7 +466,7 @@ class TusdHooksController extends Controller
                     'original_name' => $fileInfo['originalName'],
                     'type' => $fileInfo['type'] ?? 'application/octet-stream',
                     'size' => $fileInfo['size'],
-                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $filePath
+                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $safePath
                 ]);
 
                 $fileIds[] = $file->id;
@@ -529,6 +555,37 @@ class TusdHooksController extends Controller
 
             return response()->json(['ok' => true]);
         }
+    }
+
+    /**
+     * Sanitize a bundle file path to prevent path traversal attacks
+     * Returns null if the path is dangerous and should be skipped
+     */
+    private function sanitizeBundlePath(string $path): ?string
+    {
+        // Normalize directory separators
+        $path = str_replace('\\', '/', $path);
+        
+        // Check for dangerous patterns before sanitization
+        if (strpos($path, '..') !== false) {
+            return null;
+        }
+        
+        // Remove leading slashes
+        $path = ltrim($path, '/');
+        
+        // Remove null bytes
+        $path = str_replace("\0", '', $path);
+        
+        // Clean up double slashes
+        $path = preg_replace('/\/+/', '/', $path);
+        
+        // If empty after sanitization, reject
+        if (empty($path)) {
+            return null;
+        }
+        
+        return $path;
     }
 
     /**

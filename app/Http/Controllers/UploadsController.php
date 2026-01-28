@@ -279,12 +279,32 @@ class UploadsController extends Controller
         $originalPath = $request->filePaths[$uploadId] ?? '';
         $originalPath = explode('/', $originalPath);
         $originalPath = implode('/', array_slice($originalPath, 0, -1));
+        
+        // Sanitize path to prevent directory traversal attacks
+        $originalPath = $this->sanitizePath($originalPath);
       }
 
       $destPath = $completePath . '/' . $originalPath;
-
+      
+      // Verify the resolved path is within the share directory
+      // Create parent directories first so realpath can resolve
       if (!file_exists($destPath)) {
         mkdir($destPath, 0777, true);
+      }
+      $resolvedPath = realpath($destPath);
+      $resolvedSharePath = realpath($completePath);
+      
+      if ($resolvedPath === false || $resolvedSharePath === false || 
+          strpos($resolvedPath, $resolvedSharePath) !== 0) {
+        Log::warning('Path traversal attempt detected', [
+          'user_id' => $user->id,
+          'original_path' => $request->filePaths[$uploadId] ?? '',
+          'resolved_path' => $resolvedPath,
+          'share_path' => $resolvedSharePath
+        ]);
+        
+        // Clean up and skip this file
+        continue;
       }
       
       // Use sanitized filename from database for file operations
@@ -427,6 +447,33 @@ class UploadsController extends Controller
         'recipient' => $recipient
       ]);
     }
+  }
+
+  /**
+   * Sanitize a file path to prevent directory traversal attacks
+   * Removes ../, ..\, and leading slashes
+   */
+  private function sanitizePath(string $path): string
+  {
+    // Normalize directory separators
+    $path = str_replace('\\', '/', $path);
+    
+    // Remove any ../ or ..\ sequences (handles encoded variants too)
+    $path = preg_replace('/\.\.[\\/\\\\]/', '', $path);
+    
+    // Also remove standalone .. 
+    $path = preg_replace('/\.\./', '', $path);
+    
+    // Remove leading slashes to prevent absolute paths
+    $path = ltrim($path, '/');
+    
+    // Remove any null bytes
+    $path = str_replace("\0", '', $path);
+    
+    // Clean up any double slashes that may have resulted
+    $path = preg_replace('/\/+/', '/', $path);
+    
+    return $path;
   }
 
   /**
