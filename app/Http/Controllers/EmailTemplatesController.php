@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Validator;
+use App\Utils\FileHelper;
 
 class EmailTemplatesController extends Controller
 {
@@ -94,12 +95,22 @@ class EmailTemplatesController extends Controller
   {
     $templates = $request->all();
     foreach ($templates as $template) {
+      // Validate template ID to prevent path traversal attacks
+      $templateId = $template['id'] ?? '';
+      if (!preg_match('/^[a-zA-Z0-9_-]+$/', $templateId)) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Invalid template ID',
+          'data' => []
+        ], 400);
+      }
+      
       // Build dynamic validation rules based on original template
-      $originalPath = resource_path('views/emails/' . $template['id'] . '.twig');
+      $originalPath = resource_path('views/emails/' . $templateId . '.twig');
       if (!file_exists($originalPath)) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Template not found: ' . $template['id'],
+          'message' => 'Template not found: ' . $templateId,
           'data' => []
         ], 404);
       }
@@ -144,9 +155,13 @@ class EmailTemplatesController extends Controller
 
   private function updateTemplate($template)
   {
-    $template_file_path = storage_path('templates/emails/' . $template['id'] . '.twig');
+    // Template ID should already be validated by update() method
+    // but add basename() as defense-in-depth
+    $safeId = basename($template['id']);
+    
+    $template_file_path = storage_path('templates/emails/' . $safeId . '.twig');
     Setting::updateOrCreate(
-      ['key' => 'email_subject_' . $template['id'] . '.twig'],
+      ['key' => 'email_subject_' . $safeId . '.twig'],
       ['value' => $template['subject'], 'group' => 'system.emails.subjects']
     );
     if (!file_exists(dirname($template_file_path))) {
