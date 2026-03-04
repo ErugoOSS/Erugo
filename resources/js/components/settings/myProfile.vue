@@ -11,6 +11,7 @@ const { t } = useTranslate()
 
 const toast = useToast()
 const profile = ref(null)
+const hasSso = ref(false)
 const editUserFormActive = ref(false)
 const editUser = ref({})
 const errors = ref({})
@@ -41,6 +42,7 @@ const loadEverything = async () => {
 
 const loadProfile = async () => {
   profile.value = await getMyProfile()
+  hasSso.value = profile.value.has_sso || false
 }
 
 const loadAvailableAuthProviders = async () => {
@@ -72,9 +74,11 @@ const saveUser = async () => {
   }
 
   try {
-    const profileData = {
-      name: profile.value.name,
-      email: profile.value.email
+    const profileData = {}
+    // Only send name and email if the user is not managed by SSO
+    if (!hasSso.value) {
+      profileData.name = profile.value.name
+      profileData.email = profile.value.email
     }
     const updatedUser = await updateMyProfile(profileData)
     profile.value = updatedUser
@@ -191,14 +195,18 @@ const handleUnlinkProvider = async (provider) => {
               </div>
 
               <div class="setting-group-body">
+                <div v-if="hasSso" class="setting-group-body-item sso-notice">
+                  <small>{{ $t('settings.account.sso_managed_notice') }}</small>
+                </div>
+
                 <div class="setting-group-body-item">
                   <label for="email">{{ $t('settings.account.email') }}</label>
-                  <input type="text" id="email" v-model="profile.email" />
+                  <input type="text" id="email" v-model="profile.email" :disabled="hasSso" :class="{ 'disabled-field': hasSso }" />
                 </div>
 
                 <div class="setting-group-body-item">
                   <label for="name">{{ $t('settings.account.name') }}</label>
-                  <input type="text" id="name" v-model="profile.name" />
+                  <input type="text" id="name" v-model="profile.name" :disabled="hasSso" :class="{ 'disabled-field': hasSso }" />
                 </div>
 
                 <div class="setting-group-body-item mt-3">
@@ -268,7 +276,7 @@ const handleUnlinkProvider = async (provider) => {
                         <Link />
                         {{ $t('settings.account.create_link') }}
                       </button>
-                      <button class="secondary block" @click="handleUnlinkProvider(provider)" v-if="provider.is_linked">
+                      <button class="secondary block" @click="handleUnlinkProvider(provider)" v-if="provider.is_linked && provider.allow_unlink">
                         <Unlink />
                         {{ $t('settings.account.unlink') }}
                       </button>
@@ -550,5 +558,18 @@ const handleUnlinkProvider = async (provider) => {
   left: 0;
   width: 0;
   height: 0;
+}
+
+.disabled-field {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--panel-bg-color-alt, #f5f5f5);
+}
+
+.sso-notice {
+  small {
+    color: var(--link-color);
+    font-style: italic;
+  }
 }
 </style>

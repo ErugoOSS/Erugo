@@ -23,6 +23,10 @@ interface AuthProviderInterface
 
     public static function getEmptyProviderConfig(): array;
 
+    public static function getAdvancedProviderConfig(): array;
+
+    public static function getAdvancedConfigKeys(): array;
+
     public static function getInformationUrl(): ?string;
 }
 

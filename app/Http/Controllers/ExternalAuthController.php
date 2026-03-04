@@ -44,7 +44,7 @@ class ExternalAuthController extends Controller
     public function __construct()
     {
         // Force HTTPS for all redirect URLs for security
-        URL::forceScheme('https');
+         URL::forceScheme('https');
 
         // Inject the settings service
         $this->settings = app()->make(SettingsService::class);
@@ -234,7 +234,7 @@ class ExternalAuthController extends Controller
             ->first();
 
         if ($linkedAuth) {
-            return $this->loginWithLinkedAccount($linkedAuth);
+            return $this->loginWithLinkedAccount($linkedAuth, $authProviderUser);
         }
 
         // No linked account found, try to find a user with the same email
@@ -247,12 +247,17 @@ class ExternalAuthController extends Controller
      * @param UserAuthProvider $linkedAuth The linked auth provider record
      * @return \Illuminate\Http\RedirectResponse
      */
-    private function loginWithLinkedAccount($linkedAuth)
+    private function loginWithLinkedAccount($linkedAuth, $authProviderUser = null)
     {
         $user = User::find($linkedAuth->user_id);
 
         if (!$user) {
             return redirect('/')->with('error', 'User not found');
+        }
+
+        // Sync profile data from the identity provider on each login
+        if ($authProviderUser) {
+            $this->syncUserProfile($user, $authProviderUser);
         }
 
         return $this->authenticateAndRedirect($user);
@@ -301,6 +306,9 @@ class ExternalAuthController extends Controller
 
         // Link the provider to the user since we found them by email
         $this->linkProviderToUser($user, $provider, $authProviderUser);
+
+        // Sync profile data from the identity provider
+        $this->syncUserProfile($user, $authProviderUser);
 
         return $this->createAuthCookieAndRedirect($user);
     }
@@ -368,6 +376,34 @@ class ExternalAuthController extends Controller
     }
 
     /**
+     * Sync user profile data from the identity provider
+     * Updates name and email on every SSO login to keep them in sync
+     *
+     * @param User $user The local user
+     * @param AuthProviderUser $authProviderUser The user data from the provider
+     * @return void
+     */
+    private function syncUserProfile($user, $authProviderUser)
+    {
+        $updated = false;
+
+        if (!empty($authProviderUser->name) && $user->name !== $authProviderUser->name) {
+            $user->name = $authProviderUser->name;
+            $updated = true;
+        }
+
+        if (!empty($authProviderUser->email) && $user->email !== $authProviderUser->email) {
+            $user->email = $authProviderUser->email;
+            $updated = true;
+        }
+
+        if ($updated) {
+            $user->save();
+            \Log::info("Synced SSO profile for user {$user->id}: name={$user->name}, email={$user->email}");
+        }
+    }
+
+    /**
      * Create auth cookie and redirect
      *
      * @param User $user The authenticated user
@@ -381,7 +417,6 @@ class ExternalAuthController extends Controller
 
         // Create HTTP-only secure cookie with refresh token
         $cookie = cookie('refresh_token', urlencode($refreshToken), $twentyFourHours, null, null, true, true);
-
         // Redirect to home with the cookie
         return redirect('/')->withCookie($cookie);
     }

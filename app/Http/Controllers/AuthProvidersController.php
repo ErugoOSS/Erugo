@@ -64,12 +64,14 @@ class AuthProvidersController extends Controller
         'provider_description' => $class::getDescription(),
         'enabled' => $authProvider->enabled == "true",
         'allow_registration' => (bool) $authProvider->allow_registration,
+        'allow_unlink' => (bool) $authProvider->allow_unlink,
         'class' => $authProvider->provider_class,
         'provider_config' => $authProvider->provider_config,
         'icon' => $class::getIcon(),
         'information_url' => $class::getInformationUrl(),
         'uuid' => $authProvider->uuid,
-        'callback_url' => $this->buildCallbackUrl($authProvider->uuid)
+        'callback_url' => $this->buildCallbackUrl($authProvider->uuid),
+        'advanced_config_keys' => $class::getAdvancedConfigKeys()
       ];
     });
 
@@ -208,6 +210,7 @@ class AuthProvidersController extends Controller
       $authProvider->provider_config = $provider['provider_config'];
       $authProvider->enabled = $provider['enabled'];
       $authProvider->allow_registration = $provider['allow_registration'] ?? false;
+      $authProvider->allow_unlink = $provider['allow_unlink'] ?? false;
       $authProvider->uuid = $provider['uuid'];
       $authProvider->save();
 
@@ -219,7 +222,8 @@ class AuthProvidersController extends Controller
       'name' => $provider['name'],
       'provider_config' => $provider['provider_config'],
       'enabled' => $provider['enabled'],
-      'allow_registration' => $provider['allow_registration'] ?? false
+      'allow_registration' => $provider['allow_registration'] ?? false,
+      'allow_unlink' => $provider['allow_unlink'] ?? false
     ]);
 
     return $authProvider;
@@ -346,7 +350,8 @@ class AuthProvidersController extends Controller
         'description' => $class::getDescription(),
         'icon' => $class::getIcon(),
         'class' => $providerType,
-        'provider_config' => $class::getEmptyProviderConfig()
+        'provider_config' => $class::getEmptyProviderConfig(),
+        'advanced_config_keys' => $class::getAdvancedConfigKeys()
       ];
     }
     return response()->json(
@@ -386,7 +391,8 @@ class AuthProvidersController extends Controller
       return [
         'id' => $authProvider->id,
         'name' => $authProvider->name,
-        'icon' => $icon
+        'icon' => $icon,
+        'allow_unlink' => (bool) $authProvider->allow_unlink
       ];
     });
 

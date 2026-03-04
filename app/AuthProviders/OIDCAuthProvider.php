@@ -27,6 +27,11 @@ class OIDCAuthProvider extends BaseAuthProvider
     $this->provider = $provider;
   }
 
+  private function getAdvancedConfig($key, $default = '')
+  {
+    return $this->provider->provider_config->$key ?? $default;
+  }
+
   private function createClient()
   {
 
@@ -41,10 +46,37 @@ class OIDCAuthProvider extends BaseAuthProvider
       $this->client_secret
     );
 
+    // Apply custom endpoint overrides if configured
+    $endpointOverrides = [];
+    $endpointKeys = [
+      'authorization_endpoint',
+      'token_endpoint',
+      'userinfo_endpoint',
+      'end_session_endpoint',
+    ];
+
+    foreach ($endpointKeys as $key) {
+      $value = $this->getAdvancedConfig($key);
+      if (!empty($value)) {
+        $endpointOverrides[$key] = $value;
+      }
+    }
+
+    if (!empty($endpointOverrides)) {
+      $client->providerConfigParam($endpointOverrides);
+    }
+
     // Set callback URL and required scopes
     $route = route('social.provider.callback', ['provider' => $this->provider->uuid]);
     $client->setRedirectURL($route);
-    $client->addScope(['openid', 'email', 'profile']);
+
+    // Use custom scopes if configured, otherwise use defaults
+    $customScopes = $this->getAdvancedConfig('scopes');
+    if (!empty($customScopes)) {
+      $client->addScope(array_map('trim', explode(' ', $customScopes)));
+    } else {
+      $client->addScope(['openid', 'email', 'profile']);
+    }
 
     return $client;
   }
@@ -85,16 +117,53 @@ class OIDCAuthProvider extends BaseAuthProvider
     $oidc = $this->createClient();
     $oidc->authenticate();
 
-    // Get user info
-    $userInfo = $oidc->requestUserInfo();
+    // Get verified claims from the ID token (always available after authenticate)
+    $idTokenClaims = $oidc->getVerifiedClaims();
 
-    \Log::info("User info: " . json_encode($userInfo));
+    \Log::info("ID token claims: " . json_encode($idTokenClaims));
+
+    // Try to get user info from userinfo endpoint, but don't fail if it errors
+    // Some providers (e.g. ADFS) don't support the userinfo endpoint properly
+    // and return all claims in the ID token instead
+    $userInfo = null;
+    try {
+      $userInfo = $oidc->requestUserInfo();
+      \Log::info("User info: " . json_encode($userInfo));
+    } catch (\Exception $e) {
+      \Log::warning("Userinfo endpoint failed, using ID token claims only: " . $e->getMessage());
+    }
+
+    // Resolve claim mappings (custom or default)
+    $claimSub = $this->getAdvancedConfig('claim_sub', 'sub');
+    $claimName = $this->getAdvancedConfig('claim_name', 'name');
+    $claimEmail = $this->getAdvancedConfig('claim_email', 'email');
+    $claimAvatar = $this->getAdvancedConfig('claim_avatar', 'picture');
+    $claimVerified = $this->getAdvancedConfig('claim_email_verified', 'email_verified');
+
+    // Use empty string as fallback indicator for default claim names
+    if (empty($claimSub)) $claimSub = 'sub';
+    if (empty($claimName)) $claimName = 'name';
+    if (empty($claimEmail)) $claimEmail = 'email';
+    if (empty($claimAvatar)) $claimAvatar = 'picture';
+    if (empty($claimVerified)) $claimVerified = 'email_verified';
+
+    // Helper to resolve a claim value from userinfo first, then ID token as fallback
+    $resolveClaim = function ($claimKey) use ($userInfo, $idTokenClaims) {
+      if (isset($userInfo->$claimKey)) {
+        return $userInfo->$claimKey;
+      }
+      if (isset($idTokenClaims->$claimKey)) {
+        return $idTokenClaims->$claimKey;
+      }
+      return null;
+    };
+
     $userdata = [
-      'sub' => $userInfo->sub,
-      'name' => $userInfo->name,
-      'email' => $userInfo->email,
-      'avatar' => $userInfo->picture ?? null,
-      'verified' => $userInfo->email_verified ?? false
+      'sub' => $resolveClaim($claimSub),
+      'name' => $resolveClaim($claimName),
+      'email' => $resolveClaim($claimEmail),
+      'avatar' => $resolveClaim($claimAvatar),
+      'verified' => $resolveClaim($claimVerified) ?? false
     ];
 
     \Log::info("User data: " . json_encode($userdata));
@@ -124,6 +193,16 @@ class OIDCAuthProvider extends BaseAuthProvider
       'client_id' => ['required', 'string'],
       'client_secret' => ['required', 'string'],
       'base_url' => ['required', 'url'],
+      'authorization_endpoint' => ['nullable', 'url'],
+      'token_endpoint' => ['nullable', 'url'],
+      'userinfo_endpoint' => ['nullable', 'url'],
+      'end_session_endpoint' => ['nullable', 'url'],
+      'scopes' => ['nullable', 'string'],
+      'claim_sub' => ['nullable', 'string'],
+      'claim_name' => ['nullable', 'string'],
+      'claim_email' => ['nullable', 'string'],
+      'claim_avatar' => ['nullable', 'string'],
+      'claim_email_verified' => ['nullable', 'string'],
     ]);
   }
 
@@ -138,6 +217,48 @@ class OIDCAuthProvider extends BaseAuthProvider
       'client_id' => '',
       'client_secret' => '',
       'base_url' => '',
+      'authorization_endpoint' => '',
+      'token_endpoint' => '',
+      'userinfo_endpoint' => '',
+      'end_session_endpoint' => '',
+      'scopes' => '',
+      'claim_sub' => '',
+      'claim_name' => '',
+      'claim_email' => '',
+      'claim_avatar' => '',
+      'claim_email_verified' => '',
+    ];
+  }
+
+  public static function getAdvancedProviderConfig(): array
+  {
+    return [
+      'authorization_endpoint' => '',
+      'token_endpoint' => '',
+      'userinfo_endpoint' => '',
+      'end_session_endpoint' => '',
+      'scopes' => '',
+      'claim_sub' => '',
+      'claim_name' => '',
+      'claim_email' => '',
+      'claim_avatar' => '',
+      'claim_email_verified' => '',
+    ];
+  }
+
+  public static function getAdvancedConfigKeys(): array
+  {
+    return [
+      'authorization_endpoint',
+      'token_endpoint',
+      'userinfo_endpoint',
+      'end_session_endpoint',
+      'scopes',
+      'claim_sub',
+      'claim_name',
+      'claim_email',
+      'claim_avatar',
+      'claim_email_verified',
     ];
   }
 }

@@ -439,8 +439,11 @@ const handleNewProviderButtonClicked = async () => {
       icon: newProviderType.value.icon,
       class: newProviderType.value.class,
       provider_config: newProviderType.value.provider_config,
+      advanced_config_keys: newProviderType.value.advanced_config_keys || [],
       uuid: uuid,
       enabled: false,
+      allow_registration: false,
+      allow_unlink: false,
       editing: true,
       callback_url: await handleGetCallbackUrl(uuid)
     }
@@ -459,7 +462,7 @@ const handleGetCallbackUrl = async (uuid) => {
 
 const generateUUID = () => {
   //are we in a secure context?
-  if (typeof window !== 'undefined' && window.crypto) {
+  if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
     return window.crypto.randomUUID()
   }
   //fallback to a simple uuid
@@ -477,6 +480,26 @@ const uuidv4 = () => {
 const disableNewProviderButton = computed(() => {
   return activateNewProviderForm.value && !newProviderType.value
 })
+
+const showAdvancedSettings = ref({})
+
+const isAdvancedConfigKey = (authProvider, configKey) => {
+  return (authProvider.advanced_config_keys || []).includes(configKey)
+}
+
+const hasAdvancedConfig = (authProvider) => {
+  return (authProvider.advanced_config_keys || []).length > 0
+}
+
+const toggleAdvancedSettings = (authProvider) => {
+  const key = authProvider.id || authProvider.uuid
+  showAdvancedSettings.value[key] = !showAdvancedSettings.value[key]
+}
+
+const isAdvancedSettingsVisible = (authProvider) => {
+  const key = authProvider.id || authProvider.uuid
+  return showAdvancedSettings.value[key] || false
+}
 
 const handleDeleteAuthProvider = async (id) => {
   if (!confirm(t.value('settings.system.delete_auth_provider_confirmation'))) {
@@ -1059,6 +1082,17 @@ const handleDeleteAuthProvider = async (id) => {
                               {{ $t('settings.system.auth_provider_allow_registration') }}
                             </label>
                           </div>
+                          <div class="checkbox-container">
+                            <input
+                              type="checkbox"
+                              :id="`auth_provider_allow_unlink_${authProvider.id}`"
+                              v-model="authProvider.allow_unlink"
+                              :disabled="onLocalhost"
+                            />
+                            <label :for="`auth_provider_allow_unlink_${authProvider.id}`">
+                              {{ $t('settings.system.auth_provider_allow_unlink') }}
+                            </label>
+                          </div>
                         </div>
                         <div class="col-auto" v-if="authProvider.information_url">
                           <a :href="authProvider.information_url" target="_blank" class="provider-info-link">
@@ -1084,6 +1118,7 @@ const handleDeleteAuthProvider = async (id) => {
                         class="setting-group-body-item"
                         v-for="(configValue, configKey) in authProvider.provider_config"
                         :key="configKey"
+                        v-show="!isAdvancedConfigKey(authProvider, configKey)"
                       >
                         <label :for="`auth_provider_config_${authProvider.id}_${configKey}`">
                           {{ $t(`settings.system.auth_provider_config_${configKey}`) }}
@@ -1104,6 +1139,74 @@ const handleDeleteAuthProvider = async (id) => {
                             <Eye v-if="hideSecrets[`${authProvider.id}_${configKey}`]" />
                             <EyeOff v-else />
                           </button>
+                        </div>
+                      </div>
+
+                      <div v-if="hasAdvancedConfig(authProvider)" class="advanced-settings-section">
+                        <a
+                          href="#"
+                          class="advanced-settings-toggle"
+                          @click.prevent="toggleAdvancedSettings(authProvider)"
+                        >
+                          <Settings style="width: 14px; height: 14px; margin-right: 4px" />
+                          {{ $t('settings.system.auth_provider_advanced_settings') }}
+                        </a>
+
+                        <div v-show="isAdvancedSettingsVisible(authProvider)" class="advanced-settings-body">
+                          <p class="help-text mb-3">{{ $t('settings.system.auth_provider_advanced_settings_description') }}</p>
+
+                          <h6 class="mb-2" style="font-size: 0.85rem; opacity: 0.7">
+                            {{ $t('settings.system.auth_provider_advanced_endpoints') }}
+                          </h6>
+                          <template
+                            v-for="(configValue, configKey) in authProvider.provider_config"
+                            :key="'adv-endpoint-' + configKey"
+                          >
+                            <div
+                              class="setting-group-body-item"
+                              v-if="isAdvancedConfigKey(authProvider, configKey) && !configKey.startsWith('claim_')"
+                            >
+                              <label :for="`auth_provider_config_${authProvider.id}_${configKey}`">
+                                {{ $t(`settings.system.auth_provider_config_${configKey}`) }}
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="text"
+                                  :id="`auth_provider_config_${authProvider.id}_${configKey}`"
+                                  v-model="authProvider.provider_config[configKey]"
+                                  :placeholder="$t(`settings.system.auth_provider_config_${configKey}_placeholder`)"
+                                  :readonly="onLocalhost"
+                                />
+                              </div>
+                            </div>
+                          </template>
+
+                          <h6 class="mb-2 mt-3" style="font-size: 0.85rem; opacity: 0.7">
+                            {{ $t('settings.system.auth_provider_advanced_claim_mapping') }}
+                          </h6>
+                          <p class="help-text mb-2">{{ $t('settings.system.auth_provider_advanced_claim_mapping_description') }}</p>
+                          <template
+                            v-for="(configValue, configKey) in authProvider.provider_config"
+                            :key="'adv-claim-' + configKey"
+                          >
+                            <div
+                              class="setting-group-body-item"
+                              v-if="isAdvancedConfigKey(authProvider, configKey) && configKey.startsWith('claim_')"
+                            >
+                              <label :for="`auth_provider_config_${authProvider.id}_${configKey}`">
+                                {{ $t(`settings.system.auth_provider_config_${configKey}`) }}
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="text"
+                                  :id="`auth_provider_config_${authProvider.id}_${configKey}`"
+                                  v-model="authProvider.provider_config[configKey]"
+                                  :placeholder="$t(`settings.system.auth_provider_config_${configKey}_placeholder`)"
+                                  :readonly="onLocalhost"
+                                />
+                              </div>
+                            </div>
+                          </template>
                         </div>
                       </div>
                       <hr v-if="!onLocalhost" />
@@ -1167,6 +1270,8 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.auth_providers_description') }}</p>
               <h6>{{ $t('settings.system.auth_provider_allow_registration') }}</h6>
               <p>{{ $t('settings.system.auth_provider_allow_registration_description') }}</p>
+              <h6>{{ $t('settings.system.auth_provider_allow_unlink') }}</h6>
+              <p>{{ $t('settings.system.auth_provider_allow_unlink_description') }}</p>
               <h6>{{ $t('settings.system.provider_trust_warning') }}</h6>
               <p>{{ $t('settings.system.provider_trust_warning_description') }}</p>
             </div>
@@ -1339,7 +1444,7 @@ const handleDeleteAuthProvider = async (id) => {
   &.open {
     margin-bottom: 10px;
     opacity: 1;
-    max-height: 800px;
+    max-height: 2000px;
     padding: 1rem;
   }
 }
@@ -1429,6 +1534,31 @@ const handleDeleteAuthProvider = async (id) => {
     width: 15px;
     height: 15px;
     margin-top: -2px;
+  }
+}
+
+.advanced-settings-section {
+  margin-top: 0.5rem;
+
+  .advanced-settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--panel-text-color-alt);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    &:hover {
+      color: var(--panel-text-color);
+    }
+  }
+
+  .advanced-settings-body {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: var(--panel-section-background-color);
+    border-radius: var(--panel-border-radius);
+    border: 1px solid var(--input-border-color);
   }
 }
 
