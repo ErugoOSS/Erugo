@@ -63,6 +63,16 @@ class BaseAuthProvider implements AuthProviderInterface
         return [];
     }
 
+    public static function getAdvancedProviderConfig(): array
+    {
+        return [];
+    }
+
+    public static function getAdvancedConfigKeys(): array
+    {
+        return [];
+    }
+
     public static function getInformationUrl(): ?string
     {
         return null;

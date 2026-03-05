@@ -38,6 +38,9 @@ class UsersController extends Controller
       ];
     });
 
+    // Expose whether this user has SSO linked accounts (profile managed by SSO)
+    $user->has_sso = $user->authProviders->count() > 0;
+
     unset($user->authProviders);
 
     return response()->json([
@@ -69,6 +72,15 @@ class UsersController extends Controller
         'message' => 'Provider not linked to this account'
       ], 404);
     }
+
+    // Check if the provider allows unlinking
+    $authProvider = \App\Models\AuthProvider::find($providerId);
+    if ($authProvider && !$authProvider->allow_unlink) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'This provider does not allow unlinking.'
+      ], 400);
+    }
     
     // Check if this is the only authentication method
     if ($user->authProviders()->count() <= 1 && !$user->password) {
@@ -97,6 +109,22 @@ class UsersController extends Controller
   {
 
     $user = Auth::user();
+
+    // If user has SSO linked accounts, prevent name and email changes
+    // These fields are managed by the identity provider
+    $hasSso = $user->authProviders()->count() > 0;
+    if ($hasSso && ($request->has('name') || $request->has('email'))) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Validation failed',
+        'data' => [
+          'errors' => [
+            'name' => ['Name and email are managed by your identity provider.'],
+            'email' => ['Name and email are managed by your identity provider.']
+          ]
+        ]
+      ], 422);
+    }
 
     $validator = Validator::make($request->all(), [
       'password' => ['sometimes', 'confirmed', Password::min(8)],
