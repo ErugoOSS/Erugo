@@ -179,6 +179,7 @@ const filesByDirectory = computed(() => {
           :is-root="true"
           :read-only="true"
           :share-code="downloadShareCode"
+          :password="password"
         />
       </div>
       <div class="share-message mt-3" v-if="share.description">
