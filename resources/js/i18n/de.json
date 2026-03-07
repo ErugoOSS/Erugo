@@ -4,20 +4,20 @@
   "Add Folders": "Ordner hinzufügen",
   "Add Recipient": "Empfänger hinzufügen",
   "Email Verification": "E-Mail-Überprüfung",
-  "Message to share recipients (optional)": "Nachricht an die gemeinsamen Empfänger (optional)",
+  "Message to share recipients (optional)": "Nachricht an die Empfänger der Freigabe (optional)",
   "No files added yet": "Noch keine Dateien hinzugefügt",
   "No recipients": "Keine Empfänger",
   "Password Reset": "Passwort zurücksetzen",
   "Powered by": "Powered by",
   "Processing uploaded files": "Verarbeitung hochgeladener Dateien",
-  "Reverse Share": "Umgekehrte Aufteilung",
-  "Reverse Share Invite": "Reverse Share Invite",
-  "Share Created": "Teilen Erstellt",
-  "Share Deleted Warning": "Gelöschte Warnung teilen",
-  "Share Deletion Warning": "Warnung vor der Löschung von Aktien",
-  "Share Downloaded": "Heruntergeladene Freigabe",
-  "Share Expired Warning": "Anteil Abgelaufene Warnung",
-  "Share Expiry Warning": "Warnung vor dem Verfall von Aktien",
+  "Reverse Share": "Dateianforderung",
+  "Reverse Share Invite": "Dateianforderungs-Einladung",
+  "Share Created": "Freigabe erstellt",
+  "Share Deleted Warning": "Freigaben-Lösch-Warnung",
+  "Share Deletion Warning": "Warnung vor der Löschung von Freigaben",
+  "Share Downloaded": "Freigabe heruntergeladen",
+  "Share Expired Warning": "Freigabe abgelaufen Warnung",
+  "Share Expiry Warning": "Warnung vor dem Verfall von Freigaben",
   "Share Name": "Name der Freigabe",
   "Share URL": "URL teilen",
   "We'll provide you with a link instead": {
@@ -43,11 +43,11 @@
     "guest_warning": "Sie sind als Gast eingeloggt. Sie können hier Dateien hochladen, die an die Person weitergeleitet werden, die Ihnen diese Anfrage geschickt hat.",
     "invalid_email_or_password": "Anmeldung fehlgeschlagen",
     "invite_accepted": "Freigabeeinladung akzeptiert. Sie können jetzt Dateien hochladen.",
-    "login": "Anmeldung",
+    "login": "Anmelden",
     "login_successful": "Erfolgreich eingeloggt",
-    "login_to_accept_invite": "Bitte melden Sie sich an, um diese Einladung zur umgekehrten Freigabe anzunehmen.",
+    "login_to_accept_invite": "Bitte melden Sie sich an, um diese Einladung zur Dateianforderung anzunehmen.",
     "login_with": "Anmeldung mit",
-    "logout": "Abmeldung",
+    "logout": "Abmelden",
     "name": "Vollständiger Name",
     "no_account": "Sie haben noch kein Konto?",
     "or": "Oder",
@@ -57,22 +57,22 @@
     "password_set": "Passwort erfolgreich gesetzt!",
     "password_set_description": "Ihr Passwort wurde festgelegt. Sie werden gleich eingeloggt.",
     "passwords_do_not_match": "Passwörter stimmen nicht überein",
-    "please_enter_email": "Bitte geben Sie eine E-Mail Adresse ein",
+    "please_enter_email": "Bitte geben Sie eine E-Mail-Adresse ein",
     "please_enter_email_and_password": "Bitte E-Mail und Passwort eingeben",
     "please_enter_email_to_reset_password": "Bitte geben Sie Ihre E-Mail-Adresse ein, um Ihr Passwort zurückzusetzen",
     "please_enter_password_and_confirm_password": "Bitte geben Sie ein Passwort ein und bestätigen Sie das Passwort",
     "please_enter_verification_code": "Bitte geben Sie den 6-stelligen Verifizierungscode ein",
     "please_fill_all_fields": "Bitte füllen Sie alle Felder aus",
     "register": "Register",
-    "registering": "Registrierung...",
+    "registering": "Registriere...",
     "registration_failed": "Registrierung fehlgeschlagen",
-    "registration_successful": "Registrierung erfolgreich! Bitte prüfen Sie Ihre E-Mail auf den Verifizierungscode.",
+    "registration_successful": "Registrierung erfolgreich! Bitte prüfen Sie Ihre E-Mails für den Verifizierungscode.",
     "request_reset": "Reset anfordern",
     "resend_code": "Code erneut senden",
     "save_new_password": "Neues Passwort speichern",
-    "sending": "Ich schicke...",
+    "sending": "Sende...",
     "verification_code": "Verifizierungscode",
-    "verification_code_resent": "Verifizierungscode erneut gesendet. Bitte überprüfen Sie Ihre E-Mail.",
+    "verification_code_resent": "Verifizierungscode erneut gesendet. Bitte überprüfen Sie Ihre E-Mails.",
     "verification_code_sent": "Wir haben einen Verifizierungscode an {email} gesendet. Bitte geben Sie ihn unten ein.",
     "verification_failed": "Verifizierung fehlgeschlagen",
     "verify_email": "E-Mail verifizieren",
@@ -266,7 +266,7 @@
       "instance": "Instanzen",
       "plan": "Ihr Plan",
       "status": "Status",
-      "usage": "Verwendung"
+      "usage": "Nutzung"
     },
     "passwordMismatch": "Passwörter stimmen nicht überein",
     "planChange": {
@@ -274,11 +274,11 @@
       "cancelTitle": "Abonnement kündigen",
       "cancelling": "Abbestellen",
       "confirmCancel": "Abonnement kündigen",
-      "confirmDowngrade": "Herabstufung",
+      "confirmDowngrade": "Herabstufen",
       "confirmReactivate": "Reaktivieren Sie",
       "confirmUpgrade": "Jetzt aktualisieren",
       "downgradeMessage": "Ihr Tarif wird am Ende des aktuellen Abrechnungszeitraums ({date}) herabgestuft. Bis dahin behalten Sie die Funktionen Ihres aktuellen Tarifs bei.",
-      "downgradeTitle": "Downgrade-Plan",
+      "downgradeTitle": "Plan herabstufen",
       "from": "Von",
       "reactivateMessage": "Ihr Abonnement wird reaktiviert und läuft wie gewohnt weiter. Bis zu Ihrem nächsten Abrechnungsdatum werden keine weiteren Gebühren fällig.",
       "reactivateTitle": "Abonnement reaktivieren",
@@ -351,7 +351,7 @@
         "instances": "Bis zu {count} Instanzen",
         "subdomain": "Kostenlose Subdomain"
       },
-      "reactivate": "Nicht absagen",
+      "reactivate": "Nicht kündigen",
       "reactivated": "Ihr Abonnement wurde reaktiviert und wird nicht mehr gekündigt",
       "stopWaiting": "Abbrechen",
       "subdomain": "Kostenlose Subdomain inklusive",
@@ -359,7 +359,7 @@
       "title": "Wählen Sie Ihren Plan",
       "transfer": "{count} GB Übertragung/Monat",
       "transferUnlimited": "Unbegrenzte Übertragung",
-      "waitingForPayment": "Ich warte auf die Bezahlung..."
+      "waitingForPayment": "Wartet auf Bezahlung..."
     },
     "subscriptionActive": "Abonnement aktiviert!",
     "title": "Erugo Verbinden",
@@ -389,7 +389,7 @@
     "navigate": "zum Navigieren",
     "noResults": "Keine Ergebnisse gefunden",
     "placeholder": "Sucheinstellungen...",
-    "select": "zum Auswählen"
+    "select": "zur Auswahl"
   },
   "confirm_delete_user": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
   "download": {
@@ -405,7 +405,7 @@
     "labels": {
       "message": "Nachricht an den Empfänger"
     },
-    "message": "Nachricht (fakultativ)"
+    "message": "Nachricht (optional)"
   },
   "limit": "Grenze",
   "message": {
@@ -418,10 +418,31 @@
   },
   "settings": {
     "about": {
-      "description": "Informationen über Ihre Erugo-Installation.",
+      "built_with": "Erstellt mit",
+      "created_by": "Erstellt und gepflegt von",
+      "credits": {
+        "laravel": "PHP-Framework",
+        "tus": "Fortsetzbare Datei-Uploads",
+        "vue": "Frontend-Framework"
+      },
+      "database": "Datenbank",
+      "description": "Informationen zu Ihrer Erugo-Installation.",
+      "discord": "Discord",
+      "documentation": "Dokumentation",
+      "donate": "Unterstützen Sie die Entwicklung",
+      "intro": "Erugo ist eine kostenlose, selbstgehostete Open-Source-Filesharing-Plattform. ",
+      "license": "Lizenz",
+      "loading": "Systeminformationen werden geladen...",
+      "max_upload": "Maximaler Upload",
+      "of": "von",
+      "storage": "Speicher",
+      "support_cta": "Wenn Sie Erugo nützlich finden, denken Sie darüber nach",
+      "support_link": "seine Entwicklung zu unterstützen",
+      "system_info": "Systeminformationen",
       "title": "Über Erugo",
       "version": "Version",
-      "visit_website": "Besuchen Sie erugo.app"
+      "visit_github": "GitHub",
+      "visit_website": "Webseite"
     },
     "account": {
       "change_password": "Mein Passwort ändern",
@@ -435,7 +456,7 @@
     "allShares": {
       "allUsers": "Alle Benutzer",
       "filterByUser": "Filter nach Benutzer",
-      "noShares": "Es gibt keine Aktien zu zeigen",
+      "noShares": "Es gibt keine Freigaben zum Anzeigen",
       "owner": "Eigentümer"
     },
     "authProvidersSavedSuccessfully": "Auth-Provider erfolgreich gespeichert",
@@ -451,7 +472,7 @@
       "background_slideshow_speed_description": "Ändert, wie oft das Hintergrundbild zufällig wechselt (dies hat nur Auswirkungen, wenn Sie mehrere Hintergrundbilder haben). Setzen Sie den Wert 0, um die Diashow zu deaktivieren und stattdessen auf jeder neuen Seite ein zufälliges Bild anzuzeigen.",
       "background_slideshow_speed_off": "Deaktivieren",
       "confirm": "Bitte bestätigen",
-      "confirm_delete_theme": "Sind Sie sicher, dass Sie das Thema \"{name}\" löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+      "confirm_delete_theme": "Sind Sie sicher, dass Sie das Theme \"{name}\" löschen möchten? Dies kann nicht rückgängig gemacht werden.",
       "confirm_reset_favicon": "Wollen Sie das Favicon wirklich zurücksetzen? Dadurch wird Ihr Favicon gelöscht und das Standard-Favicon von Erugo wiederhergestellt. Es gibt keine Möglichkeit, Ihr Favicon wiederherzustellen, also stellen Sie sicher, dass Sie eine Sicherungskopie davon haben, bevor Sie fortfahren.",
       "confirm_reset_logo": "Möchten Sie das Logo wirklich zurücksetzen? Dadurch wird Ihr Logo gelöscht und das Standard-Erugo-Logo wiederhergestellt. Es gibt keine Möglichkeit, Ihr Logo wiederherzustellen, also stellen Sie sicher, dass Sie eine Sicherungskopie davon haben, bevor Sie fortfahren.",
       "delete": "Löschen",
@@ -470,10 +491,10 @@
       "favicon_reset_success": "Favicon erfolgreich zurückgesetzt",
       "favicon_upload_failed": "Hochladen des Favicons fehlgeschlagen",
       "favicon_uploaded": "Favicon hochgeladen",
-      "in_pixels": "In Pixel",
+      "in_pixels": "In Pixeln",
       "in_seconds": "Sekunden",
       "install_custom_theme": "Installieren Sie ein benutzerdefiniertes Theme\n",
-      "install_custom_theme_description": "Installieren Sie ein benutzerdefiniertes Themeaus einer JSON-Datei.\n\nDies kann ein Theme sein, das Sie selbst geändert oder erstellt haben, oder eines, das Sie heruntergeladen haben.",
+      "install_custom_theme_description": "Installieren Sie ein benutzerdefiniertes Theme aus einer JSON-Datei.\n\nDies kann ein Theme sein, das Sie selbst geändert oder erstellt haben, oder eines, das Sie heruntergeladen haben.",
       "install_custom_theme_description_2": "Wenn Sie ein Theme aus dem Internet herunterladen, stellen Sie bitte sicher, dass Sie der Quelle vertrauen und das Theme vor der Installation auf bösartigen Code überprüft haben.",
       "install_theme": "Theme installieren",
       "logo": "Logo",
@@ -491,12 +512,12 @@
       "settings_saved": "Branding-Einstellungen erfolgreich gespeichert",
       "show_powered_by": "Powered by Erugo anzeigen",
       "show_powered_by_description": "Zeigen oder verbergen Sie den Text \"Powered by Erugo\" unten auf der Seite. Dieser Text ermöglicht es Erugo, von den Nutzern entdeckt zu werden und hilft uns zu wachsen, Sie können ihn jedoch ausblenden, wenn Sie es wünschen.\n",
-      "theme": "Themen",
-      "theme_delete_failed": "Thema kann nicht gelöscht werden",
+      "theme": "Themes",
+      "theme_delete_failed": "Theme kann nicht gelöscht werden",
       "theme_deleted_successfully": "Theme erfolgreich gelöscht",
       "theme_description": "Wählen Sie aus einer Reihe von vorgefertigten Themes oder einem von Ihnen installierten Theme.",
       "theme_file": "Theme-Datei",
-      "theme_name": "Theme Name",
+      "theme_name": "Theme-Name",
       "upload_background": "Hintergrundbild oder Video hochladen",
       "upload_background_image": "Hintergrundbild hochladen",
       "upload_favicon": "favicon.svg",
@@ -515,7 +536,7 @@
       },
       "myShares": {
         "create": "Dateien teilen",
-        "pruneExpired": "Abgelaufene geteilte Dateien löschen"
+        "pruneExpired": "Abgelaufene Freigaben löschen"
       },
       "system": {
         "save": "Systemeinstellungen speichern"
@@ -526,11 +547,11 @@
     },
     "close": "Schließen",
     "confirm": {
-      "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden."
+      "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen Freigaben löschen wollen? Dies kann nicht rückgängig gemacht werden."
     },
     "description": {
       "about": "Informationen über Ihre Erugo-Installation",
-      "allShares": "Anzeigen und Verwalten von Freigaben durch alle Benutzer",
+      "allShares": "Anzeigen und Verwalten von Freigaben aller Benutzer",
       "branding": "Passen Sie die Benutzeroberfläche Ihrer Erugo-Instanz an und fügen Sie Ihre eigenen Branding-Anpassungen hinzu.",
       "cloudConnect": "Verbinden Sie Ihre Instanz mit der Erugo Cloud für einfaches Domain-Routing",
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
@@ -549,7 +570,7 @@
       "error_loading_templates": "Vorlagen konnten nicht geladen werden",
       "error_saving_fallback": "Fallback-Text konnte nicht gespeichert werden",
       "error_saving_templates": "Vorlagen können nicht gespeichert werden",
-      "no_changes": "Keine Änderungen zu speichern",
+      "no_changes": "Keine Änderungen zum Speichern",
       "passwordReset": "Passwort zurücksetzen",
       "requiredFields": "Erforderliche Felder",
       "sections": {
@@ -559,37 +580,37 @@
         "fallbackText": "Fallback-Link Beschreibungstext",
         "fallbackTextDescription": "Für E-Mail-Clients, die Aktionsschaltflächen nicht richtig anzeigen können, fügen wir einen Ausweichlink am Ende der E-Mail ein. Mit dieser Option können Sie den Text, der über diesem Ausweichlink erscheint, anpassen, damit die Empfänger seinen Zweck verstehen.",
         "header": "Inhalt der Kopfzeile",
-        "subject": "Thema"
+        "subject": "Betreff"
       },
       "success": "Vorlagen erfolgreich gespeichert",
       "validation_error": "{template}: Fehlende Pflichtfelder ({fields})"
     },
     "error": {
-      "pruneExpiredShares": "Abgelaufene geteilte Dateien konnten nicht zur Löschung eingeplant werden!",
-      "shareExpired": "Geteilte Dateien konnten nicht auf \"abgelaufen\" gesetzt werden",
-      "shareExtended": "Geteilte Dateien konnten nicht auf \"verlängern\" gesetzt werden"
+      "pruneExpiredShares": "Abgelaufene Freigaben konnten nicht zur Löschung eingeplant werden!",
+      "shareExpired": "Freigaben konnten nicht auf \"abgelaufen\" gesetzt werden",
+      "shareExtended": "Freigaben konnten nicht auf \"verlängern\" gesetzt werden"
     },
     "help": {
       "auth_provider": {
         "title": "Informationen zum Autorisierungsanbieter"
       },
       "downloadLimit": {
-        "description": "Sie können das Download-Limit für jede Freigabe festlegen, indem Sie auf die Zahl auf der rechten Seite klicken und das neue Limit eintippen. Deaktivieren Sie das Feld, um das Limit zu entfernen.",
+        "description": "Sie können das Download-Limit für jede Freigabe festlegen, indem Sie auf die Zahl auf der rechten Seite klicken und das neue Limit eintippen. Löschen Sie die Zahl, um das Limit zu entfernen.",
         "description2": "Die Änderungen werden automatisch gespeichert, wenn Sie außerhalb des Feldes klicken.",
         "title": "Hilfe zu Download-Limits"
       }
     },
     "invite": {
-      "message": "Nachricht (fakultativ)"
+      "message": "Nachricht (optional)"
     },
     "loading": "Geteilte Dateien laden...",
-    "noShares": "Sie haben keine geteilten Dateien. Warum nicht eine anlegen?",
+    "noShares": "Sie haben keine Freigaben. Warum nicht eine erstellen?",
     "provider": {
       "edit": "Bearbeiten",
       "view": "Ansehen"
     },
     "reverse_invite": {
-      "description": "Fordern Sie Dateien von einer Kontaktperson an, indem Sie deren Daten unten eingeben. Er erhält einen Link, über den er einmalig Dateien direkt an Sie hochladen kann. Sobald sie die Dateien hochgeladen haben, erhalten Sie eine E-Mail-Benachrichtigung."
+      "description": "Fordern Sie Dateien von einer Kontaktperson an, indem Sie deren Daten unten eingeben. Es wird Link versandt, über den einmalig Dateien direkt für Sie hochgeladen werden können. Sobald die Dateien hochgeladen wurden, erhalten Sie eine E-Mail-Benachrichtigung."
     },
     "settingsSavedSuccessfully": "Einstellungen erfolgreich gespeichert",
     "share": {
@@ -600,15 +621,15 @@
     },
     "stats": {
       "downloads": {
-        "all_time": "All-Time Downloads",
+        "all_time": "Gesamte Downloads",
         "chart_title": "Downloads im Laufe der Zeit",
         "days_option": "{days} Tage",
         "downloads": "Downloads",
         "downloads_in_period": "Downloads ({days} Tage)",
         "time_period": "Zeitspanne:",
-        "title": "Aktivität herunterladen",
-        "top_shares": "Meist heruntergeladene Aktien",
-        "unique_downloaders": "Einzigartige Downloader"
+        "title": "Download-Aktivität",
+        "top_shares": "Meist heruntergeladene Freigabe",
+        "unique_downloaders": "Unterschiedliche Downloader"
       },
       "error_loading": "Systemstatistiken konnten nicht geladen werden",
       "file_types": {
@@ -629,21 +650,21 @@
         "active_vs_expired_title": "Aktiv vs. Abgelaufen",
         "categories_description": "Die Dateien sind nach Typ gruppiert: Bilder, Dokumente, Videos, Audio, Archive, Code und andere.",
         "categories_title": "Kategorien",
-        "disk_usage_description": "Zeigt die gesamte Speicherplatznutzung an. Erwägen Sie, alte Freigaben zu bereinigen, wenn die Nutzung hoch ist.",
+        "disk_usage_description": "Zeigt die gesamte Speicherplatznutzung an. Erwägen Sie, alte Freigaben zu bereinigen, wenn die Belegung hoch ist.",
         "disk_usage_title": "Nutzung der Festplatte",
         "downloads_description": "Verfolgen Sie die Download-Aktivität für alle Freigaben über den von Ihnen gewählten Zeitraum.",
-        "downloads_title": "Aktivität herunterladen",
+        "downloads_title": "Downloadaktivität",
         "file_types_description": "Aufschlüsselung der Dateien nach Kategorie über alle Freigaben hinweg.",
         "file_types_title": "Dateityp Verteilung",
-        "guest_users_description": "Benutzer, die über umgekehrte Einladungen zur gemeinsamen Nutzung erstellt wurden.",
+        "guest_users_description": "Benutzer, die über Dateianforderungen erstellt wurden.",
         "guest_users_title": "Gast-Benutzer",
-        "shares_description": "Übersicht über alle Aktien im System, einschließlich ihres aktuellen Status.",
+        "shares_description": "Übersicht über alle Freigaben im System, einschließlich ihres aktuellen Status.",
         "shares_title": "Statistik teilen",
         "storage_description": "Überwachen Sie die Festplattennutzung Ihres Servers und den von den Freigaben verbrauchten Speicherplatz.",
         "storage_title": "Überblick über die Speicherung",
-        "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Aktien heruntergeladen haben.",
+        "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Freigaben heruntergeladen haben.",
         "unique_downloaders_title": "Einzigartige Downloader",
-        "users_description": "Überblick über die Benutzerkonten und deren Aktivitätsniveau.",
+        "users_description": "Überblick über die Benutzerkonten und deren Aktivität.",
         "users_title": "Benutzer-Statistik"
       },
       "loading": "Laden der Statistiken...",
@@ -651,54 +672,54 @@
         "downloads": "Herunterladen",
         "file_types": "Datei-Typen",
         "shares": "Geteilte Dateien",
-        "storage": "Lagerung",
+        "storage": "Speicher",
         "users": "Benutzer"
       },
-      "refresh": "Auffrischen",
+      "refresh": "Aktualisieren",
       "shares": {
-        "active_shares": "Aktive Aktien",
+        "active_shares": "Aktive Freigaben",
         "deleted": "Gelöscht",
         "expired": "Abgelaufen",
         "last_7_days": "Letzte 7 Tage",
-        "per_share": "pro Aktie",
+        "per_share": "pro Freigabe",
         "protected": "Geschützt",
         "title": "Statistik teilen",
         "total_files": "Dateien insgesamt",
-        "total_shares": "Anteile insgesamt"
+        "total_shares": "Freigaben insgesamt"
       },
       "storage": {
         "available_space": "Verfügbarer Platz",
         "disk_usage": "Nutzung der Festplatte",
         "free": "kostenlos",
         "of": "von",
-        "of_disk": "der Scheibe",
+        "of_disk": "der Festplatte",
         "share_storage": "Speicher teilen",
-        "title": "Überblick über die Speicherung",
+        "title": "Speicherübersicht",
         "used": "gebraucht"
       },
       "users": {
         "active": "Aktiv",
         "admins": "Admins",
         "guests": "Gäste",
-        "shares": "Aktien",
+        "shares": "Freigaben",
         "title": "Benutzer-Statistik",
         "top_users": "Aktivste Benutzer",
         "total_users": "Benutzer insgesamt",
-        "with_shares": "Benutzer mit Anteilen"
+        "with_shares": "Benutzer mit Freigaben"
       }
     },
     "success": {
-      "pruneExpiredShares": "Abgelaufene geteilten Dateien sind zur Löschung vorgesehen und werden im Hintergrund verarbeitet.",
-      "shareExpired": "Der Zeitraum zum Download der geteilten Dateien ist abgelaufen",
-      "shareExtended": "Der Zeitraum zum Download der geteilten Dateien wurde verlängert"
+      "pruneExpiredShares": "Abgelaufene Freigaben sind zur Löschung vorgesehen und werden im Hintergrund verarbeitet.",
+      "shareExpired": "Der Zeitraum zum Download der Freigabe ist abgelaufen",
+      "shareExtended": "Der Zeitraum zum Download der Freigabe wurde verlängert"
     },
     "system": {
       "allow_chunked_uploads": "Chunked-Upload-Modus zulassen",
       "allow_chunked_uploads_description": "Der Chunked-Upload-Modus unterteilt Dateien in kleinere Segmente, die nacheinander übertragen werden. Diese Methode ist zwar bei kleineren Dateien etwas langsamer als der direkte Upload, bietet aber bei der Übertragung großer Dateien mehr Stabilität und Zuverlässigkeit. Chunked Uploads unterstützen die Verfolgung des Fortschritts und ermöglichen es dem Benutzer, die Übertragung manuell anzuhalten und fortzusetzen. Dies ist ideal für Dateien über 100 MB oder bei instabilen Netzwerkverbindungen.",
       "allow_direct_uploads": "Direkten Upload-Modus zulassen",
       "allow_direct_uploads_description": "Beim direkten Upload werden die Dateien in einer einzigen, ununterbrochenen Anfrage übertragen. Während diese Methode für die meisten Dateien die schnellsten Übertragungsgeschwindigkeiten bietet, kann es bei extrem großen Dateien zu Stabilitätsproblemen oder Timeouts kommen. Für eine optimale Leistung bei Dateien, die größer als 100 MB sind, ist der Upload in Teilen die bessere Option.",
-      "allow_reverse_shares": "Umgekehrtes Teilen zulassen",
-      "allow_reverse_shares_description": "Legt fest, ob Ihre registrierten Benutzer die Erlaubnis haben sollen, umgekehrte Freigabeanforderungen zu senden. Diese Anfragen geben externen Personen einen einmaligen Upload-Pass, der es ihnen ermöglicht, Dateien direkt an den registrierten Benutzer zu liefern, der die Anfrage initiiert hat.\n\n\n\n\n",
+      "allow_reverse_shares": "Dateianforderungen zulassen",
+      "allow_reverse_shares_description": "Legt fest, ob Ihre registrierten Benutzer die Erlaubnis haben sollen, Dateianforderungen zu senden. Diese Anfragen geben externen Personen einen einmaligen Upload-Zugang, der es ihnen ermöglicht, Dateien direkt an den registrierten Benutzer zu senden, der die Anfrage initiiert hat.\n\n\n\n\n",
       "application_name": "Name der Anwendung",
       "application_name_description": "Passen Sie den Anzeigenamen der Anwendung an, der in der Titelleiste, in Dialogfeldern und anderen Oberflächenelementen erscheint. Dies trägt dazu bei, ein konsistentes Branding während der gesamten Benutzererfahrung zu erhalten.",
       "application_url": "URL der Anwendung",
@@ -720,30 +741,30 @@
         "actions": "Aktionen",
         "auto_backup": "Automatische Backups",
         "auto_backup_description": "Das System erstellt automatisch tägliche Backups. Backups, die älter als 7 Tage sind, werden automatisch entfernt, um Speicherplatz zu sparen.",
-        "create_backup": "Sicherung erstellen",
-        "create_failed": "Sicherung konnte nicht erstellt werden",
-        "create_success": "Sicherung erfolgreich erstellt",
+        "create_backup": "Backup erstellen",
+        "create_failed": "Backup konnte nicht erstellt werden",
+        "create_success": "Backup erfolgreich erstellt",
         "created_at": "Erstellt",
         "delete": "Löschen",
-        "delete_confirmation": "Sind Sie sicher, dass Sie diese Sicherung löschen wollen? Diese Aktion kann nicht rückgängig gemacht werden.",
-        "delete_failed": "Sicherung konnte nicht gelöscht werden",
-        "delete_success": "Sicherung erfolgreich gelöscht",
-        "description": "Anzeigen und Verwalten von Datenbanksicherungen. Backups werden automatisch erstellt und 7 Tage lang gespeichert, bevor sie gelöscht werden.",
+        "delete_confirmation": "Sind Sie sicher, dass Sie dieses Backup löschen wollen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "delete_failed": "Backup konnte nicht gelöscht werden",
+        "delete_success": "Backup erfolgreich gelöscht",
+        "description": "Anzeigen und Verwalten von Datenbankbackups. Backups werden automatisch erstellt und 7 Tage lang gespeichert, bevor sie gelöscht werden.",
         "download": "Herunterladen",
-        "download_failed": "Download der Sicherung fehlgeschlagen",
-        "download_success": "Download der Sicherungskopie gestartet",
+        "download_failed": "Download des Backups fehlgeschlagen",
+        "download_success": "Download des Backups gestartet",
         "filename": "Dateiname",
         "load_failed": "Backups konnten nicht geladen werden",
         "loading": "Laden der Backups...",
-        "no_backups": "Keine Sicherungen verfügbar. Klicken Sie auf \"Backup erstellen\", um ein Backup zu erstellen.",
-        "refresh": "Auffrischen",
+        "no_backups": "Keine Backups verfügbar. Klicken Sie auf \"Backup erstellen\", um ein Backup zu erstellen.",
+        "refresh": "Aktualisieren",
         "size": "Größe",
         "title": "Datenbank-Backups"
       },
-      "callback_url": "Rückruf-URL",
+      "callback_url": "Callback-URL",
       "callback_url_description": "Verwenden Sie die in der Konfiguration Ihres Identitätsanbieters angegebene Callback-URL.",
-      "chunked": "In Teilen",
-      "chunked_uploads_disabled_but_default": "Sie haben den Standard-Upload-Modus auf \"in Teilen\" eingestellt, aber Uploads \"in Teilen\" sind deaktiviert!",
+      "chunked": "Chunked",
+      "chunked_uploads_disabled_but_default": "Sie haben den Standard-Upload-Modus auf \"Chunked\" eingestellt, aber Uploads \"Chunked\" sind deaktiviert!",
       "clean_files_after": "Dateien bereinigen nach",
       "clean_files_after_description": "Zeitraum zwischen dem Ablauf der geteilten Dateien bis zum Löschen dieser Dateien aus dem System",
       "days": "Tage",
@@ -776,29 +797,29 @@
       "login_message_description": "Fügen Sie eine benutzerdefinierte Nachricht oder Ankündigung hinzu, die auf dem Anmeldebildschirm angezeigt werden soll. Dies kann für Willkommensnachrichten, wichtige Benachrichtigungen oder temporäre Ankündigungen verwendet werden.",
       "max_expiry_time": "Maximale Verfallszeit",
       "max_expiry_time_description": "Legen Sie die maximale Anzahl von Tagen fest, die ein Benutzer bei der Erstellung einer Freigabe für deren Ablauf auswählen kann. Leeren Sie den Wert, um eine unbegrenzte Verfallszeit zuzulassen.",
-      "max_share_size": "Maximale Größe der geteilten Dateien",
-      "max_share_size_description": "Legen Sie die maximale Größe von geteilten Dateien fest, die ein Benutzer erstellen kann. Der Wert wird in Megabyte oder Gigabyte angegeben.",
+      "max_share_size": "Maximale Größe der Freigabe",
+      "max_share_size_description": "Legen Sie die maximale Größe von Freigaben fest, die ein Benutzer erstellen kann. Der Wert wird in Megabyte oder Gigabyte angegeben.",
       "pattern_token_alphanumeric": "Alphanumerisch (0-9, A-Z, a-z)",
       "pattern_token_digit": "Ziffer (0-9)",
-      "pattern_token_escape": "Buchstäbliches Zeichen (Escape)",
+      "pattern_token_escape": "Exaktes Zeichen (Escape)",
       "pattern_token_hex": "Hexadezimal (0-9, A-F)",
       "pattern_token_lowercase": "Kleinbuchstaben (a-z)",
       "pattern_token_range": "Zeichenbereich/Klasse",
       "pattern_token_uppercase": "Großbuchstabe (A-Z)",
-      "provider_trust_warning": "Warnung: Vertrauen in Auth Provider ",
+      "provider_trust_warning": "Warnung: Auth Provider vertrauen",
       "provider_trust_warning_description": "Stellen Sie sicher, dass Sie nur Authentifizierungsanbieter konfigurieren und aktivieren, denen Sie vertrauen. Authentifizierungsanbieter verfügen über erweiterte Zugriffsrechte auf Ihre Anwendungs- und Benutzerdaten. Das Hinzufügen von nicht vertrauenswürdigen oder gefährdeten Anbietern kann zu unbefugtem Zugriff, Datenverletzungen oder Kontoübernahmen führen.",
-      "reverse_shares": "Reverse-Aktien",
+      "reverse_shares": "Dateianforderungen",
       "select_auth_provider": "Wählen Sie einen Autorisierungsanbieter",
       "self_registration": "Selbstregistrierung",
-      "self_registration_allow_any_domain": "Registrierung von jeder E-Mail-Domäne aus zulassen",
+      "self_registration_allow_any_domain": "Registrierung von jeder E-Mail-Domain aus zulassen",
       "self_registration_allowed_domains": "Erlaubte E-Mail-Domains",
-      "self_registration_allowed_domains_description": "Wenn die Domäneneinschränkungen aktiviert sind, können sich nur Benutzer mit E-Mail-Adressen aus den angegebenen Domänen registrieren. Dies ist nützlich, um die Registrierung auf Ihre Organisation zu beschränken.",
-      "self_registration_allowed_domains_help": "Geben Sie die Domänen durch Kommas getrennt ein (z. B. Firma.com, Partner.org)",
-      "self_registration_allowed_domains_placeholder": "beispiel.com, unternehmen.org",
+      "self_registration_allowed_domains_description": "Wenn die Domaineinschränkungen aktiviert sind, können sich nur Benutzer mit E-Mail-Adressen aus den angegebenen Domains registrieren. Dies ist nützlich, um die Registrierung auf Ihre Organisation zu beschränken.",
+      "self_registration_allowed_domains_help": "Geben Sie die Domains durch Kommas getrennt ein (z. B. Firma.com, Partner.org)",
+      "self_registration_allowed_domains_placeholder": "example.com, unternehmen.org",
       "self_registration_description": "Erlauben Sie Benutzern, ihre eigenen Konten zu erstellen. Wenn diese Option aktiviert ist, wird auf der Anmeldeseite die Option \"Konto erstellen\" angezeigt. Die Benutzer müssen ihre E-Mail-Adresse verifizieren, bevor sie sich anmelden können.",
       "self_registration_enabled": "Aktivierung der Selbstregistrierung",
       "share_deleted_emails": "E-Mails bei gelöschten Dateien",
-      "share_deleted_emails_description": "Benachrichtigung der Benutzer, wenn ihre Freigaben endgültig aus dem System gelöscht wurden. Dies bestätigt den Abschluss des Lebenszyklus von Inhalten aus Sicherheits- und Compliance-Gründen.",
+      "share_deleted_emails_description": "Benachrichtigung der Benutzer, wenn ihre Freigaben endgültig aus dem System gelöscht wurden. Dies bestätigt das Ende der Dateilebenszeit aus Sicherheits- und Compliance-Gründen.",
       "share_deletion_warning_emails": "Warn-E-Mails bei anstehenden Löschungen von Dateien",
       "share_deletion_warning_emails_description": "Informieren Sie die Nutzer im Voraus, wenn ihre abgelaufenen Freigaben endgültig gelöscht werden sollen. Dies gibt ihnen eine letzte Gelegenheit, wichtige Inhalte zu speichern.",
       "share_downloaded_emails": "E-Mails bei heruntergeladenen Dateien",
@@ -807,9 +828,9 @@
       "share_expired_warning_emails_description": "Benachrichtigung der Nutzer, wenn ihre Freigaben ihr Verfallsdatum erreicht haben und für die Empfänger nicht mehr zugänglich sind. Hilft den Benutzern, ihren Freigabestatus im Auge zu behalten.",
       "share_expiry_warning_emails": "Warn-E-Mails bei bald ablaufenden Freigaben",
       "share_expiry_warning_emails_description": "Senden Sie proaktive Benachrichtigungen an Nutzer, wenn ihre geteilten Dateien bald ablaufen. Dies gibt ihnen die Möglichkeit, den Zugang bei Bedarf zu verlängern.",
-      "share_url_generation": "URL-Generierung freigeben",
+      "share_url_generation": "Freigaben URL-Generierung",
       "share_url_mode": "URL-Erzeugungsmodus",
-      "share_url_mode_description": "Wählen Sie, wie Freigabe-URLs generiert werden. Haiku erstellt einprägsame Wortkombinationen (z. B. \"Herbst-Brise-Stille-Mond\"). Im Mustermodus können Sie ein benutzerdefiniertes Format mit der Erugo-Mustersyntax definieren.",
+      "share_url_mode_description": "Wählen Sie, wie Freigabe-URLs generiert werden. Haiku erstellt einprägsame Wortkombinationen (z. B. \"autum-breeze-silent-moon\"). Im Mustermodus können Sie ein benutzerdefiniertes Format mit der Erugo-Mustersyntax definieren.",
       "share_url_mode_haiku": "Klassischer Haiku-Stil",
       "share_url_mode_pattern": "Muster",
       "share_url_mode_random": "Zufällige Zeichenfolge",
@@ -828,10 +849,10 @@
       "share_url_random_length": "Zufällige Stringlänge",
       "share_url_random_lowercase": "Kleinbuchstaben a-z",
       "share_url_random_numbers": "Zahlen 0-9",
-      "share_url_random_special": "Besondere Zeichen",
+      "share_url_random_special": "Sonderzeichen",
       "share_url_random_uppercase": "Großbuchstaben A-Z",
       "share_url_shortcode_length": "Länge des Kurzcodes",
-      "shares": "Geteilte Dateien",
+      "shares": "Freigaben",
       "show_deleted_shares": "Zeige gelöschte Freigaben",
       "show_language_selector": "Sprachauswahl anzeigen",
       "show_language_selector_description": "Schalten Sie die Sichtbarkeit des Sprachauswahl-Dropdowns in der oberen rechten Ecke der Anwendung um. Wenn es aktiviert ist, können Benutzer schnell zwischen den verfügbaren Sprachen der Benutzeroberfläche wechseln.",
@@ -847,7 +868,7 @@
       "smtp_port_description": "Die Portnummer, die für die Verbindung mit Ihrem SMTP-Server verwendet wird. Übliche Ports sind 25 (Standard), 465 (SSL) und 587 (TLS).",
       "smtp_sender_address": "SMTP-Absenderadresse",
       "smtp_sender_address_description": "Die E-Mail-Adresse, die als Absender für alle System-E-Mails verwendet werden soll. Diese Adresse sollte gültig und bei Ihrem SMTP-Dienst richtig konfiguriert sein.",
-      "smtp_sender_name": "SMTP Absender Name",
+      "smtp_sender_name": "SMTP-Absender-Name",
       "smtp_sender_name_description": "Der Anzeigename, der als Absender von System-E-Mails erscheinen wird. Die Benutzer sehen diesen Namen in ihrem E-Mail-Client (z. B. \"Your App Name\" oder \"Your App Support\").",
       "smtp_username": "SMTP-Benutzername",
       "smtp_username_description": "Der Benutzername, der für die Authentifizierung bei Ihrem SMTP-Server erforderlich ist. Dies ist normalerweise die E-Mail-Adresse oder der Kontoname, der mit Ihrem E-Mail-Dienst verbunden ist.",
@@ -864,7 +885,7 @@
     },
     "title": {
       "about": "Über",
-      "allShares": "Alle Aktien",
+      "allShares": "Alle Freigaben",
       "branding": "Branding & Benutzeroberfläche",
       "cloudConnect": "Erugo Verbinden",
       "emailTemplates": "E-Mail-Vorlagen",
@@ -872,7 +893,7 @@
       "manage": "Verwalten Sie",
       "myProfile": "Mein Konto",
       "myShares": "Meine Freigaben",
-      "reverse_invite": "Umgekehrte Freigabeanforderung erstellen",
+      "reverse_invite": "Dateianforderung erstellen",
       "share": {
         "password_protect": "Freigabe mit Passwort schützen"
       },
@@ -953,7 +974,7 @@
       "password": "Passwort",
       "password_confirmation": "Bestätigen Sie Ihr Passwort"
     },
-    "intro": "Vielen Dank für die Installation von Erugo! Lasst uns loslegen!",
+    "intro": "Vielen Dank für die Installation von Erugo! Lassen Sie uns loslegen!",
     "logo": "Logo",
     "logo_placeholder": "Logobild auswählen (PNG oder SVG)",
     "save_and_login": "Einstellungen speichern & Anmelden",
@@ -988,9 +1009,9 @@
       "count": "{value, plural, one {{count} Datei} other {{count} Dateien}}",
       "including": "einschließlich:"
     },
-    "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
-    "passwordNotProtected": "Öffnen Sie",
-    "passwordProtected": "Passwort geschützt"
+    "not_found": "Die von Ihnen gesuchte Freigabe wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
+    "passwordNotProtected": "Ohne Passwortschutz",
+    "passwordProtected": "Passwortgeschützt"
   },
   "total_size": "Gesamtgröße",
   "upload": {
@@ -1002,7 +1023,7 @@
       "chunked": "Chunked-Loading-Modus",
       "direct": "Direkter Upload-Modus"
     },
-    "expiry_label": "Die Aktie verfällt am {value} {unit} (Änderung)",
+    "expiry_label": "Die Freigabe verfällt am {value} {unit} (Änderung)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "Die von Ihnen eingegebene Verfallszeit überschreitet die Höchstgrenze. Wir haben sie automatisch auf den längsten zulässigen Zeitraum angepasst.",
     "expiry_unit": {
@@ -1011,7 +1032,7 @@
       "weeks": "Woche(n)",
       "years": "Jahr(e)"
     },
-    "guest_share_created": "Dankeschön! Ihre Dateien wurden erfolgreich gesendet. In wenigen Augenblicken werden Sie abgemeldet.",
+    "guest_share_created": "Dankeschön! Ihre Dateien wurden erfolgreich gesendet. In Kürze werden Sie abgemeldet.",
     "interrupted_upload": {
       "description": "Es sieht so aus, als hätten Sie einen Upload durchgeführt, der unterbrochen wurde.",
       "files": "Dateien",
@@ -1029,14 +1050,14 @@
     "password_mismatch": "Passwörter stimmen nicht überein",
     "password_required": "Zum Schutz der Freigabe ist ein Passwort erforderlich",
     "time_remaining_suffix": "s",
-    "time_remaining_text": "verbleibende",
+    "time_remaining_text": "verbleibend",
     "upload_mode_swapped": "Upload-Modus auf {value} geändert"
   },
   "uploading": {
     "files": "{value, plural, one {Hochladen der Datei #} other {Hochladen von # Dateien}}"
   },
   "warnings": {
-    "how_to_fix": "Wie beheben",
+    "how_to_fix": "Problemlösung",
     "tusd_help_title": "Upload-Dienst nicht verfügbar",
     "tusd_unavailable": "Der Upload-Dienst ist nicht verfügbar. Der tusd-Dienst läuft nicht. Datei-Uploads funktionieren nicht, bis das Problem behoben ist."
   }
