@@ -964,7 +964,8 @@
   "share": {
     "button": {
       "expireNow": "Expirer maintenant",
-      "extend": "Prolonger"
+      "extend": "Prolonger",
+      "recipients": "destinataire(s)"
     },
     "contains": {
       "count": "{value, plural, one {Contient : fichier} other {Contient : fichiers {value}}}"

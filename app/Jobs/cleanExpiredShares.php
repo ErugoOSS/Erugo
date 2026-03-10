@@ -27,6 +27,7 @@ class cleanExpiredShares implements ShouldQueue
         Log::info('Found ' . $shares->count() . ' shares to clean');
         foreach ($shares as $share) {
             Log::info('Cleaning share ' . $share->id);
+            $share->recipients()->delete();
             $share->cleanFiles();
             Log::info('Share ' . $share->id . ' cleaned');
         }

@@ -5,12 +5,13 @@ import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
   server: {
-    host: true,
+    host: '0.0.0.0',
     port: 5173,
     strictPort: true,
     cors: true,
     hmr: {
-      host: process.env.VITE_DEV_HOST || 'localhost'
+      host: 'localhost',
+      port: 5173
     }
   },
   plugins: [

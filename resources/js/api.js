@@ -7,6 +7,9 @@ import * as tus from 'tus-js-client'
 import { watch } from 'vue'
 import JSZip from 'jszip'
 
+
+
+
 // Bundling configuration for small files
 const BUNDLE_CONFIG = {
   minFileCount: 50, // Minimum number of files to trigger bundling
@@ -37,6 +40,27 @@ const shouldBundleFiles = (files) => {
 
   return shouldBundle
 }
+
+
+  export const getShareRecipients = async (id) => {
+    return await fetchWithAuth(`${apiUrl}/api/shares/${id}/recipients`, { method: 'GET' })
+  }
+
+  export const updateShareRecipients = async (id, recipients) => {
+    return await fetchWithAuth(`${apiUrl}/api/shares/${id}/recipients`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipients }),
+    })
+  }
+
+  export const resendShareRecipientEmails = async (id) => {
+    return await fetchWithAuth(`${apiUrl}/api/shares/${id}/recipients/resend`, {
+      method: 'POST',
+    })
+  }
+
+
 
 /**
  * Bundle multiple files into a single zip file

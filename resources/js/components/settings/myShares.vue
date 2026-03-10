@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose } from 'vue'
-import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
+
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -16,6 +16,17 @@ import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import { useTranslate } from '@tolgee/vue'
+import RecipientsModal from '../shares/recipients.vue'
+
+import {
+  getMyShares,
+  expireShare,
+  extendShare,
+  setDownloadLimit,
+  pruneExpiredShares,
+} from '../../api'
+
+
 
 const { t } = useTranslate()
 
@@ -32,6 +43,19 @@ onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
   loadShares()
 })
+
+const recipientsModalOpen = ref(false)
+const selectedShare = ref(null)
+
+const openRecipientsModal = (share) => {
+  selectedShare.value = share
+  recipientsModalOpen.value = true
+}
+
+
+//const removeRecipientRow = (idx) => recipientsEmails.value.splice(idx, 1)
+
+
 
 const loadShares = async () => {
   shares.value = await getMyShares(showDeletedShares.value)
@@ -239,6 +263,7 @@ defineExpose({
               <CalendarX2 />
               {{ $t('share.button.expireNow') }}
             </button>
+
             <button
               @click="handleExtendShareClick(share)"
               class="secondary"
@@ -247,6 +272,12 @@ defineExpose({
               <CalendarPlus />
               {{ $t('share.button.extend') }}
             </button>
+            
+
+            <button class="secondary" @click="openRecipientsModal(share)">
+                {{ ($t && $t('share.button.recipients')) || 'Recipients' }}
+            </button>
+
             <button
               @click="downloadShare(share)"
               class="secondary icon-only"
@@ -255,6 +286,7 @@ defineExpose({
             >
               <HardDriveDownload style="margin-right: 0" />
             </button>
+
           </td>
         </tr>
       </tbody>
@@ -266,6 +298,14 @@ defineExpose({
     <div v-else class="center-message">
       <p>{{ $t('settings.loading') }}</p>
     </div>
+
+    <RecipientsModal
+      :modelValue="recipientsModalOpen"
+      :share="selectedShare"
+      @update:modelValue="recipientsModalOpen = $event"
+    />
+
+
   </div>
 </template>
 
@@ -493,4 +533,73 @@ td {
   vertical-align: middle;
   opacity: 0.7;
 }
+
+.recipients-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+}
+
+.recipients-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recipients-modal-form {
+  width: min(900px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+  background: var(--panel-section-background-color);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.recipients-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recipients-modal-content {
+  padding: 10px 0;
+}
+
+.recipient-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.email-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+.button-bar {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.error {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: rgba(255, 0, 0, 0.08);
+}
+
+
 </style>

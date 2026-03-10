@@ -964,7 +964,8 @@
   "share": {
     "button": {
       "expireNow": "Scadere ora",
-      "extend": "Estendere"
+      "extend": "Estendere",
+      "recipients":"Ricevente"
     },
     "contains": {
       "count": "{value, plural, one {Contiene: 1 File} other {Contiene: {value} File} }"

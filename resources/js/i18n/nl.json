@@ -964,7 +964,8 @@
   "share": {
     "button": {
       "expireNow": "Nu verlopen",
-      "extend": "Verleng"
+      "extend": "Verleng",
+      "recipients": "Ontvangers beheren"
     },
     "contains": {
       "count": "{value, plural, one {Bevat: # bestand} other {Bevat: {value} bestanden}}"

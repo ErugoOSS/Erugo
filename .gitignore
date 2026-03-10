@@ -33,3 +33,5 @@ database.sqlite-journal
 database.sqlite-shm
 database.sqlite-wal
 ISSUES_TODO.md
+scripts/*
+erugo-storage/*
