@@ -687,6 +687,12 @@ class SharesController extends Controller
     }
 
     $share->download_count++;
+    
+    // Auto-expire if download limit is reached
+    if ($share->download_limit != null && $share->download_count >= $share->download_limit) {
+      $share->expires_at = \Carbon\Carbon::now();
+    }
+    
     $share->save();
     return $download;
   }

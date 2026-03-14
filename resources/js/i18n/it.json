@@ -978,6 +978,7 @@
       "password_required": "Per scaricare questa condivisione è necessario inserire la password.",
       "password_required_short": "Inserire la password"
     },
+    "download_limit_info": "Scaricato {count} su {limit} volte",
     "download_limit_reached": "Scarica il limite raggiunto",
     "download_limit_reached.message": "La condivisione che si sta cercando di scaricare ha raggiunto il limite di download. Chiedere al creatore della condivisione di aumentare il limite di download.",
     "expired": "Quota scaduta",
@@ -1002,6 +1003,8 @@
       "chunked": "Modalità di caricamento chunked",
       "direct": "Modalità di caricamento diretto"
     },
+    "download_limit_label": "Limite di download: {value} (modifica)",
+    "download_limit_unlimited": "Illimitato",
     "expiry_label": "L'azione scadrà nel {value} {unit} (modifica)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "Il tempo di scadenza inserito supera il limite massimo. L'abbiamo adattato automaticamente al periodo più lungo consentito.",

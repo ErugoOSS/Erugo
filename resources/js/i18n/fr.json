@@ -978,6 +978,7 @@
       "password_required": "Vous devez saisir le mot de passe pour télécharger ce partage.",
       "password_required_short": "Entrez le mot de passe"
     },
+    "download_limit_info": "Téléchargé {count} fois sur {limit}",
     "download_limit_reached": "Limite de téléchargement atteinte",
     "download_limit_reached.message": "Le partage que vous essayez de télécharger a atteint sa limite de téléchargement. Veuillez demander au créateur du partage d'augmenter la limite de téléchargement.",
     "expired": "Partage expiré",
@@ -1002,6 +1003,8 @@
       "chunked": "Mode de téléchargement par morceaux",
       "direct": "Mode de téléchargement direct"
     },
+    "download_limit_label": "Limite de téléchargement: {value} (modifier)",
+    "download_limit_unlimited": "Illimité",
     "expiry_label": "Le partage expirera dans {value} {unit}  (modifier)",
     "expiry_max_value": "Max {value}",
     "expiry_too_long": "Le délai d'expiration que vous avez introduit dépasse la limite maximale. Nous l'avons automatiquement adapté à la période la plus longue autorisée.",

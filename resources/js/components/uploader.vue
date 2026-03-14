@@ -5,6 +5,7 @@ import {
   FilePlus,
   FolderPlus,
   Upload,
+  Download,
   Trash,
   Copy,
   X,
@@ -89,6 +90,13 @@ const timeRemaining = computed(() => {
 const expiryValue = ref(domData().default_expiry_time)
 const expiryUnit = ref('days')
 const maxExpiryTime = ref(domData().max_expiry_time)
+
+const downloadLimit = ref(null)
+const showDownloadLimitSettings = ref(false)
+const toggleDownloadLimitSettings = () => {
+  showDownloadLimitSettings.value = !showDownloadLimitSettings.value
+}
+
 const errors = ref({
   shareName: null
 })
@@ -414,6 +422,7 @@ const doTusUpload = async (uploadId) => {
       shareDescription.value,
       recipients.value,
       calculateExpiryDate(),
+      downloadLimit.value,
       sharePassword.value,
       sharePasswordConfirm.value,
       (progress) => {
@@ -872,6 +881,21 @@ const filesByDirectory = computed(() => {
         <option value="months" v-if="canExpireInMonths">{{ $t('uploader.expiry_unit.months') }}</option>
         <option value="years" v-if="canExpireInYears">{{ $t('uploader.expiry_unit.years') }}</option>
       </select>
+    </div>
+  </div>
+  <div class="expiry-settings-container">
+    <span class="expiry-label" @click="toggleDownloadLimitSettings">
+      <Download />
+      {{ $t('uploader.download_limit_label', { value: downloadLimit || $t('uploader.download_limit_unlimited') }) }}
+    </span>
+    <div class="expiry-settings" :class="{ visible: showDownloadLimitSettings }">
+      <input 
+        type="number" 
+        v-model="downloadLimit" 
+        class="w-full" 
+        min="1" 
+        :placeholder="$t('uploader.download_limit_unlimited')" 
+      />
     </div>
   </div>
   <div class="upload-basket-details pt-2">

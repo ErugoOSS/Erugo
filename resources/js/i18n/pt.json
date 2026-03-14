@@ -949,6 +949,7 @@
       "password_required": "É necessário introduzir a palavra-passe para descarregar esta partilha.",
       "password_required_short": "Introduzir a palavra-passe"
     },
+    "download_limit_info": "Descarregado {count} de {limit} vezes",
     "download_limit_reached": "Limite de Descarregamentos Atingido",
     "download_limit_reached.message": "A partilha que está a tentar descarregar atingiu o limite de descarregamentos. Por favor peça ao criador da partilha que aumente o limite.",
     "expired": "Partilha Expirada",
@@ -973,6 +974,8 @@
       "chunked": "Modo de carregamento por blocos",
       "direct": "Modo de carregamento direto"
     },
+    "download_limit_label": "Limite de descarregamentos: {value} (alteração)",
+    "download_limit_unlimited": "Ilimitado",
     "expiry_label": "A ação expirará em {value} {unit} (alteração)",
     "expiry_max_value": "Máximo: {value}",
     "expiry_too_long": "O tempo de expiração que introduziu excede o limite máximo. Ajustámo-lo automaticamente para o período mais longo permitido.",
