@@ -116,6 +116,7 @@ const uploadBundledFiles = async (
   shareDescription,
   recipients,
   expiryDate,
+  downloadLimit,
   password,
   passwordConfirm,
   onProgress,
@@ -200,6 +201,8 @@ const uploadBundledFiles = async (
     })
 
     const apiUrl = getApiUrl()
+    const downloadLimitValue = downloadLimit ? parseInt(downloadLimit) : null
+    
     const response = await fetchWithAuth(`${apiUrl}/api/uploads/create-share-from-uploads`, {
       method: 'POST',
       headers: {
@@ -215,6 +218,7 @@ const uploadBundledFiles = async (
         uploadIds: [uploadResult.uploadId],
         filePaths: {}, // Not needed for bundles, paths are in the manifest
         expiry_date: expiryDate,
+        download_limit: downloadLimitValue,
         password: password,
         password_confirm: passwordConfirm,
         isBundle: true
@@ -1530,6 +1534,7 @@ export const uploadFilesInChunks = async (
   shareDescription,
   recipients,
   expiryDate,
+  downloadLimit,
   password,
   passwordConfirm,
   onProgress,
@@ -1547,6 +1552,7 @@ export const uploadFilesInChunks = async (
       shareDescription,
       recipients,
       expiryDate,
+      downloadLimit,
       password,
       passwordConfirm,
       onProgress,
@@ -1665,6 +1671,7 @@ export const uploadFilesInChunks = async (
   const uploadIds = results.map((r) => r.uploadId)
   const maxRetries = 5
   const baseDelayMs = 500
+  const downloadLimitValue = downloadLimit ? parseInt(downloadLimit) : null
   
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -1683,6 +1690,7 @@ export const uploadFilesInChunks = async (
           uploadIds: uploadIds,
           filePaths: filePaths,
           expiry_date: expiryDate,
+          download_limit: downloadLimitValue,
           password: password,
           password_confirm: passwordConfirm
         })

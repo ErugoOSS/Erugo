@@ -978,6 +978,7 @@
       "password_required": "Sie müssen das Passwort eingeben, um diese Freigabe herunterzuladen.",
       "password_required_short": "Passwort eingeben"
     },
+    "download_limit_info": "Bereits {count} von {limit} Mal heruntergeladen",
     "download_limit_reached": "Download-Grenze erreicht",
     "download_limit_reached.message": "Die Freigabe, die Sie herunterladen möchten, hat ihr Download-Limit erreicht. Bitten Sie den Ersteller der Freigabe, das Download-Limit zu erhöhen.",
     "expired": "Freigabe abgelaufen",
@@ -1002,6 +1003,8 @@
       "chunked": "Chunked-Loading-Modus",
       "direct": "Direkter Upload-Modus"
     },
+    "download_limit_label": "Download-Limit: {value} (Änderung)",
+    "download_limit_unlimited": "Unbegrenzt",
     "expiry_label": "Die Aktie verfällt am {value} {unit} (Änderung)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "Die von Ihnen eingegebene Verfallszeit überschreitet die Höchstgrenze. Wir haben sie automatisch auf den längsten zulässigen Zeitraum angepasst.",

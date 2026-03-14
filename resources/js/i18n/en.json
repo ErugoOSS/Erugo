@@ -999,6 +999,7 @@
       "password_required": "You must enter the password to download this share.",
       "password_required_short": "Enter password"
     },
+    "download_limit_info": "Downloaded {count} of {limit} times",
     "download_limit_reached": "Download Limit Reached",
     "download_limit_reached.message": "The share you are trying to download has reached its download limit. Please ask the share creator to increase the download limit.",
     "expired": "Share Expired",
@@ -1023,7 +1024,9 @@
       "chunked": "Chunked upload mode",
       "direct": "Direct upload mode"
     },
-    "expiry_label": "Share will expire in {value} {unit}  (change)",
+    "download_limit_label": "Download limit: {value} (change)",
+    "download_limit_unlimited": "Unlimited",
+    "expiry_label": "Share will expire in {value} {unit} (change)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "The expiry time you entered exceeds the maximum limit. We've automatically adjusted it to the longest period allowed.",
     "expiry_unit": {

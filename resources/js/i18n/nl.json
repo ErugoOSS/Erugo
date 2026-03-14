@@ -978,6 +978,7 @@
       "password_required": "Je moet het wachtwoord invoeren om deze share te downloaden.",
       "password_required_short": "Wachtwoord invoeren"
     },
+    "download_limit_info": "{count} van {limit} keer gedownload",
     "download_limit_reached": "Download limiet bereikt",
     "download_limit_reached.message": "De share die je probeert te downloaden heeft zijn downloadlimiet bereikt. Vraag de maker van de share om de downloadlimiet te verhogen.",
     "expired": "Link verlopen",
@@ -1002,6 +1003,8 @@
       "chunked": "Modus voor gebundeld laden",
       "direct": "Directe uploadmodus"
     },
+    "download_limit_label": "Downloadlimiet: {value} (verandering)",
+    "download_limit_unlimited": "Onbeperkt",
     "expiry_label": "Aandeel vervalt in {value} {unit} (verandering)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "De vervaltijd die je hebt opgegeven overschrijdt de maximumlimiet. We hebben het automatisch aangepast naar de langst toegestane periode.",

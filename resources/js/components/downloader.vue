@@ -165,13 +165,18 @@ const filesByDirectory = computed(() => {
         </div>
       </div>
       <div class="share-expires">
-        {{
-          $t('share.expires.in', {
-            days: timeUntilExpiration(share.expires_at).days,
-            hours: timeUntilExpiration(share.expires_at).hours,
-            minutes: timeUntilExpiration(share.expires_at).minutes
-          })
-        }}
+        <div>
+          {{
+            $t('share.expires.in', {
+              days: timeUntilExpiration(share.expires_at).days,
+              hours: timeUntilExpiration(share.expires_at).hours,
+              minutes: timeUntilExpiration(share.expires_at).minutes
+            })
+          }}
+        </div>
+        <div v-if="share.download_limit" class="download-limit">
+          {{ $t('share.download_limit_info', 'Downloaded {count} of {limit} times', { count: share.download_count, limit: share.download_limit }) }}
+        </div>
       </div>
       <div class="share-files-list">
         <directory-item
@@ -342,7 +347,9 @@ const filesByDirectory = computed(() => {
   background: var(--panel-item-background-color);
   padding: 10px 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   margin-top: 0!important;
 }
 </style>

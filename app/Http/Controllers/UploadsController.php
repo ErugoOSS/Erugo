@@ -81,7 +81,8 @@ class UploadsController extends Controller
       'description' => ['max:500'],
       'uploadIds' => ['required', 'array'],
       'uploadIds.*' => ['required', 'string'],
-      'expiry_date' => ['required', 'date']
+      'expiry_date' => ['required', 'date'],
+      'download_limit' => ['nullable', 'integer', 'min:1']
     ]);
 
     if ($validator->fails()) {
@@ -231,6 +232,7 @@ class UploadsController extends Controller
       'name' => $request->name,
       'description' => $request->description,
       'expires_at' => $expiryDate,
+      'download_limit' => $request->download_limit,
       'user_id' => $user->id,
       'path' => $sharePath,
       'long_id' => $longId,
