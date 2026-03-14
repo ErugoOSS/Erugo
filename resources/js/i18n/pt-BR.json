@@ -1,9 +1,461 @@
 {
-  "settings": {
-    "system": {
-      "auth_providers_description_localhost": "A configuração de autenticação externa não está disponível no localhost. Os provedores OAuth exigem um nome de domínio totalmente qualificado (FQDN) para funcionar corretamente. Aceda ao Erugo através de um domínio registado para configurar estas definições.",
-      "callback_url": "URL de chamada de retorno",
-      "callback_url_description": "Utilize o URL de retorno de chamada fornecido na configuração do seu fornecedor de identidade."
+    "Add Files":"Adicionar Arquivos",
+    "Add Folders":"Adicionar Pastas",
+    "Add Recipient":"Adicionar Destinatário",
+    "Message to share recipients (optional)":"Mensagem para os destinatários (opcional)",
+    "No files added yet":"Nenhum arquivo adicionado ainda",
+    "No recipients":"Nenhum destinatário",
+    "Powered by":"Desenvolvido por",
+    "Reverse Share":"Compartilhamento Reverso",
+    "Share Name":"Nome do Compartilhamento",
+    "Share URL":"URL do Compartilhamento",
+    "We'll provide you with a link instead":{
+        "":"Forneceremos um link em vez disso"
+    },
+    "auth":{
+        "back_to_login":"Voltar para o login",
+        "confirm_end_guest_session":"Tem certeza de que deseja encerrar esta sessão? Como você é um usuário convidado, não poderá fazer upload de arquivos adicionais após encerrar esta sessão.",
+        "confirm_password":"Confirmar Senha",
+        "email":"E-mail",
+        "end_guest_session":"Encerrar sessão de convidado",
+        "failed_to_accept_invite":"Este código de convite não é válido. Ele pode ter expirado, já ter sido usado ou foi revogado pelo remetente.",
+        "failed_to_reset_password":"Falha ao redefinir a senha",
+        "failed_to_send_password_reset_email":"Falha ao enviar e-mail de redefinição de senha",
+        "forgot_password":"Esqueceu a senha",
+        "forgot_password_create_password":"Criar senha",
+        "forgot_password_create_password_description":"Por favor, insira sua nova senha. A senha e a confirmação de senha devem ser iguais.",
+        "guest_warning":"Os arquivos que você enviar usando o formulário à esquerda serão compartilhados diretamente com a pessoa que o convidou.",
+        "invalid_email_or_password":"Falha no login",
+        "invite_accepted":"Convite de compartilhamento reverso aceito. Agora você pode fazer upload de arquivos.",
+        "login":"Entrar",
+        "login_successful":"Login realizado com sucesso",
+        "login_with":"Entrar com",
+        "logout":"Sair",
+        "or":"Ou",
+        "password":"Senha",
+        "password_reset_email_sent":"E-mail de redefinição de senha enviado",
+        "password_reset_successfully":"Senha redefinida com sucesso",
+        "password_set":"Senha definida com sucesso!",
+        "password_set_description":"Sua senha foi definida. Você será conectado em um momento.",
+        "passwords_do_not_match":"As senhas não coincidem",
+        "please_enter_email":"Por favor, insira um endereço de e-mail",
+        "please_enter_email_and_password":"Por favor, insira e-mail e senha",
+        "please_enter_email_to_reset_password":"Por favor, insira seu e-mail para redefinir sua senha",
+        "please_enter_password_and_confirm_password":"Por favor, insira uma senha e confirme a senha",
+        "request_reset":"Solicitar Redefinição",
+        "save_new_password":"Salvar nova senha",
+        "welcome":"Bem-vindo"
+    },
+    "button":{
+        "reverse_share_invite":"Criar uma solicitação de compartilhamento reverso",
+        "reverse_share_invite_send":"Enviar Solicitação",
+        "share":{
+            "password_protect":"Proteger com senha"
+        }
+    },
+    "confirm_delete_user":"Tem certeza de que deseja excluir este usuário?",
+    "download":{
+        "files":"{value, plural, one {Baixar # arquivo} other {Baixar {value} arquivos}}"
+    },
+    "email":"E-mail",
+    "full_name":"Nome Completo",
+    "guest":{
+        "upload_success":"Upload Concluído!",
+        "upload_success_message":"A pessoa que solicitou esses arquivos receberá um e-mail com um link para download."
+    },
+    "invite":{
+        "labels":{
+            "message":"Mensagem para o Destinatário"
+        },
+        "message":"Mensagem (opcional)"
+    },
+    "limit":"Limite",
+    "message":{
+        "from":"Mensagem de {name}"
+    },
+    "processing_uploaded_files":"Processando arquivos enviados",
+    "reverse_invite_send":{
+        "error":"Não foi possível enviar o convite de compartilhamento reverso",
+        "success":"Convite de compartilhamento reverso enviado!"
+    },
+    "settings":{
+        "account":{
+            "change_password":"Alterar minha senha",
+            "create_link":"Link",
+            "email":"Meu Endereço de E-mail",
+            "linked_accounts_description":"Vincule sua conta a um provedor externo para facilitar o login. Após vincular, você pode fazer login diretamente selecionando o botão do provedor na tela de login.",
+            "myProfile_description":"Atualize seu endereço de e-mail ou altere seu nome. Você pode alterar sua senha clicando no botão \"Alterar minha senha\" e seguindo as instruções.",
+            "name":"Meu Nome Completo",
+            "unlink":"Desvincular"
+        },
+        "authProvidersSavedSuccessfully":"Provedores de autenticação salvos com sucesso",
+        "branding":{
+            "background_images":"Imagens de Fundo",
+            "background_images_description":"Faça upload de imagens de fundo personalizadas para substituir os padrões do Unsplash. As imagens alternam aleatoriamente no intervalo que você definir.",
+            "background_slideshow_speed":"Intervalo de Troca de Imagem",
+            "background_slideshow_speed_1_day":"Um dia",
+            "background_slideshow_speed_1_hour":"1 Hora",
+            "background_slideshow_speed_2_hours":"2 Horas",
+            "background_slideshow_speed_3_minutes":"3 Minutos",
+            "background_slideshow_speed_5_minutes":"5 Minutos",
+            "background_slideshow_speed_description":"Altere a frequência com que a imagem de fundo muda aleatoriamente (isso só tem efeito se você tiver várias imagens de fundo). Defina como 0 para desativar o slideshow e exibir uma imagem aleatória em cada atualização de página.",
+            "background_slideshow_speed_off":"Desativar",
+            "delete":"Excluir",
+            "delete_theme":"Excluir Tema",
+            "delete_theme_description":"Exclua o tema selecionado. Isso o removerá da lista de temas e você não poderá mais usá-lo. Não é possível excluir o tema ativo ou temas incluídos.",
+            "download":"Baixar",
+            "download_theme":"Baixar Tema",
+            "download_theme_description":"Baixe o tema selecionado como um arquivo JSON. Isso pode ser usado para criar um novo tema ou modificar um existente.",
+            "in_pixels":"Em pixels",
+            "in_seconds":"segundos",
+            "install_custom_theme":"Instalar um Tema Personalizado",
+            "install_custom_theme_description":"Instale um tema personalizado a partir de um arquivo JSON. Isso pode ser um tema que você modificou ou criou ou um que você baixou.",
+            "install_custom_theme_description_2":"Se você baixar um tema da web, certifique-se de confiar na fonte e verificar o tema quanto a códigos maliciosos antes de instalá-lo.",
+            "install_theme":"Instalar Tema",
+            "logo":"Logotipo",
+            "logo_description":"Exiba o logotipo da sua empresa no formato PNG no canto superior esquerdo. Defina a largura desejada em pixels - a altura será ajustada automaticamente para manter a proporção. Use uma imagem de origem com largura pelo menos igual à largura de exibição para garantir qualidade.",
+            "logo_image":"Imagem do Logotipo",
+            "logo_width":"Largura do Logotipo",
+            "other_ui_settings":"Outros",
+            "select_theme":"Selecionar Tema",
+            "select_theme_description":"Selecione entre uma variedade de temas prontos ou um que você instalou.",
+            "settings_saved":"Configurações de marca salvas com sucesso",
+            "show_powered_by":"Exibir Desenvolvido por Erugo",
+            "show_powered_by_description":"Mostrar ou ocultar o texto \"Desenvolvido por Erugo\" na parte inferior da página. Esse texto permite que o Erugo seja descoberto pelos usuários e nos ajuda a crescer, mas você pode ocultá-lo se desejar.",
+            "theme":"Temas",
+            "theme_description":"Selecione entre uma variedade de temas prontos ou um que você instalou.",
+            "theme_file":"Arquivo de Tema",
+            "theme_name":"Nome do Tema",
+            "upload_background_image":"Fazer Upload de Imagem de Fundo",
+            "use_my_backgrounds":"Usar Meus Fundos",
+            "use_my_backgrounds_description":"Use os fundos que você enviou. Se não estiver marcado, os fundos do Unsplash serão usados."
+        },
+        "button":{
+            "branding":{
+                "save":"Salvar Configurações de Marca"
+            },
+            "emailTemplates":{
+                "save":"Salvar Modelos de E-mail"
+            },
+            "myProfile":{
+                "save":"Salvar alterações de perfil"
+            },
+            "myShares":{
+                "create":"Criar Compartilhamento",
+                "pruneExpired":"Excluir compartilhamentos expirados"
+            },
+            "system":{
+                "save":"Salvar Configurações do Sistema"
+            },
+            "users":{
+                "add":"Adicionar Usuário"
+            }
+        },
+        "close":"Fechar",
+        "confirm":{
+            "pruneExpiredShares":"Tem certeza de que deseja excluir seus compartilhamentos expirados? Isso não pode ser desfeito."
+        },
+        "description":{
+            "branding":"Personalize a interface do usuário da sua instância do Erugo e adicione sua própria marca.",
+            "emailTemplates":"Gerenciar modelos de e-mail",
+            "myProfile":"Gerenciar sua conta.",
+            "myShares":"Gerenciar Seus Compartilhamentos.",
+            "system":"Gerenciar o comportamento da sua instância do Erugo.",
+            "users":"Gerenciar Seus Usuários."
+        },
+        "emailTemplates":{
+            "accountCreated":"Conta Criada",
+            "accountCreatedDescription":"Enviado para novos usuários quando um administrador cria sua conta. Contém um link que permite ao usuário definir sua senha.",
+            "baseTemplate":"Modelo Base",
+            "baseTemplateDescription":"Controla o modelo base do qual todos os outros modelos herdam.",
+            "error":"Falha ao carregar modelos de e-mail",
+            "error_loading_templates":"Falha ao carregar modelos",
+            "error_saving_templates":"Falha ao salvar modelos",
+            "passwordReset":"Redefinição de Senha",
+            "sections":{
+                "action_text":"Texto do botão de ação",
+                "action_url":"URL de Ação",
+                "content":"Conteúdo da mensagem",
+                "fallbackText":"Texto descritivo do link alternativo",
+                "fallbackTextDescription":"Para clientes de e-mail que não conseguem exibir botões de ação corretamente, incluímos um link alternativo na parte inferior do e-mail. Use esta opção para personalizar o texto que aparece acima desse link alternativo, ajudando os destinatários a entender seu propósito.",
+                "header":"Conteúdo do cabeçalho",
+                "subject":"Assunto"
+            },
+            "success":"Modelos salvos com sucesso"
+        },
+        "error":{
+            "pruneExpiredShares":"Falha ao agendar a exclusão de compartilhamentos expirados!",
+            "shareExpired":"Falha ao expirar o compartilhamento",
+            "shareExtended":"Falha ao estender o compartilhamento"
+        },
+        "help":{
+            "auth_provider":{
+                "title":"Informações do provedor de autenticação"
+            },
+            "downloadLimit":{
+                "description":"Você pode definir o limite de download para qualquer compartilhamento clicando no número à direita e digitando o novo limite. Limpe a caixa para remover o limite.",
+                "description2":"As alterações serão salvas automaticamente quando você clicar fora da caixa.",
+                "title":"Ajuda com Limite de Download"
+            }
+        },
+        "invite":{
+            "message":"Mensagem (opcional)"
+        },
+        "loading":"Carregando compartilhamentos...",
+        "noShares":"Você não tem compartilhamentos. Por que não criar um?",
+        "provider":{
+            "edit":"Editar",
+            "view":"Visualizar"
+        },
+        "reverse_invite":{
+            "description":"Solicite arquivos de um contato inserindo os detalhes dele abaixo. Eles receberão um link que concede acesso único para fazer upload de arquivos diretamente para você. Após o upload dos arquivos, você receberá uma notificação por e-mail."
+        },
+        "settingsSavedSuccessfully":"Configurações salvas com sucesso",
+        "share":{
+            "password":"Senha do compartilhamento",
+            "password_confirm":"Confirmar senha do compartilhamento",
+            "password_protect_description":"Crie uma senha para seu compartilhamento. Qualquer pessoa que baixar este compartilhamento precisará dessa senha para acessá-lo. Observe: Após a criação, essa senha será criptografada e não poderemos recuperá-la para você. Certifique-se de salvá-la em um local seguro.",
+            "remove_password":"Remover Senha"
+        },
+        "success":{
+            "pruneExpiredShares":"Os compartilhamentos expirados foram agendados para exclusão e serão processados em segundo plano.",
+            "shareExpired":"Compartilhamento expirado",
+            "shareExtended":"Compartilhamento estendido"
+        },
+        "system":{
+            "allow_chunked_uploads":"Permitir modo de upload fragmentado",
+            "allow_chunked_uploads_description":"O modo de upload fragmentado divide os arquivos em segmentos menores que são transferidos sequencialmente. Embora um pouco mais lento que o upload direto para arquivos menores, esse método oferece maior estabilidade e confiabilidade ao transferir arquivos grandes. Uploads fragmentados suportam rastreamento de progresso e permitem que os usuários pausem e retomem transferências manualmente, tornando-o ideal para arquivos acima de 100MB ou em conexões de rede instáveis.",
+            "allow_direct_uploads":"Permitir modo de upload direto",
+            "allow_direct_uploads_description":"O modo de upload direto transmite arquivos em uma única solicitação ininterrupta. Embora esse método ofereça as velocidades de transferência mais rápidas para a maioria dos arquivos, arquivos extremamente grandes podem causar problemas de estabilidade ou timeouts. Para desempenho ideal com arquivos acima de 100MB, uploads fragmentados podem ser uma melhor opção.",
+            "allow_reverse_shares":"Permitir compartilhamentos reversos",
+            "allow_reverse_shares_description":"Determina se seus usuários registrados devem ter permissão para enviar solicitações de compartilhamento reverso. Essas solicitações fornecem a indivíduos externos um passe de upload único, permitindo que eles entreguem arquivos diretamente ao usuário registrado que iniciou a solicitação.",
+            "application_name":"Nome do Aplicativo",
+            "application_name_description":"Personalize o nome exibido do seu aplicativo que aparece em barras de título, diálogos e outros elementos da interface. Isso ajuda a manter uma marca consistente em toda a experiência do usuário.",
+            "application_url":"URL do Aplicativo",
+            "application_url_description":"A URL base do seu aplicativo. Isso é usado para criar links clicáveis em e-mails de notificação, permitindo que os usuários naveguem diretamente para páginas específicas dentro do aplicativo.",
+            "auth":"Autenticação",
+            "auth_provider_config_base_url":"URL Base",
+            "auth_provider_config_client_id":"ID do Cliente",
+            "auth_provider_config_client_secret":"Segredo do Cliente",
+            "auth_provider_config_tenant":"ID do Inquilino",
+            "auth_provider_enabled":"Ativar",
+            "auth_provider_name":"Nome do Provedor",
+            "auth_provider_type":"Tipo de Provedor",
+            "auth_providers":"Provedores de autenticação",
+            "auth_providers_description":"Configure os provedores de autenticação pelos quais você deseja que seus usuários possam se autenticar.",
+            "auth_providers_description_localhost":"A configuração de autenticação externa não está disponível em localhost. Provedores OAuth exigem um nome de domínio totalmente qualificado (FQDN) para funcionar corretamente. Acesse o Erugo por meio de um domínio registrado para configurar essas configurações.",
+            "callback_url":"URL de Retorno",
+            "callback_url_description":"Use a URL de retorno fornecida na configuração do seu provedor de identidade.",
+            "chunked":"Fragmentado",
+            "chunked_uploads_disabled_but_default":"Você definiu o modo de upload padrão como fragmentado, mas os uploads fragmentados estão desativados!",
+            "clean_files_after":"Limpar Arquivos Após",
+            "clean_files_after_description":"Quanto tempo após a expiração de um compartilhamento os arquivos são excluídos do sistema.",
+            "days":"Dias",
+            "default_expiry_time":"Tempo de Expiração Padrão",
+            "default_language":"Idioma Padrão",
+            "default_language_description":"Defina o idioma principal que será usado em toda a interface do aplicativo para todos os usuários por padrão. Usuários individuais podem substituir essa configuração com suas preferências pessoais.",
+            "default_upload_mode":"Modo de Upload Padrão",
+            "default_upload_mode_description":"Defina qual modo deve ser selecionado por padrão. Os usuários podem alterar isso ao criar um compartilhamento se você tiver mais de um método ativado.",
+            "delete_auth_provider":"Excluir este provedor",
+            "direct":"Direto",
+            "direct_uploads_disabled_but_default":"Você definiu o modo de upload padrão como direto, mas os uploads diretos estão desativados!",
+            "disabled":"Desativado",
+            "emails":"Notificações",
+            "enable_share_deleted_emails":"Ativar E-mails de Compartilhamento Excluído",
+            "enable_share_deletion_warning_emails":"Ativar E-mails de Aviso de Exclusão de Compartilhamento",
+            "enable_share_downloaded_emails":"Ativar E-mails de Compartilhamento Baixado",
+            "enable_share_expired_warning_emails":"Ativar E-mails de Compartilhamento Expirado",
+            "enable_share_expiry_warning_emails":"Ativar E-mails de Aviso de Expiração de Compartilhamento",
+            "enabled":"Ativado",
+            "general":"Geral",
+            "languages":{
+                "dutch":"Holandês",
+                "english":"Inglês",
+                "french":"Francês",
+                "german":"Alemão",
+                "italian":"Italiano",
+                "portuguese":"Português"
+            },
+            "login_message":"Mensagem de Login",
+            "login_message_description":"Adicione uma mensagem ou anúncio personalizado que será exibido na tela de login. Isso pode ser usado para mensagens de boas-vindas, notificações importantes ou anúncios temporários.",
+            "max_expiry_time":"Tempo Máximo de Expiração",
+            "max_expiry_time_description":"Defina o número máximo de dias que um usuário pode selecionar para a expiração do compartilhamento ao criá-lo. Deixe o valor vazio para permitir tempo de expiração ilimitado.",
+            "max_share_size":"Tamanho Máximo do Compartilhamento",
+            "max_share_size_description":"Defina o tamanho máximo de um compartilhamento que um usuário pode criar. O valor está em megabytes ou gigabytes.",
+            "provider_trust_warning":"Aviso: Confiança no Provedor de Autenticação",
+            "provider_trust_warning_description":"Certifique-se de configurar e ativar apenas provedores de autenticação em que você confia. Provedores de autenticação têm privilégios de acesso elevados ao seu aplicativo e dados do usuário. Adicionar provedores não confiáveis ou comprometidos pode levar a acesso não autorizado, violações de dados ou apropriação de contas.",
+            "reverse_shares":"Compartilhamentos Reversos",
+            "select_auth_provider":"Selecionar um provedor de autenticação",
+            "share_deleted_emails":"E-mails de \"Compartilhamento excluído\"",
+            "share_deleted_emails_description":"Notifique os usuários quando seus compartilhamentos forem permanentemente excluídos do sistema. Isso confirma a conclusão do ciclo de vida do conteúdo para fins de segurança e conformidade.",
+            "share_deletion_warning_emails":"E-mails de aviso de \"Exclusão de compartilhamento\"",
+            "share_deletion_warning_emails_description":"Forneça aviso prévio aos usuários quando seus compartilhamentos expirados estão agendados para exclusão permanente. Isso lhes dá uma última oportunidade para salvar conteúdo importante.",
+            "share_downloaded_emails":"E-mails de \"Compartilhamento baixado\"",
+            "share_downloaded_emails_description":"Notifique os proprietários de compartilhamentos quando seu conteúdo compartilhado é baixado pela primeira vez. Isso ajuda os usuários a rastrear quando os destinatários acessam seus arquivos compartilhados.",
+            "share_expired_warning_emails":"E-mails de aviso de \"Compartilhamento expirado\"",
+            "share_expired_warning_emails_description":"Alerte os usuários quando seus compartilhamentos atingirem a data de expiração e não estiverem mais acessíveis aos destinatários. Ajuda os usuários a manterem a consciência do status de seus compartilhamentos.",
+            "share_expiry_warning_emails":"E-mails de aviso de \"Expiração de compartilhamento\"",
+            "share_expiry_warning_emails_description":"Envie notificações proativas aos usuários quando seus compartilhamentos estiverem próximos da expiração. Isso lhes dá a oportunidade de estender o acesso, se necessário.",
+            "shares":"Compartilhamentos",
+            "show_deleted_shares":"Exibir compartilhamentos excluídos",
+            "show_language_selector":"Exibir Seletor de Idioma",
+            "show_language_selector_description":"Alterne a visibilidade do menu suspenso de seleção de idioma no canto superior direito do aplicativo. Quando ativado, os usuários podem alternar rapidamente entre os idiomas de interface disponíveis.",
+            "smtp":"SMTP",
+            "smtp_host":"Host SMTP",
+            "smtp_host_description":"O endereço do servidor para seu serviço de e-mail de saída. Isso é usado para enviar notificações e outros e-mails do sistema para os usuários.",
+            "smtp_password":"Senha SMTP",
+            "smtp_password_description":"A senha usada para autenticar com seu servidor SMTP. Essa credencial permite que seu aplicativo envie e-mails por meio do seu provedor de serviços de e-mail.",
+            "smtp_port":"Porta SMTP",
+            "smtp_port_description":"O número da porta usada para conectar ao seu servidor SMTP. Portas comuns incluem 25 (padrão), 465 (SSL) e 587 (TLS).",
+            "smtp_sender_address":"Endereço do Remetente SMTP",
+            "smtp_sender_address_description":"O endereço de e-mail que será usado como remetente para todos os e-mails do sistema. Este endereço deve ser válido e configurado corretamente com seu serviço SMTP.",
+            "smtp_sender_name":"Nome do Remetente SMTP",
+            "smtp_sender_name_description":"O nome de exibição que aparecerá como remetente dos e-mails do sistema. Os usuários verão esse nome em seu cliente de e-mail (por exemplo, \"Nome do Seu Aplicativo\" ou \"Suporte do Seu Aplicativo\").",
+            "smtp_username":"Nome de Usuário SMTP",
+            "smtp_username_description":"O nome de usuário necessário para autenticar com seu servidor SMTP. Geralmente é o endereço de e-mail ou o nome da conta associado ao seu serviço de e-mail.",
+            "upload_modes":"Modos de Upload",
+            "your_auth_providers":"Seus Provedores de Autenticação"
+        },
+        "system_auth_provider_info_link":"Sobre {name}",
+        "table":{
+            "actions":"Ações",
+            "dates":"Datas",
+            "downloads":"Downloads",
+            "files":"Arquivos",
+            "name":"Nome"
+        },
+        "title":{
+            "branding":"Marca e Interface",
+            "emailTemplates":"Modelos de E-mail",
+            "linked_accounts":"Contas Vinculadas",
+            "manage":"Gerenciar",
+            "myProfile":"Minha Conta",
+            "myShares":"Meus Compartilhamentos",
+            "reverse_invite":"Criar solicitação de compartilhamento reverso",
+            "share":{
+                "password_protect":"Proteger compartilhamento com senha"
+            },
+            "system":"Configurações do Sistema",
+            "users":"Usuários",
+            "users.edit":"Editar {name}"
+        },
+        "users":{
+            "account":"Tipo de Conta",
+            "actions":"Ações",
+            "active":"Ativo",
+            "add":"Adicionar Usuário",
+            "add_user_description":"Enviaremos um e-mail ao usuário com um link para definir sua senha.",
+            "admin":"Administrador",
+            "admin_help_text":"Tornar o usuário um administrador.",
+            "admin_help_text_2":"O usuário terá os mesmos privilégios que você.",
+            "cannot_delete_yourself":"Você não pode excluir a si mesmo",
+            "close":"Cancelar",
+            "created":"Criado",
+            "current_password":"Senha Atual",
+            "current_password_required":"A senha atual é obrigatória",
+            "delete":"Excluir",
+            "edit":"Editar",
+            "edit_my_profile":"Editar Meu Perfil",
+            "email":"E-mail",
+            "failed_to_create_user":"Falha ao criar usuário",
+            "failed_to_delete_user":"Falha ao excluir usuário",
+            "failed_to_update_user":"Falha ao atualizar usuário",
+            "id":"ID",
+            "leave_blank_to_keep_same_password":"Deixe em branco para manter a mesma senha.",
+            "link_provider_confirm":"Deseja realmente vincular sua conta a este provedor?",
+            "linked":"Conta Vinculada",
+            "name":"Nome",
+            "not_linked":"Conta Não Vinculada",
+            "password":"Nova Senha",
+            "password_confirmation":"Confirmar Nova Senha",
+            "password_confirmation_mismatch":"A senha e a confirmação de senha devem ser iguais",
+            "password_min_length":"A senha deve ter pelo menos {length} caracteres.",
+            "password_required":"A senha é obrigatória",
+            "password_update_failed":"Falha ao atualizar a senha",
+            "password_updated":"Senha atualizada",
+            "profile_errors":"Por favor, verifique suas entradas",
+            "profile_update_failed":"Falha ao atualizar seu perfil",
+            "profile_updated":"Seu perfil foi atualizado",
+            "provider_unlink_failed":"Falha ao desvincular o provedor da sua conta",
+            "provider_unlinked":"O provedor foi desvinculado da sua conta",
+            "save_changes":"Salvar Alterações",
+            "send_invite":"Enviar Solicitação",
+            "unlink_provider_confirm":"Deseja realmente desvincular sua conta deste provedor?",
+            "update_password":"Atualizar Senha",
+            "user":"Usuário",
+            "user_created_successfully":"Usuário criado com sucesso",
+            "user_deleted_successfully":"Usuário excluído com sucesso",
+            "user_updated_successfully":"Usuário atualizado com sucesso",
+            "you":"Você"
+        }
+    },
+    "setup":{
+        "create_admin_account":"Criar Conta de Administrador",
+        "first_user":{
+            "email":"E-mail",
+            "name":"Nome Completo",
+            "password":"Senha",
+            "password_confirmation":"Confirmar Senha"
+        },
+        "intro":"Obrigado por instalar o Erugo! Crie seu primeiro usuário administrador para começar."
+    },
+    "share":{
+        "button":{
+            "expireNow":"Expirar Agora",
+            "extend":"Estender"
+        },
+        "contains":{
+            "count":"{value, plural, one {Contém: # arquivo} other {Contém: {value} arquivos}}"
+        },
+        "created":"Criado",
+        "data_loading":"Carregando...",
+        "deleted":"Excluído",
+        "deletes":"Exclusões",
+        "download":{
+            "invalid_password":"A senha do compartilhamento é inválida",
+            "password_required":"Você deve inserir a senha para baixar este compartilhamento.",
+            "password_required_short":"Inserir senha"
+        },
+        "download_limit_reached":"Limite de Download Atingido",
+        "download_limit_reached.message":"O compartilhamento que você está tentando baixar atingiu seu limite de download. Peça ao criador do compartilhamento para aumentar o limite de download.",
+        "expired":"Compartilhamento Expirado",
+        "expired.message Ditto":"O compartilhamento que você está procurando não foi encontrado. Talvez você precise fazer login para vê-lo.",
+        "expires":"Expira",
+        "expires.in":"Expira em {days} {days, plural, one {dia} other {dias}}, {hours} {hours, plural, one {hora} other {horas}}, {minutes} {minutes, plural, one {minuto} other {minutos}}",
+        "files":{
+            "count":"{value, plural, one {# arquivo} other {# arquivos}}",
+            "including":"incluindo:"
+        },
+        "not_found":"O compartilhamento que você está procurando não foi encontrado. Talvez você precise fazer login para vê-lo.",
+        "passwordNotProtected":"Aberto",
+        "passwordProtected":"Protegido por senha"
+    },
+    "total_size":"Tamanho Total",
+    "upload":{
+        "files":"{value, plural, one {Enviar # arquivo} other {Enviar # arquivos}}",
+        "upload_mode_not_supported":"Nenhum modo de upload válido está selecionado! Não sabemos o que sugerir porque isso não deveria ser possível."
+    },
+    "uploader":{
+        "current_mode":{
+            "chunked":"Modo de upload fragmentado",
+            "direct":"Modo de upload direto"
+        },
+        "expiry_label":"O compartilhamento expirará em {value} {unit} (alterar)",
+        "expiry_max_value":"Máx: {value}",
+        "expiry_too_long":"O tempo de expiração inserido excede o limite máximo. Ajustamos automaticamente para o período mais longo permitido.",
+        "expiry_unit":{
+            "days":"Dia(s)",
+            "months":"Mês(es)",
+            "weeks":"Semana(s)",
+            "years":"Ano(s)"
+        },
+        "guest_share_created":"Obrigado! Seus arquivos foram enviados com sucesso. Em alguns momentos, você será desconectado.",
+        "password_confirmation_required":"Confirmação de senha obrigatória",
+        "password_mismatch":"As senhas não coincidem",
+        "password_required":"A senha é obrigatória para proteger o compartilhamento",
+        "upload_mode_swapped":"Modo de upload alterado para {value}"
+    },
+    "uploading":{
+        "files":"{value, plural, one {Enviando # arquivo} other {Enviando # arquivos}}"
     }
-  }
 }
