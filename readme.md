@@ -10,9 +10,17 @@ Erugo is a powerful, self-hosted file-sharing platform that puts you in **comple
 
 ### Why Self-Host?
 
-- **Your Data, Your Rules** — Files stay on your infrastructure. No third-party access, no data mining, no surprises.
-- **Deploy Anywhere** — Run on your own server, VPS, or even a Raspberry Pi. Docker makes setup a breeze.
-- **Open Source Forever** — MIT licensed. Inspect the code, contribute features, or fork it for your own needs.
+#### Your Data, Your Rules
+
+Files stay on your infrastructure. No third-party access, no data mining, no surprises.
+
+#### Deploy Anywhere
+
+Run on your own server, VPS, or even a Raspberry Pi. Docker makes setup a breeze.
+
+#### Open Source Forever
+
+MIT licensed. Inspect the code, contribute features, or fork it for your own needs.
 
 ### Support Erugo's Development
 
