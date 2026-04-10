@@ -1,6 +1,8 @@
 <script setup>
-import { ref, defineProps, onMounted, nextTick } from 'vue'
+import { ref, defineProps, onMounted, nextTick, watch } from 'vue'
 import { CircleMinus } from 'lucide-vue-next'
+import { searchRecipientHistories } from '../api'
+import debounce from '../debounce'
 const props = defineProps({
   recipient: {
     type: Object,
@@ -12,6 +14,37 @@ const isPopoverOpen = ref(false)
 const recipientRef = ref(null)
 const recipientPopoverRef = ref(null)
 
+const recipientSuggestions = ref([])
+const recipientSuggestionsOpen = ref(false)
+
+const closeRecipientSuggestions = () => {
+  recipientSuggestionsOpen.value = false
+  recipientSuggestions.value = []
+}
+
+const getRecipientQuery = () => {
+  const email = (props.recipient.email || '').trim()
+  const name = (props.recipient.name || '').trim()
+  if (email.length >= 2) return email
+  if (name.length >= 2) return name
+  return ''
+}
+
+const loadRecipientSuggestions = debounce(async () => {
+  const q = getRecipientQuery()
+  if (!q) {
+    closeRecipientSuggestions()
+    return
+  }
+  try {
+    const items = await searchRecipientHistories(q, 10)
+    recipientSuggestions.value = Array.isArray(items) ? items : []
+    recipientSuggestionsOpen.value = recipientSuggestions.value.length > 0
+  } catch (e) {
+    closeRecipientSuggestions()
+  }
+}, 200)
+
 onMounted(() => {
   setTimeout(() => {
     if (props.recipient.showPopover) {
@@ -22,6 +55,7 @@ onMounted(() => {
       if (!recipientPopoverRef.value) return
       if (!recipientPopoverRef.value.contains(event.target) && !recipientRef.value.contains(event.target)) {
         isPopoverOpen.value = false
+        closeRecipientSuggestions()
         //is recipient email or name input empty?
         if (props.recipient.email === null || props.recipient.name === null || props.recipient.email === '' || props.recipient.name === '') {
           emit('remove', props.recipient)
@@ -45,6 +79,9 @@ const togglePopover = () => {
   recipientPopover.style.left = `${offset.left}px`
   setTimeout(() => {
     isPopoverOpen.value = !isPopoverOpen.value
+    if (!isPopoverOpen.value) {
+      closeRecipientSuggestions()
+    }
   }, 10)
 
   //find the first input and focus it
@@ -60,6 +97,20 @@ const moveFocusToEmail = () => {
     emailInput.value.focus()
   }
 }
+
+const handleRecipientSuggestionClick = (item) => {
+  if (!item) return
+  props.recipient.email = item.email || ''
+  if (item.name) {
+    props.recipient.name = item.name
+  }
+  closeRecipientSuggestions()
+  nextTick(() => {
+    if (emailInput.value) {
+      emailInput.value.focus()
+    }
+  })
+}
 const removeRecipient = () => {
   const confirm = window.confirm('Are you sure you want to remove this recipient?')
   if (confirm) {
@@ -71,6 +122,17 @@ const emit = defineEmits(['remove'])
 defineExpose({
   togglePopover
 })
+
+watch(
+  () => [props.recipient.email, props.recipient.name, isPopoverOpen.value],
+  () => {
+    if (!isPopoverOpen.value) {
+      closeRecipientSuggestions()
+      return
+    }
+    loadRecipientSuggestions()
+  }
+)
 </script>
 <template>
   <div class="recipient" @click="togglePopover" ref="recipientRef">
@@ -81,7 +143,27 @@ defineExpose({
       <div class="recipient-popover-content">
         <div>
           <input type="text" v-model="recipient.name" :placeholder="$t('full_name')" @keyup.enter="moveFocusToEmail" />
-          <input type="text" v-model="recipient.email" :placeholder="$t('email')" ref="emailInput" @keyup.enter="togglePopover" />
+          <input
+            type="text"
+            v-model="recipient.email"
+            :placeholder="$t('email')"
+            ref="emailInput"
+            @keyup.enter="togglePopover"
+            @blur="() => setTimeout(() => closeRecipientSuggestions(), 100)"
+          />
+          <div v-if="recipientSuggestionsOpen" class="recipient-suggestions">
+            <button
+              v-for="(item, idx) in recipientSuggestions"
+              :key="`${item.email}-${idx}`"
+              type="button"
+              class="recipient-suggestion"
+              @mousedown.prevent
+              @click="handleRecipientSuggestionClick(item)"
+            >
+              <span class="recipient-name" v-if="item.name">{{ item.name }}</span>
+              <span class="recipient-email">{{ item.email }}</span>
+            </button>
+          </div>
         </div>
         <div class="button-container">
           <div class="button-outside-label">
@@ -197,6 +279,34 @@ defineExpose({
     &:focus {
       outline: none;
     }
+  }
+
+  .recipient-suggestions {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--panel-background-color);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  }
+
+  .recipient-suggestion {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .recipient-name {
+    font-weight: 600;
+  }
+
+  .recipient-email {
+    opacity: 0.85;
   }
 }
 </style>

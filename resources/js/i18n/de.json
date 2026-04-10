@@ -14,10 +14,10 @@
   "Reverse Share Invite": "Reverse Share Invite",
   "Share Created": "Teilen Erstellt",
   "Share Deleted Warning": "Gelöschte Warnung teilen",
-  "Share Deletion Warning": "Warnung vor der Löschung von Aktien",
+  "Share Deletion Warning": "Warnung vor der Löschung von Shares",
   "Share Downloaded": "Heruntergeladene Freigabe",
   "Share Expired Warning": "Anteil Abgelaufene Warnung",
-  "Share Expiry Warning": "Warnung vor dem Verfall von Aktien",
+  "Share Expiry Warning": "Warnung vor dem Verfall von Shares",
   "Share Name": "Name der Freigabe",
   "Share URL": "URL teilen",
   "We'll provide you with a link instead": {
@@ -435,7 +435,7 @@
     "allShares": {
       "allUsers": "Alle Benutzer",
       "filterByUser": "Filter nach Benutzer",
-      "noShares": "Es gibt keine Aktien zu zeigen",
+      "noShares": "Es gibt keine Shares zu zeigen",
       "owner": "Eigentümer"
     },
     "authProvidersSavedSuccessfully": "Auth-Provider erfolgreich gespeichert",
@@ -536,6 +536,7 @@
       "emailTemplates": "Verwalten von E-Mail-Vorlagen",
       "myProfile": "Verwalten Sie Ihr Konto.",
       "myShares": "Verwalten Sie Ihre geteilten Dateien.",
+      "recipientHistory": "Verwalten Sie Ihre gespeicherten Empfänger",
       "stats": "Ihr Erugo-System auf einen Blick",
       "system": "Verwalten Sie das Verhalten Ihrer Erugo-Instanz.",
       "users": "Verwalten Sie Ihre Benutzer."
@@ -607,7 +608,7 @@
         "downloads_in_period": "Downloads ({days} Tage)",
         "time_period": "Zeitspanne:",
         "title": "Aktivität herunterladen",
-        "top_shares": "Meist heruntergeladene Aktien",
+        "top_shares": "Meist heruntergeladene Shares",
         "unique_downloaders": "Einzigartige Downloader"
       },
       "error_loading": "Systemstatistiken konnten nicht geladen werden",
@@ -637,11 +638,11 @@
         "file_types_title": "Dateityp Verteilung",
         "guest_users_description": "Benutzer, die über umgekehrte Einladungen zur gemeinsamen Nutzung erstellt wurden.",
         "guest_users_title": "Gast-Benutzer",
-        "shares_description": "Übersicht über alle Aktien im System, einschließlich ihres aktuellen Status.",
+        "shares_description": "Übersicht über alle Shares im System, einschließlich ihres aktuellen Status.",
         "shares_title": "Statistik teilen",
         "storage_description": "Überwachen Sie die Festplattennutzung Ihres Servers und den von den Freigaben verbrauchten Speicherplatz.",
         "storage_title": "Überblick über die Speicherung",
-        "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Aktien heruntergeladen haben.",
+        "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Shares heruntergeladen haben.",
         "unique_downloaders_title": "Einzigartige Downloader",
         "users_description": "Überblick über die Benutzerkonten und deren Aktivitätsniveau.",
         "users_title": "Benutzer-Statistik"
@@ -656,11 +657,11 @@
       },
       "refresh": "Auffrischen",
       "shares": {
-        "active_shares": "Aktive Aktien",
+        "active_shares": "Aktive Shares",
         "deleted": "Gelöscht",
         "expired": "Abgelaufen",
         "last_7_days": "Letzte 7 Tage",
-        "per_share": "pro Aktie",
+        "per_share": "pro Share",
         "protected": "Geschützt",
         "title": "Statistik teilen",
         "total_files": "Dateien insgesamt",
@@ -680,7 +681,7 @@
         "active": "Aktiv",
         "admins": "Admins",
         "guests": "Gäste",
-        "shares": "Aktien",
+        "shares": "Shares",
         "title": "Benutzer-Statistik",
         "top_users": "Aktivste Benutzer",
         "total_users": "Benutzer insgesamt",
@@ -760,7 +761,8 @@
       "enable_share_deleted_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien gelöscht wurden",
       "enable_share_deletion_warning_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien bald gelöscht werden",
       "enable_share_downloaded_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien heruntergeladen wurden",
-      "enable_share_expired_warning_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien abglaufen sind",
+      "enable_upload_confirmation_emails": "Aktiviere die E-Mail-Benachrichtigung nach erfolgreichem Upload",
+      "enable_share_expired_warning_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien abgelaufen sind",
       "enable_share_expiry_warning_emails": "Aktiviere die E-Mail-Benachrichtigung, wenn geteilte Dateien bald ablaufen werden",
       "enabled": "Aktiviert",
       "general": "Allgemein",
@@ -787,7 +789,7 @@
       "pattern_token_uppercase": "Großbuchstabe (A-Z)",
       "provider_trust_warning": "Warnung: Vertrauen in Auth Provider ",
       "provider_trust_warning_description": "Stellen Sie sicher, dass Sie nur Authentifizierungsanbieter konfigurieren und aktivieren, denen Sie vertrauen. Authentifizierungsanbieter verfügen über erweiterte Zugriffsrechte auf Ihre Anwendungs- und Benutzerdaten. Das Hinzufügen von nicht vertrauenswürdigen oder gefährdeten Anbietern kann zu unbefugtem Zugriff, Datenverletzungen oder Kontoübernahmen führen.",
-      "reverse_shares": "Reverse-Aktien",
+      "reverse_shares": "Reverse-Shares",
       "select_auth_provider": "Wählen Sie einen Autorisierungsanbieter",
       "self_registration": "Selbstregistrierung",
       "self_registration_allow_any_domain": "Registrierung von jeder E-Mail-Domäne aus zulassen",
@@ -864,7 +866,7 @@
     },
     "title": {
       "about": "Über",
-      "allShares": "Alle Aktien",
+      "allShares": "Alle Shares",
       "branding": "Branding & Benutzeroberfläche",
       "cloudConnect": "Erugo Verbinden",
       "emailTemplates": "E-Mail-Vorlagen",
@@ -872,6 +874,7 @@
       "manage": "Verwalten Sie",
       "myProfile": "Mein Konto",
       "myShares": "Meine Freigaben",
+      "recipientHistory": "gespeicherte Empfänger",
       "reverse_invite": "Umgekehrte Freigabeanforderung erstellen",
       "share": {
         "password_protect": "Freigabe mit Passwort schützen"
@@ -936,7 +939,7 @@
       "user_created_successfully": "Benutzer erfolgreich angelegt",
       "user_deleted_successfully": "Benutzer wurde erfolgreich gelöscht",
       "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
-      "view_shares": "Aktien ansehen",
+      "view_shares": "Share ansehen",
       "you": "Sie"
     }
   },
@@ -988,7 +991,7 @@
       "count": "{value, plural, one {{count} Datei} other {{count} Dateien}}",
       "including": "einschließlich:"
     },
-    "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
+    "not_found": "Der von Ihnen gesuchte Share wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
     "passwordNotProtected": "Öffnen Sie",
     "passwordProtected": "Passwort geschützt"
   },
@@ -1002,7 +1005,7 @@
       "chunked": "Chunked-Loading-Modus",
       "direct": "Direkter Upload-Modus"
     },
-    "expiry_label": "Die Aktie verfällt am {value} {unit} (Änderung)",
+    "expiry_label": "Der Share verfällt am {value} {unit} (Änderung)",
     "expiry_max_value": "Max: {value}",
     "expiry_too_long": "Die von Ihnen eingegebene Verfallszeit überschreitet die Höchstgrenze. Wir haben sie automatisch auf den längsten zulässigen Zeitraum angepasst.",
     "expiry_unit": {

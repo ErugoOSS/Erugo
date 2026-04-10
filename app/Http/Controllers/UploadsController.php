@@ -15,6 +15,7 @@ use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
+use App\Services\RecipientHistoryService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -419,7 +420,7 @@ class UploadsController extends Controller
     // Process recipients if provided (normal share flow)
     if ($request->has('recipients') && is_array($request->recipients)) {
       foreach ($request->recipients as $recipient) {
-        if (is_array($recipient) && isset($recipient['name']) && isset($recipient['email'])) {
+        if (is_array($recipient) && isset($recipient['email'])) {
           $this->sendShareCreatedEmail($share, $recipient);
         }
       }
@@ -446,6 +447,21 @@ class UploadsController extends Controller
         'share' => $share,
         'recipient' => $recipient
       ]);
+
+      if (is_array($recipient) && isset($recipient['email'])) {
+        $recipientHistoryUserId = $share->user_id;
+        if (!$recipientHistoryUserId && $user) {
+          $recipientHistoryUserId = $user->id;
+        }
+
+        if ($recipientHistoryUserId) {
+          app(RecipientHistoryService::class)->touchRecipient(
+            $recipientHistoryUserId,
+            $recipient['email'],
+            $recipient['name'] ?? null
+          );
+        }
+      }
     }
   }
 

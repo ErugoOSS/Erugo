@@ -63,6 +63,7 @@ const settings = ref({
   share_url_mode: 'haiku',
   share_url_pattern: '******',
   emails_share_downloaded_enabled: '',
+  emails_upload_confirmation_enabled: '',
   smtp_host: '',
   smtp_port: '',
   smtp_encryption: 'tls',
@@ -772,6 +773,19 @@ const handleDeleteAuthProvider = async (id) => {
                     />
                     <label for="emails_share_downloaded_enabled">
                       {{ $t('settings.system.enable_share_downloaded_emails') }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="emails_upload_confirmation_enabled"
+                      v-model="settings.emails_upload_confirmation_enabled"
+                    />
+                    <label for="emails_upload_confirmation_enabled">
+                      {{ $t('settings.system.enable_upload_confirmation_emails') }}
                     </label>
                   </div>
                 </div>

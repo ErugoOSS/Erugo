@@ -557,6 +557,7 @@
       "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
+      "recipientHistory": "Manage Your Recipients",
       "stats": "Your Erugo system at a glance",
       "system": "Manage the behaviour of your Erugo instance.",
       "users": "Manage Your Users."
@@ -781,6 +782,7 @@
       "enable_share_deleted_emails": "Enable Share Deleted Emails",
       "enable_share_deletion_warning_emails": "Enable Share Deletion Warning Emails",
       "enable_share_downloaded_emails": "Enable Share Downloaded Emails",
+      "enable_upload_confirmation_emails": "Enable Upload Confirmation Emails",
       "enable_share_expired_warning_emails": "Enable Share Expired Emails",
       "enable_share_expiry_warning_emails": "Enable Share Expiry Warning Emails",
       "enabled": "Enabled",
@@ -893,6 +895,7 @@
       "manage": "Manage",
       "myProfile": "My Account",
       "myShares": "My Shares",
+      "recipientHistory": "Recipient-list",
       "reverse_invite": "Create reverse share request",
       "share": {
         "password_protect": "Password protect share"

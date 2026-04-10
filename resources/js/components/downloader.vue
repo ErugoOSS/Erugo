@@ -196,11 +196,12 @@ const filesByDirectory = computed(() => {
       <div class="password-input-container" v-else>
         <div class="input-container">
           <input
-            type="password"
+            type="text"
             v-model="password"
             :placeholder="$t('settings.share.password')"
             :class="{ error: error }"
             @keyup.enter="downloadPasswordProtectedFiles"
+            autocomplete="off"
           />
           <div class="error-message" v-if="error">
             {{ error }}

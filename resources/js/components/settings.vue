@@ -31,6 +31,7 @@ import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
 import About from './settings/about.vue'
+import RecipientHistoryManager from './settings/recipientHistoryManager.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 import { useSetting } from '../composables/useSetting'
@@ -64,6 +65,7 @@ const tabContents = ref({
   myProfile: ref(null),
   myShares: ref(null),
   allShares: ref(null),
+  recipientHistory: ref(null),
   about: ref(null)
 })
 
@@ -153,6 +155,7 @@ const getSettingsTitle = () => {
       myShares: 'My Shares',
       allShares: 'All Shares',
       emailTemplates: 'Email Templates',
+      recipientHistory: 'Recipient-list',
       about: 'About'
     }
     return fallbackTitles[activeTab.value] || 'Erugo'
@@ -175,6 +178,8 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
+    case 'recipientHistory':
+      return t.value('settings.title.recipientHistory') || 'Recipient-list'
     case 'about':
       return t.value('settings.title.about')
     default:
@@ -326,6 +331,12 @@ const handleUserFilterChange = (event) => {
             <h2>
               <Boxes />
               {{ $t('settings.title.myShares') }}
+            </h2>
+          </div>
+          <div class="settings-tab" :class="{ active: activeTab === 'recipientHistory' }" @click="setActiveTab('recipientHistory')">
+            <h2>
+              <Mail />
+              {{ $t('settings.title.recipientHistory') || 'Recipient-list' }}
             </h2>
           </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myProfile' }" @click="setActiveTab('myProfile')">
@@ -571,6 +582,25 @@ const handleUserFilterChange = (event) => {
               </div>
               <div class="tab-content-body">
                 <MyShares ref="mySharesPanel" v-if="store.settingsOpen" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'recipientHistory'"
+              class="settings-tab-content"
+              ref="tabContents.recipientHistory"
+              key="recipientHistory"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Mail />
+                  <span>
+                    {{ $t('settings.title.recipientHistory') || 'Recipient-list' }}
+                    <small>{{ $t('settings.description.recipientHistory') || 'Gespeicherte E-Mail-Adressen verwalten' }}</small>
+                  </span>
+                </h2>
+              </div>
+              <div class="tab-content-body">
+                <RecipientHistoryManager v-if="store.settingsOpen" />
               </div>
             </div>
             <div

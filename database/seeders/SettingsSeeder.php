@@ -255,6 +255,14 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
+                'key' => 'emails_upload_confirmation_enabled',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.emails',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
                 'key' => 'emails_share_expiry_warning_enabled',
                 'value' => 'true',
                 'previous_value' => null,

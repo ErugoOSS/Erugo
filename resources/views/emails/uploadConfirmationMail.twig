@@ -1,0 +1,25 @@
+{% extends 'emails/layout' %}
+
+{% block header %} Upload Successful
+{% endblock %}
+
+{% block content %}
+<h2>Hi {{ user.name | split(' ')[0] }},</h2>
+
+<p>Your upload has been completed successfully.</p>
+<p>You shared {{ share.file_count }} file{{ share.file_count == 1 ? '' : 's' }} with {{ recipients | length }} recipient{{ recipients | length == 1 ? '' : 's' }}.</p>
+<p>Share name: {{ share.name }}</p>
+{% if recipients | length > 0 %}
+<p>Recipients:</p>
+<ul>
+{% for recipient in recipients %}
+  <li>{{ recipient.email }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block action_url %}{{ settings.application_url }}/shares/{{ share.long_id }}{% endblock %}
+{% block action_text %}
+	View Share
+{% endblock %}

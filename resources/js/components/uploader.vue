@@ -19,7 +19,7 @@ import {
   RotateCcw
 } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, simpleUUID } from '../utils'
-import { getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
+import { getHealth, getMyProfile, uploadFilesInChunks, logout, sendUploadConfirmation } from '../api'
 import Recipient from './recipient.vue'
 import { uploadController } from '../store'
 import { domData } from '../domData'
@@ -468,6 +468,10 @@ const doTusUpload = async (uploadId) => {
           thankGuestForUpload()
         } else {
           showSharePanel(createShareURL(result.data.share.long_id))
+          // Send upload confirmation email
+          sendUploadConfirmation(result.data.share.long_id, recipients.value).catch((error) => {
+            console.error('Failed to send upload confirmation email:', error)
+          })
         }
         uploadBasket.value = []
         shareName.value = ''
@@ -1035,7 +1039,7 @@ const filesByDirectory = computed(() => {
       <div class="input-container">
         <label for="edit_share_password">{{ $t('settings.share.password') }}</label>
         <input
-          type="password"
+          type="text"
           v-model="shareFormPassword"
           id="edit_share_password"
           :placeholder="$t('settings.share.password')"
@@ -1043,6 +1047,7 @@ const filesByDirectory = computed(() => {
           :class="{ error: passwordFormErrors.password }"
           @keyup.enter="setPassword"
           ref="passwordInput"
+          autocomplete="off"
         />
         <div class="error-message" v-if="passwordFormErrors.password">
           {{ passwordFormErrors.password }}
@@ -1052,13 +1057,14 @@ const filesByDirectory = computed(() => {
       <div class="input-container">
         <label for="edit_share_password_confirm">{{ $t('settings.share.password_confirm') }}</label>
         <input
-          type="password"
+          type="text"
           v-model="shareFormPasswordConfirm"
           id="edit_share_password_confirm"
           :placeholder="$t('settings.share.password_confirm')"
           required
           :class="{ error: passwordFormErrors.passwordConfirm }"
           @keyup.enter="setPassword"
+          autocomplete="off"
         />
 
         <div class="error-message" v-if="passwordFormErrors.passwordConfirm">
