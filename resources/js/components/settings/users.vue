@@ -66,6 +66,7 @@ const handleEditUserClick = (user) => {
   editUser.value = user
   editUser.value.admin = user.admin == 1
   editUser.value.must_change_password = user.must_change_password == 1
+  editUser.value.allow_unlimited_expiry = user.allow_unlimited_expiry == 1
   editUserFormActive.value = true
 }
 
@@ -143,7 +144,9 @@ const getEmptyUser = () => {
     password_confirmation: '',
     name: '',
     admin: false,
-    must_change_password: false
+    must_change_password: false,
+    storage_limit: null,
+    allow_unlimited_expiry: false
   }
 }
 
@@ -285,6 +288,31 @@ const confirmForceResetPassword = () => {
         </p>
       </div>
 
+      <div class="input-container">
+        <label for="new_user_storage_limit">{{ $t('settings.users.storage_limit') }}</label>
+        <input
+          type="number"
+          v-model="newUser.storage_limit"
+          id="new_user_storage_limit"
+          :placeholder="$t('settings.users.storage_limit_placeholder')"
+          :class="{ error: errors.storage_limit }"
+        />
+        <p class="help-text">
+          {{ $t('settings.users.storage_limit_help_text') }}
+        </p>
+        <div class="error-message" v-if="errors.storage_limit">
+          {{ errors.storage_limit[0] }}
+        </div>
+      </div>
+
+      <div class="checkbox-container">
+        <input type="checkbox" v-model="newUser.allow_unlimited_expiry" id="new_user_allow_unlimited_expiry" />
+        <label for="new_user_allow_unlimited_expiry">{{ $t('settings.users.allow_unlimited_expiry') }}</label>
+        <p class="help-text">
+          {{ $t('settings.users.allow_unlimited_expiry_help_text') }}
+        </p>
+      </div>
+
       <div class="button-bar">
         <button @click="saveUser">
           <UserPlus />
@@ -340,6 +368,31 @@ const confirmForceResetPassword = () => {
           {{ $t('settings.users.admin_help_text') }}
           <br />
           {{ $t('settings.users.admin_help_text_2') }}
+        </p>
+      </div>
+
+      <div class="input-container">
+        <label for="edit_user_storage_limit">{{ $t('settings.users.storage_limit') }}</label>
+        <input
+          type="number"
+          v-model="editUser.storage_limit"
+          id="edit_user_storage_limit"
+          :placeholder="$t('settings.users.storage_limit_placeholder')"
+          :class="{ error: errors.storage_limit }"
+        />
+        <p class="help-text">
+          {{ $t('settings.users.storage_limit_help_text') }}
+        </p>
+        <div class="error-message" v-if="errors.storage_limit">
+          {{ errors.storage_limit[0] }}
+        </div>
+      </div>
+
+      <div class="checkbox-container">
+        <input type="checkbox" v-model="editUser.allow_unlimited_expiry" id="edit_user_allow_unlimited_expiry" />
+        <label for="edit_user_allow_unlimited_expiry">{{ $t('settings.users.allow_unlimited_expiry') }}</label>
+        <p class="help-text">
+          {{ $t('settings.users.allow_unlimited_expiry_help_text') }}
         </p>
       </div>
 

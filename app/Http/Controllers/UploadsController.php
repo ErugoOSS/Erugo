@@ -96,9 +96,14 @@ class UploadsController extends Controller
     }
 
     $maxExpiryTime = Setting::where('key', 'max_expiry_time')->first()->value;
+    $allowUnlimitedExpiry = Setting::where('key', 'allow_unlimited_expiry')->first()->value ?? 'false';
     $expiryDate = Carbon::parse($request->expiry_date);
 
-    if ($maxExpiryTime !== null) {
+    // Check if user has unlimited expiry permission
+    $user = Auth::user();
+    $userAllowUnlimitedExpiry = $user && $user->allow_unlimited_expiry == 1;
+
+    if (!$userAllowUnlimitedExpiry && $allowUnlimitedExpiry !== 'true' && $maxExpiryTime !== null) {
       $now = Carbon::now();
 
       if ($now->diffInDays($expiryDate) > $maxExpiryTime) {
@@ -118,6 +123,31 @@ class UploadsController extends Controller
         'status' => 'error',
         'message' => 'Unauthorized'
       ], 401);
+    }
+
+    // Check storage limit if set
+    if ($user->storage_limit !== null) {
+      $currentStorage = Share::where('user_id', $user->id)
+        ->where('status', '!=', 'deleted')
+        ->sum('size');
+      
+      $uploadSize = UploadSession::whereIn('upload_id', $request->uploadIds)
+        ->where('user_id', $user->id)
+        ->where('status', 'complete')
+        ->sum('size');
+      
+      if ($currentStorage + $uploadSize > $user->storage_limit) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Storage limit exceeded',
+          'data' => [
+            'current_storage' => $currentStorage,
+            'upload_size' => $uploadSize,
+            'storage_limit' => $user->storage_limit,
+            'available' => $user->storage_limit - $currentStorage
+          ]
+        ], 400);
+      }
     }
 
     // Generate a unique long ID for the share

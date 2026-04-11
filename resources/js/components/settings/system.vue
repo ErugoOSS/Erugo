@@ -64,6 +64,7 @@ const settings = ref({
   share_url_pattern: '******',
   emails_share_downloaded_enabled: '',
   emails_upload_confirmation_enabled: '',
+  allow_unlimited_expiry: '',
   smtp_host: '',
   smtp_port: '',
   smtp_encryption: 'tls',
@@ -640,6 +641,18 @@ const handleDeleteAuthProvider = async (id) => {
                     <small>({{ $t('settings.system.days') }})</small>
                   </label>
                   <input type="number" id="max_expiry_time" v-model="settings.max_expiry_time" placeholder="∞" />
+                </div>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="allow_unlimited_expiry"
+                      v-model="settings.allow_unlimited_expiry"
+                    />
+                    <label for="allow_unlimited_expiry">
+                      {{ $t('settings.system.allow_unlimited_expiry') }}
+                    </label>
+                  </div>
                 </div>
                 <div class="setting-group-body-item">
                   <div class="row">

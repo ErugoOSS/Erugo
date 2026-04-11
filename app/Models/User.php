@@ -27,6 +27,8 @@ class User extends Authenticatable implements JWTSubject
         'active',
         'must_change_password',
         'is_guest',
+        'storage_limit',
+        'allow_unlimited_expiry',
         'email_verification_code',
         'email_verification_code_expires_at',
     ];
