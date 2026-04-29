@@ -9,6 +9,7 @@ class ReverseShareInvite extends Model
   protected $fillable = [
     'user_id',
     'guest_user_id',
+    'guest_token',
     'recipient_name',
     'recipient_email',
     'message',
