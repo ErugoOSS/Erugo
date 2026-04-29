@@ -14,7 +14,6 @@ use App\Mail\passwordResetMail;
 use App\Jobs\sendEmail;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Models\ReverseShareInvite;
-use Illuminate\Support\Facades\Crypt;
 
 
 class AuthController extends Controller
@@ -101,18 +100,12 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = Crypt::decryptString($request->token);
-
-        $user = Auth::setToken($token)->user();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
-        $invite = ReverseShareInvite::where('guest_user_id', $user->id)->first();
+        // Look up the invite by the SHA-256 hash of the plain-text token.
+        // This replaces the old approach of decoding a JWT embedded in the link,
+        // which broke after 60 minutes because the JWT TTL is shorter than the
+        // 7-day invite expiry.
+        $invite = ReverseShareInvite::where('guest_token', hash('sha256', $request->token))
+            ->first();
 
         if (!$invite) {
             return response()->json([
@@ -135,10 +128,16 @@ class AuthController extends Controller
             ], 404);
         }
 
-        $invite->markAsUsed();
+        $user = User::find($invite->guest_user_id);
 
-        //invalidate the token
-        auth()->invalidate();
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Guest user not found'
+            ], 404);
+        }
+
+        $invite->markAsUsed();
 
         return $this->respondWithToken($user);
     }
