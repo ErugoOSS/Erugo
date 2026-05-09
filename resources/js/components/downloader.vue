@@ -224,7 +224,7 @@ const filesByDirectory = computed(() => {
           <TrendingDown />
           {{ $t('share.download_limit_reached') }}
         </h1>
-        <p>
+        <p class="mx-5 text-center">
           {{ $t('share.download_limit_reached.message') }}
         </p>
       </template>
