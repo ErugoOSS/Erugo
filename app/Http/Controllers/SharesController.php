@@ -16,6 +16,11 @@ use App\Services\SettingsService;
 use App\Services\PatternGenerator;
 use App\Jobs\cleanSpecificShares;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Models\File;
+use App\Jobs\CreateShareZip;
+use App\Mail\shareCreatedMail;
+use Illuminate\Support\Facades\Log;
 
 class SharesController extends Controller
 {
@@ -697,6 +702,237 @@ class SharesController extends Controller
     $sendEmail = $settingsService->get('emails_share_downloaded_enabled');
     if ($sendEmail == 'true' && $share->user) {
       sendEmail::dispatch($share->user->email, shareDownloadedMail::class, ['share' => $share]);
+    }
+  }
+
+  /**
+   * ConvertX backend-to-backend share creation.
+   *
+   * Endpoint: POST /api/integrations/convertx/share
+   *
+   * Auth:
+   *   - Header: X-Erugo-Api-Token: <CONVERTX_INTEGRATION_TOKEN>
+   *     OR
+   *   - Header: Authorization: Bearer <CONVERTX_INTEGRATION_TOKEN>
+   */
+  public function createFromConvertx(Request $request)
+  {
+    try {
+      // =====================
+      // AUTH
+      // =====================
+      $tokenEnv = env('CONVERTX_INTEGRATION_TOKEN');
+      $incoming = $request->header('X-Erugo-Api-Token') ?: $request->bearerToken();
+
+      if (!$tokenEnv) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'CONVERTX_INTEGRATION_TOKEN not configured on server',
+        ], 500);
+      }
+
+      if (!$incoming || !hash_equals($tokenEnv, $incoming)) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized (invalid API token)',
+        ], 401);
+      }
+
+      // =====================
+      // VALIDATION
+      // =====================
+      $validator = Validator::make($request->all(), [
+        'file' => ['required', 'file'],
+        'name' => ['nullable', 'string', 'max:255'],
+        'description' => ['nullable', 'string', 'max:500'],
+        // Optional: send share link via email
+        'recipient_email' => ['nullable', 'email', 'max:255'],
+        'recipient_name' => ['nullable', 'string', 'max:255'],
+      ]);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Validation failed',
+          'data' => [
+            'errors' => $validator->errors(),
+          ],
+        ], 422);
+      }
+
+      /** @var \Illuminate\Http\UploadedFile $uploaded */
+      $uploaded = $request->file('file');
+
+      $originalName = $uploaded->getClientOriginalName();
+      $mimeType = $uploaded->getMimeType();
+      $fileSize = $uploaded->getSize();
+
+      // =====================
+      // OWNER USER
+      // =====================
+      $userId = env('CONVERTX_INTEGRATION_USER_ID');
+      $user = $userId ? User::find($userId) : User::orderBy('id')->first();
+
+      if (!$user) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'No user exists to own ConvertX shares',
+        ], 500);
+      }
+
+      // =====================
+      // CREATE SHARE DIRECTORY
+      // =====================
+      $longId = $this->generateLongId();
+      $sharePath = $user->id . '/' . $longId;
+      $relativeDir = 'shares/' . $sharePath;
+      $dir = storage_path('app/' . $relativeDir);
+
+      if (!is_dir($dir) && !mkdir($dir, 0777, true)) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Failed to create share directory',
+        ], 500);
+      }
+
+      // Sanitize filename for storage (keep original for display)
+      $safeName = $this->sanitizeDownloadFilename($originalName, 'file');
+      $destAbs = $dir . '/' . $safeName;
+
+      // Avoid overwriting existing file
+      if (file_exists($destAbs)) {
+        $timestamp = now()->format('YmdHis');
+        $safeName = $timestamp . '_' . $safeName;
+        $destAbs = $dir . '/' . $safeName;
+      }
+
+      // Move file
+      $uploaded->move($dir, $safeName);
+
+      // =====================
+      // CLAMAV SCAN (optional but enabled if CLAMAV_URL is set)
+      // =====================
+      try {
+        /** @var \App\Services\ClamavScanner $scanner */
+        $scanner = app(\App\Services\ClamavScanner::class);
+        $clean = $scanner->scanPath($relativeDir . '/' . $safeName);
+
+        if (!$clean) {
+          // Delete the uploaded file if infected
+          @unlink($destAbs);
+
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Uploaded file failed antivirus scan and was rejected.',
+          ], 422);
+        }
+      } catch (\Throwable $scanEx) {
+        Log::error('[ConvertX] ClamAV scan failed', [
+          'error' => $scanEx->getMessage(),
+        ]);
+
+        // Fail closed: reject if AV is configured but scan throws
+        if (env('CLAMAV_URL')) {
+          @unlink($destAbs);
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Antivirus scan failed; upload rejected.',
+          ], 500);
+        }
+      }
+
+      // =====================
+      // CREATE SHARE RECORD
+      // =====================
+      $expiryHours = (int) env('CONVERTX_DEFAULT_EXPIRY_HOURS', 168);
+      $share = Share::create([
+        'name' => $request->input('name', $originalName),
+        'description' => $request->input('description'),
+        'expires_at' => Carbon::now()->addHours($expiryHours),
+        'user_id' => $user->id,
+        'path' => $sharePath,
+        'long_id' => $longId,
+        'size' => $fileSize,
+        'file_count' => 1,
+        'status' => 'pending',
+        'password' => null,
+      ]);
+
+      // File record: 'name' is sanitized filename for storage; 'display_name' is original
+      File::create([
+        'share_id' => $share->id,
+        'name' => $safeName,
+        'display_name' => $originalName,
+        'type' => $mimeType,
+        'size' => $fileSize,
+        'full_path' => '',
+        'temp_path' => null,
+      ]);
+
+      // Ensure ZIP is created to match standard download flow
+      CreateShareZip::dispatch($share);
+
+      // =====================
+      // OPTIONAL EMAIL
+      // =====================
+      $emailSent = false;
+      $recipientEmail = $request->input('recipient_email') ?? $request->input('recipientEmail');
+      $recipientName = $request->input('recipient_name') ?? $request->input('recipientName');
+
+      if (is_string($recipientEmail) && trim($recipientEmail) !== '') {
+        try {
+          $recipient = [
+            'email' => trim($recipientEmail),
+            'name' => (is_string($recipientName) && trim($recipientName) !== '') ? trim($recipientName) : 'Recipient',
+          ];
+
+          if (class_exists(shareCreatedMail::class)) {
+            sendEmail::dispatch($recipient['email'], shareCreatedMail::class, [
+              'user' => $user,
+              'share' => $share,
+              'recipient' => $recipient,
+            ]);
+            $emailSent = true;
+          } else {
+            Log::warning('[ConvertX] shareCreatedMail not found; skipping email dispatch', [
+              'recipient_email' => $recipient['email'],
+            ]);
+          }
+        } catch (\Throwable $mailEx) {
+          Log::error('[ConvertX] Email dispatch failed', [
+            'recipient_email' => $recipientEmail,
+            'error' => $mailEx->getMessage(),
+          ]);
+        }
+      }
+
+      // =====================
+      // RESPONSE
+      // =====================
+      $shareUrl = url('/shares/' . $share->long_id);
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Share created',
+        'share_url' => $shareUrl,
+        'email_sent' => $emailSent,
+        'data' => [
+          'share' => [
+            'id' => $share->id,
+            'long_id' => $share->long_id,
+            'url' => $shareUrl,
+          ],
+        ],
+      ]);
+    } catch (\Throwable $e) {
+      Log::error('[ConvertX] createFromConvertx failed', [
+        'error' => $e->getMessage(),
+      ]);
+
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Internal server error',
+      ], 500);
     }
   }
 }
