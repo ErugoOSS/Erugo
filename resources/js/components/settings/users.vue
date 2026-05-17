@@ -246,6 +246,9 @@ const confirmForceResetPassword = () => {
       <p v-html="$t('settings.users.add_user_description')"></p>
       <p v-if="selfRegistrationEnabled">{{ $t('settings.users.add_user_self_registration_tip_on') }}</p>
       <p v-else>{{ $t('settings.users.add_user_self_registration_tip_off') }}</p>
+      <!-- Hidden decoy fields to prevent browser password save prompts -->
+      <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+      <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
       <div class="input-container">
         <label for="new_user_email">{{ $t('settings.users.email') }}</label>
         <input
@@ -254,6 +257,7 @@ const confirmForceResetPassword = () => {
           id="new_user_email"
           :placeholder="$t('settings.users.email')"
           required
+          autocomplete="off"
           :class="{ error: errors.email }"
         />
         <div class="error-message" v-if="errors.email">
@@ -268,6 +272,7 @@ const confirmForceResetPassword = () => {
           id="new_user_name"
           :placeholder="$t('settings.users.name')"
           required
+          autocomplete="off"
           :class="{ error: errors.name }"
         />
         <div class="error-message" v-if="errors.name">
@@ -304,6 +309,9 @@ const confirmForceResetPassword = () => {
         <UserPlus />
         {{ $t('settings.title.users.edit', { name: editUser.name }) }}
       </h2>
+      <!-- Hidden decoy fields to prevent browser password save prompts -->
+      <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+      <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
       <div class="input-container">
         <label for="edit_user_email">{{ $t('settings.users.email') }}</label>
         <input
@@ -312,6 +320,7 @@ const confirmForceResetPassword = () => {
           id="edit_user_email"
           :placeholder="$t('settings.users.email')"
           required
+          autocomplete="off"
           :class="{ error: errors.email }"
         />
         <div class="error-message" v-if="errors.email">
@@ -326,6 +335,7 @@ const confirmForceResetPassword = () => {
           id="edit_user_name"
           :placeholder="$t('settings.users.name')"
           required
+          autocomplete="off"
           :class="{ error: errors.name }"
         />
         <div class="error-message" v-if="errors.name">

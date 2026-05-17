@@ -191,14 +191,17 @@ const handleUnlinkProvider = async (provider) => {
               </div>
 
               <div class="setting-group-body">
+                <!-- Hidden decoy fields to prevent browser password save prompts -->
+                <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+                <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
                 <div class="setting-group-body-item">
                   <label for="email">{{ $t('settings.account.email') }}</label>
-                  <input type="text" id="email" v-model="profile.email" />
+                  <input type="text" id="email" v-model="profile.email" autocomplete="off" />
                 </div>
 
                 <div class="setting-group-body-item">
                   <label for="name">{{ $t('settings.account.name') }}</label>
-                  <input type="text" id="name" v-model="profile.name" />
+                  <input type="text" id="name" v-model="profile.name" autocomplete="off" />
                 </div>
 
                 <div class="setting-group-body-item mt-3">

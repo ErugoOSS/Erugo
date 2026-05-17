@@ -80,8 +80,11 @@ defineExpose({
     <div class="recipient-popover" :class="{ active: isPopoverOpen }" ref="recipientPopoverRef">
       <div class="recipient-popover-content">
         <div>
-          <input type="text" v-model="recipient.name" :placeholder="$t('full_name')" @keyup.enter="moveFocusToEmail" />
-          <input type="text" v-model="recipient.email" :placeholder="$t('email')" ref="emailInput" @keyup.enter="togglePopover" />
+          <!-- Hidden decoy fields to prevent browser password save prompts -->
+          <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+          <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
+          <input type="text" v-model="recipient.name" :placeholder="$t('full_name')" @keyup.enter="moveFocusToEmail" autocomplete="off" />
+          <input type="text" v-model="recipient.email" :placeholder="$t('email')" ref="emailInput" @keyup.enter="togglePopover" autocomplete="off" />
         </div>
         <div class="button-container">
           <div class="button-outside-label">

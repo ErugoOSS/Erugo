@@ -48,6 +48,9 @@ defineExpose({
         {{ $t('settings.title.reverse_invite') }}
       </h2>
       <p>{{ $t('settings.reverse_invite.description') }}</p>
+      <!-- Hidden decoy fields to prevent browser password save prompts -->
+      <input type="text" name="prevent_autofill_1" style="display:none" tabindex="-1" autocomplete="off" />
+      <input type="password" name="prevent_autofill_2" style="display:none" tabindex="-1" autocomplete="off" />
       <div class="input-container">
         <label for="edit_user_email">{{ $t('settings.users.email') }}</label>
         <input
@@ -56,6 +59,7 @@ defineExpose({
           id="edit_user_email"
           :placeholder="$t('settings.users.email')"
           required
+          autocomplete="off"
           :class="{ error: errors.email }"
         />
         <div class="error-message" v-if="errors.email">
@@ -70,6 +74,7 @@ defineExpose({
           id="edit_user_name"
           :placeholder="$t('settings.users.name')"
           required
+          autocomplete="off"
           :class="{ error: errors.name }"
         />
         <div class="error-message" v-if="errors.name">
