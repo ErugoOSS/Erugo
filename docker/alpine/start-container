@@ -172,6 +172,29 @@ if [ -d /var/www/html/storage/app/public/backgrounds ] && [ "$(ls -A /var/www/ht
     echo "Backgrounds migration complete."
 fi
 
+# If ERUGO_SHARES_PATH is set, point storage/app/shares at it via a symlink
+if [ -n "$ERUGO_SHARES_PATH" ]; then
+    echo "Configuring shares path: $ERUGO_SHARES_PATH"
+    mkdir -p "$ERUGO_SHARES_PATH"
+    chown -R erugo:erugo "$ERUGO_SHARES_PATH"
+
+    # Move any existing files over the first time this is enabled
+    if [ -d /var/www/html/storage/app/shares ] && [ ! -L /var/www/html/storage/app/shares ]; then
+        if [ "$(ls -A /var/www/html/storage/app/shares 2>/dev/null)" ]; then
+            echo "Migrating existing shares to $ERUGO_SHARES_PATH..."
+            cp -rn /var/www/html/storage/app/shares/. "$ERUGO_SHARES_PATH/" 2>/dev/null || true
+        fi
+        rm -rf /var/www/html/storage/app/shares
+    fi
+
+    # Replace any old symlink that points somewhere else
+    if [ -L /var/www/html/storage/app/shares ]; then
+        rm /var/www/html/storage/app/shares
+    fi
+
+    ln -s "$ERUGO_SHARES_PATH" /var/www/html/storage/app/shares
+fi
+
 # Create symlinks for public assets (images, backgrounds) pointing to storage
 echo "Creating storage symlinks..."
 # Remove any existing symlinks or directories that conflict

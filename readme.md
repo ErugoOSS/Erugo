@@ -49,6 +49,22 @@ The above docker-compose.yml provides a basic configuration starting point that 
 docker compose up -d
 ``` 
 
+If you'd rather keep uploaded files on a separate volume from the database, set `ERUGO_SHARES_PATH` and mount that path in. The SQLite database can be moved the same way using `DB_DATABASE`.
+
+```yaml
+services:
+  app:
+    image: wardy784/erugo:latest
+    restart: unless-stopped
+    environment:
+      - ERUGO_SHARES_PATH=/data/shares
+    volumes:
+      - ./erugo-storage:/var/www/html/storage
+      - /mnt/bulk/shares:/data/shares
+    ports:
+      - "9998:80"
+```
+
 ## Screenshots
 
 ![Upload Interface](.github/images/screenshots/main-screen-with-files.png)
