@@ -72,7 +72,8 @@ const settings = ref({
   smtp_sender_address: '',
   self_registration_enabled: false,
   self_registration_allow_any_domain: true,
-  self_registration_allowed_domains: ''
+  self_registration_allowed_domains: '',
+  sso_auto_launch: false
 })
 
 // Pattern presets for share URL generation
@@ -985,6 +986,23 @@ const handleDeleteAuthProvider = async (id) => {
                     />
                     <p class="help-text">{{ $t('settings.system.self_registration_allowed_domains_help') }}</p>
                   </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h5 id="sso_auto_launch_heading" class="mb-3">{{ $t('settings.system.sso_auto_launch_heading') }}</h5>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="sso_auto_launch"
+                      v-model="settings.sso_auto_launch"
+                    />
+                    <label for="sso_auto_launch">
+                      {{ $t('settings.system.sso_auto_launch') }}
+                    </label>
+                  </div>
+                  <p class="help-text">{{ $t('settings.system.sso_auto_launch_description') }}</p>
                 </div>
 
                 <hr class="my-4" />

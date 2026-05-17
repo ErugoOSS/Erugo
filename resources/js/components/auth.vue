@@ -53,6 +53,19 @@ const isRegistering = ref(false)
 const isVerifying = ref(false)
 const isResending = ref(false)
 
+// Hide the login UI until we know whether we are about to redirect to an SSO
+// provider, otherwise the form briefly flashes before the navigation fires
+const ssoAutoLaunchEnabled = domData().sso_auto_launch === true
+const initialUrlParams = new URLSearchParams(window.location.search)
+const initialAutoLaunchParam = initialUrlParams.get('autoLaunch')
+const mightAutoLaunch =
+  (ssoAutoLaunchEnabled || initialAutoLaunchParam === '1') &&
+  initialAutoLaunchParam !== '0' &&
+  !domData().token &&
+  !initialUrlParams.get('invite_id') &&
+  !initialUrlParams.get('invite_token')
+const pendingAutoLaunchDecision = ref(mightAutoLaunch)
+
 onMounted(async () => {
   const token = domData().token
   if (token) {
@@ -63,7 +76,9 @@ onMounted(async () => {
   // Parse URL parameters FIRST (before any async operations)
   // This ensures invite_id is set before attemptRefresh() completes
   const urlParams = new URLSearchParams(window.location.search)
-  
+  const inviteToken = urlParams.get('invite_token')
+  const autoLaunchParam = urlParams.get('autoLaunch')
+
   // Check for invite_id (for existing users who need to log in)
   const inviteId = urlParams.get('invite_id')
   if (inviteId) {
@@ -73,12 +88,29 @@ onMounted(async () => {
     window.history.replaceState({}, document.title, window.location.pathname)
   }
 
-  // Now try to refresh (if user is already logged in, this will accept the pending invite)
-  attemptRefresh()
+  // Refresh and providers run in parallel because the auto-launch decision below
+  // needs both store.isLoggedIn() and authProviders.value.length to be settled
+  const [, providers] = await Promise.all([
+    attemptRefresh(),
+    getAvailableAuthProviders().catch(() => [])
+  ])
+  authProviders.value = providers
 
-  getAvailableAuthProviders().then((data) => {
-    authProviders.value = data
-  })
+  const escapeConditions =
+    haveResetToken.value ||
+    pendingInviteId.value ||
+    inviteToken ||
+    autoLaunchParam === '0' ||
+    store.isLoggedIn()
+  const forceLaunch =
+    autoLaunchParam === '1' && authProviders.value.length >= 1 && !escapeConditions
+  const naturalLaunch =
+    ssoAutoLaunchEnabled && authProviders.value.length === 1 && !escapeConditions
+  if (forceLaunch || naturalLaunch) {
+    attemptAuthProviderLogin(authProviders.value[0].id)
+    return
+  }
+  pendingAutoLaunchDecision.value = false
 
   // Check if self-registration is enabled
   try {
@@ -90,7 +122,7 @@ onMounted(async () => {
   }
 
   // Grab reverse share token from url (for guest users)
-  reverseShareToken.value = urlParams.get('invite_token')
+  reverseShareToken.value = inviteToken
   if (reverseShareToken.value) {
     try {
       await acceptReverseShareInvite(reverseShareToken.value)
@@ -280,8 +312,11 @@ const switchToLogin = () => {
 </script>
 
 <template>
+  <!-- Empty placeholder while we decide whether to auto-launch to an SSO provider -->
+  <div class="auth-container auth-pending" v-if="pendingAutoLaunchDecision"></div>
+
   <!-- Verification Code Screen -->
-  <div class="auth-container" v-if="verificationMode">
+  <div class="auth-container" v-else-if="verificationMode">
     <div class="auth-container-inner">
       <h1>{{ $t('auth.verify_email') }}</h1>
       <p>{{ $t('auth.verification_code_sent', { email: registrationEmail }) }}</p>

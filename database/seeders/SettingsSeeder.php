@@ -438,6 +438,14 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
+                'key' => 'sso_auto_launch',
+                'value' => 'false',
+                'previous_value' => null,
+                'group' => 'system.auth',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
                 'key' => 'email_subject_emailVerificationMail.twig',
                 'value' => 'Verify your email address',
                 'previous_value' => null,

@@ -872,6 +872,9 @@
       "smtp_sender_name_description": "The display name that will appear as the sender of system emails. Users will see this name in their email client (e.g. \"Your App Name\" or \"Your App Support\").",
       "smtp_username": "SMTP Username",
       "smtp_username_description": "The username required to authenticate with your SMTP server. This is typically the email address or account name associated with your email service.",
+      "sso_auto_launch": "Auto-redirect to SSO provider on login",
+      "sso_auto_launch_description": "When enabled and exactly one auth provider is configured, the login page redirects to that provider automatically. To reach the local login form, add ?autoLaunch=0 to the URL or use the browser back button.",
+      "sso_auto_launch_heading": "Auto-redirect on login",
       "upload_modes": "Upload modes",
       "your_auth_providers": "Your Auth Providers"
     },
