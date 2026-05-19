@@ -9,6 +9,8 @@ use App\Models\UploadSession;
 use App\Utils\FileHelper;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Services\SettingsService;
+use App\Jobs\sendSecurityAlertEmail;
+use App\Mail\malwareDetectedMail;
 
 class TusdHooksController extends Controller
 {
@@ -149,6 +151,22 @@ class TusdHooksController extends Controller
                         'message' => "Total upload size would exceed maximum allowed size of {$maxSizeFormatted}. Current pending uploads: {$currentSizeFormatted}. All pending uploads have been cancelled."
                     ], 413);
                 }
+            }
+            
+            // Check blocked file extensions
+            $filename = $payload['Event']['Upload']['MetaData']['filename'] ?? '';
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $blockedExtensions = $this->getBlockedExtensions();
+            if (in_array($extension, $blockedExtensions)) {
+                Log::warning('tusd pre-create: Blocked file extension', [
+                    'user_id' => $user->id,
+                    'filename' => $filename,
+                    'extension' => $extension
+                ]);
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'File type .' . $extension . ' is not permitted on this platform (' . $filename . ') More information on blocked file types: https://erugo-companyname.com/blocked-filetypes'
+                ], 422);
             }
 
             Log::info('tusd pre-create: Upload authorized', [
@@ -318,6 +336,92 @@ class TusdHooksController extends Controller
 
             // Sanitize filename for storage
             $sanitizedFilename = FileHelper::sanitizeFilename($filename);
+            
+            // ClamAV scan
+            $uploadPath = storage_path('app/uploads/' . $uploadId);
+            $hostPath = '/var/erugo/storage/app/uploads/' . $uploadId;
+            if (file_exists($uploadPath)) {
+                $socket = stream_socket_client('unix:///var/run/clamav/clamd.ctl', $errno, $errstr, 30);
+                if ($socket) {
+                    fwrite($socket, "SCAN {$hostPath}\n");
+                    $response = fgets($socket, 4096);
+                    fclose($socket);
+                    Log::info('tusd post-finish: ClamAV scan', [
+                        'upload_id' => $uploadId,
+                        'filename' => $filename,
+                        'response' => $response
+                    ]);
+                    if (str_contains($response, 'FOUND')) {
+                        Log::warning('tusd post-finish: Malware detected', [
+                            'upload_id' => $uploadId,
+                            'filename' => $filename,
+                            'threat' => $response
+                        ]);
+                        unlink($uploadPath);
+                        // Also delete the .info file that tusd creates
+                        $infoPath = $uploadPath . '.info';
+                        if (file_exists($infoPath)) {
+                            unlink($infoPath);
+                        }
+                        $session->status = 'failed';
+                        $session->status_message = 'File rejected: malware detected in ' . $filename . ' (' . trim(preg_replace('/^.*:\s*/', '', $response)) . ')';
+                        $session->save();
+                        sendSecurityAlertEmail::dispatch($filename, $uploadId, trim($response), 'Malware Detected', $session->user_id);
+                        return response()->json(['ok' => false, 'message' => 'File rejected: malware detected in' . $filename], 422);
+                    }
+                    if (str_contains($response, 'ERROR') || empty($response)) {
+                        Log::warning('tusd post-finish: ClamAV scan error', [
+                            'upload_id' => $uploadId,
+                            'filename' => $filename,
+                            'response' => $response
+                        ]);
+                        if (file_exists($uploadPath)) {
+                            unlink($uploadPath);
+                        }
+                        $infoPath = $uploadPath . '.info';
+                        if (file_exists($infoPath)) {
+                            unlink($infoPath);
+                        }                        
+                        $session->status = 'failed';
+                        $session->status_message = 'File rejected: security scan failed for ' . $filename;
+                        $session->save();
+                        sendSecurityAlertEmail::dispatch($filename, $uploadId, 'ClamAV scan error or file removed by security software', 'Scan Failed', $session->user_id);
+                        return response()->json(['ok' => false, 'message' => 'File rejected: security scan failed'], 422);
+                    }
+                }
+            }
+            $blockedExtensions = $this->getBlockedExtensions();
+            // Check for blocked extensions inside zip files
+            $zipExtensions = ['zip', 'zipx', 'tar', 'gz', 'tgz', 'rar', '7z', 'bz2'];
+            if (in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), $zipExtensions)) {
+                $zip = new \ZipArchive();
+                if ($zip->open($uploadPath) === true) {
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $innerFile = $zip->getNameIndex($i);
+                        $innerExt = strtolower(pathinfo($innerFile, PATHINFO_EXTENSION));
+                        if (in_array($innerExt, $blockedExtensions)) {
+                            Log::warning('tusd post-finish: Blocked extension inside zip', [
+                                'upload_id' => $uploadId,
+                                'filename' => $filename,
+                                'blocked_file' => $innerFile,
+                                'extension' => $innerExt
+                            ]);
+                            $zip->close();
+                            unlink($uploadPath);
+                            $infoPath = $uploadPath . '.info';
+                            if (file_exists($infoPath)) unlink($infoPath);
+                            $session->status = 'failed';
+                            $session->status_message = 'File type .' . $innerExt . ' is not permitted on this platform (' . $innerFile . '). More information on blocked file types: https://erugo-companyname.com/blocked-filetypes';
+                            $session->save();
+                            return response()->json([
+                                'ok' => false, 
+                                'message' => 'File type .' . $innerExt . ' is not permitted on this platform (' . $innerFile . '). More information on blocked file types: https://erugo-companyname.com/blocked-filetypes'
+                            ], 422);
+                        }
+                    }
+                    $zip->close();
+                }
+            }
 
             // Create file record
             $file = File::create([
@@ -371,6 +475,60 @@ class TusdHooksController extends Controller
                 mkdir($extractDir, 0755, true);
             }
 
+            // ClamAV scan bundle before extraction
+            $hostBundlePath = '/var/erugo/storage/app/uploads/' . $uploadId;
+            $socket = stream_socket_client('unix:///var/run/clamav/clamd.ctl', $errno, $errstr, 30);
+            if ($socket) {
+                fwrite($socket, "SCAN {$hostBundlePath}\n");
+                $response = fgets($socket, 4096);
+                fclose($socket);
+                Log::info('tusd post-finish: ClamAV bundle scan', [
+                    'upload_id' => $uploadId,
+                    'response' => $response
+                ]);
+                if (str_contains($response, 'FOUND')) {
+                    Log::warning('tusd post-finish: Malware detected in bundle', [
+                        'upload_id' => $uploadId,
+                        'threat' => $response
+                    ]);
+                    if (file_exists($bundlePath)) unlink($bundlePath);
+                    $infoPath = $bundlePath . '.info';
+                    if (file_exists($infoPath)) unlink($infoPath);
+                    $session->status = 'failed';
+                    $session->status_message = 'File rejected: malware detected (' . trim(preg_replace('/^.*:\s*/', '', $response)) . ')';
+                    $session->save();
+                    sendSecurityAlertEmail::dispatch(
+                        '__erugo_bundle__ (folder upload, ID: ' . $uploadId . ')',
+                        $uploadId,
+                        trim($response),
+                        'Malware Detected in Bundle',
+                        $session->user_id
+                    );
+                    return response()->json(['ok' => false, 'message' => 'File rejected: malware detected (' . trim(preg_replace('/^.*:\s*/', '', $response)) . ')'], 422);
+
+                }
+                if (str_contains($response, 'ERROR') || empty($response)) {
+                    Log::warning('tusd post-finish: ClamAV bundle scan error', [
+                        'upload_id' => $uploadId,
+                        'response' => $response
+                    ]);
+                    if (file_exists($bundlePath)) unlink($bundlePath);
+                    $infoPath = $bundlePath . '.info';
+                    if (file_exists($infoPath)) unlink($infoPath);
+                    $session->status = 'failed';
+                    $session->status_message = 'File rejected: security scan failed';
+                    $session->save();
+                    sendSecurityAlertEmail::dispatch(
+                        '__erugo_bundle__ (folder upload, ID: ' . $uploadId . ')',
+                        $uploadId,
+                        'ClamAV scan error or file removed by security software',
+                        'Bundle Scan Failed',
+                        $session->user_id
+                    );
+                    return response()->json(['ok' => false, 'message' => 'File rejected: security scan failed'], 422);
+                }
+            }
+
             // Open and extract the zip
             $zip = new \ZipArchive();
             $result = $zip->open($bundlePath);
@@ -381,6 +539,7 @@ class TusdHooksController extends Controller
                     'error_code' => $result
                 ]);
                 $session->status = 'failed';
+                $session->status_message = 'File type .' . $ext . ' is not permitted on this platform (' . $fileInfo['originalName'] . '). More information on blocked file types: https://erugo-companyname.com/blocked-filetypes';
                 $session->save();
                 return response()->json(['ok' => true]);
             }
@@ -416,6 +575,34 @@ class TusdHooksController extends Controller
             $manifestPath = $extractDir . '/__erugo_manifest__.json';
             if (file_exists($manifestPath)) {
                 unlink($manifestPath);
+            }
+
+            // Check for blocked extensions in bundle
+            $blockedExtensions = $this->getBlockedExtensions();
+            foreach ($manifest['files'] as $fileInfo) {
+                $ext = strtolower(pathinfo($fileInfo['originalName'], PATHINFO_EXTENSION));
+                if (in_array($ext, $blockedExtensions)) {
+                    Log::warning('tusd post-finish: Blocked extension in bundle', [
+                        'user_id' => $session->user_id,
+                        'upload_id' => $uploadId,
+                        'filename' => $fileInfo['originalName'],
+                        'extension' => $ext
+                    ]);
+                    // Cleanup
+                    if (file_exists($bundlePath)) unlink($bundlePath);
+                    $infoPath = $bundlePath . '.info';
+                    if (file_exists($infoPath)) unlink($infoPath);
+                    if (file_exists($extractDir)) {
+                        $this->deleteDirectory($extractDir);
+                    }
+                    $session->status = 'failed';
+                    $session->status_message = 'File type .' . $ext . ' is not permitted on this platform (' . $fileInfo['originalName'] . '). More information on blocked file types: https://erugo-companyname.com/blocked-filetypes';
+                    $session->save();
+                    return response()->json([
+                        'ok' => false,
+                        'message' => 'File type .' . $ext . ' is not permitted on this platform (' . $fileInfo['originalName'] . '). More information on blocked file types: https://erugo-companyname.com/blocked-filetypes'
+                    ], 422);
+                }
             }
 
             // Create File records for each file in the manifest
@@ -589,6 +776,37 @@ class TusdHooksController extends Controller
     }
 
     /**
+     * Recursively delete a directory and its contents
+     */
+    private function deleteDirectory(string $dir): void
+    {
+        if (!file_exists($dir)) return;
+        $items = array_diff(scandir($dir), ['.', '..']);
+        foreach ($items as $item) {
+            $path = $dir . '/' . $item;
+            is_dir($path) ? $this->deleteDirectory($path) : unlink($path);
+        }
+        rmdir($dir);
+    }
+
+    /**
+     * Get list of blocked file extensions
+     */
+    private function getBlockedExtensions(): array
+    {
+        return [
+            'html','htm','ace','ani','apk','app','appx','arj','bat','cmd','com',
+            'deb','dex','dll','docm','elf','exe','hta','img','jar','kext','lha',
+            'lib','library','lnk','lzh','macho','msc','msi','msix','msp','mst',
+            'pif','ppa','ppam','reg','rev','scf','scr','sct','sys','uif','vb',
+            'vbe','vbs','vxd','wsc','wsf','wsh','xll','xz','z','one','onenote',
+            'dot','xlt','xla','xlm','xlw','xlsb','xlsm','xlam','xltm','ppt',
+            'pps','pot','mdb','wbk','dotm','dotx','xltx','pptm','potx','potm',
+            'ppsx','ppsm','sldx','sldm'
+        ];
+    }
+
+    /**
      * Format bytes into human readable format
      */
     private function formatBytes(int $bytes): string
@@ -603,4 +821,3 @@ class TusdHooksController extends Controller
         return $bytes . ' bytes';
     }
 }
-

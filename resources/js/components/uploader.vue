@@ -1,22 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
-  CircleSlash2,
-  FilePlus,
-  FolderPlus,
-  Upload,
-  Trash,
-  Copy,
-  X,
-  Loader,
-  Check,
-  Plus,
-  Pause,
-  Play,
-  Clock9,
-  Lock,
-  LockOpen,
-  RotateCcw
+  CircleSlash2, FilePlus, FolderPlus, Upload, Trash, Copy, X, Loader,
+  Check, Plus, Pause, Play, Clock9, Lock, LockOpen, RotateCcw, ShieldAlert,
+  ShieldCheck, ChevronDown, ChevronUp
 } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, simpleUUID } from '../utils'
 import { getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
@@ -54,6 +41,12 @@ const completedFiles = ref([])
 const uploadStartTime = ref(null)
 const uploadTick = ref(0) // Reactive trigger for time-based computed properties
 let uploadTickInterval = null
+
+// Upload error modal
+const showUploadErrorModal = ref(false)
+const uploadErrorMessage = ref('')
+const uploadErrorIsBlocked = ref(false)
+const uploadErrorIsMalware = ref(false)
 
 // Speed calculation baseline (reset on pause/resume to keep speed accurate)
 const speedBaselineTime = ref(null)
@@ -110,6 +103,10 @@ const recipients = ref([])
 const UPLOAD_STATE_KEY = 'erugo_upload_in_progress'
 const showInterruptedUploadPanel = ref(false)
 const interruptedUploadInfo = ref(null)
+
+// Legal acceptance (in-memory only, no persistence — GDPR/TTDSG)
+const legalAccepted = ref(false)
+const showLegalText = ref(false)
 
 // Save upload state to localStorage when upload starts
 const saveUploadState = () => {
@@ -403,6 +400,43 @@ const multiplierFromUnit = (unit) => {
   }
 }
 
+const showUploadError = (error) => {
+  let cleanMessage = ''
+
+  // Try to get message from tus DetailedError response body (post-finish errors)
+  if (error.originalResponse) {
+    try {
+      const body = error.originalResponse.getBody()
+      const parsed = JSON.parse(body)
+      cleanMessage = parsed.message || ''
+    } catch (e) {
+      // Response was not JSON (e.g. 500 HTML page) - use generic message
+      cleanMessage = ''
+    }
+  }
+
+  // Fall back to extracting from error.message (pre-create errors)
+  if (!cleanMessage) {
+    const rawMessage = error.message || ''
+    const match = rawMessage.match(/"message":"([^"]+)"/)
+    cleanMessage = match ? match[1] : rawMessage
+  }
+
+  const isBlocked = cleanMessage.includes('is not permitted')
+  const isMalware = cleanMessage.includes('malware detected')
+    || cleanMessage.includes('security scan failed')
+
+  // Only show specific message for known security events, otherwise generic
+  if (!isBlocked && !isMalware) {
+    cleanMessage = 'The upload could not be completed. Please try again.'
+  }
+
+  uploadErrorMessage.value = cleanMessage
+  uploadErrorIsBlocked.value = isBlocked
+  uploadErrorIsMalware.value = isMalware
+  showUploadErrorModal.value = true
+}
+
 const doTusUpload = async (uploadId) => {
   let pageTitleAtStart = document.title
 
@@ -477,14 +511,14 @@ const doTusUpload = async (uploadId) => {
       },
       (error) => {
         console.error('Upload error:', error)
-        alert(`Upload failed: ${error.message}`)
+        showUploadError(error)
         currentlyUploading.value = false
         resetUploadState()
       }
     )
   } catch (error) {
     console.error('Upload error:', error)
-    alert(`Upload failed: ${error.message}`)
+    showUploadError(error)
     currentlyUploading.value = false
     resetUploadState()
   }
@@ -965,40 +999,76 @@ const filesByDirectory = computed(() => {
       </div>
     </div>
   </div>
-
-  <div class="upload-button-container">
-    <div class="container-fluid">
-      <div class="row align-items-center">
-        <div class="col d-flex align-items-center justify-content-end">
-          <button
-            class="upload-button block"
-            :disabled="uploadBasket.length === 0 || currentlyUploading"
-            @click="uploadFiles"
-            :class="{ uploading: currentlyUploading }"
-          >
-            <div class="loader" v-if="currentlyUploading">
-              <Loader />
-            </div>
-            <Upload v-else />
-            <template v-if="uploadBasket.length > 0 && currentlyUploading">
-              {{ $t('uploading.files', 'Uploading {value} files', { value: uploadBasket.length }) }}
-            </template>
-            <template v-if="uploadBasket.length > 0 && !currentlyUploading">
-              {{ $t('upload.files', 'Upload {value} files', { value: uploadBasket.length }) }}
-            </template>
-            <template v-if="uploadBasket.length === 0">{{ $t('No files added yet') }}</template>
+ 
+<div class="upload-button-container">
+  <div class="container-fluid">
+    <!-- Legal acceptance -->
+    <div class="row">
+      <div class="col-12">
+        <div class="legal-acceptance mb-2">
+          <button type="button" class="legal-toggle secondary block" @click="showLegalText = !showLegalText">
+            <ShieldCheck />
+            <span class="flex-grow-1 text-start">
+              {{ showLegalText
+                ? $t('share.legal.hide', 'Hide notes')
+                : $t('share.legal.show', 'View Terms of Use') }}
+            </span>
+            <ChevronUp v-if="showLegalText" />
+            <ChevronDown v-else />
           </button>
-        </div>
 
-        <div class="ps-0 col-auto">
-          <button class="icon-only secondary" @click="showPasswordForm = !showPasswordForm">
-            <Lock v-if="passwordProtected" />
-            <LockOpen v-else />
-          </button>
+          <div v-if="showLegalText" class="legal-text">
+            <p>{{ $t('share.legal.intro', 'All content is confidential and may only be used for its intended purpose.') }}</p>
+            <ul>
+              <li>{{ $t('share.legal.bullet1', 'Uploads must not contain any illegal content or malware.') }}</li>
+              <li>{{ $t('share.legal.bullet2', 'Downloads and documents provided must not be shared or published without authorization.') }}</li>
+              <li>{{ $t('share.legal.bullet3', 'Accesses, as well as uploads and downloads, may be logged.') }}</li>
+              <li>{{ $t('share.legal.bullet4', 'To the extent permitted by law, CompanyName assumes no liability for data loss, errors, or damages resulting from the use of the data room.') }}</li>
+              <li>{{ $t('share.legal.bullet5', 'CompanyName may change or revoke access rights at any time.') }}</li>
+            </ul>
+          </div>
+
+          <div class="checkbox-container mt-2">
+            <input type="checkbox" v-model="legalAccepted" id="legalAcceptedUpload" />
+            <label for="legalAcceptedUpload">
+              {{ $t('share.legal.accept', 'I have read the Terms of Use and agree to them.') }}
+            </label>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="row align-items-center">
+      <div class="col d-flex align-items-center justify-content-end">
+        <button
+          class="upload-button block"
+          :disabled="uploadBasket.length === 0 || currentlyUploading || !legalAccepted"
+          @click="uploadFiles"
+          :class="{ uploading: currentlyUploading }"
+        >
+          <div class="loader" v-if="currentlyUploading">
+            <Loader />
+          </div>
+          <Upload v-else />
+          <template v-if="uploadBasket.length > 0 && currentlyUploading">
+            {{ $t('uploading.files', 'Uploading {value} files', { value: uploadBasket.length }) }}
+          </template>
+          <template v-if="uploadBasket.length > 0 && !currentlyUploading">
+            {{ $t('upload.files', 'Upload {value} files', { value: uploadBasket.length }) }}
+          </template>
+          <template v-if="uploadBasket.length === 0">{{ $t('No files added yet') }}</template>
+        </button>
+      </div>
+
+      <div class="ps-0 col-auto">
+        <button class="icon-only secondary" @click="showPasswordForm = !showPasswordForm">
+          <Lock v-if="passwordProtected" />
+          <LockOpen v-else />
+        </button>
+      </div>
+    </div>
   </div>
+</div>
 
   <input
     type="file"
@@ -1137,6 +1207,49 @@ const filesByDirectory = computed(() => {
       </div>
     </div>
   </div>
+
+  <!-- Upload Error / Blocked File Modal -->
+  <div
+    class="user-form-overlay"
+    :class="{ active: showUploadErrorModal }"
+    @click="(e) => !e.target.closest('.user-form') && (showUploadErrorModal = false)"
+  >
+    <div class="user-form">
+      <h2>
+        <ShieldAlert v-if="uploadErrorIsBlocked || uploadErrorIsMalware" />
+        <CircleSlash2 v-else />
+        {{ uploadErrorIsMalware
+          ? $t('upload.malware_title', 'Security Alert')
+          : uploadErrorIsBlocked
+            ? $t('upload.blocked_title', 'File type not permitted')
+            : $t('upload.error_title', 'Upload failed') }}
+      </h2>
+      <p style="width:100%; text-align:left; line-height:1.6;">
+        {{ uploadErrorMessage }}
+      </p>
+      <p v-if="uploadErrorIsBlocked && !uploadErrorIsMalware" style="width:100%; text-align:left; font-size:0.9em; opacity:0.75; margin-top: -8px;">
+        {{ $t('upload.blocked_info', 'For a full list of blocked file types, see the link below.') }}
+      </p>
+      <div class="button-bar" style="width:100%;">
+        <button @click="showUploadErrorModal = false">
+          <Check />
+          {{ $t('button.ok', 'OK') }}
+        </button>
+        <a
+          v-if="uploadErrorIsBlocked && !uploadErrorIsMalware"
+          href="/blocked-filetypes"
+          target="_blank"
+          class="secondary"
+          style="display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; width:100%;"
+          @click="showUploadErrorModal = false"
+        >
+          <ShieldAlert style="width:16px;height:16px;" />
+          {{ $t('upload.view_blocked_types', 'View blocked types') }}
+        </a>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <style scoped lang="scss">
@@ -1285,6 +1398,71 @@ const filesByDirectory = computed(() => {
     width: 100%;
     display: flex;
     gap: 10px;
+  }
+}
+
+.legal-acceptance {
+  width: 100%;
+
+  .legal-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+  }
+
+  .legal-text {
+    margin-top: 10px;
+    padding: 14px 16px;
+    background: var(--panel-section-background-color);
+    border-radius: var(--panel-border-radius);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--panel-text-color);
+
+    p {
+      margin: 0 0 8px 0;
+      font-weight: 500;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+
+      li {
+        margin: 4px 0;
+      }
+    }
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 4px 0 4px;
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--primary-button-background-color);
+    }
+
+    label {
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--panel-text-color);
+      user-select: none;
+    }
   }
 }
 </style>

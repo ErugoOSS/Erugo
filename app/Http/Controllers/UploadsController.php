@@ -132,9 +132,10 @@ class UploadsController extends Controller
 
     // Find files from upload sessions by tusd upload IDs
     // Use retry loop to handle race condition where post-finish hooks
-    // may still be processing when this endpoint is called (especially with many small files)
+    // may still be processing when this endpoint is called.
+    // For bundle uploads, ClamAV scanning can take 10-30s so we wait up to 60s total.
     $expectedCount = count($request->uploadIds);
-    $maxRetries = 5;
+    $maxRetries = 60; // Up to 60 iterations, capped delay = ~60s total for slow ClamAV scans
     $sessions = null;
 
     for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
@@ -148,9 +149,23 @@ class UploadsController extends Controller
         break;
       }
 
+      // Check for failed sessions during retry loop - return immediately with specific message
+      $failedSession = UploadSession::whereIn('upload_id', $request->uploadIds)
+        ->where('user_id', $user->id)
+        ->where('status', 'failed')
+        ->whereNotNull('status_message')
+        ->first();
+
+      if ($failedSession) {
+        return response()->json([
+          'status' => 'error',
+          'message' => $failedSession->status_message
+        ], 400);
+      }
+
       if ($attempt < $maxRetries - 1) {
-        // Wait with exponential backoff: 100ms, 200ms, 400ms, 800ms
-        $delayMs = 100 * pow(2, $attempt);
+        // Wait with exponential backoff capped at 1000ms: 100ms, 200ms, 400ms, 800ms, 1000ms, 1000ms...
+        $delayMs = min(100 * pow(2, $attempt), 1000);
         usleep($delayMs * 1000);
 
         Log::debug('Waiting for upload sessions to complete', [
@@ -168,6 +183,20 @@ class UploadsController extends Controller
         'expected' => $expectedCount,
         'upload_ids' => $request->uploadIds
       ]);
+
+      // Check once more for failed sessions after all retries exhausted
+      $failedSession = UploadSession::whereIn('upload_id', $request->uploadIds)
+        ->where('user_id', $user->id)
+        ->where('status', 'failed')
+        ->whereNotNull('status_message')
+        ->first();
+
+      if ($failedSession) {
+        return response()->json([
+          'status' => 'error',
+          'message' => $failedSession->status_message
+        ], 400);
+      }
 
       return response()->json([
         'status' => 'error',

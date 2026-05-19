@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue'
 import { niceFileSize, timeUntilExpiration, getApiUrl, niceFileType, niceFileName } from '../utils'
-import { FileIcon, HeartCrack, TrendingDown, FileX, Boxes } from 'lucide-vue-next'
+import { FileIcon, HeartCrack, TrendingDown, FileX, Boxes, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { getShare } from '../api'
 import { domError } from '../domData'
 import { useToast } from 'vue-toastification'
@@ -57,6 +57,10 @@ const fetchShare = async () => {
     }
   }
 }
+
+// Legal acceptance (in-memory only, no persistence — GDPR/TTDSG)
+const legalAccepted = ref(false)
+const showLegalText = ref(false)
 
 const downloadFiles = () => {
   const downloadUrl = `${apiUrl}/api/shares/${props.downloadShareCode}/download`
@@ -187,29 +191,64 @@ const filesByDirectory = computed(() => {
           {{ share.description }}
         </div>
       </div>
-      <div class="download-button-container mt-3" v-if="!share.password_protected">
-        <button class="download-button" @click="downloadFiles">
-          {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
-        </button>
-      </div>
 
-      <div class="password-input-container" v-else>
-        <div class="input-container">
-          <input
-            type="password"
-            v-model="password"
-            :placeholder="$t('settings.share.password')"
-            :class="{ error: error }"
-            @keyup.enter="downloadPasswordProtectedFiles"
-          />
-          <div class="error-message" v-if="error">
-            {{ error }}
-          </div>
-        </div>
-        <button class="download-button mt-3" @click="downloadPasswordProtectedFiles">
-          {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
-        </button>
-      </div>
+     <!-- Legal acceptance: shown for both password-protected and unprotected shares -->
+     <div class="legal-acceptance mt-3">
+     <button type="button" class="legal-toggle secondary block" @click="showLegalText = !showLegalText">
+         <ShieldCheck />
+         <span class="flex-grow-1 text-start">
+         {{ showLegalText
+             ? $t('share.legal.hide', 'Hide notes')
+             : $t('share.legal.show', 'View Terms of Use') }}
+         </span>
+         <ChevronUp v-if="showLegalText" />
+         <ChevronDown v-else />
+     </button>
+     
+     <div v-if="showLegalText" class="legal-text">
+         <p>{{ $t('share.legal.intro', 'All content is confidential and may only be used for its intended purpose.') }}</p>
+         <ul>
+         <li>{{ $t('share.legal.bullet1', 'Uploads must not contain any illegal content or malware.') }}</li>
+         <li>{{ $t('share.legal.bullet2', 'Downloads and documents provided must not be shared or published without authorization.') }}</li>
+         <li>{{ $t('share.legal.bullet3', 'Accesses, as well as uploads and downloads, may be logged.') }}</li>
+         <li>{{ $t('share.legal.bullet4', 'To the extent permitted by law, CompanyName assumes no liability for data loss, errors, or damages resulting from the use of the data room.') }}</li>
+         <li>{{ $t('share.legal.bullet5', 'CompanyName may change or revoke access rights at any time.') }}</li>
+         </ul>
+     </div>
+     
+     <div class="checkbox-container mt-2">
+         <input type="checkbox" v-model="legalAccepted" id="legalAccepted" />
+         <label for="legalAccepted">
+         {{ $t('share.legal.accept', 'I have read the Terms of Use and agree to them.') }}
+         </label>
+     </div>
+     </div>
+     
+     <div class="download-button-container mt-3" v-if="!share.password_protected">
+     <button class="download-button" @click="downloadFiles" :disabled="!legalAccepted">
+         {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
+     </button>
+     </div>
+     
+     <div class="password-input-container" v-else>
+     <div class="input-container">
+         <input
+         type="password"
+         v-model="password"
+         :placeholder="$t('settings.share.password')"
+         :class="{ error: error }"
+         @keyup.enter="legalAccepted && downloadPasswordProtectedFiles()"
+         :disabled="!legalAccepted"
+         />
+         <div class="error-message" v-if="error">
+         {{ error }}
+         </div>
+     </div>
+     <button class="download-button mt-3" @click="downloadPasswordProtectedFiles" :disabled="!legalAccepted">
+         {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
+     </button>
+     </div>
+
     </template>
     <template v-else>
       <template v-if="shareExpired">
@@ -344,5 +383,71 @@ const filesByDirectory = computed(() => {
   display: flex;
   justify-content: center;
   margin-top: 0!important;
+}
+
+.legal-acceptance {
+  width: 100%;
+  padding: 0 20px;
+
+  .legal-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+  }
+
+  .legal-text {
+    margin-top: 10px;
+    padding: 14px 16px;
+    background: var(--panel-section-background-color);
+    border-radius: var(--panel-border-radius);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--panel-text-color);
+
+    p {
+      margin: 0 0 8px 0;
+      font-weight: 500;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+
+      li {
+        margin: 4px 0;
+      }
+    }
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 4px 0 4px;
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--primary-button-background-color);
+    }
+
+    label {
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--panel-text-color);
+      user-select: none;
+    }
+  }
 }
 </style>
