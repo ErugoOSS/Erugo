@@ -469,6 +469,81 @@ export const sendReverseShareInvite = async (email, name, message) => {
   return data
 }
 
+export const searchRecipientHistories = async (q, limit = 10) => {
+  const query = typeof q === 'string' ? q : ''
+  let lim = Number(limit)
+  if (!Number.isFinite(lim) || lim <= 0) {
+    lim = 10
+  }
+  if (lim > 20) {
+    lim = 20
+  }
+
+  const baseUrl = apiUrl ? `${apiUrl}/api/recipient-histories` : '/api/recipient-histories'
+  const url = `${baseUrl}?q=${encodeURIComponent(query)}&limit=${encodeURIComponent(String(lim))}`
+
+  const response = await fetchWithAuth(url, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getAllRecipientHistories = async () => {
+  const baseUrl = apiUrl ? `${apiUrl}/api/recipient-histories/all` : '/api/recipient-histories/all'
+  const response = await fetchWithAuth(baseUrl, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const updateRecipientHistory = async (id, email, name) => {
+  const baseUrl = apiUrl ? `${apiUrl}/api/recipient-histories/${id}` : `/api/recipient-histories/${id}`
+  const response = await fetchWithAuth(baseUrl, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      email,
+      name
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const deleteRecipientHistory = async (id) => {
+  const baseUrl = apiUrl ? `${apiUrl}/api/recipient-histories/${id}` : `/api/recipient-histories/${id}`
+  const response = await fetchWithAuth(baseUrl, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const acceptReverseShareInvite = async (token) => {
   const response = await fetch(`${apiUrl}/api/reverse-shares/accept?token=${token}`, {
     method: 'GET',
@@ -1720,4 +1795,22 @@ export const uploadFilesInChunks = async (
       }
     }
   }
+}
+
+export const sendUploadConfirmation = async (shareId, recipients) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/send-upload-confirmation`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      share_id: shareId,
+      recipients: recipients
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
 }

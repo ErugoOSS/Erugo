@@ -1,9 +1,10 @@
 <script setup>
-import { ref, defineExpose } from 'vue'
+import { ref, defineExpose, watch } from 'vue'
 import { useTranslate } from '@tolgee/vue'
 import { MessageCircleMore, UserRoundCheck, CircleX } from 'lucide-vue-next'
-import { sendReverseShareInvite } from '../api'
+import { sendReverseShareInvite, searchRecipientHistories } from '../api'
 import { useToast } from 'vue-toastification'
+import debounce from '../debounce'
 const { t } = useTranslate()
 const toast = useToast()
 const reverseInviteActive = ref(false)
@@ -14,16 +15,67 @@ const invite = ref({
 })
 const errors = ref({})
 
+const recipientSuggestions = ref([])
+const recipientSuggestionsOpen = ref(false)
+
+const closeRecipientSuggestions = () => {
+  recipientSuggestionsOpen.value = false
+  recipientSuggestions.value = []
+}
+
+const getRecipientQuery = () => {
+  const email = (invite.value.email || '').trim()
+  const name = (invite.value.name || '').trim()
+  if (email.length >= 2) return email
+  if (name.length >= 2) return name
+  return ''
+}
+
+const loadRecipientSuggestions = debounce(async () => {
+  const q = getRecipientQuery()
+  if (!q) {
+    closeRecipientSuggestions()
+    return
+  }
+
+  try {
+    const items = await searchRecipientHistories(q, 10)
+    recipientSuggestions.value = Array.isArray(items) ? items : []
+    recipientSuggestionsOpen.value = recipientSuggestions.value.length > 0
+  } catch (e) {
+    closeRecipientSuggestions()
+  }
+}, 200)
+
+watch(
+  () => [invite.value.email, invite.value.name],
+  () => {
+    loadRecipientSuggestions()
+  }
+)
+
 const reverseInviteClickOutside = (event) => {
   if (!event.target.closest('.user-form')) {
     reverseInviteActive.value = false
+    closeRecipientSuggestions()
   }
+}
+
+const handleRecipientSuggestionClick = (event, item) => {
+  event.stopPropagation()
+  if (!item) return
+  invite.value.email = item.email || ''
+  if (!invite.value.name && item.name) {
+    invite.value.name = item.name
+  }
+  closeRecipientSuggestions()
 }
 
 const sendReverseInvite = async () => {
   try {
     await sendReverseShareInvite(invite.value.email, invite.value.name, invite.value.message)
     reverseInviteActive.value = false
+    closeRecipientSuggestions()
     toast.success(t.value('reverse_invite_send.success'))
   } catch (error) {
     console.error(error)
@@ -33,6 +85,15 @@ const sendReverseInvite = async () => {
 const showReverseInviteForm = () => {
   reverseInviteActive.value = true
 }
+
+watch(
+  () => reverseInviteActive.value,
+  (active) => {
+    if (!active) {
+      closeRecipientSuggestions()
+    }
+  }
+)
 
 //expose the functions
 defineExpose({
@@ -58,6 +119,18 @@ defineExpose({
           required
           :class="{ error: errors.email }"
         />
+        <div v-if="recipientSuggestionsOpen" class="recipient-suggestions">
+          <button
+            v-for="(item, idx) in recipientSuggestions"
+            :key="`${item.email}-${idx}`"
+            type="button"
+            class="recipient-suggestion"
+            @click="handleRecipientSuggestionClick($event, item)"
+          >
+            <span class="recipient-name" v-if="item.name">{{ item.name }}</span>
+            <span class="recipient-email">{{ item.email }}</span>
+          </button>
+        </div>
         <div class="error-message" v-if="errors.email">
           {{ errors.email }}
         </div>
@@ -158,5 +231,33 @@ defineExpose({
       transform: translate(-50%, 0%);
     }
   }
+}
+
+.recipient-suggestions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--panel-background-color);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.recipient-suggestion {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recipient-name {
+  font-weight: 600;
+}
+
+.recipient-email {
+  opacity: 0.85;
 }
 </style>

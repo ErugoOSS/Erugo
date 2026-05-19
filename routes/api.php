@@ -19,6 +19,7 @@ use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
+use App\Http\Controllers\RecipientHistoriesController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -62,6 +63,13 @@ Route::group([], function ($router) {
         Route::get('/', [UsersController::class, 'me'])->name('profile.view');
         Route::put('/', [UsersController::class, 'updateMe'])->name('profile.update');
         Route::delete('/providers/{providerId}', [UsersController::class, 'unlinkProvider'])->name('profile.unlinkProvider');
+    });
+
+    Route::group(['middleware' => ['auth']], function ($router) {
+        Route::get('/recipient-histories', [RecipientHistoriesController::class, 'index'])->name('recipient-histories.index');
+        Route::get('/recipient-histories/all', [RecipientHistoriesController::class, 'getAll'])->name('recipient-histories.getAll');
+        Route::put('/recipient-histories/{id}', [RecipientHistoriesController::class, 'update'])->name('recipient-histories.update');
+        Route::delete('/recipient-histories/{id}', [RecipientHistoriesController::class, 'delete'])->name('recipient-histories.delete');
     });
 
     //manage users [auth, admin]
@@ -132,6 +140,9 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+
+        //send upload confirmation email
+        Route::post('/send-upload-confirmation', [SharesController::class, 'sendUploadConfirmation'])->name('shares.sendUploadConfirmation');
     });
 
     //all shares [auth, admin]

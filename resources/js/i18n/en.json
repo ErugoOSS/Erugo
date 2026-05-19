@@ -557,6 +557,7 @@
       "emailTemplates": "Manage email templates",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
+      "recipientHistory": "Manage Your Recipients",
       "stats": "Your Erugo system at a glance",
       "system": "Manage the behaviour of your Erugo instance.",
       "users": "Manage Your Users."
@@ -781,6 +782,7 @@
       "enable_share_deleted_emails": "Enable Share Deleted Emails",
       "enable_share_deletion_warning_emails": "Enable Share Deletion Warning Emails",
       "enable_share_downloaded_emails": "Enable Share Downloaded Emails",
+      "enable_upload_confirmation_emails": "Enable Upload Confirmation Emails",
       "enable_share_expired_warning_emails": "Enable Share Expired Emails",
       "enable_share_expiry_warning_emails": "Enable Share Expiry Warning Emails",
       "enabled": "Enabled",
@@ -797,6 +799,7 @@
       "login_message_description": "Add a custom message or announcement that will be displayed on the login screen. This can be used for welcome messages, important notifications, or temporary announcements.",
       "max_expiry_time": "Maximum Expiry Time",
       "max_expiry_time_description": "Set the maximum number of days a user can select for share expiry upon creation. Empty the value to allow unlimited expiry time.",
+      "allow_unlimited_expiry": "Allow Unlimited Expiry Time",
       "max_share_size": "Maximum Share Size",
       "max_share_size_description": "Set the maximum size of a share that a user can create. The value is in megabytes or gigabytes.",
       "pattern_token_alphanumeric": "Alphanumeric (0-9, A-Z, a-z)",
@@ -893,6 +896,7 @@
       "manage": "Manage",
       "myProfile": "My Account",
       "myShares": "My Shares",
+      "recipientHistory": "Recipient-list",
       "reverse_invite": "Create reverse share request",
       "share": {
         "password_protect": "Password protect share"
@@ -915,6 +919,11 @@
       "admin": "Admin",
       "admin_help_text": "Make the user an admin.",
       "admin_help_text_2": "User will have the same privileges as you.",
+      "storage_limit": "Storage Limit (bytes)",
+      "storage_limit_placeholder": "Unlimited",
+      "storage_limit_help_text": "Set the maximum storage limit for this user in bytes. Leave empty for unlimited storage.",
+      "allow_unlimited_expiry": "Allow Unlimited Expiry Time",
+      "allow_unlimited_expiry_help_text": "Allow this user to create shares with unlimited expiry time.",
       "cannot_delete_yourself": "You cannot delete yourself",
       "close": "Cancel",
       "confirm_force_reset_password": "Really reset user's password? They will need to create a new password before they can use the system again.",

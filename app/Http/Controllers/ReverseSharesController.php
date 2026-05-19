@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Jobs\sendEmail;
 use App\Mail\reverseShareInviteMail;
 use App\Models\Setting;
-
+use App\Services\RecipientHistoryService;
 
 class ReverseSharesController extends Controller
 {
@@ -99,6 +99,12 @@ class ReverseSharesController extends Controller
             'token' => $encryptedToken, // Will be null for existing users
             'isExistingUser' => $existingUser !== null
         ]);
+
+        app(RecipientHistoryService::class)->touchRecipient(
+            $request->user()->id,
+            $request->input('recipient_email'),
+            $request->input('recipient_name')
+        );
 
         return response()->json([
             'status' => 'success',

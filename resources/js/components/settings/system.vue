@@ -63,6 +63,8 @@ const settings = ref({
   share_url_mode: 'haiku',
   share_url_pattern: '******',
   emails_share_downloaded_enabled: '',
+  emails_upload_confirmation_enabled: '',
+  allow_unlimited_expiry: '',
   smtp_host: '',
   smtp_port: '',
   smtp_encryption: 'tls',
@@ -641,6 +643,18 @@ const handleDeleteAuthProvider = async (id) => {
                   <input type="number" id="max_expiry_time" v-model="settings.max_expiry_time" placeholder="∞" />
                 </div>
                 <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="allow_unlimited_expiry"
+                      v-model="settings.allow_unlimited_expiry"
+                    />
+                    <label for="allow_unlimited_expiry">
+                      {{ $t('settings.system.allow_unlimited_expiry') }}
+                    </label>
+                  </div>
+                </div>
+                <div class="setting-group-body-item">
                   <div class="row">
                     <div class="col pe-0">
                       <label for="max_share_size">{{ $t('settings.system.max_share_size') }}</label>
@@ -772,6 +786,19 @@ const handleDeleteAuthProvider = async (id) => {
                     />
                     <label for="emails_share_downloaded_enabled">
                       {{ $t('settings.system.enable_share_downloaded_emails') }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      id="emails_upload_confirmation_enabled"
+                      v-model="settings.emails_upload_confirmation_enabled"
+                    />
+                    <label for="emails_upload_confirmation_enabled">
+                      {{ $t('settings.system.enable_upload_confirmation_emails') }}
                     </label>
                   </div>
                 </div>

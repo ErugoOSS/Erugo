@@ -699,4 +699,35 @@ class SharesController extends Controller
       sendEmail::dispatch($share->user->email, shareDownloadedMail::class, ['share' => $share]);
     }
   }
+
+  private function sendUploadConfirmationEmail(User $user, Share $share, $recipients)
+  {
+    $settingsService = new SettingsService();
+    $sendEmail = $settingsService->get('emails_upload_confirmation_enabled');
+    if ($sendEmail == 'true' && $user) {
+      sendEmail::dispatch($user->email, \App\Mail\uploadConfirmationMail::class, ['user' => $user, 'share' => $share, 'recipients' => $recipients]);
+    }
+  }
+
+  public function sendUploadConfirmation(Request $request)
+  {
+    $user = Auth::user();
+    $shareId = $request->input('share_id');
+    $recipients = $request->input('recipients', []);
+
+    $share = Share::where('long_id', $shareId)->first();
+    if (!$share) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Share not found'
+      ], 404);
+    }
+
+    $this->sendUploadConfirmationEmail($user, $share, $recipients);
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Upload confirmation email sent'
+    ]);
+  }
 }
