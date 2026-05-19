@@ -61,7 +61,8 @@ const reverseInviteClickOutside = (event) => {
   }
 }
 
-const handleRecipientSuggestionClick = (item) => {
+const handleRecipientSuggestionClick = (event, item) => {
+  event.stopPropagation()
   if (!item) return
   invite.value.email = item.email || ''
   if (!invite.value.name && item.name) {
@@ -124,7 +125,7 @@ defineExpose({
             :key="`${item.email}-${idx}`"
             type="button"
             class="recipient-suggestion"
-            @click="handleRecipientSuggestionClick(item)"
+            @click="handleRecipientSuggestionClick($event, item)"
           >
             <span class="recipient-name" v-if="item.name">{{ item.name }}</span>
             <span class="recipient-email">{{ item.email }}</span>
