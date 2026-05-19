@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, defineExpose, nextTick } from 'vue'
-import { getMyProfile, updateMyProfile, getAvailableAuthProviders, unlinkProvider } from '../../api'
-import { User, CircleX, UserRoundCheck, UserRoundPen, Fingerprint, Link, Unlink } from 'lucide-vue-next'
+import { ref, onMounted, defineExpose, nextTick, computed } from 'vue'
+import { getMyProfile, updateMyProfile, getAvailableAuthProviders, unlinkProvider, getMyShares } from '../../api'
+import { User, CircleX, UserRoundCheck, UserRoundPen, Fingerprint, Link, Unlink, HardDrive, FileBox, Clock } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { store } from '../../store'
+import { niceFileSize } from '../../utils'
 
 import { useTranslate } from '@tolgee/vue'
 
@@ -16,6 +17,7 @@ const editUser = ref({})
 const errors = ref({})
 const availableAuthProviders = ref([])
 const onLocalhost = ref(false)
+const shares = ref([])
 
 onMounted(async () => {
   await loadEverything()
@@ -30,6 +32,11 @@ onMounted(async () => {
     store.autoShowProfileEdit = false
   }
   onLocalhost.value = window.location.hostname === 'localhost'
+  try {
+    shares.value = await getMyShares(true)
+  } catch (e) {
+    shares.value = []
+  }
 })
 
 const loadEverything = async () => {
@@ -55,6 +62,33 @@ const loadAvailableAuthProviders = async () => {
   } else {
     availableAuthProviders.value = providers
   }
+}
+
+const activeShares = computed(() =>
+  shares.value.filter(s => !s.deleted_at && !isExpired(s))
+)
+const expiredShares = computed(() =>
+  shares.value.filter(s => !s.deleted_at && isExpired(s))
+)
+const isExpired = (share) => {
+  if (!share.expires_at) return false
+  return new Date(share.expires_at) < new Date()
+}
+const totalActiveStorage = computed(() =>
+  activeShares.value.reduce((sum, s) => sum + (s.size || 0), 0)
+)
+const totalExpiredStorage = computed(() =>
+  expiredShares.value.reduce((sum, s) => sum + (s.size || 0), 0)
+)
+const sortedActiveShares = computed(() =>
+  [...activeShares.value].sort((a, b) => (b.size || 0) - (a.size || 0))
+)
+const sortedExpiredShares = computed(() =>
+  [...expiredShares.value].sort((a, b) => (b.size || 0) - (a.size || 0))
+)
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 const editUserFormClickOutside = (e) => {
@@ -172,6 +206,12 @@ const handleUnlinkProvider = async (provider) => {
             </a>
           </li>
           <li>
+            <a href="#" @click.prevent="handleNavItemClicked('storage_usage')">
+              <HardDrive />
+              {{ $t('settings.title.storage_usage', 'Storage') }}
+            </a>
+          </li>
+          <li>
             <a href="#" @click.prevent="handleNavItemClicked('linked_accounts')">
               <Link />
               {{ $t('settings.title.linked_accounts') }}
@@ -201,7 +241,7 @@ const handleUnlinkProvider = async (provider) => {
                   <input type="text" id="name" v-model="profile.name" />
                 </div>
 
-                <div class="setting-group-body-item mt-3">
+                <div class="setting-group-body-item mt-3" v-if="store.isAdmin()">
                   <button class="secondary" @click="editUserFormActive = true">
                     <UserRoundPen />
                     {{ $t('settings.account.change_password') }}
@@ -226,7 +266,50 @@ const handleUnlinkProvider = async (provider) => {
           <div class="d-none d-md-block col ps-0">
             <div class="section-help">
               <h6>{{ $t('settings.title.myProfile') }}</h6>
-              <p>{{ $t('settings.account.myProfile_description') }}</p>
+              <p v-if="store.isAdmin()">{{ $t('settings.account.myProfile_description') }}</p>
+              <p v-else>{{ $t('settings.account.myProfile_description_user', 'Aktualisieren Sie Ihre E-Mail Adresse oder ändern Sie Ihren Namen.') }}</p>
+            </div>
+          </div>
+        </div>
+
+<!-- Storage Usage -->
+        <div class="row mb-5">
+          <div class="col-12 col-md-6 pe-0 ps-0 ps-md-3" id="storage_usage">
+            <div class="setting-group">
+              <div class="setting-group-header">
+                <h3>
+                  <HardDrive />
+                  {{ $t('settings.title.storage_usage', 'Storage') }}
+                </h3>
+              </div>
+              <div class="setting-group-body">
+                <div class="setting-group-body-item">
+                  <div class="storage-summary">
+                    <div class="storage-card storage-card--active">
+                      <div class="storage-card-icon"><FileBox /></div>
+                      <div class="storage-card-body">
+                        <div class="storage-card-value">{{ niceFileSize(totalActiveStorage) }}</div>
+                        <div class="storage-card-label">{{ $t('settings.account.active_storage', 'Active storage') }}</div>
+                        <div class="storage-card-sub">{{ activeShares.length }} {{ $t('settings.account.shares', 'shares') }}</div>
+                      </div>
+                    </div>
+                    <div class="storage-card storage-card--expired" v-if="expiredShares.length > 0">
+                      <div class="storage-card-icon"><Clock /></div>
+                      <div class="storage-card-body">
+                        <div class="storage-card-value">{{ niceFileSize(totalExpiredStorage) }}</div>
+                        <div class="storage-card-label">{{ $t('settings.account.expired_storage', 'Expired — pending deletion') }}</div>
+                        <div class="storage-card-sub">{{ expiredShares.length }} {{ $t('settings.account.shares', 'shares') }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-md-block col ps-0">
+            <div class="section-help">
+              <h6>{{ $t('settings.title.storage_usage', 'Storage') }}</h6>
+              <p>{{ $t('settings.account.storage_description', 'Gesamtgröße aller Dateien in Ihren aktiven Freigaben. Abgelaufene Freigaben stehen zur Löschung an und werden automatisch entfernt.') }}</p>
             </div>
           </div>
         </div>
@@ -268,7 +351,7 @@ const handleUnlinkProvider = async (provider) => {
                         <Link />
                         {{ $t('settings.account.create_link') }}
                       </button>
-                      <button class="secondary block" @click="handleUnlinkProvider(provider)" v-if="provider.is_linked">
+                      <button class="secondary block" @click="handleUnlinkProvider(provider)" v-if="provider.is_linked && store.isAdmin()">
                         <Unlink />
                         {{ $t('settings.account.unlink') }}
                       </button>
@@ -351,6 +434,41 @@ const handleUnlinkProvider = async (provider) => {
 </template>
 
 <style lang="scss" scoped>
+.storage-summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.storage-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--panel-border-radius);
+  background: var(--panel-section-background-color-alt);
+  flex: 1;
+  min-width: 200px;
+
+  .storage-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    svg { width: 22px; height: 22px; color: #ffffff; }
+  }
+
+  .storage-card-value { font-size: 1.3rem; font-weight: 700; color: var(--panel-text-color); line-height: 1.2; }
+  .storage-card-label { font-size: 0.8rem; color: var(--panel-text-color); opacity: 0.7; margin-top: 2px; }
+  .storage-card-sub { font-size: 0.75rem; color: var(--panel-text-color); opacity: 0.5; margin-top: 2px; }
+
+  &.storage-card--active .storage-card-icon { background-color: var(--primary-button-background-color); }
+  &.storage-card--expired .storage-card-icon { background-color: #9ca3af; }
+}
+
 .profile-card {
   width: 450px;
   border-radius: 10px;
