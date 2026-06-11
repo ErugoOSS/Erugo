@@ -10,9 +10,10 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 use App\Models\Setting;
+use App\Mail\Concerns\RendersSubject;
 class passwordResetMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RendersSubject;
 
     public $token;
     public $user;
@@ -32,7 +33,7 @@ class passwordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_passwordResetMail.twig')->first()->value,
+            subject: $this->renderSubject('email_subject_passwordResetMail.twig'),
         );
     }
 

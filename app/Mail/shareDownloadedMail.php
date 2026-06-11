@@ -10,9 +10,10 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
 use App\Models\Setting;
+use App\Mail\Concerns\RendersSubject;
 class shareDownloadedMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RendersSubject;
     public $share;
     /**
      * Create a new message instance.
@@ -28,7 +29,7 @@ class shareDownloadedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_shareDownloadedMail.twig')->first()->value,
+            subject: $this->renderSubject('email_subject_shareDownloadedMail.twig'),
         );
     }
 
