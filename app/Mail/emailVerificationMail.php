@@ -10,10 +10,11 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 use App\Models\Setting;
+use App\Mail\Concerns\RendersSubject;
 
 class emailVerificationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RendersSubject;
 
     public $code;
     public $user;
@@ -33,7 +34,7 @@ class emailVerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: Setting::where('key', 'email_subject_emailVerificationMail.twig')->first()->value,
+            subject: $this->renderSubject('email_subject_emailVerificationMail.twig'),
         );
     }
 
