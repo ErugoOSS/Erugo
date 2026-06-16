@@ -18,7 +18,7 @@ import {
   LockOpen,
   RotateCcw
 } from 'lucide-vue-next'
-import { niceFileSize, niceFileType, simpleUUID } from '../utils'
+import { niceFileSize, niceFileType, niceTime, simpleUUID } from '../utils'
 import { getHealth, getMyProfile, uploadFilesInChunks, logout } from '../api'
 import Recipient from './recipient.vue'
 import { uploadController } from '../store'
@@ -834,7 +834,7 @@ const filesByDirectory = computed(() => {
               {{ niceFileSize(uploadSpeed) }}/s
             </div>
             <div class="progress-item time-remaining-text">
-              {{ Math.round(timeRemaining) }}{{ $t('uploader.time_remaining_suffix', 's') }} {{ t('uploader.time_remaining_text', 'remaining') }}
+              {{ niceTime(timeRemaining) }} {{ t('uploader.time_remaining_text', 'remaining') }}
             </div>
             
             <div v-if="currentFileName" class="progress-item file-name-text">

@@ -12,6 +12,15 @@ const simpleUUID = () => {
   });
 }
 
+const niceTime = seconds => {
+  if (seconds < 0) return '0s'
+  if (seconds < 60) return `${Math.round(seconds)}s`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`
+  const h = Math.floor(seconds / 3600)
+  const m = Math.round((seconds % 3600) / 60)
+  return `${h}h ${m}m`
+}
+
 const niceFileSize = size => {
   //return in most readable format
   if (size < 1024) return `${size} bytes`
@@ -115,4 +124,4 @@ const convertToRealType = value => {
   return value
 }
 
-export { niceFileSize, niceFileType, niceExpirationDate, timeUntilExpiration, getApiUrl, getTusdUrl, simpleUUID, niceFileName, niceDate, niceString, niceNumber, mapSettings }
+export { niceTime, niceFileSize, niceFileType, niceExpirationDate, timeUntilExpiration, getApiUrl, getTusdUrl, simpleUUID, niceFileName, niceDate, niceString, niceNumber, mapSettings }
