@@ -80,6 +80,9 @@
     "welcome": "Welcome"
   },
   "button": {
+    "copied": "Copied!",
+    "copy": "Copy",
+    "generate_link": "Generate Link",
     "reverse_share_invite": "Create a reverse share request",
     "reverse_share_invite_send": "Send Request",
     "share": {
@@ -412,8 +415,13 @@
     "from": "Message from {name}"
   },
   "processing_uploaded_files": "Processing uploaded files",
+  "reverse_invite": {
+    "link_generated_desc": "The reverse share link for {name} has been created successfully.",
+    "link_generated_title": "Link Generated",
+    "send_via_email": "Send invitation via email"
+  },
   "reverse_invite_send": {
-    "error": "Unable to send reverse share invite",
+    "error": "Unable to create or send reverse share invite",
     "success": "Reverse share invite sent!"
   },
   "settings": {
