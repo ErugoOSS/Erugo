@@ -311,14 +311,13 @@ class UploadsController extends Controller
       $sanitizedFilename = $file->name;
       $destFile = $destPath . '/' . $sanitizedFilename;
       
-      // Move file to share directory
-      // Use copy + unlink instead of rename to handle cross-filesystem moves
+      // Move file to share directory.
+      // Use copy + unlink has fallback of rename to handle cross-filesystem moves
       if (file_exists($sourcePath)) {
-        if (copy($sourcePath, $destFile)) {
-          unlink($sourcePath);
-        } else {
-          // Fallback to rename if copy fails
-          rename($sourcePath, $destFile);
+        if (!rename($sourcePath, $destFile)) {
+          if(copy($sourcePath, $destFile)) {
+            unlink($sourcePath);
+          }
         }
       }
       
