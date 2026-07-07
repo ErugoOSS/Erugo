@@ -41,7 +41,10 @@ class sendExpiryWarningEmails implements ShouldQueue
             ->get();
 
         foreach ($shares as $share) {
-            sendEmail::dispatch($share->user->email, shareExpiryWarningMail::class, ['share' => $share]);
+            $user = $share->invite ? $share->invite->user : $share->user;
+            if ($user) {
+                sendEmail::dispatch($user->email, shareExpiryWarningMail::class, ['share' => $share]);
+            }
             $share->sent_expiry_warning = true;
             $share->save();
         }
