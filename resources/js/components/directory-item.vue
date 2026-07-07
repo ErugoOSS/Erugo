@@ -42,6 +42,10 @@ const props = defineProps({
   completedFiles: {
     type: Array,
     default: () => []
+  },
+  password: {
+    type: String,
+    default: ''
   }
 })
 
@@ -82,7 +86,23 @@ function downloadFile(file, dirName = null) {
   }
   
   const downloadUrl = `${apiUrl}/api/shares/${props.shareCode}/download/file/${encodeURIComponent(filePath)}`
-  window.location.href = downloadUrl
+  
+  // Using a hidden form to force the POST and send the password securely
+  const form = document.createElement('form')
+  form.action = downloadUrl
+  form.method = 'POST'
+
+  if (props.password) {
+    const passwordInput = document.createElement('input')
+    passwordInput.type = 'hidden'
+    passwordInput.name = 'password'
+    passwordInput.value = props.password
+    form.appendChild(passwordInput)
+  }
+
+  document.body.appendChild(form)
+  form.submit()
+  setTimeout(() => document.body.removeChild(form), 0)
 }
 
 // Helper function to get directories from structure
@@ -218,6 +238,7 @@ function getDirectories(structure) {
           :current-uploading-file="currentUploadingFile"
           :current-file-progress="currentFileProgress"
           :completed-files="completedFiles"
+          :password="password"
         />
       </div>
     </template>

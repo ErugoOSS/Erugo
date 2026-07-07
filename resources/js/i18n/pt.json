@@ -969,7 +969,8 @@
     },
     "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver.",
     "passwordNotProtected": "Aberto",
-    "passwordProtected": "Protegido por palavra-passe"
+    "passwordProtected": "Protegido por palavra-passe",
+    "unlocked": "Partilha desbloqueada com sucesso!"
   },
   "total_size": "Tamanho Total",
   "upload": {

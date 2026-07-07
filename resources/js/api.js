@@ -276,6 +276,10 @@ const fetchWithAuth = async (url, options = {}) => {
       const clonedResponse = response.clone()
       const responseData = await clonedResponse.json()
 
+      if (responseData?.message === 'Invalid password') {
+        return response
+      }
+
       // Check for password change required in response body
       if (responseData?.message === 'Password change required') {
         store.setSettingsOpen(false)
@@ -969,12 +973,16 @@ export const pruneExpiredShares = async () => {
   return data.data.shares
 }
 
-export const getShare = async (id) => {
+export const getShare = async (id, password = null) => {
+  const headers = {
+    ...addJsonHeader()
+  }
+  if (password) {
+    headers['X-Share-Password'] = password
+  }
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
     method: 'GET',
-    headers: {
-      ...addJsonHeader()
-    }
+    headers: headers
   })
   const data = await response.json()
   if (!response.ok) {
