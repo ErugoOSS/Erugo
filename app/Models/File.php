@@ -15,6 +15,15 @@ class File extends Model
         'temp_path'
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function (File $file) {
+            if ($file->temp_path && file_exists($file->temp_path)) {
+                unlink($file->temp_path);
+            }
+        });
+    }
+
     public function share()
     {
         return $this->belongsTo(Share::class);

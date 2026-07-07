@@ -38,6 +38,32 @@ class UploadSession extends Model
     ];
 
     /**
+     * Delete file when record is removed
+     */
+    protected static function booted()
+    {
+        static::deleting(function (UploadSession $uploadSession) {
+            $uploadPath = storage_path('app/uploads/' . $uploadSession->upload_id);
+            if (file_exists($uploadPath)) {
+                unlink($uploadPath);
+            }
+            // Also delete the .info file that tusd creates
+            $infoPath = $uploadPath . '.info';
+            if (file_exists($infoPath)) {
+                unlink($infoPath);
+            }
+            // Delete associated File record if exists and not completed
+            $file = $uploadSession->file;
+            if ($file) {
+                // temp_file is not null, so the upload has not completed
+                if ($file->temp_path) {
+                    $file->delete();
+                }
+            }
+        });
+    }
+
+    /**
      * Get the bundle file IDs as an array
      */
     public function getBundleFileIdsArray(): array

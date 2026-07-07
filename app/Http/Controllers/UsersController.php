@@ -359,7 +359,7 @@ class UsersController extends Controller
       \App\Models\Download::where('share_id', $share->id)->delete();
 
       // Delete file records for this share
-      \App\Models\File::where('share_id', $share->id)->delete();
+      \App\Models\File::where('share_id', $share->id)->get()->each->delete();
 
       // Clean up the actual files on disk (suppress email notifications)
       $share->cleanFiles(true);

@@ -180,32 +180,12 @@ class TusdHooksController extends Controller
             ->whereIn('status', ['pending', 'complete'])
             ->get();
 
-        foreach ($sessions as $session) {
-            // Delete the uploaded file from disk
-            $uploadPath = storage_path('app/uploads/' . $session->upload_id);
-            if (file_exists($uploadPath)) {
-                unlink($uploadPath);
-            }
-            // Also delete the .info file that tusd creates
-            $infoPath = $uploadPath . '.info';
-            if (file_exists($infoPath)) {
-                unlink($infoPath);
-            }
-
-            // Delete associated File record if exists
-            if ($session->file_id) {
-                $file = File::find($session->file_id);
-                if ($file) {
-                    $file->delete();
-                }
-            }
-
-            $session->delete();
-        }
+        $deletedCount = $sessions->count();
+        $sessions->each->delete();
 
         Log::info('tusd: Cleaned up pending uploads for user exceeding limit', [
             'user_id' => $userId,
-            'sessions_deleted' => $sessions->count()
+            'sessions_deleted' => $deletedCount
         ]);
     }
 
@@ -532,13 +512,6 @@ class TusdHooksController extends Controller
             $session = UploadSession::where('upload_id', $uploadId)->first();
 
             if ($session) {
-                // If a file was created, delete it
-                if ($session->file_id) {
-                    $file = File::find($session->file_id);
-                    if ($file) {
-                        $file->delete();
-                    }
-                }
                 $session->delete();
 
                 Log::info('tusd post-terminate: Upload session cleaned up', [
