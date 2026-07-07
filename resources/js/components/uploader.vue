@@ -171,6 +171,16 @@ const dismissInterruptedUploadPanel = () => {
 const dismissAndClearInterruptedUpload = () => {
   showInterruptedUploadPanel.value = false
   clearUploadState()
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('tus::')) {
+        localStorage.removeItem(key)
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to clear Tus local storage', e)
+  }
 }
 
 onMounted(async () => {
