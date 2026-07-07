@@ -12,12 +12,13 @@ tests
 *.yaml
 .env*
 .editorconfig
+.prettierrc
 phpunit.xml
 README.md
 CHANGELOG.md
-docker
 docker-compose*
 Dockerfile*
+publish-docker-image.sh
 
 # Vendor cleanup
 vendor/**/*Test.php
@@ -31,4 +32,4 @@ vendor/**/docs
 vendor/**/.git
 vendor/**/.github
 
-storage/*
+storage
