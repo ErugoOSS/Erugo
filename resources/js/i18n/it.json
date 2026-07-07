@@ -80,6 +80,9 @@
     "welcome": "Benvenuto"
   },
   "button": {
+    "copied": "Copiato!",
+    "copy": "Copia",
+    "generate_link": "Genera link",
     "reverse_share_invite": "Creare una richiesta di condivisione inversa",
     "reverse_share_invite_send": "Invia richiesta",
     "share": {
@@ -412,8 +415,13 @@
     "from": "Messaggio da {name}"
   },
   "processing_uploaded_files": "Elaborazione dei file caricati",
+  "reverse_invite": {
+    "link_generated_desc": "Il link di reverse share per {name} è stato creato con successo.",
+    "link_generated_title": "Link generato",
+    "send_via_email": "Invia invito tramite email"
+  },
   "reverse_invite_send": {
-    "error": "Impossibile inviare l'invito alla condivisione inversa",
+    "error": "Impossibile creare o inviare invio di invio inverso di condivisione",
     "success": "Invito alla condivisione inversa inviato!"
   },
   "settings": {

@@ -456,7 +456,7 @@ export const login = async (email, password) => {
   return buildAuthSuccessData(data)
 }
 
-export const sendReverseShareInvite = async (email, name, message) => {
+export const sendReverseShareInvite = async (email, name, message, sendEmail) => {
   const response = await fetchWithAuth(`${apiUrl}/api/reverse-shares/invite`, {
     method: 'POST',
     headers: {
@@ -465,7 +465,8 @@ export const sendReverseShareInvite = async (email, name, message) => {
     body: JSON.stringify({
       recipient_name: name,
       recipient_email: email,
-      message: message
+      message: message,
+      send_email: sendEmail
     })
   })
   const data = await response.json()
