@@ -975,7 +975,7 @@
       "extend": "Verleng"
     },
     "contains": {
-      "count": "{value, plural, one {Bevat: # bestand} other {Bevat: {value} bestanden}}"
+      "count": "{value, plural, one {# bestand} other {# bestanden}}"
     },
     "created": "Gemaakt",
     "data_loading": "Laden...",
