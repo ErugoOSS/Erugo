@@ -27,7 +27,7 @@ class pruneLogs implements ShouldQueue
     foreach ($logFiles as $logFile) {
       Log::info('Checking log file: ' . $logFile);
       //if the file exists and is older than 14 days, delete it
-      if (file_exists($logFile) && filemtime($logFile) < time() - 14 * 24 * 60 * 60) {
+      if (file_exists($logFile) && filemtime($logFile) < time() - 365 * 24 * 60 * 60) {
         unlink($logFile);
       }
     }
