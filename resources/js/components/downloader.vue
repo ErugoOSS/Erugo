@@ -33,9 +33,7 @@ onMounted(() => {
     const errorMessage = urlParams.get('error')
 
     if (errorMessage) {
-      if (errorMessage == 'password_required') {
-        toast.error(t.value('share.download.password_required'))
-      } else if (errorMessage == 'invalid_password') {
+      if (errorMessage == 'invalid_password') {
         toast.error(t.value('share.download.invalid_password'))
       }
     }
@@ -59,8 +57,25 @@ const fetchShare = async () => {
 }
 
 const downloadFiles = () => {
-  const downloadUrl = `${apiUrl}/api/shares/${props.downloadShareCode}/download`
-  window.location.href = downloadUrl
+  if (share.value.password_protected && password.value) {
+    const form = document.createElement('form')
+    form.action = `${apiUrl}/api/shares/${props.downloadShareCode}/download`
+    form.method = 'POST'
+
+    const passwordInput = document.createElement('input')
+    passwordInput.type = 'password'
+    passwordInput.name = 'password'
+    passwordInput.value = password.value
+    form.appendChild(passwordInput)
+
+    document.body.appendChild(form)
+    form.submit()
+    setTimeout(() => document.body.removeChild(form), 0)
+  }
+  else {
+    const downloadUrl = `${apiUrl}/api/shares/${props.downloadShareCode}/download`
+    window.location.href = downloadUrl
+  }
 }
 
 const splitFullName = (fullName) => {
@@ -74,32 +89,30 @@ const splitFullName = (fullName) => {
 const password = ref('')
 const error = ref(null)
 
-const downloadPasswordProtectedFiles = () => {
-  //is the password filled in?
+const unlockShare = async () => {
   if (!password.value) {
     toast.error(t.value('share.download.password_required'))
     error.value = t.value('share.download.password_required_short')
     return
   }
 
-  //create a form and submit it
-  const form = document.createElement('form')
-  form.action = `${apiUrl}/api/shares/${props.downloadShareCode}/download`
-  form.method = 'POST'
-
-  //add the password input
-  const passwordInput = document.createElement('input')
-  passwordInput.type = 'password'
-  passwordInput.name = 'password'
-  passwordInput.value = password.value
-  form.appendChild(passwordInput)
-
-  // Add the form to the document body - THIS LINE IS CRUCIAL
-  document.body.appendChild(form)
-
-  // Submit the form
-  form.submit()
-  setTimeout(() => document.body.removeChild(form), 0)
+  try {
+    error.value = null
+    const unlockedShare = await getShare(props.downloadShareCode, password.value)
+    
+    //if the password is correct, update the 'share'
+    share.value = unlockedShare
+    document.title = share.value.name
+    toast.success(t.value('share.unlocked'))
+  } catch (err) {
+    console.error(err)
+    if (err.message === 'Invalid password') {
+      toast.error(t.value('share.download.invalid_password'))
+      error.value = t.value('share.download.invalid_password')
+    } else {
+      toast.error(err.message)
+    }
+  }
 }
 
 const filesByDirectory = computed(() => {
@@ -154,62 +167,76 @@ const filesByDirectory = computed(() => {
 <template>
   <div class="download-panel-content">
     <template v-if="share">
-      <h1 class="share-name">
-        <Boxes />
-        {{ share.name }}
-      </h1>
-      <div class="stats">
-        <div class="total-size stat">{{ niceFileSize(share.size) }}</div>
-        <div class="file-count stat">
-          {{ $t('share.contains.count', 'Contains: {value} files', { value: share.file_count }) }}
-        </div>
-      </div>
-      <div class="share-expires">
-        {{
-          $t('share.expires.in', {
-            days: timeUntilExpiration(share.expires_at).days,
-            hours: timeUntilExpiration(share.expires_at).hours,
-            minutes: timeUntilExpiration(share.expires_at).minutes
-          })
-        }}
-      </div>
-      <div class="share-files-list">
-        <directory-item
-          :structure="filesByDirectory"
-          :is-root="true"
-          :read-only="true"
-          :share-code="downloadShareCode"
-        />
-      </div>
-      <div class="share-message mt-3" v-if="share.description">
-        <h6>{{ $t('message.from', { name: splitFullName(share.user.name) }) }}</h6>
-        <div class="message">
-          {{ share.description }}
-        </div>
-      </div>
-      <div class="download-button-container mt-3" v-if="!share.password_protected">
-        <button class="download-button" @click="downloadFiles">
-          {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
-        </button>
-      </div>
-
-      <div class="password-input-container" v-else>
-        <div class="input-container">
-          <input
-            type="password"
-            v-model="password"
-            :placeholder="$t('settings.share.password')"
-            :class="{ error: error }"
-            @keyup.enter="downloadPasswordProtectedFiles"
-          />
-          <div class="error-message" v-if="error">
-            {{ error }}
+      
+      <template v-if="share.name">
+        <h1 class="share-name">
+          <Boxes />
+          {{ share.name }}
+        </h1>
+        <div class="stats">
+          <div class="total-size stat">{{ niceFileSize(share.size) }}</div>
+          <div class="file-count stat">
+            {{ $t('share.contains.count', 'Contains: {value} files', { value: share.file_count }) }}
           </div>
         </div>
-        <button class="download-button mt-3" @click="downloadPasswordProtectedFiles">
-          {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
-        </button>
-      </div>
+        <div class="share-expires">
+          {{
+            $t('share.expires.in', {
+              days: timeUntilExpiration(share.expires_at).days,
+              hours: timeUntilExpiration(share.expires_at).hours,
+              minutes: timeUntilExpiration(share.expires_at).minutes
+            })
+          }}
+        </div>
+        <div class="share-files-list">
+          <directory-item
+            :structure="filesByDirectory"
+            :is-root="true"
+            :read-only="true"
+            :share-code="downloadShareCode"
+            :password="password"
+          />
+        </div>
+        <div class="share-message mt-3" v-if="share.description">
+          <h6>{{ $t('message.from', { name: splitFullName(share.user.name) }) }}</h6>
+          <div class="message">
+            {{ share.description }}
+          </div>
+        </div>
+        <div class="download-button-container mt-3">
+          <button class="download-button" @click="downloadFiles">
+            {{ $t('download.files', 'Download {value} files', { value: share.file_count }) }}
+          </button>
+        </div>
+      </template>
+
+      <template v-else-if="share.password_protected">
+        <h1 class="share-name">
+          <Boxes />
+          {{ $t('share.passwordProtected') }}
+        </h1>
+        <div class="password-input-container">
+          <p style="text-align: center; margin-bottom: 20px;">
+            {{ $t('share.download.password_required') }}
+          </p>
+          <div class="input-container">
+            <input
+              type="password"
+              v-model="password"
+              :placeholder="$t('settings.share.password')"
+              :class="{ error: error }"
+              @keyup.enter="unlockShare"
+            />
+            <div class="error-message" v-if="error">
+              {{ error }}
+            </div>
+          </div>
+          <button class="download-button mt-3" @click="unlockShare">
+            {{ $t('share.download.password_required_short') }}
+          </button>
+        </div>
+      </template>
+
     </template>
     <template v-else>
       <template v-if="shareExpired">
@@ -285,6 +312,8 @@ const filesByDirectory = computed(() => {
     width: 100%;
     display: block;
   }
+  flex-grow: 1;
+  margin-bottom: auto;
 }
 
 .error-message {

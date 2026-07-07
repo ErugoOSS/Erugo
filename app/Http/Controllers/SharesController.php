@@ -32,7 +32,7 @@ class SharesController extends Controller
     return $sanitized !== '' ? $sanitized : $fallback;
   }
 
-  public function read($shareId)
+  public function read(Request $request, $shareId)
   {
     $share = Share::where('long_id', $shareId)->with(['files', 'user'])->first();
     if (!$share) {
@@ -63,19 +63,48 @@ class SharesController extends Controller
       ], 404);
     }
 
+    $isPasswordProtected = !empty($share->password);
+    $passwordValid = false;
+    
+    if ($isPasswordProtected) {
+      //retrieve the password from the header or the input
+      $providedPassword = $request->header('X-Share-Password') ?? $request->input('password');
+      
+      if ($providedPassword) {
+        if (Hash::check($providedPassword, $share->password)) {
+          $passwordValid = true;
+        } else {
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid password'
+          ], 401); // 401 Unauthorized
+        }
+      }
+    }
+
     return response()->json([
       'status' => 'success',
       'message' => 'Share found',
       'data' => [
 
-        'share' => $this->formatSharePublic($share)
+        'share' => $this->formatSharePublic($share, $passwordValid)
 
       ]
     ]);
   }
 
-  private function formatSharePublic(Share $share)
+  private function formatSharePublic(Share $share, bool $passwordValid = false)
   {
+    $isPasswordProtected = !empty($share->password);
+
+    //if protected and the correct password has not been provided, hidding EVERYTHING.
+    if ($isPasswordProtected && !$passwordValid) {
+      return [
+        'id' => $share->id,
+        'password_protected' => true
+      ];
+    }
+
     return [
       'id' => $share->id,
       'name' => $share->name,

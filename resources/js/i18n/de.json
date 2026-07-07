@@ -998,7 +998,8 @@
     },
     "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
     "passwordNotProtected": "Öffnen Sie",
-    "passwordProtected": "Passwort geschützt"
+    "passwordProtected": "Passwort geschützt",
+    "unlocked": "Teilen erfolgreich freigeschaltet!"
   },
   "total_size": "Gesamtgröße",
   "upload": {

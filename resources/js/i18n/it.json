@@ -998,7 +998,8 @@
     },
     "not_found": "La condivisione che si sta cercando non è stata trovata. Potrebbe essere necessario effettuare il login per visualizzarla.",
     "passwordNotProtected": "Aperto",
-    "passwordProtected": "Protetto da password"
+    "passwordProtected": "Protetto da password",
+    "unlocked": "Condivisione sbloccata con successo!"
   },
   "total_size": "Dimensione totale",
   "upload": {

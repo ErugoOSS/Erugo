@@ -1019,7 +1019,8 @@
     },
     "not_found": "The share you are looking for was not found. You may need to log in to see it.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Password protected"
+    "passwordProtected": "Password protected",
+    "unlocked": "Share unlocked successfully!"
   },
   "total_size": "Total Size",
   "upload": {

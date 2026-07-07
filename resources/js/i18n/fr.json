@@ -998,7 +998,8 @@
     },
     "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
     "passwordNotProtected": "Ouvert",
-    "passwordProtected": "Protégé par un mot de passe"
+    "passwordProtected": "Protégé par un mot de passe",
+    "unlocked": "Partage débloqué avec succès!"
   },
   "total_size": "Taille totale",
   "upload": {

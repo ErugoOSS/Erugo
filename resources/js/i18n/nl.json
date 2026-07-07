@@ -998,7 +998,8 @@
     },
     "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Wachtwoord beveiligd"
+    "passwordProtected": "Wachtwoord beveiligd",
+    "unlocked": "Deel succesvol ontgrendeld!"
   },
   "total_size": "Totale grootte",
   "upload": {
