@@ -946,7 +946,7 @@
       "extend": "Extender"
     },
     "contains": {
-      "count": "{value, plural, one {Contém: # ficheiro} other {Contém: {value} ficheiros} }"
+      "count": "{value, plural, one {# ficheiro} other {# ficheiros}}"
     },
     "created": "Criação",
     "data_loading": "Carregando...",

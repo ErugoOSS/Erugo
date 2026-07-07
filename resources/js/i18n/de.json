@@ -975,7 +975,7 @@
       "extend": "Verlängern"
     },
     "contains": {
-      "count": "{value, plural, one {Enthält: # Datei} other {Enthält: {value} Dateien}}"
+      "count": "{value, plural, one {# Datei} other {# Dateien}}"
     },
     "created": "Erstellt",
     "data_loading": "Laden...",
