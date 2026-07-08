@@ -366,9 +366,11 @@ class UploadsController extends Controller
       }
 
       $invite->guest_user_id = null;
+      $invite->markAsUsed();
       $invite->save();
 
       //log the user out
+      auth()->invalidate();
       Auth::logout();
       $user->delete();
 
@@ -402,6 +404,7 @@ class UploadsController extends Controller
       }
 
       // Mark the invite as completed
+      $activeInvite->markAsUsed();
       $activeInvite->completed_at = now();
       $activeInvite->guest_user_id = null; // Clear the link since upload is done
       $activeInvite->save();
