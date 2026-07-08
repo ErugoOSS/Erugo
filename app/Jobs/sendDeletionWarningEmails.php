@@ -42,7 +42,10 @@ class sendDeletionWarningEmails implements ShouldQueue
       ->get();
 
     foreach ($shares as $share) {
-      sendEmail::dispatch($share->user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      $user = $share->invite ? $share->invite->user : $share->user;
+      if ($user) {
+        sendEmail::dispatch($user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      }
       $share->sent_deletion_warning = true;
       $share->save();
     }

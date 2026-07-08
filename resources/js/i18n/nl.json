@@ -80,6 +80,9 @@
     "welcome": "Welkom"
   },
   "button": {
+    "copied": "Gekopieerd!",
+    "copy": "Kopiëren",
+    "generate_link": "Link genereren",
     "reverse_share_invite": "Een verzoek tot omgekeerd delen maken",
     "reverse_share_invite_send": "Aanvraag versturen",
     "share": {
@@ -412,8 +415,13 @@
     "from": "Bericht van"
   },
   "processing_uploaded_files": "Verwerken van geüploade bestanden",
+  "reverse_invite": {
+    "link_generated_desc": "De reverse share link voor {name} is succesvol aangemaakt.",
+    "link_generated_title": "Link gegenereerd",
+    "send_via_email": "Uitnodiging per e-mail verzenden"
+  },
   "reverse_invite_send": {
-    "error": "Kan uitnodiging voor omgekeerd delen niet verzenden",
+    "error": "Kan geen uitnodiging voor omgekeerd delen maken of versturen",
     "success": "Uitnodiging voor omgekeerd delen verzonden!"
   },
   "settings": {
@@ -967,7 +975,7 @@
       "extend": "Verleng"
     },
     "contains": {
-      "count": "{value, plural, one {Bevat: # bestand} other {Bevat: {value} bestanden}}"
+      "count": "{value, plural, one {# bestand} other {# bestanden}}"
     },
     "created": "Gemaakt",
     "data_loading": "Laden...",
@@ -990,7 +998,8 @@
     },
     "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Wachtwoord beveiligd"
+    "passwordProtected": "Wachtwoord beveiligd",
+    "unlocked": "Deel succesvol ontgrendeld!"
   },
   "total_size": "Totale grootte",
   "upload": {

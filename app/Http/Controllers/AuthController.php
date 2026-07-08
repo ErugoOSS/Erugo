@@ -135,11 +135,6 @@ class AuthController extends Controller
             ], 404);
         }
 
-        $invite->markAsUsed();
-
-        //invalidate the token
-        auth()->invalidate();
-
         return $this->respondWithToken($user);
     }
 
@@ -318,7 +313,6 @@ class AuthController extends Controller
         // We'll use the session or a simple approach - store it in the invite itself
         // by setting the guest_user_id to the current user's ID
         $invite->guest_user_id = $user->id;
-        $invite->markAsUsed(); // Mark as used so UploadsController can find it
 
         return response()->json([
             'status' => 'success',

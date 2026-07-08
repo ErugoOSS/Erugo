@@ -311,14 +311,13 @@ class UploadsController extends Controller
       $sanitizedFilename = $file->name;
       $destFile = $destPath . '/' . $sanitizedFilename;
       
-      // Move file to share directory
-      // Use copy + unlink instead of rename to handle cross-filesystem moves
+      // Move file to share directory.
+      // Use copy + unlink has fallback of rename to handle cross-filesystem moves
       if (file_exists($sourcePath)) {
-        if (copy($sourcePath, $destFile)) {
-          unlink($sourcePath);
-        } else {
-          // Fallback to rename if copy fails
-          rename($sourcePath, $destFile);
+        if (!rename($sourcePath, $destFile)) {
+          if(copy($sourcePath, $destFile)) {
+            unlink($sourcePath);
+          }
         }
       }
       
@@ -367,9 +366,11 @@ class UploadsController extends Controller
       }
 
       $invite->guest_user_id = null;
+      $invite->markAsUsed();
       $invite->save();
 
       //log the user out
+      auth()->invalidate();
       Auth::logout();
       $user->delete();
 
@@ -403,6 +404,7 @@ class UploadsController extends Controller
       }
 
       // Mark the invite as completed
+      $activeInvite->markAsUsed();
       $activeInvite->completed_at = now();
       $activeInvite->guest_user_id = null; // Clear the link since upload is done
       $activeInvite->save();

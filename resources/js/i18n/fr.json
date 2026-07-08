@@ -80,6 +80,9 @@
     "welcome": "Bienvenue"
   },
   "button": {
+    "copied": "Copié!",
+    "copy": "Copie",
+    "generate_link": "Générer un lien",
     "reverse_share_invite": "Créer une demande de partage inversé",
     "reverse_share_invite_send": "Envoyer une demande",
     "share": {
@@ -412,8 +415,13 @@
     "from": "Message de {name}"
   },
   "processing_uploaded_files": "Traitement des fichiers téléchargés",
+  "reverse_invite": {
+    "link_generated_desc": "Le lien de partage inversé pour {name} a été créé avec succès.",
+    "link_generated_title": "Lien généré",
+    "send_via_email": "Envoyez l'invitation par email"
+  },
   "reverse_invite_send": {
-    "error": "Impossible d'envoyer l'invitation du partage inversé",
+    "error": "Impossible de créer ou d'envoyer l'invitation du partage inversé",
     "success": "Invitation au partage inversé envoyée !"
   },
   "settings": {
@@ -967,7 +975,7 @@
       "extend": "Prolonger"
     },
     "contains": {
-      "count": "{value, plural, one {Contient : fichier} other {Contient : fichiers {value}}}"
+      "count": "{value, plural, one {# fichier} other {# fichiers}}"
     },
     "created": "Créé",
     "data_loading": "Chargement...",
@@ -990,7 +998,8 @@
     },
     "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
     "passwordNotProtected": "Ouvert",
-    "passwordProtected": "Protégé par un mot de passe"
+    "passwordProtected": "Protégé par un mot de passe",
+    "unlocked": "Partage débloqué avec succès!"
   },
   "total_size": "Taille totale",
   "upload": {

@@ -59,6 +59,9 @@
     "welcome": "Bem-vindo"
   },
   "button": {
+    "copied": "Copiado!",
+    "copy": "Copiar",
+    "generate_link": "Gerar Link",
     "reverse_share_invite": "Enviar um pedido de partilha",
     "reverse_share_invite_send": "Enviar pedido",
     "share": {
@@ -391,8 +394,13 @@
     "from": "Mensagem de {name}"
   },
   "processing_uploaded_files": "Processando os ficheiros carregados",
+  "reverse_invite": {
+    "link_generated_desc": "O link de partilha inversa para {name} foi criado com sucesso.",
+    "link_generated_title": "Link Gerado",
+    "send_via_email": "Enviar convite por e-mail"
+  },
   "reverse_invite_send": {
-    "error": "Não é possível enviar convite para partilha inversa",
+    "error": "Não é possível criar ou enviar convite para partilha inversa",
     "success": "Convite para partilha enviado!"
   },
   "settings": {
@@ -938,7 +946,7 @@
       "extend": "Extender"
     },
     "contains": {
-      "count": "{value, plural, one {Contém: # ficheiro} other {Contém: {value} ficheiros} }"
+      "count": "{value, plural, one {# ficheiro} other {# ficheiros}}"
     },
     "created": "Criação",
     "data_loading": "Carregando...",
@@ -961,7 +969,8 @@
     },
     "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver.",
     "passwordNotProtected": "Aberto",
-    "passwordProtected": "Protegido por palavra-passe"
+    "passwordProtected": "Protegido por palavra-passe",
+    "unlocked": "Partilha desbloqueada com sucesso!"
   },
   "total_size": "Tamanho Total",
   "upload": {

@@ -228,6 +228,12 @@ const uploadBundledFiles = async (
 
     const data = await response.json()
     console.log('[uploadBundledFiles] Share created successfully')
+    
+    // Cleanup local storage for the bundle
+    if (uploadResult && uploadResult.uploadId) {
+      clearTusFingerprint(uploadResult.filename, uploadResult.filesize)
+    }
+
     onComplete(data)
   } catch (error) {
     console.error('[uploadBundledFiles] Error:', error)
@@ -269,6 +275,10 @@ const fetchWithAuth = async (url, options = {}) => {
       // Clone the response so we can read the body
       const clonedResponse = response.clone()
       const responseData = await clonedResponse.json()
+
+      if (responseData?.message === 'Invalid password') {
+        return response
+      }
 
       // Check for password change required in response body
       if (responseData?.message === 'Password change required') {
@@ -450,7 +460,7 @@ export const login = async (email, password) => {
   return buildAuthSuccessData(data)
 }
 
-export const sendReverseShareInvite = async (email, name, message) => {
+export const sendReverseShareInvite = async (email, name, message, sendEmail) => {
   const response = await fetchWithAuth(`${apiUrl}/api/reverse-shares/invite`, {
     method: 'POST',
     headers: {
@@ -459,7 +469,8 @@ export const sendReverseShareInvite = async (email, name, message) => {
     body: JSON.stringify({
       recipient_name: name,
       recipient_email: email,
-      message: message
+      message: message,
+      send_email: sendEmail
     })
   })
   const data = await response.json()
@@ -962,12 +973,16 @@ export const pruneExpiredShares = async () => {
   return data.data.shares
 }
 
-export const getShare = async (id) => {
+export const getShare = async (id, password = null) => {
+  const headers = {
+    ...addJsonHeader()
+  }
+  if (password) {
+    headers['X-Share-Password'] = password
+  }
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
     method: 'GET',
-    headers: {
-      ...addJsonHeader()
-    }
+    headers: headers
   })
   const data = await response.json()
   if (!response.ok) {
@@ -1344,7 +1359,7 @@ const debouncedPasswordChangeRequired = debounce(passwordChangeRequired, 100)
  * @returns {tus.Upload} - The tus upload instance (can be used for pause/resume/abort)
  */
 export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMetadata = {}) => {
-  const startUpload = (skipResume = false) => {
+  const startUpload = () => {
     const tusdEndpoint = getTusdUrl()
 
     // Create a custom httpStack that rewrites URLs to use the correct origin
@@ -1374,7 +1389,8 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
       httpStack: urlRewritingHttpStack,
       retryDelays: [0, 1000, 3000, 5000],
       chunkSize: 20 * 1024 * 1024, // 20MB chunks
-      removeFingerprintOnSuccess: true, // Clean up fingerprint after successful upload
+      parallelUploads: 10,
+      removeFingerprintOnSuccess: false, // Disable clean up fingerprint after successful upload. Allow resume with multi-file
       metadata: {
         filename: file.name,
         filetype: file.type || 'application/octet-stream',
@@ -1431,18 +1447,21 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
       }
     })
 
-    if (skipResume) {
-      // Start fresh without checking for previous uploads
-      upload.start()
-    } else {
-      // Check for previous uploads to resume
-      upload.findPreviousUploads().then(async (previousUploads) => {
-        // Filter out uploads with mismatched protocol or host (including port)
-        // This prevents resume attempts when the site is accessed from a different URL
-        const currentProtocol = window.location.protocol
-        const currentHost = window.location.host
-        const validPreviousUploads = previousUploads.filter((u) => {
-          const uploadUrl = new URL(u.uploadUrl)
+    // Check for previous uploads to resume
+    upload.findPreviousUploads().then(async (previousUploads) => {
+      // Filter out uploads with mismatched protocol or host (including port)
+      // This prevents resume attempts when the site is accessed from a different URL
+      const currentProtocol = window.location.protocol
+      const currentHost = window.location.host
+      const validPreviousUploads = previousUploads.filter((u) => {
+        const urlToCheck = u.uploadUrl || (u.parallelUploadUrls && u.parallelUploadUrls[0])
+
+        if (!urlToCheck) {
+          return false
+        }
+
+        try {
+          const uploadUrl = new URL(urlToCheck)
           if (uploadUrl.protocol !== currentProtocol) {
             return false
           }
@@ -1450,15 +1469,18 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
             return false
           }
           return true
-        })
+        } catch (e) {
+          return false
+        }
+      })
 
-        if (validPreviousUploads.length > 0) {
-          const previousUpload = validPreviousUploads[0]
-          // Extract upload ID from the previous upload URL
+      if (validPreviousUploads.length > 0) {
+        const previousUpload = validPreviousUploads[0]
+        const isParallel = !previousUpload.uploadUrl && previousUpload.parallelUploadUrls && previousUpload.parallelUploadUrls.length > 0
+
+        if (previousUpload.uploadUrl) {
           const previousUploadId = previousUpload.uploadUrl.split('/').pop()
-
-          // Verify with our backend that this upload session still exists
-          // If the file was already used to create a share, the session will be gone
+          
           try {
             const response = await fetch(`${apiUrl}/api/uploads/verify/${previousUploadId}`, {
               method: 'GET',
@@ -1471,37 +1493,58 @@ export const uploadFileWithTus = (file, onProgress, onComplete, onError, extraMe
               // Upload session exists in our backend, safe to resume
               upload.resumeFromPreviousUpload(previousUpload)
             } else {
-              // Upload session doesn't exist (file was already shared), start fresh
-              // Clear the stale fingerprint from localStorage
-              clearTusFingerprint(previousUpload.uploadUrl)
+              // Expired or already shared -> cleanup exact key
+              if (previousUpload.urlStorageKey) {
+                localStorage.removeItem(previousUpload.urlStorageKey)
+              }
             }
           } catch (e) {
-            // If verification fails, be safe and start fresh
-            clearTusFingerprint(previousUpload.uploadUrl)
+            if (previousUpload.urlStorageKey) {
+              localStorage.removeItem(previousUpload.urlStorageKey)
+            }
+          }
+        } else if (isParallel) {
+          // Bypass Laravel for parallel chunk records, let Tusd handle resume
+          upload.resumeFromPreviousUpload(previousUpload)
+        } else {
+          // Fallback cleanup if somehow the upload object lacks everything
+          if (previousUpload.urlStorageKey) {
+            localStorage.removeItem(previousUpload.urlStorageKey)
           }
         }
-        upload.start()
-      })
-    }
+      }
+      upload.start()
+    })
 
     return upload
   }
 
-  return startUpload(false)
+  return startUpload()
 }
 
 /**
  * Clear a stale tus fingerprint from localStorage
  */
-const clearTusFingerprint = (uploadUrl) => {
+const clearTusFingerprint = (filename, size) => {
+  if (!filename) return
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i)
       if (key && key.startsWith('tus::')) {
         const value = localStorage.getItem(key)
-        // The value is a JSON string containing the uploadUrl
-        if (value && value.includes(uploadUrl)) {
-          localStorage.removeItem(key)
+        if (value) {
+          try {
+            const parsed = JSON.parse(value)
+            // If filename and size match, remove from localstorage
+            if (parsed?.metadata?.filename === filename && parsed?.size === size) {
+              localStorage.removeItem(key)
+            }
+          } catch (err) {
+            // Fallback
+            if (value.includes(filename)) {
+              localStorage.removeItem(key)
+            }
+          }
         }
       }
     }
@@ -1690,6 +1733,14 @@ export const uploadFilesInChunks = async (
 
       if (response.ok) {
         const data = await response.json()
+
+        // Clean up the local storage manual fingerprints
+        results.forEach((r) => {
+          if (r.uploadId) {
+            clearTusFingerprint(r.filename, r.filesize)
+          }
+        })
+
         onComplete(data)
         return
       }

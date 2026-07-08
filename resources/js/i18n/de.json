@@ -80,6 +80,9 @@
     "welcome": "Willkommen"
   },
   "button": {
+    "copied": "Kopiert!",
+    "copy": "Kopieren",
+    "generate_link": "Link generieren",
     "reverse_share_invite": "Erstellen Sie eine umgekehrte Freigabeanforderung",
     "reverse_share_invite_send": "Anfrage senden",
     "share": {
@@ -412,8 +415,13 @@
     "from": "Nachricht von {name}"
   },
   "processing_uploaded_files": "Verarbeitung hochgeladener Dateien",
+  "reverse_invite": {
+    "link_generated_desc": "Der Reverse-Share-Link für {name} wurde erfolgreich erstellt.",
+    "link_generated_title": "Link generiert",
+    "send_via_email": "Einladung per E-Mail senden"
+  },
   "reverse_invite_send": {
-    "error": "Reverse Share-Einladung kann nicht gesendet werden",
+    "error": "Keine Einladung zum Umtauschen erstellen oder senden",
     "success": "Einladung zur umgekehrten Freigabe gesendet!"
   },
   "settings": {
@@ -967,7 +975,7 @@
       "extend": "Verlängern"
     },
     "contains": {
-      "count": "{value, plural, one {Enthält: # Datei} other {Enthält: {value} Dateien}}"
+      "count": "{value, plural, one {# Datei} other {# Dateien}}"
     },
     "created": "Erstellt",
     "data_loading": "Laden...",
@@ -990,7 +998,8 @@
     },
     "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
     "passwordNotProtected": "Öffnen Sie",
-    "passwordProtected": "Passwort geschützt"
+    "passwordProtected": "Passwort geschützt",
+    "unlocked": "Teilen erfolgreich freigeschaltet!"
   },
   "total_size": "Gesamtgröße",
   "upload": {

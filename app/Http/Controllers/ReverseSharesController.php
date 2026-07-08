@@ -19,7 +19,6 @@ class ReverseSharesController extends Controller
 {
     public function createInvite(Request $request)
     {
-
         $allowReverseShares = Setting::where('key', 'allow_reverse_shares')->first()->value;
         $allowReverseShares = filter_var($allowReverseShares, FILTER_VALIDATE_BOOLEAN);
 
@@ -30,9 +29,12 @@ class ReverseSharesController extends Controller
             ], 400);
         }
 
+        $sendEmail = $request->boolean('send_email', true);
+
         $validator = Validator::make($request->all(), [
             'recipient_name' => ['required', 'string', 'max:255'],
-            'recipient_email' => ['required', 'email', 'max:255']
+            'recipient_email' => [$sendEmail ? 'required' : 'nullable', 'email', 'max:255'],
+            'send_email' => ['nullable', 'boolean']
         ]);
 
         if ($validator->fails()) {
@@ -54,16 +56,22 @@ class ReverseSharesController extends Controller
             ], 401);
         }
 
-        // Check if recipient is an existing non-guest user
-        $existingUser = User::where('email', $request->recipient_email)
-            ->where(function ($query) {
-                $query->where('is_guest', false)
-                    ->orWhereNull('is_guest');
-            })
-            ->first();
+        $finalEmail = $request->recipient_email ?? (Str::random(20) . '@guest.local'); //we don't need a real email for the guest user
+        $existingUser = null;
+
+        if ($request->recipient_email) {
+            // Check if recipient is an existing non-guest user
+            $existingUser = User::where('email', $request->recipient_email)
+                ->where(function ($query) {
+                    $query->where('is_guest', false)
+                        ->orWhereNull('is_guest');
+                })
+                ->first();
+        }
 
         $encryptedToken = null;
         $guestUserId = null;
+        $inviteUrl = null;
 
         if ($existingUser) {
             // Existing user - no token, no guest user
@@ -73,14 +81,14 @@ class ReverseSharesController extends Controller
             // Create a guest user for the invite
             $guestUser = User::create([
                 'name' => $request->recipient_name,
-                'email' => Str::random(20), //we don't need a real email for the guest user
+                'email' => $finalEmail,
                 'password' => Hash::make(Str::random(20)), //set a random password so the user can't login
                 'is_guest' => true
             ]);
             $guestUserId = $guestUser->id;
 
-            // Generate a token only for guest users
-            $token = auth()->tokenById($guestUser->id);
+            // Generate a token only for guest users. Set validity to 24h
+            $token = auth()->setTTL(1440)->tokenById($guestUser->id);
             $encryptedToken = Crypt::encryptString($token);
         }
 
@@ -88,22 +96,35 @@ class ReverseSharesController extends Controller
             'user_id' => $user->id,
             'guest_user_id' => $guestUserId,
             'recipient_name' => $request->recipient_name,
-            'recipient_email' => $request->recipient_email,
+            'recipient_email' => $finalEmail,
             'message' => $request->message,
             'expires_at' => now()->addDays(7)
         ]);
 
-        sendEmail::dispatch($request->recipient_email, reverseShareInviteMail::class, [
-            'user' => $user,
-            'invite' => $invite,
-            'token' => $encryptedToken, // Will be null for existing users
-            'isExistingUser' => $existingUser !== null
-        ]);
+        if ($sendEmail && $request->recipient_email) {
+            sendEmail::dispatch($request->recipient_email, reverseShareInviteMail::class, [
+                'user' => $user,
+                'invite' => $invite,
+                'token' => $encryptedToken, // Will be null for existing users
+                'isExistingUser' => $existingUser !== null
+            ]);
+        } else {
+            $appUrlSetting = Setting::where('key', 'application_url')->first();
+            $baseUrl = rtrim($appUrlSetting ? $appUrlSetting->value : url(''), '/');
+    
+            // On applique la logique de ton template
+            if ($existingUser) {
+                $inviteUrl = $baseUrl . '/?invite_id=' . $invite->id;
+            } else {
+                $inviteUrl = $baseUrl . '/?invite_token=' . urlencode($encryptedToken);
+            }
+        }
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'invite' => $invite
+                'invite' => $invite,
+                'link' => $inviteUrl
             ]
         ]);
     }

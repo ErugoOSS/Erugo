@@ -111,7 +111,13 @@ RUN chown -R erugo:erugo /run/php
 COPY --chown=erugo:erugo . /var/www/html/
 COPY --from=composer /app/vendor /var/www/html/vendor
 COPY --from=node /app/public/build /var/www/html/public/build
-RUN rm -rf /var/www/html/.env /var/www/html/.git /var/www/html/node_modules /var/www/html/storage
+RUN rm -rf docker \
+           package.json \
+           package-lock.json \
+           postcss.config.js \
+           vite.config.js \
+           publish-docker-image.sh \
+           composer.lock
 
 # Set up Laravel scheduler cron job
 RUN echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" | crontab -u erugo -
