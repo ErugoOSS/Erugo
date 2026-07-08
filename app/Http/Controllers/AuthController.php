@@ -135,9 +135,6 @@ class AuthController extends Controller
             ], 404);
         }
 
-        //invalidate the token
-        auth()->invalidate();
-
         return $this->respondWithToken($user);
     }
 
