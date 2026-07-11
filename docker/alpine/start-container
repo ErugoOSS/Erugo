@@ -82,6 +82,7 @@ fi
 # Always ensure correct permissions on storage directory
 echo "Setting storage permissions..."
 chown -R erugo:erugo /var/www/html/storage
+chmod -R u=rwX,g=rX,o= /var/www/html/storage
 
 # Make sure php-fpm run directory exists and has correct permissions
 mkdir -p /run/php
