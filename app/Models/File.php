@@ -14,6 +14,7 @@ class File extends Model
         'share_id',
         'temp_path',
         'full_path',
+        'storage_id',
     ];
 
     public function share()
