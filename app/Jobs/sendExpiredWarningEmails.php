@@ -36,6 +36,7 @@ class sendExpiredWarningEmails implements ShouldQueue
 
     $shares = Share::where('expires_at', '<', now())
       ->where('sent_expired', false)
+      ->whereNotIn('status', ['pending_deletion', 'deleted'])
       ->get();
 
     foreach ($shares as $share) {

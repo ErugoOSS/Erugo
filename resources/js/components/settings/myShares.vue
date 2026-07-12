@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, inject, defineExpose } from 'vue'
-import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
+import { ref, computed, onMounted, inject, defineExpose } from 'vue'
+import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares, requestShareDeletion, undoShareDeletion } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -10,7 +10,10 @@ import {
   Rocket,
   Lock,
   LockOpen,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Trash2,
+  Undo2,
+  Clock
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
@@ -37,6 +40,14 @@ const loadShares = async () => {
   shares.value = await getMyShares(showDeletedShares.value)
   loadedShares.value = true
 }
+
+const activeShares = computed(() =>
+  shares.value.filter(s => s.status !== 'pending_deletion')
+)
+
+const pendingDeletionShares = computed(() =>
+  shares.value.filter(s => s.status === 'pending_deletion')
+)
 
 const handleExpireShareClick = async (share) => {
   expireShare(share.id)
@@ -97,6 +108,34 @@ const enableDownloadButton = (share) => {
   return !share.expired && !share.deleted
 }
 
+const enableRequestDeletionButton = (share) => {
+  return !share.deleted && !share.pending_deletion
+}
+
+const handleRequestDeletionClick = async (share) => {
+  const confirmed = confirm(t.value('settings.confirm.requestDeletion'))
+  if (!confirmed) return
+  requestShareDeletion(share.id)
+    .then(() => {
+      toast.success(t.value('settings.success.requestDeletion'))
+      loadShares()
+    })
+    .catch(() => {
+      toast.error(t.value('settings.error.requestDeletion'))
+    })
+}
+
+const handleUndoDeletionClick = async (share) => {
+  undoShareDeletion(share.id)
+    .then(() => {
+      toast.success(t.value('settings.success.undoDeletion'))
+      loadShares()
+    })
+    .catch(() => {
+      toast.error(t.value('settings.error.undoDeletion'))
+    })
+}
+
 const handlePruneExpiredShares = async () => {
   const confirmed = confirm(t.value('settings.confirm.pruneExpiredShares'))
   if (!confirmed) {
@@ -132,7 +171,7 @@ defineExpose({
         {{ $t('settings.help.downloadLimit.description2') }}
       </p>
     </HelpTip>
-    <table v-if="shares.length > 0">
+    <table v-if="activeShares.length > 0">
       <thead>
         <tr>
           <th>{{ $t('settings.table.name') }}</th>
@@ -146,7 +185,7 @@ defineExpose({
         </tr>
       </thead>
       <tbody>
-        <tr v-for="share in shares" :key="share.id" :class="{ 'reverse-share': share.shared_with_me }">
+        <tr v-for="share in activeShares" :key="share.id" :class="{ 'reverse-share': share.shared_with_me }">
           <td width="1" style="white-space: nowrap">
             <div class="slide-text">
               <strong class="content">
@@ -255,16 +294,71 @@ defineExpose({
             >
               <HardDriveDownload style="margin-right: 0" />
             </button>
+            <button
+              @click="handleRequestDeletionClick(share)"
+              class="danger"
+              :disabled="!enableRequestDeletionButton(share)"
+              :title="$t('share.button.requestDeletion')"
+            >
+              <Trash2 />
+              {{ $t('share.button.requestDeletion') }}
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
-    <div v-else-if="loadedShares" class="center-message">
+    <div v-else-if="loadedShares && pendingDeletionShares.length === 0" class="center-message">
       <Rocket />
       <p>{{ $t('settings.noShares') }}</p>
     </div>
-    <div v-else class="center-message">
+    <div v-else-if="!loadedShares" class="center-message">
       <p>{{ $t('settings.loading') }}</p>
+    </div>
+
+    <!-- Pending Deletion Section -->
+    <div v-if="pendingDeletionShares.length > 0" class="pending-deletion-section">
+      <h4 class="pending-deletion-header">
+        <Clock />
+        {{ $t('settings.pendingDeletion.title') }}
+      </h4>
+      <p class="pending-deletion-description">{{ $t('settings.pendingDeletion.description') }}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t('settings.table.name') }}</th>
+            <th>{{ $t('settings.table.files') }}</th>
+            <th>{{ $t('settings.pendingDeletion.requestedOn') }}</th>
+            <th>{{ $t('settings.table.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="share in pendingDeletionShares" :key="share.id" class="pending-deletion-row">
+            <td width="1" style="white-space: nowrap">
+              <div class="slide-text">
+                <strong class="content">{{ share.name }}</strong>
+              </div>
+              <span class="pending-deletion-badge">
+                <Clock />
+                {{ $t('share.status.pendingDeletion') }}
+              </span>
+            </td>
+            <td style="vertical-align: top">
+              <h6 class="file-count">
+                {{ $t('share.files.count', { count: share.files.length, value: share.files.length }) }}
+              </h6>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="date">{{ niceDate(share.deletion_requested_at) }}</div>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <button @click="handleUndoDeletionClick(share)" class="secondary">
+                <Undo2 />
+                {{ $t('share.button.undoDeletion') }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -492,5 +586,56 @@ td {
   margin-right: 5px;
   vertical-align: middle;
   opacity: 0.7;
+}
+
+.pending-deletion-section {
+  margin-top: 2rem;
+  border-top: 2px solid var(--panel-section-background-color-alt);
+  padding-top: 1rem;
+}
+
+.pending-deletion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--panel-section-text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.7;
+  }
+}
+
+.pending-deletion-description {
+  font-size: 0.8rem;
+  color: var(--panel-section-text-color);
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.pending-deletion-row {
+  opacity: 0.8;
+}
+
+.pending-deletion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--panel-section-text-color);
+  background: var(--panel-section-background-color-alt);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 4px;
+  opacity: 0.8;
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
 }
 </style>

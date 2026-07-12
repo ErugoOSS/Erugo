@@ -132,6 +132,12 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+
+        //request early deletion of a share (user or admin)
+        Route::post('/{id}/request-deletion', [SharesController::class, 'requestDeletion'])->name('shares.requestDeletion');
+
+        //undo a pending deletion request
+        Route::post('/{id}/undo-deletion', [SharesController::class, 'undoDeletion'])->name('shares.undoDeletion');
     });
 
     //all shares [auth, admin]
