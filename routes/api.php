@@ -144,6 +144,9 @@ Route::group([], function ($router) {
     Route::group(['prefix' => 'shares', 'middleware' => ['auth', Admin::class]], function ($router) {
         //get all shares (admin only)
         Route::get('/all', [SharesController::class, 'allShares'])->name('shares.allShares');
+
+        //immediately delete a share's files (admin only, requires typed confirmation)
+        Route::post('/{id}/delete-immediately', [SharesController::class, 'deleteImmediately'])->name('shares.deleteImmediately');
     });
 
     //manage themes [auth, admin]

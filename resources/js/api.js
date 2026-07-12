@@ -976,6 +976,21 @@ export const requestShareDeletion = async (id) => {
   return data.data.share
 }
 
+export const deleteShareImmediately = async (id, confirmation) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/delete-immediately`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ confirmation })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
 export const undoShareDeletion = async (id) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/undo-deletion`, {
     method: 'POST',
