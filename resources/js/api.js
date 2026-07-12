@@ -931,6 +931,28 @@ export const extendShare = async (id) => {
   return data.data.share
 }
 
+export const addFilesToShare = async (shareId, uploadIds, filePaths) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/add-files`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify({ uploadIds, filePaths })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
+export const replaceShareFile = async (shareId, uploadId, filePath) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/replace-file`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify({ uploadIds: [uploadId], filePaths: { [uploadId]: filePath } })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
 export const setDownloadLimit = async (id, amount) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/set-download-limit`, {
     method: 'POST',
