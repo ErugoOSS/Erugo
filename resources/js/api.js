@@ -917,12 +917,13 @@ export const expireShare = async (id) => {
   return data.data.share
 }
 
-export const extendShare = async (id) => {
+export const extendShare = async (id, payload = {}) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/extend`, {
     method: 'POST',
     headers: {
       ...addJsonHeader()
-    }
+    },
+    body: JSON.stringify(payload)
   })
   const data = await response.json()
   if (!response.ok) {
