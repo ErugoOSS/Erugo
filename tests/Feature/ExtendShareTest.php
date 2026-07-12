@@ -304,20 +304,34 @@ class ExtendShareTest extends TestCase
         $this->assertNotNull($share->expires_at, 'Non-admin unlimited flag must be ignored');
     }
 
-    public function test_regular_user_cannot_set_specific_date(): void
+    public function test_regular_user_can_set_specific_date_within_max_expiry(): void
     {
+        $this->setMaxExpiry(30);
+
         $owner  = $this->makeUser();
         $share  = $this->makeShare($owner);
-        $target = Carbon::now()->addDays(90)->toDateString();
+        $target = Carbon::now()->addDays(20)->toDateString(); // within 30-day limit
 
-        // Non-admin sending expires_at should fall through to relative logic
         $this->actingAs($owner, 'sanctum')
             ->postJson($this->extendUrl($share->id), ['expires_at' => $target])
             ->assertStatus(200);
 
         $share->refresh();
-        // Should NOT be exactly 90 days from now (would be ~7 days from base)
-        $this->assertNotEquals($target, $share->expires_at->toDateString());
+        $this->assertEquals($target, $share->expires_at->toDateString());
+    }
+
+    public function test_regular_user_date_picker_rejects_date_beyond_max_expiry(): void
+    {
+        $this->setMaxExpiry(30);
+
+        $owner  = $this->makeUser();
+        $share  = $this->makeShare($owner);
+        $target = Carbon::now()->addDays(60)->toDateString(); // exceeds 30-day limit
+
+        $this->actingAs($owner, 'sanctum')
+            ->postJson($this->extendUrl($share->id), ['expires_at' => $target])
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'error');
     }
 
     // ──────────────────────────────────────────────────────────────────────────
