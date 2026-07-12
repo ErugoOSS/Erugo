@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { extendShare } from '../api'
 import { useToast } from 'vue-toastification'
 import { CalendarPlus, X } from 'lucide-vue-next'
+import { domData } from '../domData'
 
 const props = defineProps({
   share: {
@@ -14,6 +15,9 @@ const props = defineProps({
     default: false
   }
 })
+
+// max_expiry_time is in the page's initial settings (null = unlimited for admins)
+const maxExpiryDays = props.isAdmin ? null : (domData().max_expiry_time || null)
 
 const emit = defineEmits(['close', 'extended'])
 
@@ -37,6 +41,13 @@ const minDate = computed(() => {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
   return tomorrow.toISOString().split('T')[0]
+})
+
+const maxDate = computed(() => {
+  if (!maxExpiryDays) return null
+  const d = new Date()
+  d.setDate(d.getDate() + parseInt(maxExpiryDays))
+  return d.toISOString().split('T')[0]
 })
 
 const handleSubmit = async () => {
@@ -89,10 +100,10 @@ const handleSubmit = async () => {
         <strong>{{ currentExpiry }}</strong>
       </div>
 
-      <div v-if="isAdmin" class="mode-tabs">
+      <div class="mode-tabs">
         <button :class="{ active: mode === 'relative' }" @click="mode = 'relative'">Extend by</button>
         <button :class="{ active: mode === 'date' }" @click="mode = 'date'">Set date</button>
-        <button :class="{ active: mode === 'unlimited' }" @click="mode = 'unlimited'">No expiration</button>
+        <button v-if="isAdmin" :class="{ active: mode === 'unlimited' }" @click="mode = 'unlimited'">No expiration</button>
       </div>
 
       <div class="modal-body">
@@ -112,14 +123,16 @@ const handleSubmit = async () => {
           </select>
         </div>
 
-        <!-- Admin: specific date -->
+        <!-- Specific date (all users; max constrained for non-admins) -->
         <div v-else-if="mode === 'date'" class="date-picker">
           <input
             type="date"
             v-model="specificDate"
             :min="minDate"
+            :max="maxDate || undefined"
             class="date-input"
           />
+          <p v-if="maxDate" class="date-hint">Max: {{ maxDate }}</p>
         </div>
 
         <!-- Admin: no expiration -->
@@ -271,6 +284,13 @@ const handleSubmit = async () => {
 }
 
 .date-picker {
+  .date-hint {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: var(--panel-section-text-color);
+    opacity: 0.6;
+  }
+
   .date-input {
     width: 100%;
     padding: 8px 12px;

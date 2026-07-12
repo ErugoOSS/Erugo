@@ -529,9 +529,19 @@ class SharesController extends Controller
       return response()->json(['status' => 'success', 'message' => 'Share set to no expiration', 'data' => ['share' => $share]]);
     }
 
-    // Admin can set a specific date
-    if ($user->admin && $request->filled('expires_at')) {
+    // Any user can set a specific date; non-admins are subject to max_expiry_time
+    if ($request->filled('expires_at')) {
       $newExpiry = Carbon::parse($request->input('expires_at'));
+      if (!$user->admin && $maxExpiryDays !== null) {
+        $maxAllowed = Carbon::now()->addDays((int) $maxExpiryDays);
+        if ($newExpiry > $maxAllowed) {
+          return response()->json([
+            'status'  => 'error',
+            'message' => 'Date exceeds maximum allowed expiry time',
+            'data'    => ['max_expiry_days' => (int) $maxExpiryDays]
+          ], 422);
+        }
+      }
       $share->expires_at = $newExpiry;
       $share->save();
       return response()->json(['status' => 'success', 'message' => 'Share extended', 'data' => ['share' => $share]]);
