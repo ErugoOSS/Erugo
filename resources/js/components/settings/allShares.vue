@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
-import { getAllShares, expireShare, extendShare, setDownloadLimit, requestShareDeletion, undoShareDeletion } from '../../api'
+import { getAllShares, expireShare, extendShare, setDownloadLimit, requestShareDeletion, undoShareDeletion, deleteShareImmediately } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -12,7 +12,8 @@ import {
   LockOpen,
   Clock,
   Trash2,
-  Undo2
+  Undo2,
+  OctagonX
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
@@ -131,6 +132,25 @@ const handleUndoDeletionClick = async (share) => {
     .catch((error) => {
       toast.error('Failed to undo share deletion')
     })
+}
+
+const handleDeleteImmediatelyClick = async (share) => {
+  const confirmation = prompt(
+    `Type "delete" to immediately remove all files for share "${share.name}".\n\nThis cannot be undone.`
+  )
+  if (confirmation === null) return  // user cancelled
+  deleteShareImmediately(share.id, confirmation)
+    .then(() => {
+      toast.success('Share deleted immediately')
+      loadShares()
+    })
+    .catch((error) => {
+      toast.error(error.message || 'Failed to delete share')
+    })
+}
+
+const canDeleteImmediately = (share) => {
+  return share.pending_deletion || (share.expired && !share.deleted)
 }
 
 const setShowDeletedShares = (value) => {
@@ -311,6 +331,16 @@ defineExpose({
               >
                 <Undo2 />
                 {{ $t('share.button.undoDeletion') }}
+              </button>
+            </template>
+            <template v-if="canDeleteImmediately(share)">
+              <button
+                @click="handleDeleteImmediatelyClick(share)"
+                class="danger"
+                :title="$t('share.button.deleteImmediately')"
+              >
+                <OctagonX />
+                {{ $t('share.button.deleteImmediately') }}
               </button>
             </template>
           </td>
