@@ -144,6 +144,12 @@ Route::group([], function ($router) {
 
         //permanently remove the DB record of a deleted share (owner or admin)
         Route::delete('/{id}', [SharesController::class, 'purgeShare'])->name('shares.purge');
+
+        //add files to existing share (multi-file)
+        Route::post('/{id}/add-files', [UploadsController::class, 'addFilesToShare'])->name('shares.addFiles');
+
+        //replace the single file in a single-file share
+        Route::post('/{id}/replace-file', [UploadsController::class, 'replaceShareFile'])->name('shares.replaceFile');
     });
 
     //all shares [auth, admin]

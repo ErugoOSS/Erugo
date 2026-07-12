@@ -14,12 +14,14 @@ import {
   Trash2,
   Undo2,
   Clock,
+  FilePlus2,
   ChevronDown
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import ExtendShareModal from '../ExtendShareModal.vue'
+import ManageShareFilesModal from '../ManageShareFilesModal.vue'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
@@ -34,6 +36,7 @@ const loadedShares = ref(false)
 const shares = ref([])
 const showDeletedShares = ref(false)
 const extendModalShare = ref(null)
+const manageFilesShare = ref(null)
 const openDropdownId = ref(null)
 
 const toggleDropdown = (id) => {
@@ -203,6 +206,12 @@ defineExpose({
       :is-admin="false"
       @close="extendModalShare = null"
       @extended="loadShares"
+    />
+    <ManageShareFilesModal
+      v-if="manageFilesShare"
+      :share="manageFilesShare"
+      @close="manageFilesShare = null"
+      @done="loadShares"
     />
     <HelpTip id="download-limit-help-tip" :header="$t('settings.help.downloadLimit.title')">
       <p>
@@ -381,6 +390,14 @@ defineExpose({
                 title="Download all files"
               >
                 <HardDriveDownload style="margin-right: 0" />
+              </button>
+              <button
+                v-if="!share.deleted"
+                @click="manageFilesShare = share"
+                class="secondary icon-only"
+                :title="share.files.length === 1 ? 'Replace file' : 'Add files'"
+              >
+                <FilePlus2 style="margin-right: 0" />
               </button>
             </div>
           </td>
