@@ -138,6 +138,9 @@ Route::group([], function ($router) {
 
         //replace the single file in a single-file share
         Route::post('/{id}/replace-file', [UploadsController::class, 'replaceShareFile'])->name('shares.replaceFile');
+
+        //clone a share (hard-links files, preserves storage_id)
+        Route::post('/{id}/clone', [SharesController::class, 'cloneShare'])->name('shares.clone');
     });
 
     //all shares [auth, admin]

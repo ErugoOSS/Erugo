@@ -984,6 +984,19 @@ export const pruneExpiredShares = async () => {
   return data.data.shares
 }
 
+export const cloneShare = async (shareId, name = null) => {
+  const body = {}
+  if (name) body.name = name
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/clone`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify(body)
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
 export const getShare = async (id) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
     method: 'GET',
