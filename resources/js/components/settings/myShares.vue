@@ -17,6 +17,7 @@ import {
   Undo2,
   Clock,
   FilePlus2,
+  Copy,
   ChevronDown
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
@@ -24,6 +25,7 @@ import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
 import ExtendShareModal from '../ExtendShareModal.vue'
 import ManageShareFilesModal from '../ManageShareFilesModal.vue'
+import CloneShareModal from '../CloneShareModal.vue'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
@@ -50,6 +52,7 @@ const toggleDropdown = (id) => {
 const closeDropdown = () => {
   openDropdownId.value = null
 }
+const cloneShareTarget = ref(null)
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
@@ -223,6 +226,12 @@ defineExpose({
       :share="replaceFileShare"
       mode="replace"
       @close="replaceFileShare = null"
+      @done="loadShares"
+    />
+    <CloneShareModal
+      v-if="cloneShareTarget"
+      :share="cloneShareTarget"
+      @close="cloneShareTarget = null"
       @done="loadShares"
     />
     <HelpTip id="download-limit-help-tip" :header="$t('settings.help.downloadLimit.title')">
@@ -418,6 +427,22 @@ defineExpose({
                 title="Replace file"
               >
                 <RefreshCcw style="margin-right: 0" />
+              </button>
+              <button
+                @click="handleExtendShareClick(share)"
+                class="secondary"
+                :disabled="!enableExtendShareButton(share)"
+              >
+                <CalendarPlus />
+                {{ $t('share.button.extend') }}
+              </button>
+              <button
+                v-if="!share.deleted"
+                @click="cloneShareTarget = share"
+                class="secondary icon-only"
+                title="Clone share"
+              >
+                <Copy style="margin-right: 0" />
               </button>
             </div>
           </td>
