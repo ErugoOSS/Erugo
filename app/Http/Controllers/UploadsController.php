@@ -435,6 +435,272 @@ class UploadsController extends Controller
   }
 
   /**
+   * Add files to an existing multi-file share.
+   * Moves uploaded files into the share directory, updates the DB, and re-queues zip creation.
+   */
+  public function addFilesToShare(Request $request, $shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::find($shareId);
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if ($user->id !== $share->user_id && !$user->admin) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status === 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Share has been deleted'], 422);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'uploadIds'    => ['required', 'array', 'min:1'],
+      'uploadIds.*'  => ['required', 'string'],
+    ]);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'error', 'message' => 'Validation failed', 'data' => ['errors' => $validator->errors()]], 422);
+    }
+
+    $sessions = $this->waitForSessions($request->uploadIds, $user->id);
+    if (!$sessions) {
+      return response()->json(['status' => 'error', 'message' => 'Some uploads were not found or not completed'], 400);
+    }
+
+    [$files, $isBundleUpload] = $this->filesFromSessions($sessions);
+    if ($files->count() === 0) {
+      return response()->json(['status' => 'error', 'message' => 'No files found for the uploads'], 400);
+    }
+
+    $completePath = storage_path('app/shares/' . $share->path);
+    if (!is_dir($completePath)) {
+      mkdir($completePath, 0777, true);
+    }
+
+    $uploadIdToFile = $this->buildUploadIdToFileMap($sessions, $files);
+
+    foreach ($files as $file) {
+      $originalPath = $this->resolveOriginalPath($file, $isBundleUpload, $sessions, $uploadIdToFile, $request->filePaths ?? []);
+      $originalPath = $this->sanitizePath($originalPath);
+
+      $destPath = rtrim($completePath . '/' . $originalPath, '/');
+      if (!is_dir($destPath)) mkdir($destPath, 0777, true);
+
+      $resolvedDest  = realpath($destPath);
+      $resolvedShare = realpath($completePath);
+      if (!$resolvedDest || !$resolvedShare || strpos($resolvedDest, $resolvedShare) !== 0) {
+        Log::warning('Path traversal attempt in addFilesToShare', ['user_id' => $user->id, 'path' => $originalPath]);
+        continue;
+      }
+
+      $sourcePath = storage_path('app/' . $file->temp_path);
+      $destFile   = $destPath . '/' . $file->name;
+      if (file_exists($sourcePath)) {
+        copy($sourcePath, $destFile) ? unlink($sourcePath) : rename($sourcePath, $destFile);
+      }
+      if (!$isBundleUpload) {
+        $infoPath = $sourcePath . '.info';
+        if (file_exists($infoPath)) unlink($infoPath);
+      }
+
+      $file->share_id  = $share->id;
+      $file->full_path = $originalPath ?: null;
+      $file->temp_path = null;
+      $file->save();
+    }
+
+    foreach ($sessions as $session) {
+      if ($session->is_bundle) {
+        $extractDir = storage_path('app/uploads/' . $session->upload_id . '_extracted');
+        if (is_dir($extractDir)) $this->recursiveDelete($extractDir);
+      }
+      $session->delete();
+    }
+
+    // Delete stale zip so CreateShareZip rebuilds it
+    $zipPath = storage_path('app/shares/' . $share->path . '.zip');
+    if (file_exists($zipPath)) unlink($zipPath);
+
+    $share->size       = $share->files()->sum('size');
+    $share->file_count = $share->files()->count();
+    $share->status     = 'pending';
+    $share->save();
+
+    CreateShareZip::dispatch($share);
+
+    return response()->json(['status' => 'success', 'message' => 'Files added to share', 'data' => ['share' => $share]]);
+  }
+
+  /**
+   * Replace the single file in a single-file share.
+   */
+  public function replaceShareFile(Request $request, $shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::find($shareId);
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if ($user->id !== $share->user_id && !$user->admin) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status === 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Share has been deleted'], 422);
+    }
+
+    if ($share->files()->count() !== 1) {
+      return response()->json(['status' => 'error', 'message' => 'replaceShareFile requires exactly one file in the share'], 422);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'uploadIds'   => ['required', 'array', 'min:1', 'max:1'],
+      'uploadIds.*' => ['required', 'string'],
+    ]);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'error', 'message' => 'Validation failed', 'data' => ['errors' => $validator->errors()]], 422);
+    }
+
+    $sessions = $this->waitForSessions($request->uploadIds, $user->id);
+    if (!$sessions) {
+      return response()->json(['status' => 'error', 'message' => 'Upload was not found or not completed'], 400);
+    }
+
+    $session = $sessions->first();
+    $newFile = File::find($session->file_id);
+    if (!$newFile) {
+      return response()->json(['status' => 'error', 'message' => 'No file record found for upload'], 400);
+    }
+
+    // Delete old physical file
+    $oldFile      = $share->files()->first();
+    $shareDirPath = storage_path('app/shares/' . $share->path);
+    $oldFileFull  = $shareDirPath;
+    if ($oldFile->full_path) $oldFileFull .= '/' . $oldFile->full_path;
+    $oldFileFull .= '/' . $oldFile->name;
+    if (file_exists($oldFileFull)) unlink($oldFileFull);
+    $oldFile->delete();
+
+    // Move new file into share directory root
+    if (!is_dir($shareDirPath)) mkdir($shareDirPath, 0777, true);
+    $sourcePath = storage_path('app/' . $newFile->temp_path);
+    $destFile   = $shareDirPath . '/' . $newFile->name;
+    if (file_exists($sourcePath)) {
+      copy($sourcePath, $destFile) ? unlink($sourcePath) : rename($sourcePath, $destFile);
+    }
+    $infoPath = $sourcePath . '.info';
+    if (file_exists($infoPath)) unlink($infoPath);
+
+    $newFile->share_id  = $share->id;
+    $newFile->full_path = null;
+    $newFile->temp_path = null;
+    $newFile->save();
+
+    $session->delete();
+
+    $share->size       = $newFile->size;
+    $share->file_count = 1;
+    $share->status     = 'ready';
+    $share->save();
+
+    return response()->json(['status' => 'success', 'message' => 'File replaced', 'data' => ['share' => $share->fresh(['files'])]]);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Private helpers shared by addFilesToShare / replaceShareFile
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /** Wait (with backoff) until all upload sessions are complete. Returns null on timeout. */
+  private function waitForSessions(array $uploadIds, int $userId): ?\Illuminate\Support\Collection
+  {
+    $expected   = count($uploadIds);
+    $maxRetries = 5;
+
+    for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+      $sessions = UploadSession::whereIn('upload_id', $uploadIds)
+        ->where('user_id', $userId)
+        ->where('status', 'complete')
+        ->get();
+
+      if ($sessions->count() === $expected) return $sessions;
+
+      if ($attempt < $maxRetries - 1) {
+        usleep(100 * (int) pow(2, $attempt) * 1000); // 100ms, 200ms, 400ms, 800ms
+      }
+    }
+
+    return null;
+  }
+
+  /** Extract File models from sessions; detect bundle uploads. */
+  private function filesFromSessions(\Illuminate\Support\Collection $sessions): array
+  {
+    $fileIds        = [];
+    $isBundleUpload = false;
+
+    foreach ($sessions as $session) {
+      if ($session->is_bundle && $session->bundle_file_ids) {
+        $fileIds       = array_merge($fileIds, $session->getBundleFileIdsArray());
+        $isBundleUpload = true;
+      } elseif ($session->file_id) {
+        $fileIds[] = $session->file_id;
+      }
+    }
+
+    $fileIds = array_filter($fileIds);
+    return [File::whereIn('id', $fileIds)->get(), $isBundleUpload];
+  }
+
+  /** Map upload_id → File for non-bundle sessions. */
+  private function buildUploadIdToFileMap(\Illuminate\Support\Collection $sessions, \Illuminate\Support\Collection $files): array
+  {
+    $map = [];
+    foreach ($sessions as $session) {
+      if (!$session->is_bundle && $session->file_id) {
+        $map[$session->upload_id] = $files->firstWhere('id', $session->file_id);
+      }
+    }
+    return $map;
+  }
+
+  /** Determine the subdirectory (within the share dir) for a file. */
+  private function resolveOriginalPath(
+    File $file,
+    bool $isBundleUpload,
+    \Illuminate\Support\Collection $sessions,
+    array $uploadIdToFile,
+    array $filePaths
+  ): string {
+    if ($isBundleUpload) {
+      $parts = explode('_extracted/', $file->temp_path);
+      if (count($parts) > 1) {
+        $pathParts = explode('/', $parts[1]);
+        array_pop($pathParts);
+        return implode('/', $pathParts);
+      }
+      return '';
+    }
+
+    $uploadId = null;
+    foreach ($uploadIdToFile as $uid => $f) {
+      if ($f && $f->id === $file->id) { $uploadId = $uid; break; }
+    }
+
+    $path = $filePaths[$uploadId] ?? '';
+    $path = implode('/', array_slice(explode('/', $path), 0, -1));
+    return $path;
+  }
+
+  /**
    * Send email notification that a share has been created
    */
   private function sendShareCreatedEmail(Share $share, $recipient)
