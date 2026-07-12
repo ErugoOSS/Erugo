@@ -65,11 +65,18 @@ class Share extends Model
 
   function getExpiredAttribute()
   {
+    if ($this->expires_at === null) {
+      return false; // null = no expiration (admin unlimited)
+    }
     return $this->expires_at < now()->addMinutes(1);
   }
 
   function getDeletesAtAttribute()
   {
+    if ($this->expires_at === null) {
+      return null; // no expiration = no scheduled cleanup
+    }
+
     $cleanFilesAfterDays = Setting::where('key', 'clean_files_after_days')->first();
 
     if (!$cleanFilesAfterDays) {

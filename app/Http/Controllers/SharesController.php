@@ -503,38 +503,80 @@ class SharesController extends Controller
     ]);
   }
 
-  public function extend($shareId)
+  public function extend($shareId, Request $request)
   {
-
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
+
     $share = Share::where('id', $shareId)->first();
     if (!$share) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Share not found'
-      ], 404);
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
     }
+
     if (!$this->canManageShare($share, $user)) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
-    $share->expires_at = Carbon::now()->addDays(7);
+
+    $settingsService = new SettingsService();
+    $maxExpiryDays = $settingsService->get('max_expiry_time'); // null = no limit configured
+
+    // Admin can set unlimited (null expires_at)
+    if ($user->admin && $request->boolean('unlimited')) {
+      $share->expires_at = null;
+      $share->save();
+      return response()->json(['status' => 'success', 'message' => 'Share set to no expiration', 'data' => ['share' => $share]]);
+    }
+
+    // Admin can set a specific date
+    if ($user->admin && $request->filled('expires_at')) {
+      $newExpiry = Carbon::parse($request->input('expires_at'));
+      $share->expires_at = $newExpiry;
+      $share->save();
+      return response()->json(['status' => 'success', 'message' => 'Share extended', 'data' => ['share' => $share]]);
+    }
+
+    // Relative extension: amount + unit (default: 7 days, matching original behaviour)
+    $amount = (int) $request->input('amount', 7);
+    $unit   = $request->input('unit', 'days');
+
+    if ($amount < 1) {
+      return response()->json(['status' => 'error', 'message' => 'Amount must be at least 1'], 422);
+    }
+
+    if (!in_array($unit, ['days', 'weeks', 'months'])) {
+      return response()->json(['status' => 'error', 'message' => 'Unit must be days, weeks, or months'], 422);
+    }
+
+    // Base: current expiry or now, whichever is later (fixes bug where extending
+    // a far-future share from now() would shorten it)
+    $base = ($share->expires_at !== null && $share->expires_at > Carbon::now())
+      ? $share->expires_at
+      : Carbon::now();
+
+    $newExpiry = match ($unit) {
+      'weeks'  => $base->copy()->addWeeks($amount),
+      'months' => $base->copy()->addMonths($amount),
+      default  => $base->copy()->addDays($amount),
+    };
+
+    // Enforce max_expiry_time for non-admin users
+    if (!$user->admin && $maxExpiryDays !== null) {
+      $maxAllowed = Carbon::now()->addDays((int) $maxExpiryDays);
+      if ($newExpiry > $maxAllowed) {
+        return response()->json([
+          'status'  => 'error',
+          'message' => 'Extension would exceed maximum allowed expiry time',
+          'data'    => ['max_expiry_days' => (int) $maxExpiryDays]
+        ], 422);
+      }
+    }
+
+    $share->expires_at = $newExpiry;
     $share->save();
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Share extended',
-      'data' => [
-        'share' => $share
-      ]
-    ]);
+
+    return response()->json(['status' => 'success', 'message' => 'Share extended', 'data' => ['share' => $share]]);
   }
 
   public function setDownloadLimit($shareId, Request $request)

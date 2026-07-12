@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose, computed } from 'vue'
-import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
+import { getAllShares, expireShare, setDownloadLimit } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -14,6 +14,7 @@ import {
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
+import ExtendShareModal from '../ExtendShareModal.vue'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
@@ -28,6 +29,7 @@ const loadedShares = ref(false)
 const shares = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
+const extendModalShare = ref(null)
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
@@ -50,15 +52,8 @@ const handleExpireShareClick = async (share) => {
     })
 }
 
-const handleExtendShareClick = async (share) => {
-  extendShare(share.id)
-    .then(() => {
-      toast.success(t.value('settings.success.shareExtended'))
-      loadShares()
-    })
-    .catch((error) => {
-      toast.error(t.value('settings.error.shareExtended'))
-    })
+const handleExtendShareClick = (share) => {
+  extendModalShare.value = share
 }
 
 const handleDownloadLimitChange = async (share) => {
@@ -118,6 +113,13 @@ defineExpose({
 
 <template>
   <div>
+    <ExtendShareModal
+      v-if="extendModalShare"
+      :share="extendModalShare"
+      :is-admin="true"
+      @close="extendModalShare = null"
+      @extended="loadShares"
+    />
     <HelpTip id="download-limit-help-tip-all" :header="$t('settings.help.downloadLimit.title')">
       <p>
         {{ $t('settings.help.downloadLimit.description') }}
