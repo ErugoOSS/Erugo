@@ -702,8 +702,8 @@ class SharesController extends Controller
     }
 
     $confirmation = $request->input('confirmation');
-    if (strtolower(trim($confirmation ?? '')) !== 'delete') {
-      return response()->json(['status' => 'error', 'message' => 'Confirmation required — type "delete" to confirm'], 422);
+    if (trim($confirmation ?? '') !== 'DELETE') {
+      return response()->json(['status' => 'error', 'message' => 'Confirmation required — type DELETE (uppercase) to confirm'], 422);
     }
 
     $share = Share::where('id', $shareId)->first();
