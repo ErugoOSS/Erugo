@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose } from 'vue'
 import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
+import { RefreshCcw } from 'lucide-vue-next'
+import { useSetting } from '../../composables/useSetting'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -30,7 +32,10 @@ const loadedShares = ref(false)
 
 const shares = ref([])
 const showDeletedShares = ref(false)
+const { value: allowFileReplacement } = useSetting('allow_file_replacement', 'system.shares', '1')
+
 const manageFilesShare = ref(null)
+const replaceFileShare = ref(null)
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
@@ -131,7 +136,15 @@ defineExpose({
     <ManageShareFilesModal
       v-if="manageFilesShare"
       :share="manageFilesShare"
+      mode="add"
       @close="manageFilesShare = null"
+      @done="loadShares"
+    />
+    <ManageShareFilesModal
+      v-if="replaceFileShare"
+      :share="replaceFileShare"
+      mode="replace"
+      @close="replaceFileShare = null"
       @done="loadShares"
     />
     <HelpTip id="download-limit-help-tip" :header="$t('settings.help.downloadLimit.title')">
@@ -267,11 +280,19 @@ defineExpose({
             </button>
             <button
               v-if="!share.deleted"
-              @click="manageFilesShare = share"
               class="secondary icon-only"
-              :title="share.files.length === 1 ? 'Replace file' : 'Add files'"
+              @click="manageFilesShare = share"
+              title="Add files"
             >
               <FilePlus2 style="margin-right: 0" />
+            </button>
+            <button
+              v-if="!share.deleted && share.files.length === 1 && allowFileReplacement == '1'"
+              class="secondary icon-only"
+              @click="replaceFileShare = share"
+              title="Replace file"
+            >
+              <RefreshCcw style="margin-right: 0" />
             </button>
           </td>
         </tr>
