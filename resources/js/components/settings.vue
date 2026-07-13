@@ -91,13 +91,20 @@ const clickOutside = (e) => {
   }
 }
 
+const ADMIN_TABS = ['stats', 'branding', 'system', 'emailTemplates', 'users', 'allShares', 'backups']
+
 const setActiveTab = (tab, options = {}) => {
+  // Silently block non-admins from landing on admin-only tabs (e.g. via stale URL hash)
+  if (ADMIN_TABS.includes(tab) && !store.isAdmin()) {
+    activeTab.value = 'myShares'
+    return
+  }
   const { updateUrl = true } = options
   activeTab.value = tab
   if (tab === 'allShares' && allSharesUsers.value.length === 0) {
     loadAllSharesUsers()
   }
-  
+
   // Update URL hash with the new tab
   if (updateUrl) {
     updateUrlHash(tab)
