@@ -584,6 +584,18 @@
     },
     "loading": "Chargement des partages...",
     "noShares": "Vous n'avez pas de partages. Pourquoi ne pas en créer un ?",
+    "pendingDeletion": {
+      "title": "Suppression en attente",
+      "description": "Les partages suivants ont été demandés pour suppression. Vous pouvez annuler cela avant qu'ils soient définitivement supprimés.",
+      "requestedOn": "Demandé le",
+      "deleteAll": "Tout supprimer définitivement",
+      "confirmPrompt": "Saisissez DELETE (en majuscules) pour supprimer définitivement tous les partages en attente et leurs fichiers. Cette action est irréversible.",
+      "confirmMismatch": "La confirmation ne correspond pas — vous devez saisir DELETE en majuscules exactement."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partage expiré} other {# partages expirés}}",
+      "notice": "Ces partages ont expiré et leurs fichiers sont toujours stockés sur le disque. Pour les supprimer, sélectionnez 'Demander la suppression' dans le menu d'actions du partage."
+    },
     "provider": {
       "edit": "Editer",
       "view": "Voir"
