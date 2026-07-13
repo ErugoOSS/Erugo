@@ -4,6 +4,18 @@
       "auth_providers_description_localhost": "A configuração de autenticação externa não está disponível no localhost. Os provedores OAuth exigem um nome de domínio totalmente qualificado (FQDN) para funcionar corretamente. Aceda ao Erugo através de um domínio registado para configurar estas definições.",
       "callback_url": "URL de chamada de retorno",
       "callback_url_description": "Utilize o URL de retorno de chamada fornecido na configuração do seu fornecedor de identidade."
+    },
+    "pendingDeletion": {
+      "title": "Exclusão pendente",
+      "description": "Os compartilhamentos a seguir foram solicitados para exclusão. Você pode desfazer isso antes que sejam removidos permanentemente.",
+      "requestedOn": "Solicitado em",
+      "deleteAll": "Excluir tudo permanentemente",
+      "confirmPrompt": "Digite DELETE (maiúsculas) para remover permanentemente todos os compartilhamentos pendentes e seus arquivos. Isso não pode ser desfeito.",
+      "confirmMismatch": "Confirmação não corresponde — você deve digitar DELETE em maiúsculas exatamente."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 compartilhamento expirado} other {# compartilhamentos expirados}}",
+      "notice": "Esses compartilhamentos expiraram e seus arquivos ainda estão armazenados no disco. Para removê-los, selecione 'Solicitar exclusão' no menu de ações do compartilhamento."
     }
   }
 }

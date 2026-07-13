@@ -584,6 +584,18 @@
     },
     "loading": "Aandelen uploaden...",
     "noShares": "Er zijn geen aandelen. Maak er een!",
+    "pendingDeletion": {
+      "title": "Verwijdering in behandeling",
+      "description": "Voor de volgende shares is verwijdering aangevraagd. U kunt dit ongedaan maken voordat ze permanent worden verwijderd.",
+      "requestedOn": "Aangevraagd op",
+      "deleteAll": "Alles definitief verwijderen",
+      "confirmPrompt": "Typ DELETE (hoofdletters) om alle wachtende shares en hun bestanden permanent te verwijderen. Dit kan niet ongedaan worden gemaakt.",
+      "confirmMismatch": "Bevestiging komt niet overeen — u moet DELETE exact in hoofdletters typen."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 verlopen share} other {# verlopen shares}}",
+      "notice": "Deze shares zijn verlopen en hun bestanden staan nog steeds op schijf. Om ze te verwijderen, selecteer 'Verwijdering aanvragen' in het actiemenu van de share."
+    },
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"

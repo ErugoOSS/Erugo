@@ -605,6 +605,18 @@
     },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
+    "pendingDeletion": {
+      "title": "Pending Deletion",
+      "description": "The following shares have been requested for deletion. You can undo this before they are permanently removed.",
+      "requestedOn": "Requested On",
+      "deleteAll": "Delete all permanently",
+      "confirmPrompt": "Type DELETE (uppercase) to permanently remove all pending shares and their files. This cannot be undone.",
+      "confirmMismatch": "Confirmation did not match \u2014 you must type DELETE in uppercase exactly."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 expired share} other {# expired shares}}",
+      "notice": "These shares have expired and their files are still stored on disk. To remove them, select 'Request Deletion' from the share's action menu."
+    },
     "provider": {
       "edit": "Edit",
       "view": "View"

@@ -584,6 +584,18 @@
     },
     "loading": "Geteilte Dateien laden...",
     "noShares": "Sie haben keine geteilten Dateien. Warum nicht eine anlegen?",
+    "pendingDeletion": {
+      "title": "Löschung ausstehend",
+      "description": "Für die folgenden Shares wurde eine Löschung beantragt. Sie können dies rückgängig machen, bevor sie dauerhaft entfernt werden.",
+      "requestedOn": "Beantragt am",
+      "deleteAll": "Alle dauerhaft löschen",
+      "confirmPrompt": "Geben Sie DELETE (Großbuchstaben) ein, um alle ausstehenden Shares und ihre Dateien dauerhaft zu entfernen. Dies kann nicht rückgängig gemacht werden.",
+      "confirmMismatch": "Bestätigung stimmte nicht überein — Sie müssen DELETE in Großbuchstaben eingeben."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 abgelaufener Share} other {# abgelaufene Shares}}",
+      "notice": "Diese Shares sind abgelaufen und die Dateien sind noch auf dem Datenträger gespeichert. Um sie zu entfernen, wählen Sie im Aktionsmenü des Shares 'Löschung beantragen'."
+    },
     "provider": {
       "edit": "Bearbeiten",
       "view": "Ansehen"

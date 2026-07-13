@@ -563,6 +563,18 @@
     },
     "loading": "Carregando as transferências...",
     "noShares": "Não tem transferências. Porque não criar uma?",
+    "pendingDeletion": {
+      "title": "Eliminação pendente",
+      "description": "As seguintes partilhas foram solicitadas para eliminação. Pode desfazer isto antes de serem removidas permanentemente.",
+      "requestedOn": "Solicitado em",
+      "deleteAll": "Eliminar tudo permanentemente",
+      "confirmPrompt": "Escreva DELETE (maiúsculas) para remover permanentemente todas as partilhas pendentes e os seus ficheiros. Esta ação não pode ser desfeita.",
+      "confirmMismatch": "Confirmação não corresponde — deve escrever DELETE em maiúsculas exatamente."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partilha expirada} other {# partilhas expiradas}}",
+      "notice": "Estas partilhas expiraram e os seus ficheiros ainda estão armazenados no disco. Para os remover, selecione 'Solicitar eliminação' no menu de ações da partilha."
+    },
     "provider": {
       "edit": "Editar",
       "view": "Ver"
