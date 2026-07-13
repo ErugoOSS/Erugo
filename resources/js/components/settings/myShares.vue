@@ -137,8 +137,10 @@ const handleUndoDeletionClick = async (share) => {
 }
 
 const handlePruneExpiredShares = async () => {
-  const confirmed = confirm(t.value('settings.confirm.pruneExpiredShares'))
-  if (!confirmed) {
+  const input = prompt(t.value('settings.pendingDeletion.confirmPrompt'))
+  if (input === null) return // cancelled
+  if (input !== 'DELETE') {
+    toast.error(t.value('settings.pendingDeletion.confirmMismatch'))
     return
   }
   try {
@@ -317,11 +319,19 @@ defineExpose({
 
     <!-- Pending Deletion Section -->
     <div v-if="pendingDeletionShares.length > 0" class="pending-deletion-section">
-      <h4 class="pending-deletion-header">
-        <Clock />
-        {{ $t('settings.pendingDeletion.title') }}
-      </h4>
-      <p class="pending-deletion-description">{{ $t('settings.pendingDeletion.description') }}</p>
+      <div class="pending-deletion-section-header">
+        <div>
+          <h4 class="pending-deletion-header">
+            <Clock />
+            {{ $t('settings.pendingDeletion.title') }}
+          </h4>
+          <p class="pending-deletion-description">{{ $t('settings.pendingDeletion.description') }}</p>
+        </div>
+        <button class="danger" @click="handlePruneExpiredShares">
+          <Trash2 />
+          {{ $t('settings.pendingDeletion.deleteAll') }}
+        </button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -586,6 +596,19 @@ td {
   margin-right: 5px;
   vertical-align: middle;
   opacity: 0.7;
+}
+
+.pending-deletion-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 0.75rem;
+
+  button {
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
 }
 
 .pending-deletion-section {
