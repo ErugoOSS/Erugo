@@ -70,6 +70,9 @@
         try_files {path} {path}/ /index.php?{query}
         
         # Enable PHP processing
-        php_fastcgi unix//run/php/php-fpm.sock
+        php_fastcgi unix//run/php/php-fpm.sock {
+            read_timeout 310s
+            write_timeout 310s
+        }
     }
 }
