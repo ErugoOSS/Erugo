@@ -32,6 +32,14 @@ const shares = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
 
+const activeShares = computed(() =>
+  shares.value.filter(s => s.status !== 'pending_deletion')
+)
+
+const pendingDeletionShares = computed(() =>
+  shares.value.filter(s => s.status === 'pending_deletion')
+)
+
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
   loadShares()
@@ -87,14 +95,6 @@ const handleDownloadLimitChange = async (share) => {
 
 const downloadShare = async (share) => {
   window.location.href = `/api/shares/${share.long_id}/download`
-}
-
-const enableExpireShareButton = (share) => {
-  return !share.expired && !share.deleted
-}
-
-const enableExtendShareButton = (share) => {
-  return !share.deleted
 }
 
 const enableDownloadButton = (share) => {
@@ -162,7 +162,7 @@ defineExpose({
       </p>
     </HelpTip>
 
-    <table v-if="shares.length > 0">
+    <table v-if="activeShares.length > 0">
       <thead>
         <tr>
           <th>{{ $t('settings.table.name') }}</th>
@@ -177,7 +177,7 @@ defineExpose({
         </tr>
       </thead>
       <tbody>
-        <tr v-for="share in shares" :key="share.id">
+        <tr v-for="share in activeShares" :key="share.id">
           <td width="1" style="white-space: nowrap">
             <div class="slide-text">
               <strong class="content">{{ share.name }}</strong>
@@ -195,11 +195,6 @@ defineExpose({
                 <LockOpen />
                 {{ $t('share.passwordNotProtected') }}
               </template>
-            </div>
-            <div v-if="share.pending_deletion" class="pending-deletion-badge">
-              <Clock />
-              {{ $t('share.status.pendingDeletion') }}
-              <span class="deletion-requester">({{ share.deletion_requested_by }})</span>
             </div>
           </td>
           <td width="1" style="white-space: nowrap">
@@ -304,25 +299,72 @@ defineExpose({
                 {{ $t('share.button.requestDeletion') }}
               </button>
             </template>
-            <template v-if="share.pending_deletion">
-              <button
-                @click="handleUndoDeletionClick(share)"
-                class="secondary"
-              >
-                <Undo2 />
-                {{ $t('share.button.undoDeletion') }}
-              </button>
-            </template>
           </td>
         </tr>
       </tbody>
     </table>
-    <div v-else-if="loadedShares" class="center-message">
+    <div v-else-if="loadedShares && pendingDeletionShares.length === 0" class="center-message">
       <Rocket />
       <p>{{ $t('settings.allShares.noShares') }}</p>
     </div>
-    <div v-else class="center-message">
+    <div v-else-if="!loadedShares" class="center-message">
       <p>{{ $t('settings.loading') }}</p>
+    </div>
+
+    <!-- Pending Deletion Section -->
+    <div v-if="pendingDeletionShares.length > 0" class="pending-deletion-section">
+      <h4 class="pending-deletion-header">
+        <Clock />
+        {{ $t('settings.pendingDeletion.title') }}
+      </h4>
+      <p class="pending-deletion-description">{{ $t('settings.pendingDeletion.description') }}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t('settings.table.name') }}</th>
+            <th>{{ $t('settings.allShares.owner') }}</th>
+            <th>{{ $t('settings.table.files') }}</th>
+            <th>{{ $t('settings.pendingDeletion.requestedOn') }}</th>
+            <th>{{ $t('settings.table.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="share in pendingDeletionShares" :key="share.id" class="pending-deletion-row">
+            <td width="1" style="white-space: nowrap">
+              <div class="slide-text">
+                <strong class="content">{{ share.name }}</strong>
+              </div>
+              <span class="pending-deletion-badge">
+                <Clock />
+                {{ $t('share.status.pendingDeletion') }}
+                <span class="deletion-requester">({{ share.deletion_requested_by }})</span>
+              </span>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="owner-info">
+                <strong>{{ share.user_name }}</strong>
+                <small>{{ share.user_email }}</small>
+              </div>
+            </td>
+            <td style="vertical-align: top">
+              <h6 class="file-count">
+                {{ $t('share.files.count', { count: share.files.length, value: share.files.length }) }}
+              </h6>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="date">{{ niceDate(share.deletion_requested_at) }}</div>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="actions-cell">
+                <button @click="handleUndoDeletionClick(share)" class="secondary">
+                  <Undo2 />
+                  {{ $t('share.button.undoDeletion') }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -552,6 +594,39 @@ td {
     height: 1rem;
     margin-top: -2px;
   }
+}
+
+.pending-deletion-section {
+  margin-top: 2rem;
+  border-top: 2px solid var(--panel-section-background-color-alt);
+  padding-top: 1rem;
+}
+
+.pending-deletion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--panel-section-text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.7;
+  }
+}
+
+.pending-deletion-description {
+  font-size: 0.8rem;
+  color: var(--panel-section-text-color);
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.pending-deletion-row {
+  opacity: 0.8;
 }
 
 .pending-deletion-badge {
