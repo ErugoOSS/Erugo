@@ -1,6 +1,8 @@
 {
   "settings": {
     "system": {
+      "allow_file_replacement": "Permitir substituição de arquivo",
+      "allow_file_replacement_description": "Quando ativado, os usuários podem substituir o arquivo em um compartilhamento de arquivo único sem criar um novo compartilhamento. Desativar para cenários de auditoria onde os arquivos não devem ser alterados após o compartilhamento.",
       "auth_providers_description_localhost": "A configuração de autenticação externa não está disponível no localhost. Os provedores OAuth exigem um nome de domínio totalmente qualificado (FQDN) para funcionar corretamente. Aceda ao Erugo através de um domínio registado para configurar estas definições.",
       "callback_url": "URL de chamada de retorno",
       "callback_url_description": "Utilize o URL de retorno de chamada fornecido na configuração do seu fornecedor de identidade."

@@ -718,6 +718,8 @@
       "allow_chunked_uploads_description": "Chunked upload mode breaks files into smaller segments that are transferred sequentially. While slightly slower than direct upload for smaller files, this method provides greater stability and reliability when transferring large files. Chunked uploads support progress tracking and allow users to manually pause and resume transfers, making it ideal for files over 100MB or when using unstable network connections.",
       "allow_direct_uploads": "Allow direct upload mode",
       "allow_direct_uploads_description": "Direct upload mode transmits files in a single, uninterrupted request. While this method offers the fastest transfer speeds for most files, extremely large files may cause stability issues or timeouts. For optimal performance with files exceeding 100MB, chunked uploads may be a better option.",
+      "allow_file_replacement": "Allow file replacement",
+      "allow_file_replacement_description": "When enabled, users can replace the file in a single-file share without creating a new share. Disable for audit scenarios where files must not change after sharing.",
       "allow_reverse_shares": "Allow reverse shares",
       "allow_reverse_shares_description": "Determines whether your registered users should have permission to send reverse share requests. These requests provide external individuals with a one-time upload pass, allowing them to deliver files directly to the registered user who initiated the request.\n\n\n\n\n",
       "application_name": "Application Name",

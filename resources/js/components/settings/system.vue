@@ -59,6 +59,7 @@ const settings = ref({
   max_expiry_time: '',
   max_share_size: '',
   max_share_size_unit: '',
+  allow_file_replacement: '1',
   clean_files_after_days: '',
   share_url_mode: 'haiku',
   share_url_pattern: '******',
@@ -670,6 +671,20 @@ const handleDeleteAuthProvider = async (id) => {
                     v-model="settings.clean_files_after_days"
                     placeholder="30"
                   />
+                </div>
+                <div class="setting-group-body-item">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h4 id="allow_file_replacement">{{ $t('settings.system.allow_file_replacement') || 'Allow file replacement' }}</h4>
+                      <div class="checkbox-container">
+                        <input type="checkbox" id="allow_file_replacement_checkbox" :checked="settings.allow_file_replacement == '1'" @change="settings.allow_file_replacement = $event.target.checked ? '1' : '0'" />
+                        <label for="allow_file_replacement_checkbox">{{ $t('settings.system.allow_file_replacement') || 'Allow file replacement' }}</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 help-column">
+                      <p>{{ $t('settings.system.allow_file_replacement_description') || 'When enabled, users can replace the file in a single-file share without creating a new share. Disable for audit scenarios where files must not change after sharing.' }}</p>
+                    </div>
+                  </div>
                 </div>
                 <h6 id="reverse_shares" class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
                 <div class="setting-group-body-item">
