@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,26 @@ use App\Utils\FileHelper;
 use App\Services\SettingsService;
 class SettingsController extends Controller
 {
+    /**
+     * Groups whose settings may only be read by administrators.
+     * These contain credentials (SMTP passwords, etc.) that must not be
+     * exposed to ordinary authenticated users.
+     */
+    private const ADMIN_ONLY_GROUPS = ['system', 'system.smtp', 'system.auth'];
+
+    /**
+     * Return true when the given group string falls under an admin-only prefix.
+     */
+    private function groupRequiresAdmin(string $group): bool
+    {
+        foreach (self::ADMIN_ONLY_GROUPS as $restricted) {
+            if ($group === $restricted || str_starts_with($group, $restricted . '.')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function write(Request $request)
     {
         $request->validate([
@@ -73,6 +94,14 @@ class SettingsController extends Controller
                 'message' => 'Setting not found',
             ], 404);
         }
+
+        if ($this->groupRequiresAdmin($setting->group) && !Auth::user()?->admin) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Forbidden',
+            ], 403);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -83,6 +112,14 @@ class SettingsController extends Controller
 
     public function readGroup(Request $request, $group)
     {
+        // Strip trailing wildcard so we can check the base group name
+        $baseGroup = rtrim($group, '.*');
+        if ($this->groupRequiresAdmin($baseGroup) && !Auth::user()?->admin) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Forbidden',
+            ], 403);
+        }
 
         $query = Setting::query();
 
@@ -159,7 +196,7 @@ class SettingsController extends Controller
             Log::error('Logo upload error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to save logo: ' . $e->getMessage(),
+                'message' => 'Failed to save logo',
             ], 500);
         }
     }
@@ -199,7 +236,7 @@ class SettingsController extends Controller
             Log::error('Logo reset error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to reset logo: ' . $e->getMessage(),
+                'message' => 'Failed to reset logo',
             ], 500);
         }
     }

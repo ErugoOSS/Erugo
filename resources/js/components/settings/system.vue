@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, defineExpose, inject, computed, nextTick, watch } from 'vue'
+import DOMPurify from 'dompurify'
 import {
   Settings,
   Tag,
@@ -266,7 +267,13 @@ const loadSettings = async () => {
 
 const loadAuthProviders = async () => {
   try {
-    authProviders.value = await getAuthProviders()
+    const raw = await getAuthProviders()
+    authProviders.value = raw.map((p) => ({
+      ...p,
+      icon: p.icon
+        ? DOMPurify.sanitize(p.icon, { USE_PROFILES: { svg: true, svgFilters: true } })
+        : null,
+    }))
     authProviders.value.forEach((authProvider) => {
       Object.keys(authProvider.provider_config).forEach((configKey) => {
         hideSecrets.value[`${authProvider.id}_${configKey}`] = mightBeSecret(configKey)

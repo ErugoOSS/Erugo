@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, defineExpose, nextTick } from 'vue'
+import DOMPurify from 'dompurify'
 import { getMyProfile, updateMyProfile, getAvailableAuthProviders, unlinkProvider } from '../../api'
 import { User, CircleX, UserRoundCheck, UserRoundPen, Fingerprint, Link, Unlink } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
@@ -43,17 +44,21 @@ const loadProfile = async () => {
   profile.value = await getMyProfile()
 }
 
+const sanitizeIcon = (icon) =>
+  icon ? DOMPurify.sanitize(icon, { USE_PROFILES: { svg: true, svgFilters: true } }) : null
+
 const loadAvailableAuthProviders = async () => {
   let providers = await getAvailableAuthProviders()
+  const sanitized = providers.map((p) => ({ ...p, icon: sanitizeIcon(p.icon) }))
   if (profile.value.linked_accounts.length > 0) {
-    availableAuthProviders.value = providers.map((p) => {
+    availableAuthProviders.value = sanitized.map((p) => {
       return {
         ...p,
         is_linked: profile.value.linked_accounts.some((ap) => ap.id === p.id)
       }
     })
   } else {
-    availableAuthProviders.value = providers
+    availableAuthProviders.value = sanitized
   }
 }
 
