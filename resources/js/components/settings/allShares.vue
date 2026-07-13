@@ -136,9 +136,13 @@ const handleUndoDeletionClick = async (share) => {
 
 const handleDeleteImmediatelyClick = async (share) => {
   const confirmation = prompt(
-    `Type "delete" to immediately remove all files for share "${share.name}".\n\nThis cannot be undone.`
+    `Type DELETE (uppercase) to immediately remove all files for share "${share.name}".\n\nThis cannot be undone.`
   )
   if (confirmation === null) return  // user cancelled
+  if (confirmation !== 'DELETE') {
+    toast.error('Confirmation did not match — type DELETE in uppercase to confirm')
+    return
+  }
   deleteShareImmediately(share.id, confirmation)
     .then(() => {
       toast.success('Share deleted immediately')
@@ -319,16 +323,6 @@ defineExpose({
                 {{ $t('share.button.requestDeletion') }}
               </button>
             </template>
-            <template v-if="canDeleteImmediately(share)">
-              <button
-                @click="handleDeleteImmediatelyClick(share)"
-                class="danger"
-                :title="$t('share.button.deleteImmediately')"
-              >
-                <OctagonX />
-                {{ $t('share.button.deleteImmediately') }}
-              </button>
-            </template>
           </td>
         </tr>
       </tbody>
@@ -389,6 +383,10 @@ defineExpose({
                 <button @click="handleUndoDeletionClick(share)" class="secondary">
                   <Undo2 />
                   {{ $t('share.button.undoDeletion') }}
+                </button>
+                <button @click="handleDeleteImmediatelyClick(share)" class="danger">
+                  <OctagonX />
+                  {{ $t('share.button.deleteImmediately') }}
                 </button>
               </div>
             </td>
