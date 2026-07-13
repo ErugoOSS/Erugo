@@ -14,10 +14,13 @@ class SettingsController extends Controller
 {
     /**
      * Groups whose settings may only be read by administrators.
-     * These contain credentials (SMTP passwords, etc.) that must not be
-     * exposed to ordinary authenticated users.
+     * Restricted to groups that contain actual credentials — specifically
+     * SMTP server credentials in system.smtp. Other system.* sub-groups
+     * (system.shares, system.auth, system.emails, etc.) hold non-sensitive
+     * configuration that authenticated non-admin users legitimately need to
+     * read (e.g. share limits, self-registration flags).
      */
-    private const ADMIN_ONLY_GROUPS = ['system', 'system.smtp', 'system.auth'];
+    private const ADMIN_ONLY_GROUPS = ['system.smtp'];
 
     /**
      * Return true when the given group string falls under an admin-only prefix.
