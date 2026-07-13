@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'tusd' => [
+        // Optional shared secret for tusd hook validation.
+        // Set TUSD_HOOK_SECRET in .env and configure tusd with the same value
+        // using the --hooks-http-forward-headers="Hook-Secret:VALUE" option.
+        // When unset, the fallback IP-allowlist check is used.
+        'hook_secret' => env('TUSD_HOOK_SECRET'),
+    ],
+
 ];

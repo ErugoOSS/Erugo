@@ -470,9 +470,11 @@ export const sendReverseShareInvite = async (email, name, message) => {
 }
 
 export const acceptReverseShareInvite = async (token) => {
-  const response = await fetch(`${apiUrl}/api/reverse-shares/accept?token=${token}`, {
-    method: 'GET',
-    credentials: 'include'
+  const response = await fetch(`${apiUrl}/api/reverse-shares/accept`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token })
   })
   const data = await response.json()
   if (!response.ok) {

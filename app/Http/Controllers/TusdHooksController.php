@@ -46,6 +46,17 @@ class TusdHooksController extends Controller
             return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
         }
 
+        // Optional shared secret on top of the IP check. When TUSD_HOOK_SECRET
+        // is set, the request must also carry a matching Hook-Secret header.
+        $hookSecret = config('services.tusd.hook_secret');
+        if ($hookSecret) {
+            $providedSecret = $request->header('Hook-Secret');
+            if (!hash_equals($hookSecret, (string) $providedSecret)) {
+                Log::warning('tusd hook rejected: invalid Hook-Secret header');
+                return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
+            }
+        }
+
         $payload = $request->all();
         // Hook type is in the payload's Type field, not in headers
         $hookName = $payload['Type'] ?? null;

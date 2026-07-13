@@ -25,7 +25,7 @@ class BackupsController extends Controller
         
         // Ensure the backups directory exists
         if (!file_exists($backupPath)) {
-            mkdir($backupPath, 0777, true);
+            mkdir($backupPath, 0750, true);
         }
         
         $backups = [];
@@ -51,7 +51,6 @@ class BackupsController extends Controller
             'status' => 'success',
             'data' => [
                 'backups' => $backups,
-                'backup_path' => $backupPath,
             ]
         ]);
     }
@@ -73,7 +72,7 @@ class BackupsController extends Controller
 
         // Check the backups directory exists
         if (!file_exists($backupPath)) {
-            mkdir($backupPath, 0777, true);
+            mkdir($backupPath, 0750, true);
         }
 
         $backupName = 'database_backup_' . now()->format('Y-m-d_H-i-s') . '.sqlite';

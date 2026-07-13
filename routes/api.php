@@ -186,7 +186,7 @@ Route::group([], function ($router) {
 
     //accept a reverse share invite [public] (for guests with token)
     Route::group(['prefix' => 'reverse-shares'], function ($router) {
-        Route::get('/accept', [ AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
+        Route::post('/accept', [AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
     });
 
     //read auth providers [public]
@@ -199,7 +199,7 @@ Route::group([], function ($router) {
     Route::get('/shares/{share}', [SharesController::class, 'read'])->name('shares.read');
 
     //download shares [public]
-    Route::any('/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
+    Route::match(['GET', 'POST'], '/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
     
     //download specific file from share [public] - filepath can include nested directories
     Route::get('/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
