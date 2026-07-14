@@ -673,17 +673,9 @@ const handleDeleteAuthProvider = async (id) => {
                   />
                 </div>
                 <div class="setting-group-body-item">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <h4 id="allow_file_replacement">{{ $t('settings.system.allow_file_replacement') || 'Allow file replacement' }}</h4>
-                      <div class="checkbox-container">
-                        <input type="checkbox" id="allow_file_replacement_checkbox" :checked="settings.allow_file_replacement == '1'" @change="settings.allow_file_replacement = $event.target.checked ? '1' : '0'" />
-                        <label for="allow_file_replacement_checkbox">{{ $t('settings.system.allow_file_replacement') || 'Allow file replacement' }}</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 help-column">
-                      <p>{{ $t('settings.system.allow_file_replacement_description') || 'When enabled, users can replace the file in a single-file share without creating a new share. Disable for audit scenarios where files must not change after sharing.' }}</p>
-                    </div>
+                  <div class="checkbox-container">
+                    <input type="checkbox" id="allow_file_replacement_checkbox" :checked="settings.allow_file_replacement == '1'" @change="settings.allow_file_replacement = $event.target.checked ? '1' : '0'" />
+                    <label for="allow_file_replacement_checkbox">{{ $t('settings.system.allow_file_replacement') }}</label>
                   </div>
                 </div>
                 <h6 id="reverse_shares" class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
@@ -743,6 +735,8 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.max_share_size_description') }}</p>
               <h6>{{ $t('settings.system.clean_files_after') }}</h6>
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
+              <h6>{{ $t('settings.system.allow_file_replacement') }}</h6>
+              <p>{{ $t('settings.system.allow_file_replacement_description') }}</p>
               <h6>{{ $t('settings.system.allow_reverse_shares') }}</h6>
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
               <h6>{{ $t('settings.system.share_url_mode') }}</h6>
