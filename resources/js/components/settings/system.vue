@@ -1007,7 +1007,7 @@ const handleDeleteAuthProvider = async (id) => {
                       <div class="col-auto">
                         <div class="icon">
                           <Fingerprint v-if="!authProvider.icon" />
-                          <svg v-else v-html="authProvider.icon" class="custom"></svg>
+                          <svg v-else v-html="DOMPurify.sanitize(authProvider.icon, { USE_PROFILES: { svg: true } })" class="custom"></svg>
                         </div>
                       </div>
                       <div class="col">
