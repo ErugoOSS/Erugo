@@ -1012,6 +1012,14 @@
       "including": "including:"
     },
     "not_found": "The share you are looking for was not found. You may need to log in to see it.",
+    "processing": {
+      "title": "Files are being prepared for download",
+      "eta": "Ready in approximately {seconds} {seconds, plural, one {second} other {seconds}}",
+      "overdue": "Almost there, taking a little longer than expected\u2026",
+      "ready_toast": "Your files are ready to download!",
+      "failed_title": "Something went wrong preparing your files",
+      "failed_message": "The files could not be packaged for download. Please contact the share owner."
+    },
     "passwordNotProtected": "Open",
     "passwordProtected": "Password protected"
   },

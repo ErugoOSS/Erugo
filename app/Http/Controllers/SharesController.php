@@ -102,6 +102,8 @@ class SharesController extends Controller
       'user' => [
         'name' => $share->user ? $share->user->name : 'Guest User',
       ],
+      'status' => $share->status,
+      'updated_at' => $share->updated_at,
       'password_protected' => $share->password ? true : false
     ];
   }
