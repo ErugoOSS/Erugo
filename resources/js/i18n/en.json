@@ -875,7 +875,8 @@
       "smtp_username": "SMTP Username",
       "smtp_username_description": "The username required to authenticate with your SMTP server. This is typically the email address or account name associated with your email service.",
       "upload_modes": "Upload modes",
-      "your_auth_providers": "Your Auth Providers"
+      "your_auth_providers": "Your Auth Providers",
+      "file_replacement": "File Replacement"
     },
     "system_auth_provider_info_link": "About {name}",
     "table": {
