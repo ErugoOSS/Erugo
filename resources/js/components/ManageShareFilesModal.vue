@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { uploadFileWithTus } from '../api'
 import { addFilesToShare, replaceShareFile } from '../api'
 import { useToast } from 'vue-toastification'
