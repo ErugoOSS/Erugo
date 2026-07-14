@@ -702,7 +702,8 @@ const categoryColors = {
   font-weight: 700;
   color: var(--panel-text-color);
   line-height: 1.2;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .stat-label {
