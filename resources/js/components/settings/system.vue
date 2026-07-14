@@ -672,6 +672,7 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
+                <h6 id="file_replacement" class="mt-3 mb-3">{{ $t('settings.system.file_replacement') }}</h6>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
                     <input type="checkbox" id="allow_file_replacement_checkbox" :checked="settings.allow_file_replacement == '1'" @change="settings.allow_file_replacement = $event.target.checked ? '1' : '0'" />
