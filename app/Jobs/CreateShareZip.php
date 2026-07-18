@@ -6,6 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\RecalculatePhysicalStorage;
 
 class CreateShareZip implements ShouldQueue
 {
@@ -43,6 +44,7 @@ class CreateShareZip implements ShouldQueue
     if ($this->share->file_count == 1) {
       $this->share->status = 'ready';
       $this->share->save();
+      RecalculatePhysicalStorage::dispatch();
       return;
     }
 
@@ -51,6 +53,7 @@ class CreateShareZip implements ShouldQueue
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();
+      RecalculatePhysicalStorage::dispatch();
       // Directory is intentionally kept alongside the zip so files can be
       // added later (F1) and cloned by reference (F3).
     } catch (\Exception $e) {

@@ -198,7 +198,22 @@ const categoryColors = {
                       <div class="stat-content">
                         <div class="stat-value">{{ stats.storage.used_formatted }}</div>
                         <div class="stat-label">{{ $t('settings.stats.storage.share_storage') }}</div>
-                        <div class="stat-sublabel">{{ stats.storage.shares_usage_percent }}% {{ $t('settings.stats.storage.of_disk') }}</div>
+                        <div class="stat-sublabel" v-if="!(stats.storage.dedup_savings_bytes > 0)">{{ stats.storage.shares_usage_percent }}% {{ $t('settings.stats.storage.of_disk') }}</div>
+                      </div>
+                    </div>
+
+                    <div class="stat-card" v-if="stats.storage.dedup_savings_bytes > 0">
+                      <div class="stat-icon phys">
+                        <HardDrive />
+                      </div>
+                      <div class="stat-content">
+                        <div class="stat-value">{{ stats.storage.physical_formatted }}</div>
+                        <div class="stat-label">{{ $t('settings.stats.storage.physical_storage') }}</div>
+                        <div class="stat-sublabel">{{ stats.storage.physical_usage_percent }}% {{ $t('settings.stats.storage.of_disk') }}</div>
+                        <div class="dedup-savings-badge">
+                          <Activity />
+                          {{ stats.storage.logical_formatted }} {{ $t('settings.stats.storage.deduplicated') }}
+                        </div>
                       </div>
                     </div>
 
@@ -221,6 +236,8 @@ const categoryColors = {
                 <p>{{ $t('settings.stats.help.storage_description') }}</p>
                 <h6>{{ $t('settings.stats.help.disk_usage_title') }}</h6>
                 <p>{{ $t('settings.stats.help.disk_usage_description') }}</p>
+                <h6>{{ $t('settings.stats.help.physical_storage_title') }}</h6>
+                <p>{{ $t('settings.stats.help.physical_storage_description') }}</p>
               </div>
             </div>
           </div>
@@ -690,6 +707,11 @@ const categoryColors = {
     background: #10b98130;
     color: #10b981;
   }
+
+  &.phys {
+    background: #8b5cf630;
+    color: #8b5cf6;
+  }
 }
 
 .stat-content {
@@ -718,6 +740,24 @@ const categoryColors = {
   color: var(--panel-text-color);
   opacity: 0.5;
   margin-top: 2px;
+}
+
+.dedup-savings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8b5cf6;
+  background: #8b5cf618;
+  border-radius: 20px;
+  padding: 3px 10px;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 .progress-container {
