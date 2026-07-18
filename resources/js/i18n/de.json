@@ -976,7 +976,11 @@
   "share": {
     "button": {
       "expireNow": "Jetzt ablaufen lassen",
-      "extend": "Verlängern"
+      "extend": "Verlängern",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Enthält: # Datei} other {Enthält: {value} Dateien}}"

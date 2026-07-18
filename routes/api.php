@@ -138,6 +138,9 @@ Route::group([], function ($router) {
 
         //undo a pending deletion request
         Route::post('/{id}/undo-deletion', [SharesController::class, 'undoDeletion'])->name('shares.undoDeletion');
+
+        //permanently remove the DB record of a deleted share (owner or admin)
+        Route::delete('/{id}', [SharesController::class, 'purgeShare'])->name('shares.purge');
     });
 
     //all shares [auth, admin]
