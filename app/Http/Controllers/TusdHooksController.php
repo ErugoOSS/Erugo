@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Models\File;
 use App\Models\UploadSession;
 use App\Utils\FileHelper;
@@ -321,11 +322,12 @@ class TusdHooksController extends Controller
 
             // Create file record
             $file = File::create([
-                'name' => $sanitizedFilename,
+                'name'          => $sanitizedFilename,
                 'original_name' => $filename,
-                'type' => $filetype,
-                'size' => $filesize,
-                'temp_path' => 'uploads/' . $uploadId // Path relative to storage/app
+                'type'          => $filetype,
+                'size'          => $filesize,
+                'temp_path'     => 'uploads/' . $uploadId, // Path relative to storage/app
+                'storage_id'    => Str::uuid()->toString(),
             ]);
 
             // Update session
@@ -462,11 +464,12 @@ class TusdHooksController extends Controller
 
                 // Create file record - store relative path for bundle files
                 $file = File::create([
-                    'name' => $sanitizedFilename,
+                    'name'          => $sanitizedFilename,
                     'original_name' => $fileInfo['originalName'],
-                    'type' => $fileInfo['type'] ?? 'application/octet-stream',
-                    'size' => $fileInfo['size'],
-                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $safePath
+                    'type'          => $fileInfo['type'] ?? 'application/octet-stream',
+                    'size'          => $fileInfo['size'],
+                    'temp_path'     => 'uploads/' . $uploadId . '_extracted/' . $safePath,
+                    'storage_id'    => Str::uuid()->toString(),
                 ]);
 
                 $fileIds[] = $file->id;

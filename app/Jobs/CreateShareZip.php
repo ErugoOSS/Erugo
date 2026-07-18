@@ -51,7 +51,8 @@ class CreateShareZip implements ShouldQueue
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();
-      $this->removeDirectory($sourcePath);
+      // Directory is intentionally kept alongside the zip so files can be
+      // added later (F1) and cloned by reference (F3).
     } catch (\Exception $e) {
       $this->share->status = 'failed';
       $this->share->save();
