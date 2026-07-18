@@ -85,9 +85,10 @@ class UsersController extends Controller
         'message' => 'Provider unlinked successfully'
       ]);
     } catch (\Exception $e) {
+      \Log::error('Failed to unlink provider for user ' . $user->id . ': ' . $e->getMessage());
       return response()->json([
         'status' => 'error',
-        'message' => 'Failed to unlink provider: ' . $e->getMessage()
+        'message' => 'Failed to unlink provider'
       ], 500);
     }
   }
