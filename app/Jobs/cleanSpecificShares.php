@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
+use App\Jobs\RecalculatePhysicalStorage;
 
 class cleanSpecificShares implements ShouldQueue
 {
@@ -25,9 +26,14 @@ class cleanSpecificShares implements ShouldQueue
     {
         foreach ($this->shareIds as $shareId) {
             $share = Share::find($shareId);
-            if ($share && $share->user_id === $this->userId) {
+            if (!$share) {
+                continue;
+            }
+            if ($share->user_id === $this->userId) {
                 $share->cleanFiles(true);
             }
         }
+
+        RecalculatePhysicalStorage::dispatch();
     }
 }

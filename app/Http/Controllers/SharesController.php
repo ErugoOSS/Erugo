@@ -18,6 +18,7 @@ use App\Jobs\CreateShareZip;
 use App\Services\SettingsService;
 use App\Services\PatternGenerator;
 use App\Jobs\cleanSpecificShares;
+use App\Jobs\RecalculatePhysicalStorage;
 use Illuminate\Support\Facades\Hash;
 
 class SharesController extends Controller
@@ -797,6 +798,7 @@ class SharesController extends Controller
     $clone->save();
 
     CreateShareZip::dispatch($clone);
+    RecalculatePhysicalStorage::dispatch();
 
     return response()->json([
       'status' => 'success',
