@@ -598,6 +598,11 @@
       "password_protect_description": "Créez un mot de passe pour votre partage. Toute personne téléchargeant ce partage aura besoin de ce mot de passe pour y accéder. Remarque : après sa création, ce mot de passe sera crypté et nous ne pourrons pas le récupérer pour vous. Veillez à le sauvegarder dans un endroit sûr.",
       "remove_password": "Supprimer le mot de passe"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "Nombre total de téléchargement(s)",
