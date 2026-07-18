@@ -598,6 +598,11 @@
       "password_protect_description": "Erstellen Sie ein Passwort für Ihre Freigabe. Jeder, der diese Freigabe herunterlädt, benötigt dieses Passwort, um darauf zuzugreifen. Bitte beachten Sie: Nach der Erstellung wird dieses Kennwort verschlüsselt und wir können es nicht für Sie abrufen. Speichern Sie es daher an einem sicheren Ort.",
       "remove_password": "Passwort entfernen"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "All-Time Downloads",
