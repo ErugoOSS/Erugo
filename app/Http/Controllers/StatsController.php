@@ -109,7 +109,7 @@ class StatsController extends Controller
 
     public function getStats(Request $request)
     {
-        $days = (int) $request->input('days', 30);
+        $days = max(1, min(365, (int) $request->input('days', 30)));
         
         // Storage stats
         $storageStats = $this->getStorageStats();
