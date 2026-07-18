@@ -49,6 +49,10 @@ const pendingDeletionShares = computed(() =>
   shares.value.filter(s => s.status === 'pending_deletion')
 )
 
+const expiredShares = computed(() =>
+  shares.value.filter(s => s.expired && !s.deleted && s.status !== 'pending_deletion')
+)
+
 const handleExpireShareClick = async (share) => {
   expireShare(share.id)
     .then(() => {
@@ -173,6 +177,16 @@ defineExpose({
         {{ $t('settings.help.downloadLimit.description2') }}
       </p>
     </HelpTip>
+    <div v-if="expiredShares.length > 0" class="expired-shares-notice">
+      <div class="expired-shares-notice-content">
+        <CalendarX2 class="expired-notice-icon" />
+        <div>
+          <strong>{{ $t('settings.expiredShares.title', { count: expiredShares.length }) }}</strong>
+          <p>{{ $t('settings.expiredShares.notice') }}</p>
+        </div>
+      </div>
+    </div>
+
     <table v-if="activeShares.length > 0">
       <thead>
         <tr>
@@ -374,6 +388,51 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
+.expired-shares-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+
+  .expired-shares-notice-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    .expired-notice-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+      color: #f59e0b;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--panel-section-text-color);
+      margin-bottom: 2px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}
+
 .files-container {
   display: flex;
   flex-direction: row;
