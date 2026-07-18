@@ -665,7 +665,9 @@
         "unique_downloaders_description": "Count of unique IP addresses that have downloaded shares.",
         "unique_downloaders_title": "Unique Downloaders",
         "users_description": "Overview of user accounts and their activity levels.",
-        "users_title": "User Statistics"
+        "users_title": "User Statistics",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Loading statistics...",
       "nav": {
@@ -695,7 +697,12 @@
         "of_disk": "of disk",
         "share_storage": "Share Storage",
         "title": "Storage Overview",
-        "used": "used"
+        "used": "used",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Active",
@@ -1016,7 +1023,7 @@
     "processing": {
       "title": "Files are being prepared for download",
       "eta": "Ready in approximately {seconds} {seconds, plural, one {second} other {seconds}}",
-      "overdue": "Almost there, taking a little longer than expected\u2026",
+      "overdue": "Almost there, taking a little longer than expected…",
       "ready_toast": "Your files are ready to download!",
       "failed_title": "Something went wrong preparing your files",
       "failed_message": "The files could not be packaged for download. Please contact the share owner."

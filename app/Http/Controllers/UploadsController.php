@@ -12,6 +12,7 @@ use App\Models\UploadSession;
 use App\Models\ReverseShareInvite;
 use Carbon\Carbon;
 use App\Jobs\CreateShareZip;
+use App\Jobs\RecalculatePhysicalStorage;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
@@ -618,6 +619,8 @@ class UploadsController extends Controller
       $share->name = $request->input('name');
     }
     $share->save();
+
+    RecalculatePhysicalStorage::dispatch();
 
     return response()->json(['status' => 'success', 'message' => 'File replaced', 'data' => ['share' => $share->fresh(['files'])]]);
   }

@@ -644,7 +644,9 @@
         "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des partages.",
         "unique_downloaders_title": "Téléchargeurs uniques",
         "users_description": "Vue d'ensemble des comptes d'utilisateurs et de leurs niveaux d'activité.",
-        "users_title": "Statistiques sur les utilisateurs"
+        "users_title": "Statistiques sur les utilisateurs",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Chargement des statistiques...",
       "nav": {
@@ -674,7 +676,12 @@
         "of_disk": "de disque",
         "share_storage": "Stockage utilisé par les partages\n",
         "title": "Aperçu du stockage",
-        "used": "utilisé(s)"
+        "used": "utilisé(s)",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Actif",
