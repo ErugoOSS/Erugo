@@ -291,13 +291,21 @@ class SharesController extends Controller
       $expectedPath = $file->full_path ? $file->full_path . '/' . $file->display_name : $file->display_name;
       
       if ($filepath === $expectedPath || $filepath === $file->display_name) {
-        $sharePath = storage_path('app/shares/' . $share->path);
-        $filePath = $sharePath . '/' . $file->name;
-        
-        if (file_exists($filePath)) {
+        $sharePath = realpath(storage_path('app/shares/' . $share->path));
+        $filePath = $sharePath . '/' . ($file->full_path ? $file->full_path . '/' : '') . $file->name;
+        $resolvedFilePath = realpath($filePath);
+
+        // Boundary check: ensure the resolved file path stays within the share directory
+        if ($sharePath === false || $resolvedFilePath === false ||
+            strpos($resolvedFilePath, $sharePath . DIRECTORY_SEPARATOR) !== 0 &&
+            $resolvedFilePath !== $sharePath) {
+          return response()->json(['error' => 'File not found'], 404);
+        }
+
+        if (file_exists($resolvedFilePath)) {
           $this->createDownloadRecord($share);
           return response()->download(
-            $filePath,
+            $resolvedFilePath,
             $this->sanitizeDownloadFilename($file->display_name)
           );
         }
