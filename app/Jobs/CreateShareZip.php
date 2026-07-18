@@ -61,43 +61,46 @@ class CreateShareZip implements ShouldQueue
 
   function createZipFromDirectory($sourcePath, $zipPath)
   {
-
     // Ensure the zip directory exists
     $zipDir = dirname($zipPath);
     if (!is_dir($zipDir)) {
       mkdir($zipDir, 0755, true);
     }
 
-    // Build the zip command to zip the entire directory
-    $zipCommand = sprintf(
-      'zip -r %s %s',
-      escapeshellarg($zipPath),
-      escapeshellarg('.')  // '.' represents current directory after we chdir
-    );
-
-    // Change to the source directory
-    $currentDir = getcwd();
-    chdir($sourcePath);
-
-    // Execute the command
-    $output = [];
-    $returnCode = 0;
-    exec($zipCommand . ' 2>&1', $output, $returnCode);
-
-    // Change back to original directory
-    chdir($currentDir);
-
-    //did it work?
-    if ($returnCode !== 0) {
-      throw new \Exception('Failed to create zip file: ' . implode("\n", $output));
+    $zip = new \ZipArchive();
+    $result = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+    if ($result !== true) {
+      throw new \Exception("Failed to create zip archive (ZipArchive code: {$result})");
     }
 
-    //check the zip file is valid
+    $sourcePath = rtrim(realpath($sourcePath), DIRECTORY_SEPARATOR);
+    if ($sourcePath === false || !is_dir($sourcePath)) {
+      $zip->close();
+      throw new \Exception('Source directory not found or not accessible');
+    }
+
+    $iterator = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($sourcePath, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($iterator as $file) {
+      $relativePath = substr($file->getPathname(), strlen($sourcePath) + 1);
+      if ($file->isDir()) {
+        $zip->addEmptyDir($relativePath);
+      } else {
+        $zip->addFile($file->getPathname(), $relativePath);
+      }
+    }
+
+    if (!$zip->close()) {
+      throw new \Exception('ZipArchive::close failed — archive may be incomplete');
+    }
+
     if (!file_exists($zipPath)) {
       throw new \Exception('The zip operation completed but the zip file was not created');
     }
 
-    //check the zip file is not empty
     if (filesize($zipPath) === 0) {
       throw new \Exception('The zip operation completed but the zip file was empty');
     }
