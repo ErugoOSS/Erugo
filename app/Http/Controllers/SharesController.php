@@ -729,8 +729,8 @@ class SharesController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Cannot clone a deleted share'], 422);
     }
 
-    $name      = $request->input('name', 'Clone of ' . $share->name);
-    $longId    = 'share-' . Str::random(8);
+    $name      = $request->input('name', $share->name);
+    $longId    = $this->generateLongId();
     $clonePath = $user->id . '/' . $longId;
 
     $clone = Share::create([
