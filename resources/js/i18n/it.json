@@ -1002,7 +1002,11 @@
   "share": {
     "button": {
       "expireNow": "Scade ora",
-      "extend": "Estendi"
+      "extend": "Estendi",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contiene: 1 File} other {Contiene: {value} File} }"
