@@ -24,18 +24,22 @@ class Share extends Model
     'require_email',
     'expires_at',
     'status',
-    'password'
+    'password',
+    'deletion_requested_at',
+    'deletion_requested_by',
   ];
 
   protected $casts = [
     'expires_at' => 'datetime',
     'deletes_at' => 'datetime',
+    'deletion_requested_at' => 'datetime',
   ];
 
   protected $appends = [
     'expired',
     'deletes_at',
-    'deleted'
+    'deleted',
+    'pending_deletion',
   ];
 
   protected $hidden = [
@@ -88,6 +92,11 @@ class Share extends Model
   function getDeletedAttribute()
   {
     return $this->status == 'deleted';
+  }
+
+  function getPendingDeletionAttribute()
+  {
+    return $this->status === 'pending_deletion';
   }
 
   public function scopeReadyForCleaning($query)
