@@ -244,33 +244,43 @@ const saveSettings = async () => {
   }
 }
 
-const applySettingsWithoutRefresh = () => {
-  //find the style tag #erugo-css-variables
-  const styleTag = document.getElementById('erugo-css-variables')
-  if (styleTag) {
-    //update the css variables
-    styleTag.innerHTML = `
+const sanitizeCssColor = (value) => {
+  if (typeof value !== 'string') return '#000000'
+  const v = value.trim()
+  if (
+    /^#[0-9a-fA-F]{3,8}$/.test(v) ||
+    /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(\s*,\s*[\d.]+)?\s*\)$/.test(v) ||
+    /^hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%(\s*,\s*[\d.]+)?\s*\)$/.test(v)
+  ) {
+    return v
+  }
+  return '#000000'
+}
+
+const applyCssVariables = (colors) => {
+  const css = `
       :root {
-        --primary-color: ${settings.value.css_primary_color};
-        --secondary-color: ${settings.value.css_secondary_color};
-        --accent-color: ${settings.value.css_accent_color};
-        --accent-color-light: ${settings.value.css_accent_color_light};
-      }
-      `
-  } else {
-    //add the style tag
-    const styleTag = document.createElement('style')
+        --primary-color: ${sanitizeCssColor(colors.primary)};
+        --secondary-color: ${sanitizeCssColor(colors.secondary)};
+        --accent-color: ${sanitizeCssColor(colors.accent)};
+        --accent-color-light: ${sanitizeCssColor(colors.accentLight)};
+      }`
+  let styleTag = document.getElementById('erugo-css-variables')
+  if (!styleTag) {
+    styleTag = document.createElement('style')
     styleTag.id = 'erugo-css-variables'
-    styleTag.innerHTML = `
-      :root {
-        --primary-color: ${settings.value.css_primary_color};
-        --secondary-color: ${settings.value.css_secondary_color};
-        --accent-color: ${settings.value.css_accent_color};
-        --accent-color-light: ${settings.value.css_accent_color_light};
-      }
-      `
     document.head.appendChild(styleTag)
   }
+  styleTag.textContent = css
+}
+
+const applySettingsWithoutRefresh = () => {
+  applyCssVariables({
+    primary: settings.value.css_primary_color,
+    secondary: settings.value.css_secondary_color,
+    accent: settings.value.css_accent_color,
+    accentLight: settings.value.css_accent_color_light,
+  })
 
   //update the logo width
   const logo = document.getElementById('logo')
