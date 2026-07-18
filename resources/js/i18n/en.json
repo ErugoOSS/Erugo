@@ -611,7 +611,7 @@
       "requestedOn": "Requested On",
       "deleteAll": "Delete all permanently",
       "confirmPrompt": "Type DELETE (uppercase) to permanently remove all pending shares and their files. This cannot be undone.",
-      "confirmMismatch": "Confirmation did not match \u2014 you must type DELETE in uppercase exactly."
+      "confirmMismatch": "Confirmation did not match — you must type DELETE in uppercase exactly."
     },
     "expiredShares": {
       "title": "{count, plural, one {1 expired share} other {# expired shares}}",
@@ -997,7 +997,11 @@
   "share": {
     "button": {
       "expireNow": "Expire Now",
-      "extend": "Extend"
+      "extend": "Extend",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {# file} other {{value} files}}"

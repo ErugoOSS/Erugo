@@ -1006,6 +1006,20 @@ export const undoShareDeletion = async (id) => {
   return data.data.share
 }
 
+export const purgeShare = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const getShare = async (id) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
     method: 'GET',

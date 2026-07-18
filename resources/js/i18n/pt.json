@@ -947,7 +947,11 @@
   "share": {
     "button": {
       "expireNow": "Expirar Agora",
-      "extend": "Extender"
+      "extend": "Extender",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contém: # ficheiro} other {Contém: {value} ficheiros} }"

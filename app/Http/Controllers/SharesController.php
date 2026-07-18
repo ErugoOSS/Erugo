@@ -653,7 +653,7 @@ class SharesController extends Controller
         ->orWhereHas('invite', function ($q) use ($user) {
           $q->where('user_id', $user->id);
         });
-    })->where('expires_at', '<', Carbon::now())->get();
+    })->where('status', 'pending_deletion')->get();
     cleanSpecificShares::dispatch($shares->pluck('id')->toArray(), $user->id);
 
     return response()->json([
@@ -788,6 +788,44 @@ class SharesController extends Controller
       'status' => 'success',
       'message' => 'Share deleted immediately',
       'data' => ['share' => $share]
+    ]);
+  }
+
+  /**
+   * Permanently remove the DB record (and any remaining child rows) for a share
+   * that has already been soft-deleted. Files have already been cleaned up by
+   * the deletion flow; this just removes the DB row.
+   * Available to the share owner or any admin.
+   */
+  public function purgeShare($shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::where('id', $shareId)->first();
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if (!$this->canManageShare($share, $user)) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status !== 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Only shares with status "deleted" can be purged'], 422);
+    }
+
+    // Delete all child rows before removing the share to avoid FK constraint violations.
+    // Neither downloads.share_id nor files.share_id have ON DELETE CASCADE.
+    Download::where('share_id', $share->id)->delete();
+    $share->files()->delete();
+    $share->delete();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Share record removed',
     ]);
   }
 
