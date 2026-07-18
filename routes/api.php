@@ -44,16 +44,16 @@ Route::group([], function ($router) {
 
     //auth
     Route::group(['prefix' => 'auth'], function ($router) {
-        Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+        Route::post('login', [AuthController::class, 'login'])->name('auth.login')->middleware('throttle:10,1');
         Route::post('refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
-        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword');
-        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword');
-        
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword')->middleware('throttle:5,5');
+        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword')->middleware('throttle:5,5');
+
         // Self-registration routes
-        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register');
-        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail');
-        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification');
+        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register')->middleware('throttle:5,1');
+        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail')->middleware('throttle:5,15');
+        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification')->middleware('throttle:3,5');
         Route::get('registration-settings', [SelfRegistrationController::class, 'getSettings'])->name('auth.registrationSettings');
     });
 
