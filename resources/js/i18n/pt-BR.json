@@ -16,6 +16,22 @@
     "expiredShares": {
       "title": "{count, plural, one {1 compartilhamento expirado} other {# compartilhamentos expirados}}",
       "notice": "Esses compartilhamentos expiraram e seus arquivos ainda estão armazenados no disco. Para removê-los, selecione 'Solicitar exclusão' no menu de ações do compartilhamento."
+    },
+    "confirm": {
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
+    },
+    "error": {
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
+    },
+    "success": {
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
+    }
+  },
+  "share": {
+    "status": {
+      "pendingDeletion": "Pending Deletion"
     }
   }
 }

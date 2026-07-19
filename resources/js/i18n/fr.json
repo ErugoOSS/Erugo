@@ -526,7 +526,8 @@
     },
     "close": "Fermer",
     "confirm": {
-      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée."
+      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informations sur votre installation Erugo",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Impossible de planifier la suppression des partages expirés !",
       "shareExpired": "Échec de l'expiration du partage",
-      "shareExtended": "Échec de la prolongation du partage"
+      "shareExtended": "Échec de la prolongation du partage",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -702,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Les partages expirés ont été programmées pour être supprimées et seront traités en arrière-plan.",
       "shareExpired": "Partage expiré",
-      "shareExtended": "Partage étendu"
+      "shareExtended": "Partage étendu",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Autoriser le mode de téléchargement en morceaux",
@@ -1006,7 +1011,10 @@
     },
     "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
     "passwordNotProtected": "Ouvert",
-    "passwordProtected": "Protégé par un mot de passe"
+    "passwordProtected": "Protégé par un mot de passe",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Taille totale",
   "upload": {

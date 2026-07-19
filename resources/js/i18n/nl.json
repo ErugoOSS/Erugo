@@ -526,7 +526,8 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
+      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informatie over uw Erugo installatie",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Kan verwijdering van verlopen aandelen niet plannen!",
       "shareExpired": "Delen niet verlopen",
-      "shareExtended": "Niet gelukt om aandeel uit te breiden"
+      "shareExtended": "Niet gelukt om aandeel uit te breiden",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -702,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Vervallen aandelen zijn gemarkeerd voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
-      "shareExtended": "Aandeel uitgebreid"
+      "shareExtended": "Aandeel uitgebreid",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
@@ -1006,7 +1011,10 @@
     },
     "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Wachtwoord beveiligd"
+    "passwordProtected": "Wachtwoord beveiligd",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Totale grootte",
   "upload": {

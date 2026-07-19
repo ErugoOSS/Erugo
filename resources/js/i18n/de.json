@@ -526,7 +526,8 @@
     },
     "close": "Schließen",
     "confirm": {
-      "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden."
+      "pruneExpiredShares": "Sind Sie sicher, dass Sie Ihre abgelaufenen geteilten Dateien löschen wollen? Dies kann nicht rückgängig gemacht werden.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informationen über Ihre Erugo-Installation",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Abgelaufene geteilte Dateien konnten nicht zur Löschung eingeplant werden!",
       "shareExpired": "Geteilte Dateien konnten nicht auf \"abgelaufen\" gesetzt werden",
-      "shareExtended": "Geteilte Dateien konnten nicht auf \"verlängern\" gesetzt werden"
+      "shareExtended": "Geteilte Dateien konnten nicht auf \"verlängern\" gesetzt werden",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -702,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Abgelaufene geteilten Dateien sind zur Löschung vorgesehen und werden im Hintergrund verarbeitet.",
       "shareExpired": "Der Zeitraum zum Download der geteilten Dateien ist abgelaufen",
-      "shareExtended": "Der Zeitraum zum Download der geteilten Dateien wurde verlängert"
+      "shareExtended": "Der Zeitraum zum Download der geteilten Dateien wurde verlängert",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Chunked-Upload-Modus zulassen",
@@ -1006,7 +1011,10 @@
     },
     "not_found": "Die von Ihnen gesuchte Aktie wurde nicht gefunden. Möglicherweise müssen Sie sich anmelden, um sie zu sehen.",
     "passwordNotProtected": "Öffnen Sie",
-    "passwordProtected": "Passwort geschützt"
+    "passwordProtected": "Passwort geschützt",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Gesamtgröße",
   "upload": {
