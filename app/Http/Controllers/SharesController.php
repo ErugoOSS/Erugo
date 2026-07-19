@@ -197,13 +197,16 @@ class SharesController extends Controller
 
     //if there is only one file, download it directly
     if ($share->file_count == 1) {
-      if (file_exists($sharePath . '/' . $share->files[0]->name)) {
+      $file = $share->files[0];
+      $fileSubPath = ($file->full_path ? $file->full_path . '/' : '') . $file->name;
+
+      if (file_exists($sharePath . '/' . $fileSubPath)) {
 
         $this->createDownloadRecord($share);
 
         return response()->download(
-          $sharePath . '/' . $share->files[0]->name,
-          $this->sanitizeDownloadFilename($share->files[0]->display_name)
+          $sharePath . '/' . $fileSubPath,
+          $this->sanitizeDownloadFilename($file->display_name)
         );
       } else {
         return redirect()->to('/shares/' . $shareId);
