@@ -499,9 +499,10 @@ defineExpose({
 
 .files-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 220px;
   .file {
     display: flex;
     flex-direction: column;
@@ -509,10 +510,14 @@ defineExpose({
     border-radius: 5px;
     padding: 5px 10px;
     gap: 1px;
+    width: 100%;
     .file-name {
       font-size: 0.85rem;
       font-weight: bold;
       color: var(--panel-section-text-color);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .file-size {
       font-size: 0.7rem;
@@ -522,11 +527,6 @@ defineExpose({
   .some-more {
     font-size: 0.7rem;
     color: var(--panel-section-text-color);
-    margin-left: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 

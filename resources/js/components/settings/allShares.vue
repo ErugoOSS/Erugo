@@ -502,11 +502,6 @@ defineExpose({
   .some-more {
     font-size: 0.7rem;
     color: var(--panel-section-text-color);
-    margin-left: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
