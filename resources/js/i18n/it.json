@@ -526,7 +526,8 @@
     },
     "close": "Chiudi",
     "confirm": {
-      "pruneExpiredShares": "Sei sicuro di voler eliminare le condivisioni scadute? Non è possibile annullare questa operazione."
+      "pruneExpiredShares": "Sei sicuro di voler eliminare le condivisioni scadute? Non è possibile annullare questa operazione.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informazioni sull'installazione di Erugo",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle condivisioni scadute!",
       "shareExpired": "Condivisione non scaduta",
-      "shareExtended": "Impossibile estendere la condivisione"
+      "shareExtended": "Impossibile estendere la condivisione",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -702,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Le condivisioni scadute sono state contrassegnate per l'eliminazione e verranno elaborate in background.",
       "shareExpired": "Quota scaduta",
-      "shareExtended": "Quota estesa"
+      "shareExtended": "Quota estesa",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Consentire la modalità di caricamento chunked",
@@ -1006,7 +1011,10 @@
     },
     "not_found": "La condivisione che si sta cercando non è stata trovata. Potrebbe essere necessario effettuare il login per visualizzarla.",
     "passwordNotProtected": "Aperto",
-    "passwordProtected": "Protetto da password"
+    "passwordProtected": "Protetto da password",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Dimensione totale",
   "upload": {
