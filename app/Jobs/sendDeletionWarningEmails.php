@@ -39,6 +39,7 @@ class sendDeletionWarningEmails implements ShouldQueue
 
     $shares = Share::where('expires_at', '<=', now()->subDays($clean_files_after_days - $deletion_warning_days))
       ->where('sent_deletion_warning', false)
+      ->whereNotIn('status', ['pending_deletion', 'deleted'])
       ->get();
 
     foreach ($shares as $share) {

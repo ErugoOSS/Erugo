@@ -24,18 +24,22 @@ class Share extends Model
     'require_email',
     'expires_at',
     'status',
-    'password'
+    'password',
+    'deletion_requested_at',
+    'deletion_requested_by',
   ];
 
   protected $casts = [
     'expires_at' => 'datetime',
     'deletes_at' => 'datetime',
+    'deletion_requested_at' => 'datetime',
   ];
 
   protected $appends = [
     'expired',
     'deletes_at',
-    'deleted'
+    'deleted',
+    'pending_deletion',
   ];
 
   protected $hidden = [
@@ -65,11 +69,18 @@ class Share extends Model
 
   function getExpiredAttribute()
   {
+    if ($this->expires_at === null) {
+      return false; // null = no expiration (admin unlimited)
+    }
     return $this->expires_at < now()->addMinutes(1);
   }
 
   function getDeletesAtAttribute()
   {
+    if ($this->expires_at === null) {
+      return null; // no expiration = no scheduled cleanup
+    }
+
     $cleanFilesAfterDays = Setting::where('key', 'clean_files_after_days')->first();
 
     if (!$cleanFilesAfterDays) {
@@ -88,6 +99,11 @@ class Share extends Model
   function getDeletedAttribute()
   {
     return $this->status == 'deleted';
+  }
+
+  function getPendingDeletionAttribute()
+  {
+    return $this->status === 'pending_deletion';
   }
 
   public function scopeReadyForCleaning($query)

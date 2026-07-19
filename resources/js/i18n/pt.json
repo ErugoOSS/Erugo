@@ -505,7 +505,8 @@
     },
     "close": "Fechar",
     "confirm": {
-      "pruneExpiredShares": "Tem a certeza de que pretende eliminar as suas transferências expiradas? Não as poderá recuperar."
+      "pruneExpiredShares": "Tem a certeza de que pretende eliminar as suas transferências expiradas? Não as poderá recuperar.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informações sobre a sua instalação Erugo",
@@ -546,7 +547,9 @@
     "error": {
       "pruneExpiredShares": "Falha ao agendar a eliminação das transferências expiradas!",
       "shareExpired": "Falha ao expirar a partilha",
-      "shareExtended": "Falha ao extender a partilha"
+      "shareExtended": "Falha ao extender a partilha",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -563,6 +566,18 @@
     },
     "loading": "Carregando as transferências...",
     "noShares": "Não tem transferências. Porque não criar uma?",
+    "pendingDeletion": {
+      "title": "Eliminação pendente",
+      "description": "As seguintes partilhas foram solicitadas para eliminação. Pode desfazer isto antes de serem removidas permanentemente.",
+      "requestedOn": "Solicitado em",
+      "deleteAll": "Eliminar tudo permanentemente",
+      "confirmPrompt": "Escreva DELETE (maiúsculas) para remover permanentemente todas as partilhas pendentes e os seus ficheiros. Esta ação não pode ser desfeita.",
+      "confirmMismatch": "Confirmação não corresponde — deve escrever DELETE em maiúsculas exatamente."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partilha expirada} other {# partilhas expiradas}}",
+      "notice": "Estas partilhas expiraram e os seus ficheiros ainda estão armazenados no disco. Para os remover, selecione 'Solicitar eliminação' no menu de ações da partilha."
+    },
     "provider": {
       "edit": "Editar",
       "view": "Ver"
@@ -669,7 +684,9 @@
     "success": {
       "pruneExpiredShares": "As transferências expiradas foram agendadas para eliminação e serão processadas em segundo plano.",
       "shareExpired": "Partilha expirada",
-      "shareExtended": "Partilha extendida"
+      "shareExtended": "Partilha extendida",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Permitir o modo de carregamento em pedaços",
@@ -935,7 +952,11 @@
   "share": {
     "button": {
       "expireNow": "Expirar Agora",
-      "extend": "Extender"
+      "extend": "Extender",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contém: # ficheiro} other {Contém: {value} ficheiros} }"
@@ -961,7 +982,10 @@
     },
     "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver.",
     "passwordNotProtected": "Aberto",
-    "passwordProtected": "Protegido por palavra-passe"
+    "passwordProtected": "Protegido por palavra-passe",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Tamanho Total",
   "upload": {

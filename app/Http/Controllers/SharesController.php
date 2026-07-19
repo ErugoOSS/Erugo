@@ -42,6 +42,13 @@ class SharesController extends Controller
       ], 404);
     }
 
+    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Share not found'
+      ], 404);
+    }
+
     if ($share->expires_at < Carbon::now()) {
       return response()->json([
         'status' => 'error',
@@ -163,6 +170,10 @@ class SharesController extends Controller
 
     $share = Share::where('long_id', $shareId)->with('files')->first();
     if (!$share) {
+      return redirect()->to('/shares/' . $shareId);
+    }
+
+    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
       return redirect()->to('/shares/' . $shareId);
     }
 
@@ -503,38 +514,90 @@ class SharesController extends Controller
     ]);
   }
 
-  public function extend($shareId)
+  public function extend($shareId, Request $request)
   {
-
     $user = Auth::user();
     if (!$user) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
+
     $share = Share::where('id', $shareId)->first();
     if (!$share) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Share not found'
-      ], 404);
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
     }
+
     if (!$this->canManageShare($share, $user)) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-      ], 401);
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
-    $share->expires_at = Carbon::now()->addDays(7);
+
+    $settingsService = new SettingsService();
+    $maxExpiryDays = $settingsService->get('max_expiry_time'); // null = no limit configured
+
+    // Admin can set unlimited (null expires_at)
+    if ($user->admin && $request->boolean('unlimited')) {
+      $share->expires_at = null;
+      $share->save();
+      return response()->json(['status' => 'success', 'message' => 'Share set to no expiration', 'data' => ['share' => $share]]);
+    }
+
+    // Any user can set a specific date; non-admins are subject to max_expiry_time
+    if ($request->filled('expires_at')) {
+      $newExpiry = Carbon::parse($request->input('expires_at'));
+      if (!$user->admin && $maxExpiryDays !== null) {
+        $maxAllowed = Carbon::now()->addDays((int) $maxExpiryDays);
+        if ($newExpiry > $maxAllowed) {
+          return response()->json([
+            'status'  => 'error',
+            'message' => 'Date exceeds maximum allowed expiry time',
+            'data'    => ['max_expiry_days' => (int) $maxExpiryDays]
+          ], 422);
+        }
+      }
+      $share->expires_at = $newExpiry;
+      $share->save();
+      return response()->json(['status' => 'success', 'message' => 'Share extended', 'data' => ['share' => $share]]);
+    }
+
+    // Relative extension: amount + unit (default: 7 days, matching original behaviour)
+    $amount = (int) $request->input('amount', 7);
+    $unit   = $request->input('unit', 'days');
+
+    if ($amount < 1) {
+      return response()->json(['status' => 'error', 'message' => 'Amount must be at least 1'], 422);
+    }
+
+    if (!in_array($unit, ['days', 'weeks', 'months'])) {
+      return response()->json(['status' => 'error', 'message' => 'Unit must be days, weeks, or months'], 422);
+    }
+
+    // Base: current expiry or now, whichever is later (fixes bug where extending
+    // a far-future share from now() would shorten it)
+    $base = ($share->expires_at !== null && $share->expires_at > Carbon::now())
+      ? $share->expires_at
+      : Carbon::now();
+
+    $newExpiry = match ($unit) {
+      'weeks'  => $base->copy()->addWeeks($amount),
+      'months' => $base->copy()->addMonths($amount),
+      default  => $base->copy()->addDays($amount),
+    };
+
+    // Enforce max_expiry_time for non-admin users
+    if (!$user->admin && $maxExpiryDays !== null) {
+      $maxAllowed = Carbon::now()->addDays((int) $maxExpiryDays);
+      if ($newExpiry > $maxAllowed) {
+        return response()->json([
+          'status'  => 'error',
+          'message' => 'Extension would exceed maximum allowed expiry time',
+          'data'    => ['max_expiry_days' => (int) $maxExpiryDays]
+        ], 422);
+      }
+    }
+
+    $share->expires_at = $newExpiry;
     $share->save();
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Share extended',
-      'data' => [
-        'share' => $share
-      ]
-    ]);
+
+    return response()->json(['status' => 'success', 'message' => 'Share extended', 'data' => ['share' => $share]]);
   }
 
   public function setDownloadLimit($shareId, Request $request)
@@ -590,7 +653,7 @@ class SharesController extends Controller
         ->orWhereHas('invite', function ($q) use ($user) {
           $q->where('user_id', $user->id);
         });
-    })->where('expires_at', '<', Carbon::now())->get();
+    })->where('status', 'pending_deletion')->get();
     cleanSpecificShares::dispatch($shares->pluck('id')->toArray(), $user->id);
 
     return response()->json([
@@ -602,6 +665,169 @@ class SharesController extends Controller
     ]);
   }
 
+
+  /**
+   * Mark a share as pending deletion. The share link stops working immediately.
+   * Files are cleaned up when an admin runs "Delete immediately" (F5) or the
+   * scheduled cleanup job processes pending_deletion shares.
+   * Both the share owner and admins may call this.
+   */
+  public function requestDeletion($shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::where('id', $shareId)->first();
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if (!$this->canManageShare($share, $user)) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
+      return response()->json(['status' => 'error', 'message' => 'Share is already pending deletion or deleted'], 422);
+    }
+
+    $share->status = 'pending_deletion';
+    $share->deletion_requested_at = Carbon::now();
+    $share->deletion_requested_by = $user->admin ? 'admin' : 'user';
+    $share->save();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Share marked for deletion',
+      'data' => ['share' => $share]
+    ]);
+  }
+
+  /**
+   * Undo a pending deletion request. Restores the share to 'ready' status
+   * so the link becomes active again. Only valid while status is still
+   * 'pending_deletion' (i.e. before files have been cleaned up).
+   */
+  public function undoDeletion($shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::where('id', $shareId)->first();
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if (!$this->canManageShare($share, $user)) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status !== 'pending_deletion') {
+      return response()->json(['status' => 'error', 'message' => 'Share is not pending deletion'], 422);
+    }
+
+    $share->status = 'ready';
+    $share->deletion_requested_at = null;
+    $share->deletion_requested_by = null;
+    $share->save();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Share deletion undone',
+      'data' => ['share' => $share]
+    ]);
+  }
+
+  /**
+   * Admin: immediately delete a share's files and mark it as deleted.
+   * Only valid when the share is in pending_deletion, expired, or deleted-awaiting-cleanup state.
+   * Requires a typed confirmation phrase in the request body.
+   */
+  public function deleteImmediately($shareId, Request $request)
+  {
+    $user = Auth::user();
+    if (!$user || !$user->admin) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $confirmation = $request->input('confirmation');
+    if (trim($confirmation ?? '') !== 'DELETE') {
+      return response()->json(['status' => 'error', 'message' => 'Confirmation required — type DELETE (uppercase) to confirm'], 422);
+    }
+
+    $share = Share::where('id', $shareId)->first();
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    // Only allow immediate deletion for shares in an actionable state
+    $actionableStatuses = ['pending_deletion', 'deleted'];
+    $isExpired = $share->expires_at !== null && $share->expires_at < Carbon::now();
+
+    if (!in_array($share->status, $actionableStatuses) && !$isExpired) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Share must be pending deletion or expired before it can be immediately deleted'
+      ], 422);
+    }
+
+    if ($share->status === 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Share is already deleted'], 422);
+    }
+
+    $cleaned = $share->cleanFiles();
+
+    if (!$cleaned) {
+      return response()->json(['status' => 'error', 'message' => 'Failed to delete share files'], 500);
+    }
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Share deleted immediately',
+      'data' => ['share' => $share]
+    ]);
+  }
+
+  /**
+   * Permanently remove the DB record (and any remaining child rows) for a share
+   * that has already been soft-deleted. Files have already been cleaned up by
+   * the deletion flow; this just removes the DB row.
+   * Available to the share owner or any admin.
+   */
+  public function purgeShare($shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::where('id', $shareId)->first();
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if (!$this->canManageShare($share, $user)) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status !== 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Only shares with status "deleted" can be purged'], 422);
+    }
+
+    // Delete all child rows before removing the share to avoid FK constraint violations.
+    // Neither downloads.share_id nor files.share_id have ON DELETE CASCADE.
+    Download::where('share_id', $share->id)->delete();
+    $share->files()->delete();
+    $share->delete();
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Share record removed',
+    ]);
+  }
 
   public function generateLongId()
   {

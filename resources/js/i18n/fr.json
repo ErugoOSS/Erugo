@@ -526,7 +526,8 @@
     },
     "close": "Fermer",
     "confirm": {
-      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée."
+      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informations sur votre installation Erugo",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Impossible de planifier la suppression des partages expirés !",
       "shareExpired": "Échec de l'expiration du partage",
-      "shareExtended": "Échec de la prolongation du partage"
+      "shareExtended": "Échec de la prolongation du partage",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -584,6 +587,18 @@
     },
     "loading": "Chargement des partages...",
     "noShares": "Vous n'avez pas de partages. Pourquoi ne pas en créer un ?",
+    "pendingDeletion": {
+      "title": "Suppression en attente",
+      "description": "Les partages suivants ont été demandés pour suppression. Vous pouvez annuler cela avant qu'ils soient définitivement supprimés.",
+      "requestedOn": "Demandé le",
+      "deleteAll": "Tout supprimer définitivement",
+      "confirmPrompt": "Saisissez DELETE (en majuscules) pour supprimer définitivement tous les partages en attente et leurs fichiers. Cette action est irréversible.",
+      "confirmMismatch": "La confirmation ne correspond pas — vous devez saisir DELETE en majuscules exactement."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partage expiré} other {# partages expirés}}",
+      "notice": "Ces partages ont expiré et leurs fichiers sont toujours stockés sur le disque. Pour les supprimer, sélectionnez 'Demander la suppression' dans le menu d'actions du partage."
+    },
     "provider": {
       "edit": "Editer",
       "view": "Voir"
@@ -690,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Les partages expirés ont été programmées pour être supprimées et seront traités en arrière-plan.",
       "shareExpired": "Partage expiré",
-      "shareExtended": "Partage étendu"
+      "shareExtended": "Partage étendu",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Autoriser le mode de téléchargement en morceaux",
@@ -964,7 +981,11 @@
   "share": {
     "button": {
       "expireNow": "Expirer maintenant",
-      "extend": "Prolonger"
+      "extend": "Prolonger",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contient : fichier} other {Contient : fichiers {value}}}"
@@ -990,7 +1011,10 @@
     },
     "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
     "passwordNotProtected": "Ouvert",
-    "passwordProtected": "Protégé par un mot de passe"
+    "passwordProtected": "Protégé par un mot de passe",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Taille totale",
   "upload": {
