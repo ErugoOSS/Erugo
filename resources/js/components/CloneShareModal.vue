@@ -10,7 +10,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'done'])
 
 const toast = useToast()
-const newName = ref(props.share.name + ' (clone)')
+const newName = ref(props.share.name)
 const loading = ref(false)
 const error = ref(null)
 
@@ -40,7 +40,7 @@ const handleClone = async () => {
       </div>
 
       <div class="clone-body">
-        <label class="clone-label">Name for the clone</label>
+        <label class="clone-label">Share name (optional — defaults to original)</label>
         <input
           v-model="newName"
           type="text"
