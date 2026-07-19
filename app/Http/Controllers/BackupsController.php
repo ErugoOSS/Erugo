@@ -100,7 +100,7 @@ class BackupsController extends Controller
             Log::error('On-demand database backup failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to create backup: ' . $e->getMessage()
+                'message' => 'Failed to create backup'
             ], 500);
         }
     }

@@ -166,7 +166,7 @@ class TusdHooksController extends Controller
 
             return response()->json([
                 'ok' => false,
-                'message' => 'Unauthorized: ' . $e->getMessage()
+                'message' => 'Unauthorized'
             ], 401);
         }
     }
