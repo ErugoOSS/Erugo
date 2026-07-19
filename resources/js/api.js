@@ -942,11 +942,13 @@ export const addFilesToShare = async (shareId, uploadIds, filePaths) => {
   return data.data.share
 }
 
-export const replaceShareFile = async (shareId, uploadId, filePath) => {
+export const replaceShareFile = async (shareId, uploadId, filePath, name = null) => {
+  const payload = { uploadIds: [uploadId], filePaths: { [uploadId]: filePath } }
+  if (name) payload.name = name
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/replace-file`, {
     method: 'POST',
     headers: { ...addJsonHeader() },
-    body: JSON.stringify({ uploadIds: [uploadId], filePaths: { [uploadId]: filePath } })
+    body: JSON.stringify(payload)
   })
   const data = await response.json()
   if (!response.ok) throw new Error(data.message)
