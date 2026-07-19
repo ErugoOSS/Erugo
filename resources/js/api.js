@@ -931,6 +931,30 @@ export const extendShare = async (id) => {
   return data.data.share
 }
 
+export const addFilesToShare = async (shareId, uploadIds, filePaths) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/add-files`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify({ uploadIds, filePaths })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
+export const replaceShareFile = async (shareId, uploadId, filePath, name = null) => {
+  const payload = { uploadIds: [uploadId], filePaths: { [uploadId]: filePath } }
+  if (name) payload.name = name
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/replace-file`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify(payload)
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
 export const setDownloadLimit = async (id, amount) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/set-download-limit`, {
     method: 'POST',
@@ -960,6 +984,19 @@ export const pruneExpiredShares = async () => {
     throw new Error(data.message)
   }
   return data.data.shares
+}
+
+export const cloneShare = async (shareId, name = null) => {
+  const body = {}
+  if (name) body.name = name
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/clone`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify(body)
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
 }
 
 export const getShare = async (id) => {

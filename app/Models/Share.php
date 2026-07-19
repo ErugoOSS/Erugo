@@ -110,6 +110,16 @@ class Share extends Model
   }
 
 
+  private function removeDirectoryRecursively(string $dir): void
+  {
+    foreach (scandir($dir) as $item) {
+      if ($item === '.' || $item === '..') continue;
+      $path = $dir . DIRECTORY_SEPARATOR . $item;
+      is_dir($path) ? $this->removeDirectoryRecursively($path) : unlink($path);
+    }
+    rmdir($dir);
+  }
+
   public function cleanFiles($disableEmail = false)
   {
     try {
@@ -117,19 +127,10 @@ class Share extends Model
       $completePath = storage_path('app/shares/' . $filePath);
 
       if (is_dir($completePath)) {
-        //delete all files in the directory
-        $files = glob($completePath . '/*');
-        foreach ($files as $file) {
-          unlink($file);
-        }
-        //delete the directory
-        rmdir($completePath);
-      } else {
+        $this->removeDirectoryRecursively($completePath);
       }
-      //or is it a zip file?
       if (is_file($completePath . '.zip')) {
         unlink($completePath . '.zip');
-      } else {
       }
 
       $this->status = 'deleted';

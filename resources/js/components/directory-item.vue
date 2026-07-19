@@ -42,6 +42,10 @@ const props = defineProps({
   completedFiles: {
     type: Array,
     default: () => []
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -106,15 +110,16 @@ function getDirectories(structure) {
     <div v-if="structure.files && structure.files.length" class="root-files">
       <div 
         class="upload-basket-item" 
-        :class="{ 
-          'clickable': readOnly && shareCode,
+        :class="{
+          'clickable': readOnly && shareCode && !disabled,
+          'pending': disabled,
           'is-uploading': getFileStatus(file) === 'uploading',
           'is-completed': getFileStatus(file) === 'completed',
           'is-waiting': getFileStatus(file) === 'waiting'
         }"
-        v-for="file in structure.files" 
+        v-for="file in structure.files"
         :key="file.fullPath || file.name"
-        @click="readOnly && shareCode ? downloadFile(file) : null"
+        @click="readOnly && shareCode && !disabled ? downloadFile(file) : null"
       >
         <div class="name">
           {{ niceFileName(file.name) }}
@@ -160,15 +165,16 @@ function getDirectories(structure) {
         <div class="directory-files" v-if="dirContent.files && dirContent.files.length">
           <div 
             class="upload-basket-item" 
-            :class="{ 
-              'clickable': readOnly && shareCode,
+            :class="{
+              'clickable': readOnly && shareCode && !disabled,
+              'pending': disabled,
               'is-uploading': getFileStatus(file) === 'uploading',
               'is-completed': getFileStatus(file) === 'completed',
               'is-waiting': getFileStatus(file) === 'waiting'
             }"
-            v-for="file in dirContent.files" 
+            v-for="file in dirContent.files"
             :key="file.fullPath || file.name"
-            @click="readOnly && shareCode ? downloadFile(file, dirName) : null"
+            @click="readOnly && shareCode && !disabled ? downloadFile(file, dirName) : null"
           >
             <div class="name">
               <div class="icon">
@@ -218,6 +224,7 @@ function getDirectories(structure) {
           :current-uploading-file="currentUploadingFile"
           :current-file-progress="currentFileProgress"
           :completed-files="completedFiles"
+          :disabled="disabled"
         />
       </div>
     </template>
@@ -305,13 +312,22 @@ function getDirectories(structure) {
   &.is-uploading {
     background-color: rgba(59, 130, 246, 0.1);
   }
-  
+
   &.is-completed {
     opacity: 0.7;
   }
-  
+
   &.is-waiting {
     opacity: 0.6;
+  }
+}
+
+.upload-basket-item.pending {
+  opacity: 0.45;
+  cursor: not-allowed;
+
+  &:hover {
+    background-color: transparent;
   }
 }
 </style>

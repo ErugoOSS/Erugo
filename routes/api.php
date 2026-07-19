@@ -132,6 +132,15 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+
+        //add files to existing share (multi-file)
+        Route::post('/{id}/add-files', [UploadsController::class, 'addFilesToShare'])->name('shares.addFiles');
+
+        //replace the single file in a single-file share
+        Route::post('/{id}/replace-file', [UploadsController::class, 'replaceShareFile'])->name('shares.replaceFile');
+
+        //clone a share (hard-links files, preserves storage_id)
+        Route::post('/{id}/clone', [SharesController::class, 'cloneShare'])->name('shares.clone');
     });
 
     //all shares [auth, admin]
