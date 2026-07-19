@@ -39,9 +39,22 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        Auth::attempt($credentials);
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
         $user = Auth::user();
 
+        if (!$user->active) {
+            Auth::logout();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Account is disabled'
+            ], 403);
+        }
 
         return $this->respondWithToken($user);
     }
@@ -66,6 +79,13 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Unauthorized'
             ], 401);
+        }
+
+        if (!$user->active) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Account is disabled'
+            ], 403);
         }
 
         return $this->respondWithToken($user);
