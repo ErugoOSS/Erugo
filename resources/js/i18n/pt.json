@@ -577,6 +577,11 @@
       "password_protect_description": "Crie uma palavra-passe para a sua partilha. Qualquer pessoa que descarregue esta partilha necessitará desta palavra-passe para aceder à mesma. Nota: Após a criação, esta palavra-passe será encriptada e não será possível recuperá-la. Certifique-se de que a guarda num local seguro.",
       "remove_password": "Remover a palavra-passe"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "Downloads de todos os tempos",

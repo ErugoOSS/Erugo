@@ -598,6 +598,11 @@
       "password_protect_description": "Maak een wachtwoord aan voor je gedeelde link. Iedereen die dit bestand downloadt, heeft dit wachtwoord nodig om toegang te krijgen. Let op: Na het aanmaken wordt dit wachtwoord versleuteld en kunnen we het niet voor je achterhalen. Zorg ervoor dat je het op een veilige locatie opslaat.",
       "remove_password": "Wachtwoord verwijderen"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "Downloads aller tijden",

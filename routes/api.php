@@ -8,6 +8,7 @@ use App\Http\Middleware\AdminMiddleware as Admin;
 use App\Http\Middleware\NoUsersMiddleware as NoUsers;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharesController;
+use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\BackgroundsController;
 use App\Services\SettingsService;
 use App\Http\Controllers\ThemesController;
@@ -132,6 +133,12 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+    });
+
+    //diagnostics bundle [auth, admin]
+    Route::group(['prefix' => 'admin/diagnostics', 'middleware' => ['auth', Admin::class]], function () {
+        Route::post('/',               [DiagnosticsController::class, 'generate'])->name('diagnostics.generate');
+        Route::get('/{token}',         [DiagnosticsController::class, 'download'])->name('diagnostics.download');
     });
 
     //all shares [auth, admin]
