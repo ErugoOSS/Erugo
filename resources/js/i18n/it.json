@@ -644,7 +644,9 @@
         "unique_downloaders_description": "Conteggio degli indirizzi IP unici che hanno scaricato le azioni.",
         "unique_downloaders_title": "Scaricatori unici",
         "users_description": "Panoramica degli account utente e dei loro livelli di attività.",
-        "users_title": "Statistiche degli utenti"
+        "users_title": "Statistiche degli utenti",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Caricamento delle statistiche...",
       "nav": {
@@ -674,7 +676,12 @@
         "of_disk": "del disco",
         "share_storage": "Condividere lo stoccaggio",
         "title": "Panoramica sull'archiviazione",
-        "used": "usato"
+        "used": "usato",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Attivo",
@@ -697,6 +704,8 @@
       "allow_chunked_uploads_description": "La modalità Chunked upload suddivide i file in segmenti più piccoli che vengono trasferiti in sequenza. Sebbene sia leggermente più lento del caricamento diretto per i file più piccoli, questo metodo offre maggiore stabilità e affidabilità durante il trasferimento di file di grandi dimensioni. I caricamenti chunked supportano il monitoraggio dell'avanzamento e consentono agli utenti di sospendere e riprendere manualmente i trasferimenti, il che li rende ideali per i file di dimensioni superiori a 100 MB o quando si utilizzano connessioni di rete instabili.",
       "allow_direct_uploads": "Consentire la modalità di caricamento diretto",
       "allow_direct_uploads_description": "La modalità di caricamento diretto trasmette i file in un'unica richiesta ininterrotta. Sebbene questo metodo offra la velocità di trasferimento più elevata per la maggior parte dei file, i file estremamente grandi possono causare problemi di stabilità o timeout. Per ottenere prestazioni ottimali con file di dimensioni superiori a 100 MB, l'opzione migliore è rappresentata dal caricamento a pezzi.",
+      "allow_file_replacement": "Consenti sostituzione file",
+      "allow_file_replacement_description": "Se abilitato, gli utenti possono sostituire il file in una condivisione a file singolo senza creare una nuova condivisione. Disabilitare per scenari di audit in cui i file non devono cambiare dopo la condivisione.",
       "allow_reverse_shares": "Consentire le condivisioni inverse",
       "allow_reverse_shares_description": "Determina se gli utenti registrati devono avere il permesso di inviare richieste di condivisione inversa. Queste richieste forniscono a persone esterne un pass per il caricamento una tantum, consentendo loro di consegnare i file direttamente all'utente registrato che ha avviato la richiesta.\n\n\n\n\n",
       "application_name": "Nome dell'applicazione",

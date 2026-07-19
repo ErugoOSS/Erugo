@@ -10,6 +10,7 @@ use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
 use App\Services\SettingsService;
 
+if (!function_exists('getSettings')) {
 function getSettings()
 {
     
@@ -50,6 +51,7 @@ function getSettings()
 
     return $indexedSettings;
 }
+} // end if (!function_exists('getSettings'))
 
 Route::get('/', function () {
     $indexedSettings = getSettings();

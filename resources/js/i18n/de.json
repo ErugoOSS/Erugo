@@ -644,7 +644,9 @@
         "unique_downloaders_description": "Anzahl der eindeutigen IP-Adressen, die Aktien heruntergeladen haben.",
         "unique_downloaders_title": "Einzigartige Downloader",
         "users_description": "Überblick über die Benutzerkonten und deren Aktivitätsniveau.",
-        "users_title": "Benutzer-Statistik"
+        "users_title": "Benutzer-Statistik",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Laden der Statistiken...",
       "nav": {
@@ -674,7 +676,12 @@
         "of_disk": "der Scheibe",
         "share_storage": "Speicher teilen",
         "title": "Überblick über die Speicherung",
-        "used": "gebraucht"
+        "used": "gebraucht",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Aktiv",
@@ -697,6 +704,8 @@
       "allow_chunked_uploads_description": "Der Chunked-Upload-Modus unterteilt Dateien in kleinere Segmente, die nacheinander übertragen werden. Diese Methode ist zwar bei kleineren Dateien etwas langsamer als der direkte Upload, bietet aber bei der Übertragung großer Dateien mehr Stabilität und Zuverlässigkeit. Chunked Uploads unterstützen die Verfolgung des Fortschritts und ermöglichen es dem Benutzer, die Übertragung manuell anzuhalten und fortzusetzen. Dies ist ideal für Dateien über 100 MB oder bei instabilen Netzwerkverbindungen.",
       "allow_direct_uploads": "Direkten Upload-Modus zulassen",
       "allow_direct_uploads_description": "Beim direkten Upload werden die Dateien in einer einzigen, ununterbrochenen Anfrage übertragen. Während diese Methode für die meisten Dateien die schnellsten Übertragungsgeschwindigkeiten bietet, kann es bei extrem großen Dateien zu Stabilitätsproblemen oder Timeouts kommen. Für eine optimale Leistung bei Dateien, die größer als 100 MB sind, ist der Upload in Teilen die bessere Option.",
+      "allow_file_replacement": "Dateiersetzung erlauben",
+      "allow_file_replacement_description": "Wenn aktiviert, können Benutzer die Datei in einer Einzeldatei-Freigabe ersetzen, ohne eine neue Freigabe zu erstellen. Deaktivieren Sie dies für Audit-Szenarien, bei denen Dateien nach der Freigabe nicht geändert werden dürfen.",
       "allow_reverse_shares": "Umgekehrtes Teilen zulassen",
       "allow_reverse_shares_description": "Legt fest, ob Ihre registrierten Benutzer die Erlaubnis haben sollen, umgekehrte Freigabeanforderungen zu senden. Diese Anfragen geben externen Personen einen einmaligen Upload-Pass, der es ihnen ermöglicht, Dateien direkt an den registrierten Benutzer zu liefern, der die Anfrage initiiert hat.\n\n\n\n\n",
       "application_name": "Name der Anwendung",

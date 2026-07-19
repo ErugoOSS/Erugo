@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\Share;
+use App\Models\File;
 use Carbon\Carbon;
 use App\Haikunator;
 use App\Models\Setting;
@@ -12,9 +14,11 @@ use App\Models\User;
 use App\Models\Download;
 use App\Mail\shareDownloadedMail;
 use App\Jobs\sendEmail;
+use App\Jobs\CreateShareZip;
 use App\Services\SettingsService;
 use App\Services\PatternGenerator;
 use App\Jobs\cleanSpecificShares;
+use App\Jobs\RecalculatePhysicalStorage;
 use Illuminate\Support\Facades\Hash;
 
 class SharesController extends Controller
@@ -99,6 +103,8 @@ class SharesController extends Controller
       'user' => [
         'name' => $share->user ? $share->user->name : 'Guest User',
       ],
+      'status' => $share->status,
+      'updated_at' => $share->updated_at,
       'password_protected' => $share->password ? true : false
     ];
   }
@@ -698,5 +704,105 @@ class SharesController extends Controller
     if ($sendEmail == 'true' && $share->user) {
       sendEmail::dispatch($share->user->email, shareDownloadedMail::class, ['share' => $share]);
     }
+  }
+
+  /**
+   * Clone an existing share. File records are duplicated with the same storage_id;
+   * physical files are hard-linked (falling back to copy on cross-device filesystems).
+   */
+  public function cloneShare(Request $request, $shareId)
+  {
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    $share = Share::find($shareId);
+    if (!$share) {
+      return response()->json(['status' => 'error', 'message' => 'Share not found'], 404);
+    }
+
+    if ($user->id !== $share->user_id && !$user->admin) {
+      return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+    }
+
+    if ($share->status === 'deleted') {
+      return response()->json(['status' => 'error', 'message' => 'Cannot clone a deleted share'], 422);
+    }
+
+    $name      = $request->input('name', 'Clone of ' . $share->name);
+    $longId    = 'share-' . Str::random(8);
+    $clonePath = $user->id . '/' . $longId;
+
+    $clone = Share::create([
+      'user_id'        => $user->id,
+      'name'           => $name,
+      'description'    => $share->description,
+      'path'           => $clonePath,
+      'long_id'        => $longId,
+      'size'           => 0,
+      'file_count'     => 0,
+      'status'         => 'pending',
+      'expires_at'     => $share->expires_at,
+      'require_email'  => $share->require_email,
+      'download_limit' => $share->download_limit,
+      'password'       => $share->password,
+    ]);
+
+    $cloneDir = storage_path('app/shares/' . $clonePath);
+    if (!is_dir($cloneDir)) {
+      mkdir($cloneDir, 0755, true);
+    }
+
+    $originalFiles = $share->files()->get();
+    $totalSize     = 0;
+
+    foreach ($originalFiles as $file) {
+      $subdir     = $file->full_path ? rtrim($file->full_path, '/') . '/' : '';
+      $sourcePath = storage_path('app/shares/' . $share->path . '/' . $subdir . $file->name);
+
+      $destSubdir = $file->full_path ?? '';
+      $destDir    = $cloneDir . ($destSubdir !== '' ? '/' . $destSubdir : '');
+
+      if (!is_dir($destDir)) {
+        mkdir($destDir, 0755, true);
+      }
+
+      $destFile = $destDir . '/' . $file->name;
+
+      if (file_exists($sourcePath)) {
+        try {
+          link($sourcePath, $destFile);
+        } catch (\Throwable $e) {
+          // Cross-device hard-link failure — fall back to copy
+          copy($sourcePath, $destFile);
+        }
+      }
+
+      File::create([
+        'name'          => $file->name,
+        'original_name' => $file->original_name,
+        'size'          => $file->size,
+        'type'          => $file->type,
+        'full_path'     => $file->full_path,
+        'share_id'      => $clone->id,
+        'temp_path'     => null,
+        'storage_id'    => $file->storage_id,
+      ]);
+
+      $totalSize += $file->size;
+    }
+
+    $clone->size       = $totalSize;
+    $clone->file_count = $originalFiles->count();
+    $clone->save();
+
+    CreateShareZip::dispatch($clone);
+    RecalculatePhysicalStorage::dispatch();
+
+    return response()->json([
+      'status' => 'success',
+      'data'   => ['share' => $clone->fresh(['files'])],
+    ]);
   }
 }
