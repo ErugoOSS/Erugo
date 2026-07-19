@@ -441,7 +441,7 @@ class TusdHooksController extends Controller
                 $resolvedExtractDir = realpath($extractDir);
                 
                 if ($resolvedPath === false || $resolvedExtractDir === false ||
-                    strpos($resolvedPath, $resolvedExtractDir) !== 0) {
+                    ($resolvedPath !== $resolvedExtractDir && strpos($resolvedPath, $resolvedExtractDir . DIRECTORY_SEPARATOR) !== 0)) {
                     Log::warning('tusd post-finish: Path traversal attempt in bundle', [
                         'upload_id' => $uploadId,
                         'file_path' => $filePath,
