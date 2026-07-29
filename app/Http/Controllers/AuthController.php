@@ -38,6 +38,7 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only('email', 'password');
+        $credentials['email'] = strtolower(trim($credentials['email']));
 
         Auth::attempt($credentials);
         $user = Auth::user();
@@ -187,6 +188,7 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $request->merge(['email' => strtolower(trim($request->email))]);
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -225,12 +227,15 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $request->merge(['email' => strtolower(trim($request->email))]);
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
+                    'must_change_password' => false,
                 ])->save();
 
                 event(new PasswordReset($user));

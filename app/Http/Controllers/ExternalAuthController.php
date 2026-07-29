@@ -269,15 +269,17 @@ class ExternalAuthController extends Controller
     {
         $user = null;
 
+        $providerEmail = strtolower(trim($authProviderUser->email));
+
         // If trust_email is enabled, try to find a user with the same email
         if ($provider->trust_email) {
-            $user = User::where('email', $authProviderUser->email)->first();
+            $user = User::where('email', $providerEmail)->first();
         }
 
         // If no user found and allow_registration is enabled, create a new user
         if (!$user && $provider->allow_registration) {
             // Check if email is already taken (even if trust_email is off)
-            $existingUser = User::where('email', $authProviderUser->email)->first();
+            $existingUser = User::where('email', $providerEmail)->first();
             if ($existingUser) {
                 return redirect('/')->with('error', 'An account with this email already exists. Please link your account to this provider from your profile settings.');
             }
@@ -315,7 +317,7 @@ class ExternalAuthController extends Controller
     {
         return User::create([
             'name' => $authProviderUser->name,
-            'email' => $authProviderUser->email,
+            'email' => strtolower(trim($authProviderUser->email)),
             'password' => bcrypt(bin2hex(random_bytes(32))), // Random password since they'll use SSO
             'admin' => false,
             'active' => true,
