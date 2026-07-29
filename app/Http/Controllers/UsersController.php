@@ -12,6 +12,7 @@ use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
 use App\Jobs\sendEmail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UsersController extends Controller
@@ -340,6 +341,9 @@ class UsersController extends Controller
 
       // Clean up all the user's data (shares, files, downloads)
       $this->cleanupUserData($user);
+
+      // Remove any pending password reset tokens for this user
+      DB::table('password_reset_tokens')->where('email', $user->email)->delete();
 
       $user->delete();
 
