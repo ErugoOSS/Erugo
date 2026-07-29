@@ -272,7 +272,15 @@ class UsersController extends Controller
     }
 
     try {
-      $user->update($validator->validated());
+      $validated = $validator->validated();
+
+      if (isset($validated['name']))                 $user->name                 = $validated['name'];
+      if (isset($validated['email']))                $user->email                = $validated['email'];
+      if (isset($validated['password']))             $user->password             = $validated['password'];
+      if (isset($validated['admin']))                $user->admin                = $validated['admin'];
+      if (isset($validated['must_change_password'])) $user->must_change_password = $validated['must_change_password'];
+
+      $user->save();
 
       return response()->json([
         'status' => 'success',
