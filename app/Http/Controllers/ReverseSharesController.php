@@ -30,6 +30,8 @@ class ReverseSharesController extends Controller
             ], 400);
         }
 
+        $request->merge(['recipient_email' => strtolower(trim($request->recipient_email ?? ''))]);
+
         $validator = Validator::make($request->all(), [
             'recipient_name' => ['required', 'string', 'max:255'],
             'recipient_email' => ['required', 'email', 'max:255']

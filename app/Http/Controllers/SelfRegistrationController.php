@@ -29,6 +29,8 @@ class SelfRegistrationController extends Controller
             ], 403);
         }
 
+        $request->merge(['email' => strtolower(trim($request->email))]);
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'unique:users,email'],
             'name' => ['required', 'string', 'max:255'],
@@ -139,7 +141,7 @@ class SelfRegistrationController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', strtolower(trim($request->email)))->first();
 
         if (!$user) {
             return response()->json([
@@ -204,7 +206,7 @@ class SelfRegistrationController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', strtolower(trim($request->email)))->first();
 
         // Always return success to prevent email enumeration
         if (!$user || $user->active) {
