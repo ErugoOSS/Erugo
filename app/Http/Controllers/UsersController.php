@@ -279,7 +279,7 @@ class UsersController extends Controller
         $user->name = $validated['name'];
       }
       if (array_key_exists('email', $validated)) {
-        $user->email = $validated['email'];
+        $user->email = strtolower(trim($validated['email']));
       }
       if (array_key_exists('password', $validated)) {
         $user->password = $validated['password'];
@@ -461,7 +461,7 @@ class UsersController extends Controller
     try {
       $user = User::createAccount([
         'name' => $request->name,
-        'email' => $request->email,
+        'email' => strtolower(trim($request->email)),
         'password' => Hash::make($request->password),
       ], [
         'admin' => true,
