@@ -171,6 +171,8 @@ class UsersController extends Controller
   //create a new user
   public function create(Request $request)
   {
+    $request->merge(['email' => strtolower(trim($request->email ?? ''))]);
+
     $validator = Validator::make($request->all(), [
       'email' => ['required', 'email', 'unique:users,email'],
       'name' => ['required', 'string', 'max:255'],
