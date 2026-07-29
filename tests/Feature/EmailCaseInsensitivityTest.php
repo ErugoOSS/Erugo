@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
 class EmailCaseInsensitivityTest extends TestCase
 {
@@ -18,6 +19,7 @@ class EmailCaseInsensitivityTest extends TestCase
     {
         parent::setUp();
         $this->withoutVite();
+        Queue::fake();
         $this->seedRequiredSettings();
     }
 
@@ -55,7 +57,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $admin->admin = true;
         $admin->save();
 
-        $this->actingAs($admin)->postJson('/api/users', [
+        $this->actingAs($admin, 'sanctum')->postJson('/api/users', [
             'name'  => 'New User',
             'email' => 'NEWUSER@Example.COM',
             'admin' => false,
@@ -82,7 +84,7 @@ class EmailCaseInsensitivityTest extends TestCase
     /** @test */
     public function create_first_user_stores_email_as_lowercase(): void
     {
-        $this->postJson('/api/setup/first-user', [
+        $this->postJson('/api/setup', [
             'name'                  => 'Admin',
             'email'                 => 'Admin@Example.COM',
             'password'              => 'Password1!',
@@ -101,7 +103,7 @@ class EmailCaseInsensitivityTest extends TestCase
 
         $target = $this->makeUser('target@example.com');
 
-        $this->actingAs($admin)->putJson('/api/users/' . $target->id, [
+        $this->actingAs($admin, 'sanctum')->putJson('/api/users/' . $target->id, [
             'email' => 'UPDATED@Example.COM',
         ])->assertStatus(200);
 
@@ -224,7 +226,7 @@ class EmailCaseInsensitivityTest extends TestCase
 
         $this->makeUser('existing@example.com');
 
-        $this->actingAs($admin)->postJson('/api/users', [
+        $this->actingAs($admin, 'sanctum')->postJson('/api/users', [
             'name'  => 'Another',
             'email' => 'EXISTING@EXAMPLE.COM',
         ])->assertStatus(400);
@@ -341,7 +343,7 @@ class EmailCaseInsensitivityTest extends TestCase
     {
         $sender = $this->makeUser('sender@example.com');
 
-        $this->actingAs($sender)->postJson('/api/reverse-shares', [
+        $this->actingAs($sender, 'api')->postJson('/api/reverse-shares/invite', [
             'recipient_name'  => 'Recipient',
             'recipient_email' => 'RECIPIENT@Example.COM',
         ])->assertStatus(200);
