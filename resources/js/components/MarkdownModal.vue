@@ -308,7 +308,7 @@ defineExpose({
     font-size: 1.5em;
     margin: 0 0 15px 0;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--panel-border-color);
+    border-bottom: 1px solid var(--input-border-color);
   }
   
   :deep(h2) {

@@ -553,6 +553,9 @@
       "myProfile": {
         "save": "Save profile changes"
       },
+      "myLiveshares": {
+        "create": "Create Liveshare"
+      },
       "myShares": {
         "create": "Create Share",
         "pruneExpired": "Delete expired shares"
@@ -570,10 +573,12 @@
     },
     "description": {
       "about": "Information about your Erugo installation",
+      "allLiveshares": "Manage all liveshares across the system",
       "allShares": "View and manage shares by all users",
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
       "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing",
       "emailTemplates": "Manage email templates",
+      "myLiveshares": "Persistent shared spaces for collaboration",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
       "stats": "Your Erugo system at a glance",
@@ -621,6 +626,44 @@
     },
     "invite": {
       "message": "Message (optional)"
+    },
+    "liveshares": {
+      "allUsers": "All owners",
+      "confirmDelete": "Are you sure you want to delete \"{name}\"? This will permanently remove all files.",
+      "create": {
+        "description": "Liveshares are persistent spaces you can share with others to collaborate on files.",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "A short description of this liveshare...",
+        "nameLabel": "Name",
+        "namePlaceholder": "My Liveshare",
+        "submit": "Create Liveshare",
+        "title": "Create a new Liveshare"
+      },
+      "delete": "Delete liveshare",
+      "error": {
+        "create": "Failed to create liveshare",
+        "delete": "Failed to delete liveshare",
+        "load": "Failed to load liveshares",
+        "nameRequired": "Name is required"
+      },
+      "fileCount": "{count, plural, one {# file} other {# files}}",
+      "loading": "Liveshares loading...",
+      "noneAll": "No liveshares exist yet",
+      "noneMine": "No liveshares yet",
+      "open": "Open",
+      "openWorkspace": "Open workspace",
+      "success": {
+        "created": "Liveshare created",
+        "deleted": "Liveshare deleted"
+      },
+      "table": {
+        "actions": "Actions",
+        "created": "Created",
+        "files": "Files",
+        "name": "Name",
+        "owner": "Owner",
+        "role": "Role"
+      }
     },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
@@ -911,12 +954,14 @@
     },
     "title": {
       "about": "About",
+      "allLiveshares": "All Liveshares",
       "allShares": "All Shares",
       "branding": "Branding & UI",
       "cloudConnect": "Erugo Connect",
       "emailTemplates": "Email templates",
       "linked_accounts": "Linked Accounts",
       "manage": "Manage",
+      "myLiveshares": "My Liveshares",
       "myProfile": "My Account",
       "myShares": "My Shares",
       "reverse_invite": "Create reverse share request",

@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--panel-section-background-color-alt);
+  border-bottom: 1px solid var(--input-border-color);
 
   .search-icon {
     width: 14px;

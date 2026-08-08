@@ -621,7 +621,7 @@ defineExpose({ openCreateOverlay })
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--panel-section-background-color-alt);
+  border-bottom: 1px solid var(--input-border-color);
 
   h3 {
     margin: 0;
@@ -655,7 +655,7 @@ defineExpose({ openCreateOverlay })
   padding: 16px;
   border-radius: 8px;
   background: var(--panel-section-background-color);
-  border: 1px solid var(--panel-section-background-color-alt);
+  border: 1px solid var(--input-border-color);
   color: var(--panel-section-text-color);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -663,7 +663,7 @@ defineExpose({ openCreateOverlay })
 
   &:hover {
     background: var(--panel-section-background-color-alt);
-    border-color: var(--accent-color);
+    border-color: var(--input-border-color-focus);
   }
 
   svg {
@@ -768,7 +768,7 @@ defineExpose({ openCreateOverlay })
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--panel-section-background-color-alt);
+  border-bottom: 1px solid var(--input-border-color);
 
   h3 {
     margin: 0;

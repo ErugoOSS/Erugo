@@ -1,18 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineExpose } from 'vue'
 import { getLiveshares, createLiveshare, deleteLiveshare } from '../../api'
 import {
   SquareArrowOutUpRight,
   Plus,
   Trash2,
   Rocket,
-  Users,
+  CircleX,
   FileText,
   Loader2
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate } from '../../utils'
+import { useTranslate } from '@tolgee/vue'
 
+const { t } = useTranslate()
 const toast = useToast()
 const liveshares = ref([])
 const loaded = ref(false)
@@ -30,46 +32,62 @@ const loadLiveshares = async () => {
   try {
     liveshares.value = await getLiveshares()
   } catch (error) {
-    toast.error('Failed to load liveshares')
+    toast.error(t.value('settings.liveshares.error.load'))
   }
   loaded.value = true
 }
 
 const handleCreateLiveshare = async () => {
   if (!newName.value.trim()) {
-    toast.error('Name is required')
+    toast.error(t.value('settings.liveshares.error.nameRequired'))
     return
   }
 
   creating.value = true
   try {
     await createLiveshare(newName.value.trim(), newDescription.value.trim() || null)
-    toast.success('Liveshare created')
-    newName.value = ''
-    newDescription.value = ''
-    showCreateForm.value = false
+    toast.success(t.value('settings.liveshares.success.created'))
+    creating.value = false
+    closeCreateForm()
     await loadLiveshares()
   } catch (error) {
-    toast.error(error.message || 'Failed to create liveshare')
+    toast.error(error.message || t.value('settings.liveshares.error.create'))
   }
   creating.value = false
 }
 
 const handleDeleteLiveshare = async (liveshare) => {
-  const confirmed = confirm(`Are you sure you want to delete "${liveshare.name}"? This will permanently remove all files.`)
+  const confirmed = confirm(t.value('settings.liveshares.confirmDelete', { name: liveshare.name }))
   if (!confirmed) return
 
   try {
     await deleteLiveshare(liveshare.long_id)
-    toast.success('Liveshare deleted')
+    toast.success(t.value('settings.liveshares.success.deleted'))
     await loadLiveshares()
   } catch (error) {
-    toast.error(error.message || 'Failed to delete liveshare')
+    toast.error(error.message || t.value('settings.liveshares.error.delete'))
   }
 }
 
 const openWorkspace = (liveshare) => {
   window.open(`/liveshares/${liveshare.long_id}`, '_blank')
+}
+
+const openCreateForm = () => {
+  showCreateForm.value = true
+}
+
+const closeCreateForm = () => {
+  if (creating.value) return
+  showCreateForm.value = false
+  newName.value = ''
+  newDescription.value = ''
+}
+
+const createFormClickOutside = (event) => {
+  if (!event.target.closest('.liveshare-form')) {
+    closeCreateForm()
+  }
 }
 
 const roleBadgeClass = (role) => {
@@ -81,61 +99,22 @@ const roleBadgeClass = (role) => {
     'role-viewer': role === 'viewer'
   }
 }
+
+defineExpose({
+  openCreateForm
+})
 </script>
 
 <template>
   <div>
-    <!-- Create button -->
-    <div class="create-section" v-if="!showCreateForm">
-      <button class="secondary" @click="showCreateForm = true">
-        <Plus />
-        Create Liveshare
-      </button>
-    </div>
-
-    <!-- Create form -->
-    <div class="create-form" v-if="showCreateForm">
-      <h4>Create a new Liveshare</h4>
-      <div class="form-group">
-        <label>Name</label>
-        <input
-          type="text"
-          v-model="newName"
-          placeholder="My Liveshare"
-          maxlength="255"
-          @keyup.enter="handleCreateLiveshare"
-        />
-      </div>
-      <div class="form-group">
-        <label>Description (optional)</label>
-        <textarea
-          v-model="newDescription"
-          placeholder="A short description of this liveshare..."
-          maxlength="1000"
-          rows="2"
-        ></textarea>
-      </div>
-      <div class="form-actions">
-        <button @click="handleCreateLiveshare" :disabled="creating || !newName.trim()">
-          <Loader2 v-if="creating" class="spin" />
-          <Plus v-else />
-          Create
-        </button>
-        <button class="secondary" @click="showCreateForm = false" :disabled="creating">
-          Cancel
-        </button>
-      </div>
-    </div>
-
-    <!-- Liveshares list -->
     <table v-if="liveshares.length > 0">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Files</th>
-          <th>Created</th>
-          <th>Actions</th>
+          <th>{{ $t('settings.liveshares.table.name') }}</th>
+          <th>{{ $t('settings.liveshares.table.role') }}</th>
+          <th>{{ $t('settings.liveshares.table.files') }}</th>
+          <th>{{ $t('settings.liveshares.table.created') }}</th>
+          <th>{{ $t('settings.liveshares.table.actions') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -146,27 +125,27 @@ const roleBadgeClass = (role) => {
               <span class="liveshare-desc" v-if="ls.description">{{ ls.description }}</span>
             </div>
           </td>
-          <td>
+          <td width="1" style="white-space: nowrap">
             <span :class="roleBadgeClass(ls.my_role)">{{ ls.my_role }}</span>
           </td>
-          <td>
+          <td width="1" style="white-space: nowrap">
             <div class="stat-cell">
               <FileText class="stat-icon" />
-              {{ ls.file_count }} files
+              {{ $t('settings.liveshares.fileCount', { count: ls.file_count }) }}
               <span class="stat-size">({{ niceFileSize(ls.size) }})</span>
             </div>
           </td>
-          <td>{{ niceDate(ls.created_at) }}</td>
-          <td>
+          <td width="1" style="white-space: nowrap">{{ niceDate(ls.created_at) }}</td>
+          <td width="1" style="white-space: nowrap">
             <div class="action-buttons">
-              <button class="secondary" @click="openWorkspace(ls)" title="Open workspace">
+              <button class="secondary" @click="openWorkspace(ls)" :title="$t('settings.liveshares.openWorkspace')">
                 <SquareArrowOutUpRight />
-                Open
+                {{ $t('settings.liveshares.open') }}
               </button>
               <button
                 class="clear-button icon-only"
                 @click="handleDeleteLiveshare(ls)"
-                title="Delete liveshare"
+                :title="$t('settings.liveshares.delete')"
                 v-if="ls.my_role === 'owner'"
               >
                 <Trash2 />
@@ -179,56 +158,121 @@ const roleBadgeClass = (role) => {
 
     <div v-else-if="loaded" class="center-message">
       <Rocket />
-      <p>No liveshares yet</p>
+      <p>{{ $t('settings.liveshares.noneMine') }}</p>
     </div>
     <div v-else class="center-message">
-      <p>Loading...</p>
+      <p>{{ $t('settings.liveshares.loading') }}</p>
+    </div>
+  </div>
+
+  <div class="liveshare-form-overlay" :class="{ active: showCreateForm }" @click="createFormClickOutside">
+    <div class="liveshare-form">
+      <h2>
+        <Plus />
+        {{ $t('settings.liveshares.create.title') }}
+      </h2>
+      <p>{{ $t('settings.liveshares.create.description') }}</p>
+      <div class="input-container">
+        <label for="new_liveshare_name">{{ $t('settings.liveshares.create.nameLabel') }}</label>
+        <input
+          type="text"
+          id="new_liveshare_name"
+          v-model="newName"
+          :placeholder="$t('settings.liveshares.create.namePlaceholder')"
+          maxlength="255"
+          required
+          @keyup.enter="handleCreateLiveshare"
+        />
+      </div>
+      <div class="input-container">
+        <label for="new_liveshare_description">{{ $t('settings.liveshares.create.descriptionLabel') }}</label>
+        <textarea
+          id="new_liveshare_description"
+          v-model="newDescription"
+          :placeholder="$t('settings.liveshares.create.descriptionPlaceholder')"
+          maxlength="1000"
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="button-bar">
+        <button @click="handleCreateLiveshare" :disabled="creating || !newName.trim()">
+          <Loader2 v-if="creating" class="spin" />
+          <Plus v-else />
+          {{ $t('settings.liveshares.create.submit') }}
+        </button>
+        <button class="secondary close-button" @click="closeCreateForm" :disabled="creating">
+          <CircleX />
+          {{ $t('settings.close') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.create-section {
-  margin-bottom: 20px;
-}
+.liveshare-form-overlay {
+  border-radius: 10px 10px 0 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--overlay-background-color);
+  backdrop-filter: blur(10px);
+  z-index: 230;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
 
-.create-form {
-  background: var(--panel-section-background-color);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: var(--panel-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  h4 {
-    margin: 0 0 15px 0;
-    color: var(--panel-section-text-color);
+    svg {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
   }
 
-  .form-group {
-    margin-bottom: 12px;
-
-    label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--panel-section-text-color);
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      box-sizing: border-box;
-    }
+  .liveshare-form {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    width: min(500px, 100vw);
+    background: var(--panel-background-color);
+    color: var(--panel-text-color);
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    transition: all 0.3s ease;
 
     textarea {
       resize: vertical;
     }
+
+    button {
+      display: block;
+      width: 100%;
+    }
   }
 
-  .form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+    .liveshare-form {
+      transform: translate(-50%, 0%);
+    }
   }
 }
 
@@ -245,10 +289,6 @@ const roleBadgeClass = (role) => {
     font-size: 0.75rem;
     color: var(--panel-section-text-color);
     opacity: 0.7;
-    max-width: 250px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 
@@ -262,8 +302,8 @@ const roleBadgeClass = (role) => {
 }
 
 .role-owner {
-  background: var(--accent-color);
-  color: var(--panel-section-text-color);
+  background: var(--primary-button-background-color);
+  color: var(--primary-button-text-color);
 }
 
 .role-manager {

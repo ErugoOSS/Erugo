@@ -32,7 +32,7 @@ const copyToClipboard = () => {
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: color-mix(in srgb, var(--secondary-color), rgba(255, 255, 255, 0) 95%);
+  background: var(--panel-section-background-color);
   height: var(--height);
   border-radius: 5px;
   cursor: pointer;
@@ -45,15 +45,15 @@ const copyToClipboard = () => {
     padding-right: 10px;
     border-radius: 3px;
     border: none;
-    color: var(--secondary-color);
+    color: var(--panel-section-text-color);
     outline: none;
     height: var(--height);
-    background-color: color-mix(in srgb, var(--secondary-color), rgba(255, 255, 255, 0) 95%);
+    background: var(--panel-section-background-color-alt);
     font-weight: bold;
   }
   .value {
     position: relative !important;
-    background-color: color-mix(in srgb, var(--secondary-color), rgba(255, 255, 255, 0) 100%);
+    background: transparent;
     height: var(--height);
     border: none;
     border-radius: 0 3px 3px 0;
@@ -78,7 +78,8 @@ const copyToClipboard = () => {
     font-weight: bold;
     font-size: 0.8rem;
     border-radius: 5px;
-    background-color: color-mix(in srgb, var(--accent-color-light), rgba(255, 255, 255, 0) 5%);
+    // Must be opaque: this overlays the name and value while "Copied" shows.
+    background: var(--panel-section-background-color);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     pointer-events: none;

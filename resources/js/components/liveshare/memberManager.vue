@@ -233,7 +233,7 @@ defineExpose({ openCreateInvite })
 
     &.owner-icon {
       opacity: 0.8;
-      color: var(--accent-color);
+      color: var(--link-color);
     }
   }
 
@@ -269,7 +269,7 @@ defineExpose({ openCreateInvite })
   padding: 4px 8px;
   font-size: 0.75rem;
   border-radius: 4px;
-  border: 1px solid var(--panel-section-background-color-alt);
+  border: 1px solid var(--input-border-color);
   background: var(--panel-section-background-color);
   color: var(--panel-section-text-color);
   cursor: pointer;
@@ -285,8 +285,8 @@ defineExpose({ openCreateInvite })
 }
 
 .role-owner {
-  background: var(--accent-color);
-  color: var(--panel-section-text-color);
+  background: var(--primary-button-background-color);
+  color: var(--primary-button-text-color);
 }
 
 .role-manager,
@@ -310,7 +310,7 @@ defineExpose({ openCreateInvite })
 
   hr {
     border: none;
-    border-top: 1px solid var(--panel-section-background-color-alt);
+    border-top: 1px solid var(--input-border-color);
     margin-bottom: 15px;
   }
 

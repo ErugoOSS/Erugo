@@ -477,7 +477,7 @@ const OpenExternalLink = (url) => {
 .credits-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt);
+  border-top: 1px solid var(--input-border-color);
   
   h4 {
     font-size: 0.9rem;
@@ -525,7 +525,7 @@ const OpenExternalLink = (url) => {
 .system-info-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt);
+  border-top: 1px solid var(--input-border-color);
   
   h4 {
     font-size: 0.9rem;

@@ -73,7 +73,7 @@ button {
   }
 
   &:focus {
-    outline: 2px dashed color-mix(in srgb, var(--primary-button-background-color), white 90%);
+    outline: 2px dashed var(--input-border-color-focus);
   }
 
   svg {

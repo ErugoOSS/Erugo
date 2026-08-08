@@ -382,7 +382,7 @@ const handleRegister = async () => {
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
-    background: var(--accent-color);
+    background: var(--primary-button-background-color);
 
     img {
       width: 100%;

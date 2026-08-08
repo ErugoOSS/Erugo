@@ -27,7 +27,7 @@ select {
     outline: none;
   }
   &.error {
-    border: 1px solid red;
+    border: 1px solid var(--color-danger);
   }
 
 }
@@ -35,7 +35,7 @@ select {
 input:read-only,
 textarea:read-only,
 select:disabled {
-  background: var(--panel-background-color-alt);
+  background: var(--panel-section-background-color-alt);
   cursor: not-allowed;
   border: 1px dashed var(--input-border-color);
   &:focus {

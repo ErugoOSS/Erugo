@@ -290,14 +290,14 @@ defineExpose({ open, close })
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  border: 1px solid var(--panel-section-background-color-alt, #333);
+  border: 1px solid var(--input-border-color);
 }
 
 .command-palette-header {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--panel-section-background-color-alt, #333);
+  border-bottom: 1px solid var(--input-border-color);
   gap: 12px;
   
   .search-icon {
@@ -414,7 +414,7 @@ defineExpose({ open, close })
   justify-content: center;
   gap: 24px;
   padding: 12px 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt, #333);
+  border-top: 1px solid var(--input-border-color);
   background: var(--panel-section-background-color-alt, #1f1f1f);
   
   .hint {

@@ -209,12 +209,13 @@ const handleFilesSelected = async (event) => {
     stroke-width: 4;
   }
 
+  // stroke needs a solid colour; the themed surface variables are all gradients.
   .ring-bg {
-    stroke: var(--panel-section-background-color-alt);
+    stroke: var(--input-border-color);
   }
 
   .ring-fill {
-    stroke: var(--primary-button-background-color);
+    stroke: var(--link-color);
     stroke-dasharray: 150.796; // 2 * PI * 24
     stroke-linecap: round;
     transition: stroke-dashoffset 0.3s ease;

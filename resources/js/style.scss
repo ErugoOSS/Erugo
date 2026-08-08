@@ -244,15 +244,15 @@ body {
       position: fixed;
       top: 20px;
       right: 0px;
-      background: var(--accent-color-light);
+      background: var(--panel-background-color);
       backdrop-filter: blur(10px);
       padding: 10px;
       border-radius: 5px 0 0 5px;
-      color: var(--secondary-color);
+      color: var(--panel-text-color);
       font-size: 0.6rem;
       z-index: 199;
       a {
-        color: var(--secondary-color);
+        color: var(--panel-text-color);
         text-decoration: none;
       }
     }
@@ -653,6 +653,9 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  // Only rendered by shares/pending.blade.php and shares/failed.blade.php, which
+  // define these branding variables inline. They are deliberately not theme
+  // variables, so do not reuse them anywhere the SPA renders.
   .share-status-inner {
     background: var(--secondary-color);
     color: var(--accent-color-light);
@@ -690,18 +693,12 @@ body {
   overflow: hidden;
   white-space: nowrap;
   position: relative;
+  // Fades the scrolling text at both edges. A mask is used rather than a
+  // gradient overlay because every themed surface colour is itself a gradient,
+  // so there is no solid colour an overlay could blend into.
   &.has-slide {
-    &:before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(90deg, var(--accent-color-light) 0%, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%, var(--accent-color-light) 100%);
-      pointer-events: none;
-      z-index: 150;
-    }
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
   }
   .content {
     display: inline-block;

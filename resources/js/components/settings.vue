@@ -48,6 +48,8 @@ const { navigateTo } = useSettingsNavigation()
 const usersPanel = ref(null)
 const mySharesPanel = ref(null)
 const allSharesPanel = ref(null)
+const myLivesharesPanel = ref(null)
+const allLivesharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
 
@@ -55,6 +57,8 @@ const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
 const allSharesUsers = ref([])
 const selectedUserId = ref(null)
+const liveshareOwners = ref([])
+const selectedLiveshareOwnerId = ref(null)
 
 // Subscribe to self_registration_enabled setting - auto-updates when settings change
 const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
@@ -186,14 +190,18 @@ const getSettingsTitle = () => {
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
     case 'myLiveshares':
-      return 'My Liveshares'
+      return t.value('settings.title.myLiveshares')
     case 'allLiveshares':
-      return 'All Liveshares'
+      return t.value('settings.title.allLiveshares')
     case 'about':
       return t.value('settings.title.about')
     default:
       return t.value('settings.title.erugo')
   }
+}
+
+const createLiveshare = () => {
+  myLivesharesPanel.value.openCreateForm()
 }
 
 const handlePruneExpiredShares = () => {
@@ -240,6 +248,14 @@ const handleUserFilterChange = (event) => {
   selectedUserId.value = event.target.value || null
   if (allSharesPanel.value) {
     allSharesPanel.value.setUserFilter(selectedUserId.value)
+  }
+}
+
+const handleLiveshareOwnerFilterChange = (event) => {
+  const value = event.target.value
+  selectedLiveshareOwnerId.value = value ? Number(value) : null
+  if (allLivesharesPanel.value) {
+    allLivesharesPanel.value.setOwnerFilter(selectedLiveshareOwnerId.value)
   }
 }
 </script>
@@ -350,13 +366,13 @@ const handleUserFilterChange = (event) => {
           >
             <h2>
               <Share2 />
-              All Liveshares
+              {{ $t('settings.title.allLiveshares') }}
             </h2>
           </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')">
             <h2>
               <Share2 />
-              My Liveshares
+              {{ $t('settings.title.myLiveshares') }}
             </h2>
           </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myProfile' }" @click="setActiveTab('myProfile')">
@@ -614,13 +630,23 @@ const handleUserFilterChange = (event) => {
                 <h2 class="d-none d-md-flex">
                   <Share2 />
                   <span>
-                    My Liveshares
-                    <small>Persistent shared spaces for collaboration</small>
+                    {{ $t('settings.title.myLiveshares') }}
+                    <small>{{ $t('settings.description.myLiveshares') }}</small>
                   </span>
                 </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <button @click="createLiveshare">
+                        <Plus />
+                        {{ $t('settings.button.myLiveshares.create') }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="tab-content-body">
-                <MyLiveshares v-if="store.settingsOpen" />
+                <MyLiveshares ref="myLivesharesPanel" v-if="store.settingsOpen" />
               </div>
             </div>
             <div
@@ -633,13 +659,34 @@ const handleUserFilterChange = (event) => {
                 <h2 class="d-none d-md-flex">
                   <Share2 />
                   <span>
-                    All Liveshares
-                    <small>Manage all liveshares across the system</small>
+                    {{ $t('settings.title.allLiveshares') }}
+                    <small>{{ $t('settings.description.allLiveshares') }}</small>
                   </span>
                 </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <select
+                        id="liveshare-owner-filter"
+                        class="user-filter-select"
+                        @change="handleLiveshareOwnerFilterChange"
+                        :value="selectedLiveshareOwnerId || ''"
+                      >
+                        <option value="">{{ $t('settings.liveshares.allUsers') }}</option>
+                        <option v-for="owner in liveshareOwners" :key="owner.id" :value="owner.id">
+                          {{ owner.name }} ({{ owner.email }})
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="tab-content-body">
-                <AllLiveshares v-if="store.settingsOpen" />
+                <AllLiveshares
+                  ref="allLivesharesPanel"
+                  v-if="store.settingsOpen"
+                  @ownersLoaded="liveshareOwners = $event"
+                />
               </div>
             </div>
             <div
@@ -897,7 +944,7 @@ const handleUserFilterChange = (event) => {
 .user-filter-select {
   padding: 8px 12px;
   border-radius: 5px;
-  border: 1px solid var(--panel-section-background-color-alt);
+  border: 1px solid var(--input-border-color);
   background: var(--panel-section-background-color-alt);
   color: var(--panel-section-text-color);
   font-size: 0.9rem;
@@ -907,7 +954,7 @@ const handleUserFilterChange = (event) => {
   
   &:focus {
     outline: none;
-    border-color: var(--primary-button-background-color);
+    border-color: var(--input-border-color-focus);
   }
 }
 

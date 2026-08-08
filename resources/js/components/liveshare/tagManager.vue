@@ -391,7 +391,7 @@ defineExpose({ openCreateForm })
   gap: 4px;
   padding: 8px;
   background: var(--panel-background-color);
-  border: 1px solid var(--panel-section-background-color-alt);
+  border: 1px solid var(--input-border-color);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }

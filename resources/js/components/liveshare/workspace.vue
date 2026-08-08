@@ -1,26 +1,44 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue'
-import { getLiveshare, updateLiveshare, getLiveshareAvatarUrl, getLiveshareFiles, getLiveshareTags, downloadLiveshareFiles } from '../../api'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import {
+  getLiveshare,
+  updateLiveshare,
+  getLiveshareAvatarUrl,
+  getLiveshareFiles,
+  getLiveshareTags,
+  downloadLiveshareFiles,
+  removeLiveshareFile
+} from '../../api'
 import { store } from '../../store'
+import { setPageTitle } from '../../pageTitle'
 import {
   ArrowLeft,
-  Loader2,
-  Save,
-  Edit3,
-  X,
-  Users,
-  UserPlus,
-  Search,
-  Tags,
-  Filter,
-  Plus,
+  ArrowUpDown,
   Check,
   Download,
-  ListChecks
+  Edit3,
+  LayoutGrid,
+  List,
+  ListChecks,
+  Loader2,
+  PanelRight,
+  Plus,
+  Save,
+  Search,
+  Tags,
+  UserPlus,
+  Users,
+  X
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
+import { useConfirmDialog } from '../../composables/useConfirmDialog'
+import { fileDisplayName, triggerFileDownload } from './fileHelpers'
 
 import FileGrid from './fileGrid.vue'
+import FileList from './fileList.vue'
+import FilterRail from './filterRail.vue'
+import FileInspector from './fileInspector.vue'
+import FileContextMenu from './fileContextMenu.vue'
 import LiveshareUploader from './liveshareUploader.vue'
 import MemberManager from './memberManager.vue'
 import TagManager from './tagManager.vue'
@@ -30,6 +48,7 @@ const props = defineProps({
 })
 
 const toast = useToast()
+const confirmDialog = useConfirmDialog()
 const liveshare = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -48,26 +67,26 @@ const filteredFiles = ref([])
 const tags = ref([])
 let searchDebounceTimer = null
 
-const mediaTypes = [
-  { name: 'image', label: 'Images' },
-  { name: 'video', label: 'Videos' },
-  { name: 'audio', label: 'Audio' },
-  { name: 'document', label: 'Documents' },
-  { name: 'archive', label: 'Archives' },
-  { name: 'ebook', label: 'Ebooks' },
-]
-
 // Tag management sheet
 const tagManagerRef = ref(null)
 const tagManagerSheetOpen = ref(false)
+
+// Every file in the liveshare, regardless of the active filters. Backs the
+// counts shown in the filter rail.
+const allFiles = computed(() => liveshare.value?.files || [])
 
 const loadLiveshare = async () => {
   loading.value = true
   error.value = null
   try {
     liveshare.value = await getLiveshare(props.liveshareCode)
-    filteredFiles.value = liveshare.value.files || []
     await loadTags()
+    if (hasActiveFilters.value) {
+      await loadFilteredFiles()
+    } else {
+      filteredFiles.value = liveshare.value.files || []
+    }
+    pruneSelection()
   } catch (err) {
     error.value = err.message || 'Failed to load liveshare'
   }
@@ -90,6 +109,7 @@ const loadFilteredFiles = async () => {
     if (activeTagFilters.value.length) params.tags = activeTagFilters.value
     if (activeTypeFilter.value) params.type = activeTypeFilter.value
     filteredFiles.value = await getLiveshareFiles(props.liveshareCode, params)
+    pruneSelection()
   } catch (err) {
     toast.error(err.message || 'Failed to load files')
   }
@@ -99,58 +119,29 @@ const hasActiveFilters = computed(() => {
   return searchQuery.value.trim() !== '' || activeTagFilters.value.length > 0 || activeTypeFilter.value !== ''
 })
 
-const activeFilterCount = computed(() => {
-  let count = 0
-  if (activeTagFilters.value.length) count += activeTagFilters.value.length
-  if (activeTypeFilter.value) count += 1
-  return count
-})
+const activeTagObjects = computed(() =>
+  activeTagFilters.value
+    .map((id) => tags.value.find((t) => t.id === id))
+    .filter(Boolean)
+)
 
-const customTags = computed(() => {
-  return tags.value.filter(t => t.type === 'custom')
-})
-
-// Filter panel
-const filterPanelOpen = ref(false)
-const filterPanelRef = ref(null)
-const filterTagSearch = ref('')
-const filterTagSearchInput = ref(null)
-
-const filteredCustomTags = computed(() => {
-  const q = filterTagSearch.value.trim().toLowerCase()
-  if (!q) return customTags.value
-  return customTags.value.filter(t => t.name.toLowerCase().includes(q))
-})
-
-const toggleFilterPanel = () => {
-  filterPanelOpen.value = !filterPanelOpen.value
-  if (filterPanelOpen.value) {
-    filterTagSearch.value = ''
-    nextTick(() => {
-      if (filterTagSearchInput.value) {
-        filterTagSearchInput.value.focus()
-      }
-    })
+watch(
+  () => liveshare.value?.name,
+  (name) => {
+    if (name) setPageTitle(name)
   }
-}
-
-const closeFilterPanel = () => {
-  filterPanelOpen.value = false
-}
-
-const handleFilterPanelClickOutside = (e) => {
-  if (filterPanelRef.value && !filterPanelRef.value.contains(e.target)) {
-    closeFilterPanel()
-  }
-}
+)
 
 onMounted(async () => {
-  document.addEventListener('click', handleFilterPanelClickOutside, true)
+  document.addEventListener('click', handleSortMenuClickOutside, true)
+  document.addEventListener('keydown', handleKeydown)
   await loadLiveshare()
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleFilterPanelClickOutside, true)
+  document.removeEventListener('click', handleSortMenuClickOutside, true)
+  document.removeEventListener('keydown', handleKeydown)
+  clearTimeout(searchDebounceTimer)
 })
 
 const onSearchInput = () => {
@@ -166,11 +157,7 @@ const clearSearch = () => {
 }
 
 const toggleTypeFilter = (typeName) => {
-  if (activeTypeFilter.value === typeName) {
-    activeTypeFilter.value = ''
-  } else {
-    activeTypeFilter.value = typeName
-  }
+  activeTypeFilter.value = activeTypeFilter.value === typeName ? '' : typeName
   loadFilteredFiles()
 }
 
@@ -188,17 +175,238 @@ const clearAllFilters = () => {
   searchQuery.value = ''
   activeTagFilters.value = []
   activeTypeFilter.value = ''
-  filterTagSearch.value = ''
   loadFilteredFiles()
 }
 
-const getTagColor = (tag) => {
-  return tag.color || null
+// View mode and sorting
+const viewMode = ref(localStorage.getItem('liveshareViewMode') || 'grid')
+
+const setViewMode = (mode) => {
+  viewMode.value = mode
+  localStorage.setItem('liveshareViewMode', mode)
 }
 
-const myRole = computed(() => {
-  return liveshare.value?.my_role || null
+const SORT_OPTIONS = [
+  { key: 'name', label: 'Name' },
+  { key: 'size', label: 'Size' },
+  { key: 'type', label: 'Type' },
+  { key: 'uploader', label: 'Added by' },
+  { key: 'created_at', label: 'Date added' }
+]
+
+const sortKey = ref('created_at')
+const sortDir = ref('desc')
+const sortMenuOpen = ref(false)
+const sortMenuRef = ref(null)
+
+const currentSortLabel = computed(
+  () => SORT_OPTIONS.find((o) => o.key === sortKey.value)?.label || 'Sort'
+)
+
+const setSort = (key) => {
+  if (sortKey.value === key) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = key
+    sortDir.value = key === 'created_at' || key === 'size' ? 'desc' : 'asc'
+  }
+}
+
+const handleSortMenuClickOutside = (e) => {
+  if (sortMenuOpen.value && sortMenuRef.value && !sortMenuRef.value.contains(e.target)) {
+    sortMenuOpen.value = false
+  }
+}
+
+const sortValue = (file, key) => {
+  switch (key) {
+    case 'name':
+      return fileDisplayName(file).toLowerCase()
+    case 'size':
+      return file.size || 0
+    case 'type':
+      return (file.type || '').toLowerCase()
+    case 'uploader':
+      return (file.uploader?.name || '').toLowerCase()
+    case 'created_at':
+      return new Date(file.created_at || 0).getTime()
+    default:
+      return 0
+  }
+}
+
+const displayFiles = computed(() => {
+  const list = [...filteredFiles.value]
+  list.sort((a, b) => {
+    const av = sortValue(a, sortKey.value)
+    const bv = sortValue(b, sortKey.value)
+    if (av < bv) return sortDir.value === 'asc' ? -1 : 1
+    if (av > bv) return sortDir.value === 'asc' ? 1 : -1
+    return 0
+  })
+  return list
 })
+
+// Selection and the inspector
+const selectMode = ref(false)
+const selectedFileIds = ref([])
+const activeFileId = ref(null)
+const inspectorOpen = ref(true)
+let selectionAnchorId = null
+
+const activeFile = computed(() => filteredFiles.value.find((f) => f.id === activeFileId.value) || null)
+
+const selectedFiles = computed(() => displayFiles.value.filter((f) => selectedFileIds.value.includes(f.id)))
+
+// Drop ids that no longer exist in the current result set so the inspector and
+// bulk actions never operate on stale files.
+const pruneSelection = () => {
+  const ids = new Set(filteredFiles.value.map((f) => f.id))
+  selectedFileIds.value = selectedFileIds.value.filter((id) => ids.has(id))
+  if (activeFileId.value !== null && !ids.has(activeFileId.value)) {
+    activeFileId.value = null
+  }
+  if (selectionAnchorId !== null && !ids.has(selectionAnchorId)) {
+    selectionAnchorId = null
+  }
+}
+
+const toggleSelectMode = () => {
+  selectMode.value = !selectMode.value
+  if (!selectMode.value) {
+    selectedFileIds.value = []
+  }
+}
+
+const handleSelect = ({ file, additive, range }) => {
+  if (range && selectionAnchorId !== null) {
+    const ids = displayFiles.value.map((f) => f.id)
+    const from = ids.indexOf(selectionAnchorId)
+    const to = ids.indexOf(file.id)
+    if (from !== -1 && to !== -1) {
+      const [start, end] = from < to ? [from, to] : [to, from]
+      selectedFileIds.value = ids.slice(start, end + 1)
+    }
+  } else if (additive || selectMode.value) {
+    const idx = selectedFileIds.value.indexOf(file.id)
+    if (idx >= 0) {
+      selectedFileIds.value.splice(idx, 1)
+    } else {
+      selectedFileIds.value.push(file.id)
+    }
+    selectionAnchorId = file.id
+  } else {
+    selectedFileIds.value = [file.id]
+    selectionAnchorId = file.id
+  }
+
+  activeFileId.value = file.id
+  inspectorOpen.value = true
+}
+
+const selectAll = () => {
+  selectedFileIds.value = displayFiles.value.map((f) => f.id)
+}
+
+const clearSelection = () => {
+  selectedFileIds.value = []
+  activeFileId.value = null
+  selectionAnchorId = null
+}
+
+const handleKeydown = (e) => {
+  const tag = e.target?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return
+
+  if (e.key === 'Escape') {
+    if (contextMenu.value) {
+      contextMenu.value = null
+    } else if (selectedFileIds.value.length > 0) {
+      clearSelection()
+    }
+    return
+  }
+
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a' && displayFiles.value.length > 0) {
+    e.preventDefault()
+    selectAll()
+  }
+}
+
+// Context menu
+const contextMenu = ref(null)
+
+const openContextMenu = ({ file, x, y }) => {
+  if (!selectedFileIds.value.includes(file.id)) {
+    selectedFileIds.value = [file.id]
+    selectionAnchorId = file.id
+  }
+  activeFileId.value = file.id
+  contextMenu.value = { file, x, y }
+}
+
+const closeContextMenu = () => {
+  contextMenu.value = null
+}
+
+const contextMenuIsMulti = computed(
+  () => !!contextMenu.value && selectedFileIds.value.length > 1 && selectedFileIds.value.includes(contextMenu.value.file.id)
+)
+
+const handleContextDownload = () => {
+  const file = contextMenu.value?.file
+  closeContextMenu()
+  if (!file) return
+  if (contextMenuIsMulti.value) {
+    handleBulkDownload()
+  } else {
+    triggerFileDownload(props.liveshareCode, file)
+  }
+}
+
+const handleContextRemove = () => {
+  const file = contextMenu.value?.file
+  const multi = contextMenuIsMulti.value
+  closeContextMenu()
+  if (!file) return
+  if (multi) {
+    handleBulkRemove()
+  } else {
+    handleFileRemove(file)
+  }
+}
+
+const handleContextDetails = () => {
+  inspectorOpen.value = true
+  closeContextMenu()
+}
+
+const handleContextToggleSelect = () => {
+  const file = contextMenu.value?.file
+  closeContextMenu()
+  if (!file) return
+  const idx = selectedFileIds.value.indexOf(file.id)
+  if (idx >= 0) {
+    selectedFileIds.value.splice(idx, 1)
+  } else {
+    selectedFileIds.value.push(file.id)
+  }
+}
+
+const handleContextCopyName = async () => {
+  const file = contextMenu.value?.file
+  closeContextMenu()
+  if (!file) return
+  try {
+    await navigator.clipboard.writeText(fileDisplayName(file))
+    toast.success('Name copied')
+  } catch (err) {
+    toast.error('Could not copy to clipboard')
+  }
+}
+
+// Permissions
+const myRole = computed(() => liveshare.value?.my_role || null)
 
 const canManage = computed(() => {
   return myRole.value === 'owner' || myRole.value === 'manager' || store.admin
@@ -208,9 +416,7 @@ const canAddFiles = computed(() => {
   return myRole.value === 'owner' || myRole.value === 'manager' || myRole.value === 'collaborator' || store.admin
 })
 
-const canRemoveFiles = computed(() => {
-  return canManage.value
-})
+const canRemoveFiles = computed(() => canManage.value)
 
 const startEditing = () => {
   editName.value = liveshare.value.name
@@ -245,8 +451,12 @@ const saveEdits = async () => {
 }
 
 const handleFileRemove = async (file) => {
-  const { removeLiveshareFile } = await import('../../api')
-  const confirmed = confirm(`Remove "${file.original_name || file.name}"?`)
+  const confirmed = await confirmDialog.show({
+    title: 'Remove File',
+    message: `Remove "${fileDisplayName(file)}" from this liveshare?`,
+    okText: 'Remove',
+    cancelText: 'Cancel'
+  })
   if (!confirmed) return
 
   try {
@@ -258,6 +468,41 @@ const handleFileRemove = async (file) => {
   }
 }
 
+const handleBulkRemove = async () => {
+  const files = [...selectedFiles.value]
+  if (files.length === 0) return
+
+  const confirmed = await confirmDialog.show({
+    title: 'Remove Files',
+    message: `Remove ${files.length} files from this liveshare?`,
+    okText: 'Remove',
+    cancelText: 'Cancel'
+  })
+  if (!confirmed) return
+
+  let failed = 0
+  for (const file of files) {
+    try {
+      await removeLiveshareFile(props.liveshareCode, file.id)
+    } catch (err) {
+      failed++
+    }
+  }
+
+  if (failed > 0) {
+    toast.error(`Failed to remove ${failed} of ${files.length} files`)
+  } else {
+    toast.success(`${files.length} files removed`)
+  }
+
+  clearSelection()
+  await loadLiveshare()
+}
+
+const handleFileDownload = (file) => {
+  triggerFileDownload(props.liveshareCode, file)
+}
+
 const handleFilesAdded = async () => {
   await loadLiveshare()
 }
@@ -265,10 +510,22 @@ const handleFilesAdded = async () => {
 const handleTagsChanged = async () => {
   await loadTags()
   await loadFilteredFiles()
+  await refreshAllFiles()
 }
 
 const handleFileTagsChanged = async () => {
   await loadFilteredFiles()
+  await refreshAllFiles()
+}
+
+// Tag changes affect the rail counts, which read from the unfiltered file list.
+const refreshAllFiles = async () => {
+  if (!liveshare.value) return
+  try {
+    liveshare.value.files = await getLiveshareFiles(props.liveshareCode)
+  } catch (err) {
+    // Counts stay stale until the next full load; not worth interrupting the user.
+  }
 }
 
 const openTagManagerSheet = () => {
@@ -289,26 +546,6 @@ const onTagFilterFromGrid = (tagId) => {
   if (!activeTagFilters.value.includes(tagId)) {
     activeTagFilters.value.push(tagId)
     loadFilteredFiles()
-  }
-}
-
-// Select mode
-const selectMode = ref(false)
-const selectedFileIds = ref([])
-
-const toggleSelectMode = () => {
-  selectMode.value = !selectMode.value
-  if (!selectMode.value) {
-    selectedFileIds.value = []
-  }
-}
-
-const handleToggleSelect = (fileId) => {
-  const idx = selectedFileIds.value.indexOf(fileId)
-  if (idx >= 0) {
-    selectedFileIds.value.splice(idx, 1)
-  } else {
-    selectedFileIds.value.push(fileId)
   }
 }
 
@@ -366,7 +603,6 @@ const allPeople = computed(() => {
 
   const people = []
 
-  // Add owner
   if (liveshare.value.owner) {
     people.push({
       id: liveshare.value.owner.id,
@@ -375,7 +611,6 @@ const allPeople = computed(() => {
     })
   }
 
-  // Add members
   if (liveshare.value.members) {
     for (const member of liveshare.value.members) {
       if (member.user) {
@@ -422,7 +657,7 @@ const goHome = () => {
   window.location.href = '/'
 }
 
-// Bulk download filtered files
+// Bulk download of the selection, or of everything matching the active filters
 const downloading = ref(false)
 
 const handleBulkDownload = async () => {
@@ -494,7 +729,6 @@ const handleBulkDownload = async () => {
     <div class="workspace-content" v-else-if="liveshare">
       <!-- Header -->
       <div class="workspace-header">
-        <!-- Top row: everything on one line, vertically centred -->
         <div class="header-top" v-if="!editing">
           <button class="secondary icon-only" @click="goHome" title="Back to home">
             <ArrowLeft />
@@ -519,81 +753,22 @@ const handleBulkDownload = async () => {
           </button>
           <div class="header-spacer"></div>
           <button
-            class="select-btn secondary icon-only"
+            class="header-btn secondary icon-only"
             :class="{ active: selectMode }"
             @click="toggleSelectMode"
             title="Select files"
           >
             <ListChecks />
-            <span class="select-badge" v-if="selectedFileIds.length > 0">{{ selectedFileIds.length }}</span>
+            <span class="header-badge" v-if="selectedFileIds.length > 0">{{ selectedFileIds.length }}</span>
           </button>
-          <div class="filter-anchor" ref="filterPanelRef" @click.stop>
-            <button
-              class="filter-btn secondary icon-only"
-              :class="{ active: activeFilterCount > 0 }"
-              @click="toggleFilterPanel"
-              title="Filters"
-            >
-              <Filter />
-              <span class="filter-badge" v-if="activeFilterCount > 0">{{ activeFilterCount }}</span>
-            </button>
-            <div class="filter-panel" v-if="filterPanelOpen">
-              <div class="filter-panel-header">
-                <span class="filter-panel-title">Filters</span>
-                <button
-                  v-if="activeFilterCount > 0"
-                  class="filter-panel-clear"
-                  @click="clearAllFilters"
-                >
-                  Clear all
-                </button>
-              </div>
-              <div class="filter-panel-body">
-                <!-- Media type section -->
-                <div class="filter-section">
-                  <div class="filter-section-label">File type</div>
-                  <div
-                    v-for="mt in mediaTypes"
-                    :key="mt.name"
-                    class="filter-row"
-                    :class="{ active: activeTypeFilter === mt.name }"
-                    @click="toggleTypeFilter(mt.name)"
-                  >
-                    <span class="filter-row-name">{{ mt.label }}</span>
-                    <Check class="filter-check" v-if="activeTypeFilter === mt.name" />
-                  </div>
-                </div>
-                <!-- Custom tags section -->
-                <div class="filter-section" v-if="customTags.length > 0">
-                  <div class="filter-section-label">Custom tags</div>
-                  <div class="filter-tag-search">
-                    <Search class="filter-tag-search-icon" />
-                    <input
-                      ref="filterTagSearchInput"
-                      type="text"
-                      v-model="filterTagSearch"
-                      placeholder="Search tags..."
-                      class="filter-tag-search-input"
-                    />
-                  </div>
-                  <div
-                    v-for="tag in filteredCustomTags"
-                    :key="tag.id"
-                    class="filter-row"
-                    :class="{ active: activeTagFilters.includes(tag.id) }"
-                    @click="toggleTagFilter(tag.id)"
-                  >
-                    <span class="filter-row-dot" :style="{ background: tag.color || '#999' }"></span>
-                    <span class="filter-row-name">{{ tag.name }}</span>
-                    <Check class="filter-check" v-if="activeTagFilters.includes(tag.id)" />
-                  </div>
-                  <div class="filter-no-results" v-if="filteredCustomTags.length === 0">
-                    No tags match your search
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <button
+            class="header-btn secondary icon-only"
+            :class="{ active: inspectorOpen }"
+            @click="inspectorOpen = !inspectorOpen"
+            title="Toggle details panel"
+          >
+            <PanelRight />
+          </button>
           <div class="header-search-wrap">
             <Search class="header-search-icon" />
             <input
@@ -676,51 +851,205 @@ const handleBulkDownload = async () => {
             </div>
           </div>
         </div>
-        <!-- Description below the top row -->
         <p class="header-description" v-if="!editing && liveshare.description">{{ liveshare.description }}</p>
       </div>
 
-      <!-- Main content area -->
+      <!-- Main content area: rail | files | inspector -->
       <div class="workspace-main">
-        <!-- Files section -->
+        <FilterRail
+          class="workspace-rail"
+          :files="allFiles"
+          :tags="tags"
+          :active-type-filter="activeTypeFilter"
+          :active-tag-filters="activeTagFilters"
+          :can-manage="canManage"
+          @selectType="toggleTypeFilter"
+          @toggleTag="toggleTagFilter"
+          @clearAll="clearAllFilters"
+          @manageTags="openTagManagerSheet"
+        />
+
         <div class="workspace-files">
-          <div class="workspace-files-list">
+          <div class="files-toolbar">
+            <div class="toolbar-left">
+              <template v-if="selectedFileIds.length > 0">
+                <span class="toolbar-count">{{ selectedFileIds.length }} selected</span>
+                <button class="toolbar-link" @click="selectAll">Select all</button>
+                <button class="toolbar-link" @click="clearSelection">Clear</button>
+              </template>
+              <span class="toolbar-count" v-else>
+                {{ displayFiles.length }} {{ displayFiles.length === 1 ? 'file' : 'files' }}
+              </span>
+
+              <div class="filter-chips" v-if="hasActiveFilters">
+                <span class="chip" v-if="searchQuery.trim()">
+                  <span>"{{ searchQuery.trim() }}"</span>
+                  <button @click="clearSearch"><X /></button>
+                </span>
+                <span class="chip" v-if="activeTypeFilter">
+                  <span>{{ activeTypeFilter }}</span>
+                  <button @click="toggleTypeFilter(activeTypeFilter)"><X /></button>
+                </span>
+                <span
+                  class="chip"
+                  v-for="tag in activeTagObjects"
+                  :key="tag.id"
+                  :style="tag.color ? { background: tag.color, color: '#fff' } : {}"
+                >
+                  <span>{{ tag.name }}</span>
+                  <button @click="toggleTagFilter(tag.id)"><X /></button>
+                </span>
+                <button class="toolbar-link" @click="clearAllFilters">Clear all</button>
+              </div>
+            </div>
+
+            <div class="toolbar-right">
+              <div class="sort-anchor" ref="sortMenuRef">
+                <button
+                  class="toolbar-btn"
+                  @click="sortMenuOpen = !sortMenuOpen"
+                  title="Sort files"
+                >
+                  <ArrowUpDown />
+                  <span>{{ currentSortLabel }}</span>
+                </button>
+                <div class="sort-menu" v-if="sortMenuOpen">
+                  <button
+                    v-for="option in SORT_OPTIONS"
+                    :key="option.key"
+                    class="sort-option"
+                    :class="{ active: sortKey === option.key }"
+                    @click="setSort(option.key)"
+                  >
+                    <span>{{ option.label }}</span>
+                    <Check v-if="sortKey === option.key" />
+                  </button>
+                  <div class="sort-divider"></div>
+                  <button
+                    class="sort-option"
+                    :class="{ active: sortDir === 'asc' }"
+                    @click="sortDir = 'asc'"
+                  >
+                    <span>Ascending</span>
+                    <Check v-if="sortDir === 'asc'" />
+                  </button>
+                  <button
+                    class="sort-option"
+                    :class="{ active: sortDir === 'desc' }"
+                    @click="sortDir = 'desc'"
+                  >
+                    <span>Descending</span>
+                    <Check v-if="sortDir === 'desc'" />
+                  </button>
+                </div>
+              </div>
+
+              <div class="view-toggle">
+                <button
+                  class="view-btn"
+                  :class="{ active: viewMode === 'grid' }"
+                  @click="setViewMode('grid')"
+                  title="Grid view"
+                >
+                  <LayoutGrid />
+                </button>
+                <button
+                  class="view-btn"
+                  :class="{ active: viewMode === 'list' }"
+                  @click="setViewMode('list')"
+                  title="Details view"
+                >
+                  <List />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="workspace-files-list" :class="{ 'is-list-view': viewMode === 'list' }">
             <FileGrid
-              :files="filteredFiles"
-              :liveshare-long-id="liveshareCode"
-              :can-remove-files="canRemoveFiles"
-              :can-tag-files="canAddFiles"
-              :tags="tags"
+              v-if="viewMode === 'grid'"
+              :files="displayFiles"
               :select-mode="selectMode"
               :selected-ids="selectedFileIds"
-              @removeFile="handleFileRemove"
-              @fileTagsChanged="handleFileTagsChanged"
-              @filterByTag="onTagFilterFromGrid"
-              @toggleSelect="handleToggleSelect"
+              :active-id="activeFileId"
+              :filtered="hasActiveFilters"
+              @select="handleSelect"
+              @open="handleFileDownload"
+              @contextmenu="openContextMenu"
+            />
+            <FileList
+              v-else
+              :files="displayFiles"
+              :select-mode="selectMode"
+              :selected-ids="selectedFileIds"
+              :active-id="activeFileId"
+              :sort-key="sortKey"
+              :sort-dir="sortDir"
+              :filtered="hasActiveFilters"
+              @select="handleSelect"
+              @open="handleFileDownload"
+              @contextmenu="openContextMenu"
+              @sort="setSort"
+            />
+          </div>
+
+          <!-- Floating action buttons -->
+          <div class="workspace-fabs" v-if="canAddFiles || hasActiveFilters || selectedFileIds.length > 1">
+            <button
+              v-if="hasActiveFilters || selectedFileIds.length > 1"
+              class="fab-button fab-download"
+              :class="{ 'fab-loading': downloading }"
+              :disabled="downloading"
+              @click="handleBulkDownload"
+              :title="selectedFileIds.length > 0 ? `Download ${selectedFileIds.length} selected` : 'Download filtered files'"
+            >
+              <Loader2 v-if="downloading" class="spin" />
+              <Download v-else />
+            </button>
+            <LiveshareUploader
+              v-if="canAddFiles"
+              :liveshare-long-id="liveshareCode"
+              @filesAdded="handleFilesAdded"
             />
           </div>
         </div>
 
-        <!-- Floating action buttons -->
-        <div class="workspace-fabs" v-if="canAddFiles || hasActiveFilters || selectedFileIds.length > 0">
-          <button
-            v-if="hasActiveFilters || selectedFileIds.length > 0"
-            class="fab-button fab-download"
-            :class="{ 'fab-loading': downloading }"
-            :disabled="downloading"
-            @click="handleBulkDownload"
-            :title="selectedFileIds.length > 0 ? `Download ${selectedFileIds.length} selected` : 'Download filtered files'"
-          >
-            <Loader2 v-if="downloading" class="spin" />
-            <Download v-else />
-          </button>
-          <LiveshareUploader
-            v-if="canAddFiles"
-            :liveshare-long-id="liveshareCode"
-            @filesAdded="handleFilesAdded"
-          />
-        </div>
+        <FileInspector
+          v-if="inspectorOpen"
+          class="workspace-inspector"
+          :liveshare-long-id="liveshareCode"
+          :file="activeFile"
+          :selected-files="selectedFiles"
+          :tags="tags"
+          :can-remove-files="canRemoveFiles"
+          :can-tag-files="canAddFiles"
+          :downloading="downloading"
+          @close="inspectorOpen = false"
+          @download="handleFileDownload"
+          @remove="handleFileRemove"
+          @bulkDownload="handleBulkDownload"
+          @bulkRemove="handleBulkRemove"
+          @tagsChanged="handleFileTagsChanged"
+          @filterByTag="onTagFilterFromGrid"
+        />
       </div>
+
+      <!-- Right click menu -->
+      <FileContextMenu
+        v-if="contextMenu"
+        :x="contextMenu.x"
+        :y="contextMenu.y"
+        :file="contextMenu.file"
+        :selected-count="selectedFileIds.length"
+        :is-selected="selectedFileIds.includes(contextMenu.file.id)"
+        :can-remove-files="canRemoveFiles"
+        @close="closeContextMenu"
+        @download="handleContextDownload"
+        @remove="handleContextRemove"
+        @details="handleContextDetails"
+        @toggleSelect="handleContextToggleSelect"
+        @copyName="handleContextCopyName"
+      />
 
       <!-- Tag manager slide-up sheet -->
       <div
@@ -797,13 +1126,16 @@ const handleBulkDownload = async () => {
 }
 
 .workspace-loading {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 60px 20px;
   font-size: 1.1rem;
-  color: white;
+  background: var(--panel-background-color);
+  color: var(--panel-text-color);
+  border-radius: 8px;
 
   .spin {
     width: 24px;
@@ -813,13 +1145,16 @@ const handleBulkDownload = async () => {
 }
 
 .workspace-error {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 15px;
   padding: 60px 20px;
-  color: white;
+  background: var(--panel-background-color);
+  color: var(--panel-text-color);
+  border-radius: 8px;
 
   p {
     font-size: 1.1rem;
@@ -857,7 +1192,7 @@ const handleBulkDownload = async () => {
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
-    background: var(--accent-color);
+    background: var(--primary-button-background-color);
 
     img {
       width: 100%;
@@ -874,7 +1209,7 @@ const handleBulkDownload = async () => {
       justify-content: center;
       font-size: 0.8rem;
       font-weight: 700;
-      color: white;
+      color: var(--primary-button-text-color);
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
       pointer-events: none;
     }
@@ -1030,7 +1365,7 @@ const handleBulkDownload = async () => {
       height: 32px;
       border-radius: 50%;
       background: var(--primary-button-background-color);
-      color: white;
+      color: var(--primary-button-text-color);
       font-size: 0.65rem;
       font-weight: 700;
       display: flex;
@@ -1038,7 +1373,9 @@ const handleBulkDownload = async () => {
       justify-content: center;
       flex-shrink: 0;
       margin-left: -16px;
-      border: 2px solid var(--panel-background-color);
+      // Separates overlapping avatars; the header text colour is the only solid
+      // variable guaranteed to contrast with the header surface.
+      border: 2px solid var(--panel-header-text-color);
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
       cursor: default;
       position: relative;
@@ -1067,8 +1404,8 @@ const handleBulkDownload = async () => {
   }
 }
 
-// Select mode button
-.select-btn {
+// Circular toggles in the header (select mode, details panel)
+.header-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1095,7 +1432,7 @@ const handleBulkDownload = async () => {
     }
   }
 
-  .select-badge {
+  .header-badge {
     position: absolute;
     top: -4px;
     right: -4px;
@@ -1111,231 +1448,260 @@ const handleBulkDownload = async () => {
     justify-content: center;
     pointer-events: none;
   }
-}
-
-// Filter button & panel
-.filter-anchor {
-  position: relative;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-}
-
-.filter-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-
-  svg {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-  }
-
-  &.active {
-    background: var(--primary-button-background-color);
-    color: var(--primary-button-text-color);
-
-    &:hover {
-      background: var(--primary-button-background-color-hover);
-      color: var(--primary-button-text-color-hover);
-    }
-  }
-
-  .filter-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--secondary-button-background-color);
-    color: var(--secondary-button-text-color);
-    font-size: 0.65rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
-}
-
-.filter-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 100;
-  width: 240px;
-  background: var(--panel-background-color);
-  border-radius: var(--panel-border-radius);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-}
-
-.filter-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--input-border-color);
-  background: var(--panel-header-background-color);
-
-
-  .filter-panel-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--panel-header-text-color);
-  }
-
-  .filter-panel-clear {
-    border: none;
-    background: none;
-    color: var(--accent-color);
-    font-size: 0.75rem;
-    cursor: pointer;
-    padding: 0;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-.filter-panel-body {
-  max-height: 360px;
-  overflow-y: auto;
-  padding: 6px 0;
-}
-
-.filter-section {
-  padding: 0 6px;
-
-  & + .filter-section {
-    margin-top: 4px;
-    padding-top: 8px;
-    border-top: 1px solid var(--input-border-color);
-  }
-
-  .filter-section-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--panel-section-text-color);
-    opacity: 0.5;
-    padding: 4px 8px 6px;
-  }
-}
-
-.filter-tag-search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  margin-bottom: 4px;
-
-  .filter-tag-search-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-    color: var(--panel-section-text-color);
-    opacity: 0.4;
-  }
-
-  .filter-tag-search-input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: var(--panel-section-text-color);
-    font-size: 0.8rem;
-    padding: 2px 0;
-    margin: 0;
-    height: auto;
-    outline: none;
-
-    &::placeholder {
-      color: var(--panel-section-text-color);
-      opacity: 0.35;
-    }
-  }
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.1s;
-
-  &:hover {
-    background: var(--panel-section-background-color);
-  }
-
-  &.active {
-    background: var(--panel-section-background-color-alt);
-
-    .filter-row-name {
-      font-weight: 600;
-    }
-  }
-
-  .filter-row-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .filter-row-name {
-    flex: 1;
-    font-size: 0.8rem;
-    color: var(--panel-section-text-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .filter-check {
-    width: 14px;
-    height: 14px;
-    color: var(--accent-color);
-    flex-shrink: 0;
-    margin: 0;
-  }
-}
-
-.filter-no-results {
-  padding: 14px 8px;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--panel-section-text-color);
-  opacity: 0.4;
 }
 
 .workspace-main {
   flex: 1;
   min-height: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 10px;
   margin-top: 10px;
-  position: relative;
 }
 
 .workspace-files {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
   min-height: 0;
   background: var(--panel-background-color);
   border-radius: 8px;
-  padding: 20px;
+  padding: 14px 16px 16px;
+  position: relative;
+}
+
+.files-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-count {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--panel-section-text-color);
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.toolbar-link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  height: auto;
+  font-size: 0.75rem;
+  color: var(--link-color);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px 2px 8px;
+  border-radius: 11px;
+  background: var(--panel-section-background-color-alt);
+  color: var(--panel-section-text-color);
+  font-size: 0.7rem;
+  max-width: 160px;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  button {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    svg {
+      width: 11px;
+      height: 11px;
+      margin: 0;
+    }
+  }
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sort-anchor {
+  position: relative;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--panel-border-radius);
+  background: transparent;
+  color: var(--panel-section-text-color);
+  font-size: 0.76rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--panel-section-background-color);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    opacity: 0.6;
+  }
+}
+
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 120;
+  width: 175px;
+  padding: 5px;
+  background: var(--panel-background-color);
+  border-radius: var(--panel-border-radius);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+.sort-option {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: none;
+  border-radius: calc(var(--panel-border-radius) - 4px);
+  background: none;
+  color: var(--panel-text-color);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--panel-section-background-color);
+  }
+
+  &.active {
+    font-weight: 600;
+  }
+
+  svg {
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    color: var(--link-color);
+  }
+}
+
+.sort-divider {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--panel-section-background-color-alt);
+}
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--panel-border-radius);
+  background: var(--panel-section-background-color);
+}
+
+.view-btn {
+  width: 28px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--panel-border-radius) - 4px);
+  background: transparent;
+  color: var(--panel-section-text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    opacity: 0.55;
+  }
+
+  &:hover svg {
+    opacity: 0.9;
+  }
+
+  &.active {
+    background: var(--panel-background-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+
+    svg {
+      opacity: 1;
+    }
+  }
+}
+
+.workspace-files-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  // The details view manages its own scrolling so the column headers can stick.
+  &.is-list-view {
+    overflow: hidden;
+  }
 }
 
 .workspace-fabs {
@@ -1459,12 +1825,6 @@ const handleBulkDownload = async () => {
   min-height: 0;
 }
 
-.workspace-files-list {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
 .spin {
   animation: spin 1s linear infinite;
 }
@@ -1472,5 +1832,21 @@ const handleBulkDownload = async () => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1200px) {
+  .workspace-inspector {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .workspace-rail {
+    display: none;
+  }
+
+  .workspace-header .header-search-wrap {
+    width: 200px;
+  }
 }
 </style>
