@@ -431,6 +431,25 @@
       "documentation": "Documentation",
       "donate": "Support Development",
       "intro": "Erugo is a free, open-source, self-hosted file sharing platform. No tracking, no metrics — just simple, private file sharing that respects your data.",
+      "ios_app": {
+        "app_name": "Get the Erugo Companion App on iOS",
+        "description": "Take Erugo with you. The official iOS app lets you upload files, manage shares, and administer your server from your iPhone or iPad.",
+        "feature_1": "Upload files from any app via Share Extension",
+        "feature_1_desc": "Supports iOS share functionality, upload to Erugo from any app.",
+        "feature_1_title": "Share from anywhere",
+        "feature_2": "Track uploads in Dynamic Island with Live Activities",
+        "feature_2_desc": "Live notifications and dynamic island support.",
+        "feature_2_title": "Keep track of your uploads",
+        "feature_3": "Background uploads that continue while you work",
+        "feature_3_desc": "Full background upload support so you can get on with other things.",
+        "feature_3_title": "Uploads keep running in the background",
+        "feature_4": "Full admin dashboard on mobile",
+        "feature_4_desc": "Manage users, settings, and view your stats while you walk on the beach!",
+        "feature_4_title": "Admin-ing on the go!",
+        "more_info": "More Information",
+        "tagline": "The same Erugo, but now it's in your pocket.",
+        "title": "iOS App"
+      },
       "license": "License",
       "loading": "Loading system info...",
       "max_upload": "Max Upload",
@@ -534,6 +553,9 @@
       "myProfile": {
         "save": "Save profile changes"
       },
+      "myLiveshares": {
+        "create": "Create Liveshare"
+      },
       "myShares": {
         "create": "Create Share",
         "pruneExpired": "Delete expired shares"
@@ -551,10 +573,12 @@
     },
     "description": {
       "about": "Information about your Erugo installation",
+      "allLiveshares": "Manage all liveshares across the system",
       "allShares": "View and manage shares by all users",
       "branding": "Customise the UI of your Erugo instance and add your own branding.",
       "cloudConnect": "Connect your instance to Erugo Cloud for easy domain routing",
       "emailTemplates": "Manage email templates",
+      "myLiveshares": "Persistent shared spaces for collaboration",
       "myProfile": "Manage your account.",
       "myShares": "Manage Your Shares.",
       "stats": "Your Erugo system at a glance",
@@ -602,6 +626,44 @@
     },
     "invite": {
       "message": "Message (optional)"
+    },
+    "liveshares": {
+      "allUsers": "All owners",
+      "confirmDelete": "Are you sure you want to delete \"{name}\"? This will permanently remove all files.",
+      "create": {
+        "description": "Liveshares are persistent spaces you can share with others to collaborate on files.",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "A short description of this liveshare...",
+        "nameLabel": "Name",
+        "namePlaceholder": "My Liveshare",
+        "submit": "Create Liveshare",
+        "title": "Create a new Liveshare"
+      },
+      "delete": "Delete liveshare",
+      "error": {
+        "create": "Failed to create liveshare",
+        "delete": "Failed to delete liveshare",
+        "load": "Failed to load liveshares",
+        "nameRequired": "Name is required"
+      },
+      "fileCount": "{count, plural, one {# file} other {# files}}",
+      "loading": "Liveshares loading...",
+      "noneAll": "No liveshares exist yet",
+      "noneMine": "No liveshares yet",
+      "open": "Open",
+      "openWorkspace": "Open workspace",
+      "success": {
+        "created": "Liveshare created",
+        "deleted": "Liveshare deleted"
+      },
+      "table": {
+        "actions": "Actions",
+        "created": "Created",
+        "files": "Files",
+        "name": "Name",
+        "owner": "Owner",
+        "role": "Role"
+      }
     },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
@@ -793,6 +855,13 @@
         "italian": "Italian",
         "portuguese": "Portuguese"
       },
+      "licence": {
+        "description": "The Pro App Licence allows all users of your Erugo instance to access every feature of the Erugo mobile apps without purchasing or unlocking Pro mode within the app. When a user connects to a licensed server, all pro features are automatically unlocked for that server.",
+        "label": "Licence Key",
+        "learn_more": "Learn more and purchase",
+        "placeholder": "Paste your licence key here...",
+        "title": "Pro App Licence"
+      },
       "login_message": "Login Message",
       "login_message_description": "Add a custom message or announcement that will be displayed on the login screen. This can be used for welcome messages, important notifications, or temporary announcements.",
       "max_expiry_time": "Maximum Expiry Time",
@@ -885,12 +954,14 @@
     },
     "title": {
       "about": "About",
+      "allLiveshares": "All Liveshares",
       "allShares": "All Shares",
       "branding": "Branding & UI",
       "cloudConnect": "Erugo Connect",
       "emailTemplates": "Email templates",
       "linked_accounts": "Linked Accounts",
       "manage": "Manage",
+      "myLiveshares": "My Liveshares",
       "myProfile": "My Account",
       "myShares": "My Shares",
       "reverse_invite": "Create reverse share request",

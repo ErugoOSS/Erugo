@@ -444,6 +444,60 @@ class SettingsSeeder extends Seeder
                 'group' => 'system.emails.subjects',
                 'created_at' => now(),
                 'updated_at' => now()
+            ],
+
+            // Pro app licence
+            [
+                'key' => 'licence',
+                'value' => '',
+                'previous_value' => null,
+                'group' => 'system.licence',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+
+            // Liveshare settings
+            [
+                'key' => 'liveshares_enabled',
+                'value' => 'true',
+                'previous_value' => null,
+                'group' => 'system.liveshares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'liveshares_max_size',
+                'value' => '5',
+                'previous_value' => null,
+                'group' => 'system.liveshares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'liveshares_max_size_unit',
+                'value' => 'GB',
+                'previous_value' => null,
+                'group' => 'system.liveshares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'liveshares_max_files_per_user',
+                'value' => '100',
+                'previous_value' => null,
+                'group' => 'system.liveshares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+
+            // Liveshare invite email subject
+            [
+                'key' => 'email_subject_liveshareInviteMail.twig',
+                'value' => 'You have been invited to a liveshare',
+                'previous_value' => null,
+                'group' => 'system.emails.subjects',
+                'created_at' => now(),
+                'updated_at' => now()
             ]
 
         ]);

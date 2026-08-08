@@ -877,7 +877,7 @@ const categoryColors = {
   
   .rank {
     font-weight: 700;
-    color: var(--primary-button-background-color);
+    color: var(--link-color);
     min-width: 30px;
   }
   

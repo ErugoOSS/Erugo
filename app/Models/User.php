@@ -27,6 +27,7 @@ class User extends Authenticatable implements JWTSubject
         'active',
         'must_change_password',
         'is_guest',
+        'is_restricted',
         'email_verification_code',
         'email_verification_code_expires_at',
     ];
@@ -68,8 +69,17 @@ class User extends Authenticatable implements JWTSubject
             'admin' => $this->admin,
             'active' => $this->active,
             'must_change_password' => $this->must_change_password,
-            'guest' => $this->is_guest == 1 ? true : false
+            'guest' => $this->is_guest == 1 ? true : false,
+            'restricted' => $this->is_restricted ? true : false
         ];
+    }
+
+    /**
+     * Check if this user is a restricted user (can only participate in liveshares).
+     */
+    public function isRestricted(): bool
+    {
+        return (bool) $this->is_restricted;
     }
 
     public function invite()

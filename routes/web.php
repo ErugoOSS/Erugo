@@ -119,6 +119,23 @@ Route::get('/shares/{share}/file/{filepath}', function ($shareId, $filepath) {
     return $controller->downloadFile($shareId, $filepath);
 })->where('filepath', '.*');
 
+// Liveshare invite acceptance page
+Route::get('/liveshares/invite/{token}', function ($token) {
+    $indexedSettings = getSettings();
+
+    $theme = Theme::where('active', true)->first();
+
+    return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
+});
+
+// Liveshare workspace
+Route::get('/liveshares/{liveshare}', function ($liveshareId) {
+    $indexedSettings = getSettings();
+
+    $theme = Theme::where('active', true)->first();
+
+    return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
+});
 
 //auth provider login
 Route::get('/auth/provider/{provider}/login', [ExternalAuthController::class, 'providerLogin'])
@@ -131,3 +148,7 @@ Route::get('/auth/provider/{provider}/callback', [ExternalAuthController::class,
 //auth provider link account
 Route::get('/auth/provider/{provider}/link', [ExternalAuthController::class, 'linkAccount'])
     ->name('social.provider.link');
+
+//auth provider callback for native apps (redirects to custom URL scheme)
+Route::get('/auth/provider/{providerUuid}/app-callback', [ExternalAuthController::class, 'appCallback'])
+    ->name('social.provider.app-callback');

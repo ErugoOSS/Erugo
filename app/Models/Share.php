@@ -132,6 +132,18 @@ class Share extends Model
       } else {
       }
 
+      // Clean thumbnail cache
+      $thumbCachePath = storage_path('app/shares/thumbs/' . $this->id);
+      if (is_dir($thumbCachePath)) {
+        $thumbFiles = glob($thumbCachePath . '/*');
+        foreach ($thumbFiles as $thumbFile) {
+          if (is_file($thumbFile)) {
+            unlink($thumbFile);
+          }
+        }
+        rmdir($thumbCachePath);
+      }
+
       $this->status = 'deleted';
       $this->save();
 

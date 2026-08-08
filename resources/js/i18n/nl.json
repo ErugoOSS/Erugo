@@ -293,7 +293,7 @@
       "current": "UW PLAN",
       "currentPlan": "Huidig plan",
       "currentPlanSelected": "Huidig plan",
-      "free": "Gratis",
+      "free": "vrij",
       "manage": "Beheer",
       "selected": "GESELECTEERD",
       "title": "Uw plan beheren"
@@ -418,10 +418,31 @@
   },
   "settings": {
     "about": {
+      "built_with": "Gebouwd met",
+      "created_by": "Gemaakt en onderhouden door",
+      "credits": {
+        "laravel": "PHP framework",
+        "tus": "Bestanden opnieuw uploaden",
+        "vue": "Frontend framework"
+      },
+      "database": "Database",
       "description": "Informatie over uw Erugo installatie.",
+      "discord": "Discord",
+      "documentation": "Documentatie",
+      "donate": "Ondersteuning Ontwikkeling",
+      "intro": "Erugo is een gratis, open-source, self-hosted platform voor het delen van bestanden. Geen tracking, geen statistieken - gewoon eenvoudig, privé bestanden delen met respect voor jouw gegevens.",
+      "license": "Licentie",
+      "loading": "Systeeminfo wordt geladen...",
+      "max_upload": "Max upload",
+      "of": "van",
+      "storage": "Opslag",
+      "support_cta": "Als je Erugo nuttig vindt, overweeg dan",
+      "support_link": "de ontwikkeling ervan ondersteunen",
+      "system_info": "Systeeminformatie",
       "title": "Over Erugo",
       "version": "Versie",
-      "visit_website": "Bezoek erugo.app"
+      "visit_github": "GitHub",
+      "visit_website": "Website"
     },
     "account": {
       "change_password": "Mijn wachtwoord wijzigen",
@@ -674,7 +695,7 @@
         "of_disk": "van schijf",
         "share_storage": "Opslag delen",
         "title": "Overzicht opslag",
-        "used": "tweedehands"
+        "used": "gebruikt"
       },
       "users": {
         "active": "Actief",

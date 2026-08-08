@@ -119,6 +119,13 @@ class UploadsController extends Controller
       ], 401);
     }
 
+    if ($user->isRestricted()) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Restricted users cannot create shares'
+      ], 403);
+    }
+
     // Generate a unique long ID for the share
     $longId = app('App\Http\Controllers\SharesController')->generateLongId();
 

@@ -234,7 +234,16 @@ class SettingsController extends Controller
         }
 
         $favicon = $request->file('favicon');
-        $extension = strtolower($favicon->getClientOriginalExtension());
+        $extension = FileHelper::sanitizeFileExtension($favicon->getClientOriginalName());
+        
+        // Ensure extension is one of the allowed types (extra safety after validation)
+        if (!in_array($extension, ['png', 'svg'])) {
+            return response()->json([
+                'status' => 'error',
+                'error_code' => 'invalid_file_type',
+                'message' => 'Invalid file extension',
+            ], 422);
+        }
         
         // Always store as favicon.png or favicon.svg
         $filename = 'favicon.' . $extension;

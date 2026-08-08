@@ -397,10 +397,31 @@
   },
   "settings": {
     "about": {
+      "built_with": "Construído com",
+      "created_by": "Criado e mantido por",
+      "credits": {
+        "laravel": "Estrutura PHP",
+        "tus": "Carregamentos de ficheiros reenviáveis",
+        "vue": "Estrutura de front-end"
+      },
+      "database": "Base de dados",
       "description": "Informações sobre a sua instalação Erugo.",
+      "discord": "Discórdia",
+      "documentation": "Documentação",
+      "donate": "Apoio ao desenvolvimento",
+      "intro": "O Erugo é uma plataforma de partilha de ficheiros gratuita, de código aberto e auto-hospedada. Sem rastreio, sem métricas - apenas uma partilha de ficheiros simples e privada que respeita os seus dados.",
+      "license": "Licença",
+      "loading": "A carregar a informação do sistema...",
+      "max_upload": "Carregamento máximo",
+      "of": "de",
+      "storage": "Armazenamento",
+      "support_cta": "Se o Erugo lhe for útil, considere",
+      "support_link": "apoiar o seu desenvolvimento",
+      "system_info": "Informações sobre o sistema",
       "title": "Sobre Erugo",
       "version": "Versão",
-      "visit_website": "Visite erugo.app"
+      "visit_github": "GitHub",
+      "visit_website": "Sítio Web"
     },
     "account": {
       "change_password": "Alterar a minha palavra-passe",

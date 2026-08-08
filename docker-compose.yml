@@ -9,7 +9,9 @@ services:
             - '${VITE_PORT:-5173}:5173'
         environment:
             SUPERVISOR_PHP_USER: 'erugo'
-            VITE_DEV_HOST: '192.168.0.24'
+            # Host the browser uses to reach the Vite dev server. Override in
+            # .env with your LAN IP to develop against other devices.
+            VITE_DEV_HOST: '${VITE_DEV_HOST:-localhost}'
         volumes:
             - '.:/var/www/html'
             # Use named volumes for platform-specific dependencies

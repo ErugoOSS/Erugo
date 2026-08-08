@@ -250,7 +250,7 @@ function getDirectories(structure) {
   transition: background-color 0.15s ease;
   
   &:hover {
-    background-color: var(--panel-section-background-color-alt, rgba(255, 255, 255, 0.05));
+    background: var(--panel-section-background-color-alt);
   }
 }
 
@@ -272,11 +272,11 @@ function getDirectories(structure) {
     }
     
     &.uploading {
-      color: var(--accent-color, #3b82f6);
+      color: var(--link-color);
     }
     
     &.completed {
-      color: var(--success-color, #22c55e);
+      color: var(--color-success);
     }
     
     &.spin {
@@ -288,7 +288,7 @@ function getDirectories(structure) {
     min-width: 40px;
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: var(--accent-color, #3b82f6);
+    color: var(--link-color);
   }
 }
 

@@ -19,7 +19,8 @@ import {
   RefreshCw,
   Loader2,
   LogIn,
-  Info
+  Info,
+  Share2
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -30,6 +31,8 @@ import EmailTemplates from './settings/emailTemplates.vue'
 import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
+import MyLiveshares from './settings/myLiveshares.vue'
+import AllLiveshares from './settings/allLiveshares.vue'
 import About from './settings/about.vue'
 import { getUsers } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
@@ -45,6 +48,8 @@ const { navigateTo } = useSettingsNavigation()
 const usersPanel = ref(null)
 const mySharesPanel = ref(null)
 const allSharesPanel = ref(null)
+const myLivesharesPanel = ref(null)
+const allLivesharesPanel = ref(null)
 const brandingSettings = ref(null)
 const systemSettings = ref(null)
 
@@ -52,6 +57,8 @@ const showDeletedShares = ref(false)
 const showDeletedSharesAll = ref(false)
 const allSharesUsers = ref([])
 const selectedUserId = ref(null)
+const liveshareOwners = ref([])
+const selectedLiveshareOwnerId = ref(null)
 
 // Subscribe to self_registration_enabled setting - auto-updates when settings change
 const { value: selfRegistrationEnabled } = useSetting('self_registration_enabled', 'system.auth', false)
@@ -64,6 +71,8 @@ const tabContents = ref({
   myProfile: ref(null),
   myShares: ref(null),
   allShares: ref(null),
+  myLiveshares: ref(null),
+  allLiveshares: ref(null),
   about: ref(null)
 })
 
@@ -105,6 +114,9 @@ const setActiveTab = (tab, options = {}) => {
 }
 
 const getInitialTab = () => {
+  if (store.isRestricted()) {
+    return 'myLiveshares'
+  }
   return 'myShares'
 }
 
@@ -152,6 +164,8 @@ const getSettingsTitle = () => {
       myProfile: 'My Profile',
       myShares: 'My Shares',
       allShares: 'All Shares',
+      myLiveshares: 'My Liveshares',
+      allLiveshares: 'All Liveshares',
       emailTemplates: 'Email Templates',
       about: 'About'
     }
@@ -175,11 +189,19 @@ const getSettingsTitle = () => {
       return t.value('settings.title.allShares')
     case 'emailTemplates':
       return t.value('settings.title.emailTemplates')
+    case 'myLiveshares':
+      return t.value('settings.title.myLiveshares')
+    case 'allLiveshares':
+      return t.value('settings.title.allLiveshares')
     case 'about':
       return t.value('settings.title.about')
     default:
       return t.value('settings.title.erugo')
   }
+}
+
+const createLiveshare = () => {
+  myLivesharesPanel.value.openCreateForm()
 }
 
 const handlePruneExpiredShares = () => {
@@ -228,6 +250,14 @@ const handleUserFilterChange = (event) => {
     allSharesPanel.value.setUserFilter(selectedUserId.value)
   }
 }
+
+const handleLiveshareOwnerFilterChange = (event) => {
+  const value = event.target.value
+  selectedLiveshareOwnerId.value = value ? Number(value) : null
+  if (allLivesharesPanel.value) {
+    allLivesharesPanel.value.setOwnerFilter(selectedLiveshareOwnerId.value)
+  }
+}
 </script>
 
 <template>
@@ -250,7 +280,7 @@ const handleUserFilterChange = (event) => {
       </div>
       <div class="settings-tabs-wrapper">
         <div class="settings-tabs-container">
-          <div class="settings-tab" :class="{ active: activeTab === 'about' }" @click="setActiveTab('about')">
+          <div class="settings-tab" :class="{ active: activeTab === 'about' }" @click="setActiveTab('about')" v-if="!store.isRestricted()">
             <h2>
               <Info />
               {{ $t('settings.title.about') }}
@@ -322,10 +352,27 @@ const handleUserFilterChange = (event) => {
               {{ $t('settings.title.allShares') }}
             </h2>
           </div>
-          <div class="settings-tab" :class="{ active: activeTab === 'myShares' }" @click="setActiveTab('myShares')">
+          <div class="settings-tab" :class="{ active: activeTab === 'myShares' }" @click="setActiveTab('myShares')" v-if="!store.isRestricted()">
             <h2>
               <Boxes />
               {{ $t('settings.title.myShares') }}
+            </h2>
+          </div>
+          <div
+            class="settings-tab"
+            :class="{ active: activeTab === 'allLiveshares' }"
+            @click="setActiveTab('allLiveshares')"
+            v-if="store.isAdmin()"
+          >
+            <h2>
+              <Share2 />
+              {{ $t('settings.title.allLiveshares') }}
+            </h2>
+          </div>
+          <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')">
+            <h2>
+              <Share2 />
+              {{ $t('settings.title.myLiveshares') }}
             </h2>
           </div>
           <div class="settings-tab" :class="{ active: activeTab === 'myProfile' }" @click="setActiveTab('myProfile')">
@@ -571,6 +618,75 @@ const handleUserFilterChange = (event) => {
               </div>
               <div class="tab-content-body">
                 <MyShares ref="mySharesPanel" v-if="store.settingsOpen" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'myLiveshares'"
+              class="settings-tab-content"
+              ref="tabContents.myLiveshares"
+              key="myLiveshares"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Share2 />
+                  <span>
+                    {{ $t('settings.title.myLiveshares') }}
+                    <small>{{ $t('settings.description.myLiveshares') }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <button @click="createLiveshare">
+                        <Plus />
+                        {{ $t('settings.button.myLiveshares.create') }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <MyLiveshares ref="myLivesharesPanel" v-if="store.settingsOpen" />
+              </div>
+            </div>
+            <div
+              v-else-if="activeTab === 'allLiveshares'"
+              class="settings-tab-content"
+              ref="tabContents.allLiveshares"
+              key="allLiveshares"
+            >
+              <div class="tab-content-header">
+                <h2 class="d-none d-md-flex">
+                  <Share2 />
+                  <span>
+                    {{ $t('settings.title.allLiveshares') }}
+                    <small>{{ $t('settings.description.allLiveshares') }}</small>
+                  </span>
+                </h2>
+                <div class="user-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <select
+                        id="liveshare-owner-filter"
+                        class="user-filter-select"
+                        @change="handleLiveshareOwnerFilterChange"
+                        :value="selectedLiveshareOwnerId || ''"
+                      >
+                        <option value="">{{ $t('settings.liveshares.allUsers') }}</option>
+                        <option v-for="owner in liveshareOwners" :key="owner.id" :value="owner.id">
+                          {{ owner.name }} ({{ owner.email }})
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-content-body">
+                <AllLiveshares
+                  ref="allLivesharesPanel"
+                  v-if="store.settingsOpen"
+                  @ownersLoaded="liveshareOwners = $event"
+                />
               </div>
             </div>
             <div
@@ -828,7 +944,7 @@ const handleUserFilterChange = (event) => {
 .user-filter-select {
   padding: 8px 12px;
   border-radius: 5px;
-  border: 1px solid var(--panel-section-background-color-alt);
+  border: 1px solid var(--input-border-color);
   background: var(--panel-section-background-color-alt);
   color: var(--panel-section-text-color);
   font-size: 0.9rem;
@@ -838,7 +954,7 @@ const handleUserFilterChange = (event) => {
   
   &:focus {
     outline: none;
-    border-color: var(--primary-button-background-color);
+    border-color: var(--input-border-color-focus);
   }
 }
 

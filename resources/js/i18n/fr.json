@@ -418,10 +418,31 @@
   },
   "settings": {
     "about": {
+      "built_with": "Construit avec",
+      "created_by": "Créé et entretenu par",
+      "credits": {
+        "laravel": "Framework PHP",
+        "tus": "Chargements de fichiers résumables",
+        "vue": "Framework front-end"
+      },
+      "database": "Base de données",
       "description": "Informations sur votre installation Erugo.",
+      "discord": "Discord",
+      "documentation": "Documentation",
+      "donate": "Soutenir le développement",
+      "intro": "Erugo est une plateforme de partage de fichiers gratuite, open-source et auto-hébergée. Pas de suivi, pas de mesures - juste un partage de fichiers simple et privé qui respecte vos données.",
+      "license": "Licence",
+      "loading": "Chargement des informations système...",
+      "max_upload": "Limite maximale d’upload",
+      "of": "de",
+      "storage": "Stockage",
+      "support_cta": "Si vous trouvez Erugo utile, pensez à",
+      "support_link": "soutenir son développement",
+      "system_info": "Informations sur le système",
       "title": "À propos d'Erugo",
       "version": "Version",
-      "visit_website": "Visitez erugo.app"
+      "visit_github": "GitHub",
+      "visit_website": "Site web"
     },
     "account": {
       "change_password": "Modifier mon mot de passe",
@@ -440,7 +461,7 @@
     },
     "authProvidersSavedSuccessfully": "Les fournisseurs d'authentification ont été sauvegardés avec succès",
     "branding": {
-      "background_images": "Images de fond",
+      "background_images": "Images d’arrière-plan",
       "background_images_description": "Téléchargez des images d'arrière-plan personnalisées pour remplacer les images par défaut d'Unsplash. Les images tournent de manière aléatoire toutes les 3 minutes pour créer une identité visuelle dynamique.",
       "background_slideshow_speed": "Intervalle du changement d'image",
       "background_slideshow_speed_1_day": "Un jour",
@@ -608,7 +629,7 @@
         "time_period": "Période:",
         "title": "Télécharger l'activité",
         "top_shares": "Partages les plus téléchargés",
-        "unique_downloaders": "Téléchargeurs uniques"
+        "unique_downloaders": "Téléchargeur(s) unique(s)"
       },
       "error_loading": "Échec du chargement des statistiques du système",
       "file_types": {
@@ -635,14 +656,14 @@
         "downloads_title": "Télécharger l'activité",
         "file_types_description": "Répartition des fichiers par catégorie sur l'ensemble des partages.",
         "file_types_title": "Type de fichier Distribution",
-        "guest_users_description": "Utilisateurs créés par le biais d'invitations de partage inversées.",
-        "guest_users_title": "Utilisateurs invités",
+        "guest_users_description": "Utilisateur(s) créé(s) par le biais d'invitations de partage inversées.",
+        "guest_users_title": "Utilisateur(s) invité(s)",
         "shares_description": "Vue d'ensemble de tous les partages dans le système, y compris leur statut actuel.",
         "shares_title": "Statistiques de partage",
         "storage_description": "Surveillez l'utilisation du disque de votre serveur et l'espace consommé par les partages.",
         "storage_title": "Aperçu du stockage",
         "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des partages.",
-        "unique_downloaders_title": "Téléchargeurs uniques",
+        "unique_downloaders_title": "Téléchargeur(s) unique(s)",
         "users_description": "Vue d'ensemble des comptes d'utilisateurs et de leurs niveaux d'activité.",
         "users_title": "Statistiques sur les utilisateurs"
       },
@@ -652,7 +673,7 @@
         "file_types": "Types de fichiers",
         "shares": "Partages",
         "storage": "Stockage",
-        "users": "Utilisateur(s)"
+        "users": "Utilisateurs"
       },
       "refresh": "Rafraîchir",
       "shares": {
@@ -677,9 +698,9 @@
         "used": "utilisé(s)"
       },
       "users": {
-        "active": "Actif",
-        "admins": "Administrateurs",
-        "guests": "Invités",
+        "active": "Actif(s)",
+        "admins": "Administrateur(s)",
+        "guests": "Invité(s)",
         "shares": "partages",
         "title": "Statistiques sur les utilisateurs",
         "top_users": "Utilisateurs les plus actifs",
@@ -728,7 +749,7 @@
         "delete_confirmation": "Êtes-vous sûr de vouloir supprimer cette sauvegarde ? Cette action ne peut pas être annulée.",
         "delete_failed": "Échec de la suppression de la sauvegarde",
         "delete_success": "Sauvegarde supprimée avec succès",
-        "description": "Visualiser et gérer les sauvegardes de la base de données. Les sauvegardes sont créées automatiquement et stockées pendant 7 jours avant d'être élaguées.",
+        "description": "Visualiser et gérer les sauvegardes de la base de données. Les sauvegardes sont créées automatiquement et stockées pendant 7 jours avant d'être supprimés.",
         "download": "Télécharger",
         "download_failed": "Échec du téléchargement de la sauvegarde",
         "download_success": "Le téléchargement de la sauvegarde a commencé",
@@ -1029,7 +1050,7 @@
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "password_required": "Un mot de passe est nécessaire pour protéger le partage",
     "time_remaining_suffix": "s",
-    "time_remaining_text": "restant(es)",
+    "time_remaining_text": "restante(s)",
     "upload_mode_swapped": "Le mode de téléchargement est passé à {value}\n"
   },
   "uploading": {

@@ -17,7 +17,8 @@ import {
   ExternalLink,
   Database,
   Download,
-  Loader2
+  Loader2,
+  Key
 } from 'lucide-vue-next'
 import {
   getSettingsByGroup,
@@ -72,7 +73,8 @@ const settings = ref({
   smtp_sender_address: '',
   self_registration_enabled: false,
   self_registration_allow_any_domain: true,
-  self_registration_allowed_domains: ''
+  self_registration_allowed_domains: '',
+  licence: ''
 })
 
 // Pattern presets for share URL generation
@@ -532,6 +534,12 @@ const handleDeleteAuthProvider = async (id) => {
             <a href="#" @click.prevent="handleNavItemClicked('backups')">
               <Database />
               {{ $t('settings.system.backups.title') }}
+            </a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('licence')">
+              <Key />
+              {{ $t('settings.system.licence.title') }}
             </a>
           </li>
         </ul>
@@ -1268,6 +1276,39 @@ const handleDeleteAuthProvider = async (id) => {
             </div>
           </div>
         </div>
+
+        <div class="row mb-5">
+          <div class="col-12 col-md-6 pe-0 ps-0 ps-md-3">
+            <div class="setting-group" id="licence">
+              <div class="setting-group-header">
+                <h3>
+                  <Key />
+                  {{ $t('settings.system.licence.title') }}
+                </h3>
+              </div>
+
+              <div class="setting-group-body">
+                <div class="setting-group-body-item">
+                  <label for="licence">{{ $t('settings.system.licence.label') }}</label>
+                  <textarea
+                    id="licence"
+                    v-model="settings.licence"
+                    :placeholder="$t('settings.system.licence.placeholder')"
+                    rows="4"
+                    class="licence-textarea"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-md-block col ps-0">
+            <div class="section-help">
+              <h6>{{ $t('settings.system.licence.title') }}</h6>
+              <p>{{ $t('settings.system.licence.description') }}</p>
+              <p><a href="https://erugo.app/erugo-mobile-app/pro-app-licence" target="_blank" rel="noopener noreferrer">{{ $t('settings.system.licence.learn_more') }}</a></p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1594,5 +1635,13 @@ const handleDeleteAuthProvider = async (id) => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.licence-textarea {
+  width: 100%;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 100px;
 }
 </style>

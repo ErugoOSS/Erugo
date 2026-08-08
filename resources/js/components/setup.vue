@@ -391,14 +391,14 @@ button {
     opacity: 0.5;
 
     &.active {
-      background: var(--button-background-color);
-      color: var(--button-text-color);
+      background: var(--primary-button-background-color);
+      color: var(--primary-button-text-color);
       opacity: 1;
     }
 
     &.completed {
-      background: var(--button-background-color);
-      color: var(--button-text-color);
+      background: var(--primary-button-background-color);
+      color: var(--primary-button-text-color);
       opacity: 0.7;
     }
   }
@@ -410,7 +410,7 @@ button {
     transition: background 0.3s ease;
 
     &.completed {
-      background: var(--button-background-color);
+      background: var(--primary-button-background-color);
     }
   }
 }
@@ -431,7 +431,7 @@ button {
 
   &:hover:not(:disabled) {
     opacity: 1;
-    background: var(--panel-item-hover-background-color);
+    background: var(--panel-item-background-color-hover);
   }
 }
 </style>

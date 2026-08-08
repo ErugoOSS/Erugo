@@ -25,4 +25,22 @@ class ErugoOpenIDConnectclient extends \Jumbojett\OpenIDConnectClient
     protected function commitSession() {
         $this->startSession();
     }
+
+    /**
+     * Public wrapper for getProviderConfigValue
+     * Exposes the protected method for use in OIDCAuthProvider
+     */
+    public function getProviderConfigValuePublic(string $param, ?string $default = null)
+    {
+        return $this->getProviderConfigValue($param, $default);
+    }
+
+    /**
+     * Public wrapper for fetchURL
+     * Exposes the protected method for use in OIDCAuthProvider
+     */
+    public function fetchURLPublic(string $url, ?array $post_body = null, array $headers = [])
+    {
+        return $this->fetchURL($url, $post_body, $headers);
+    }
 }

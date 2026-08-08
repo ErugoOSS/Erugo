@@ -1,0 +1,17 @@
+{% extends 'emails/layout' %}
+
+{% block header %} You have been invited to a liveshare
+{% endblock %}
+
+{% block content %}
+<h2>Hi there,</h2>
+
+<p>{{ inviterName }} has invited you to join the liveshare <strong>{{ liveshareName }}</strong> as a <strong>{{ role }}</strong>.</p>
+
+<p>Click the button below to accept the invitation and start collaborating.</p>
+
+{% endblock %}
+
+{% block action_url %}{{ inviteUrl }}{% endblock %}
+
+{% block action_text %}Accept Invitation{% endblock %}

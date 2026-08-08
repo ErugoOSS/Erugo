@@ -1313,6 +1313,462 @@ export const deleteBackup = async (filename) => {
   return data
 }
 
+// Liveshare Methods
+
+export const getLiveshares = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshares
+}
+
+export const createLiveshare = async (name, description) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ name, description })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshare
+}
+
+export const getLiveshare = async (longId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshare
+}
+
+export const updateLiveshare = async (longId, updates) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}`, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(updates)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshare
+}
+
+export const deleteLiveshare = async (longId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getLiveshareMembers = async (longId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/members`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const addLiveshareMember = async (longId, email, role) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/members`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ email, role })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.member
+}
+
+export const updateLiveshareMember = async (longId, memberId, role) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/members/${memberId}`, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ role })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.member
+}
+
+export const removeLiveshareMember = async (longId, memberId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/members/${memberId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getLiveshareFiles = async (longId, { search, tags, type } = {}) => {
+  const params = new URLSearchParams()
+  if (search) params.set('search', search)
+  if (tags && tags.length) params.set('tags', tags.join(','))
+  if (type) params.set('type', type)
+  const qs = params.toString()
+  const url = `${apiUrl}/api/liveshares/${longId}/files${qs ? '?' + qs : ''}`
+  const response = await fetchWithAuth(url, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.files
+}
+
+export const addLiveshareFiles = async (longId, uploadIds) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/files`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ uploadIds })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.files
+}
+
+export const removeLiveshareFile = async (longId, fileId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/files/${fileId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const downloadLiveshareFile = (longId, fileId) => {
+  return `${apiUrl}/api/liveshares/${longId}/files/${fileId}/download`
+}
+
+export const liveshareFileThumbnailUrl = (longId, fileId) => {
+  return `${apiUrl}/api/liveshares/${longId}/files/${fileId}/thumb`
+}
+
+export const getLiveshareAvatarUrl = (longId, inviteToken = null) => {
+  let url = `${apiUrl}/api/liveshares/${longId}/avatar`
+  const params = []
+  if (store.jwt) {
+    params.push(`token=${store.jwt}`)
+  }
+  if (inviteToken) {
+    params.push(`invite_token=${inviteToken}`)
+  }
+  if (params.length) {
+    url += '?' + params.join('&')
+  }
+  return url
+}
+
+export const getAllLiveshares = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/admin/all`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshares
+}
+
+export const setLiveshareLimits = async (id, limits) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/admin/${id}/limits`, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(limits)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.liveshare
+}
+
+// Liveshare Invite Methods
+
+export const createLiveshareEmailInvite = async (longId, email, role) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/invites/email`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ email, role })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const createLiveshareLinkInvite = async (longId, role, maxUses = null, expiresAt = null) => {
+  const body = { role }
+  if (maxUses !== null) body.max_uses = maxUses
+  if (expiresAt !== null) body.expires_at = expiresAt
+
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/invites/link`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(body)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const getLiveshareInvites = async (longId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/invites`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.invites
+}
+
+export const revokeLiveshareInvite = async (longId, inviteId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/invites/${inviteId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const getLiveshareInviteInfo = async (token) => {
+  const response = await fetch(`${apiUrl}/api/liveshares/invite/${token}`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    const error = new Error(data.message)
+    error.status = response.status
+    throw error
+  }
+  return data.data
+}
+
+export const acceptLiveshareInvite = async (token) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/invite/${token}/accept`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const registerViaLiveshareInvite = async (token, name, email, password, password_confirmation) => {
+  const response = await fetch(`${apiUrl}/api/liveshares/invite/${token}/register`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({
+      name,
+      email,
+      password,
+      password_confirmation
+    })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    const error = new Error(data.message)
+    error.errors = data.data?.errors
+    throw error
+  }
+  const authData = buildAuthSuccessData(data)
+  authData.liveshareLongId = data.data.liveshare_long_id
+  return authData
+}
+
+// -------------------------------------------------------
+// Liveshare Tags
+// -------------------------------------------------------
+
+export const getLiveshareTags = async (longId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/tags`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.tags
+}
+
+export const createLiveshareTag = async (longId, name, color = null) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/tags`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ name, color })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.tag
+}
+
+export const updateLiveshareTag = async (longId, tagId, updates) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/tags/${tagId}`, {
+    method: 'PUT',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify(updates)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.tag
+}
+
+export const deleteLiveshareTag = async (longId, tagId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/tags/${tagId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const addLiveshareFileTags = async (longId, fileId, tagIds) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/files/${fileId}/tags`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ tagIds })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.tags
+}
+
+export const removeLiveshareFileTag = async (longId, fileId, tagId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/liveshares/${longId}/files/${fileId}/tags/${tagId}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.tags
+}
+
+// -------------------------------------------------------
+// Liveshare Bulk Download
+// -------------------------------------------------------
+
+/**
+ * Download multiple liveshare files as a zip.
+ * Pass EITHER { fileIds: [...] } OR filter params { search, tags, type }.
+ * Returns the URL to POST to (caller must submit as a form/fetch+blob to trigger download).
+ */
+export const downloadLiveshareFiles = (longId) => {
+  return `${apiUrl}/api/liveshares/${longId}/files/download`
+}
+
 // Private functions
 const buildAuthSuccessData = (data) => {
   const decoded = jwtDecode(data.data.access_token)
@@ -1323,7 +1779,8 @@ const buildAuthSuccessData = (data) => {
     jwtExpires: decoded.exp,
     jwt: data.data.access_token,
     mustChangePassword: decoded.must_change_password,
-    guest: decoded.guest == 1 ? true : false
+    guest: decoded.guest == 1 ? true : false,
+    restricted: decoded.restricted ? true : false
   }
 }
 

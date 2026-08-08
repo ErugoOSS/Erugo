@@ -418,10 +418,31 @@
   },
   "settings": {
     "about": {
+      "built_with": "Gebaut mit",
+      "created_by": "Erstellt und gepflegt von",
+      "credits": {
+        "laravel": "PHP-Rahmenwerk",
+        "tus": "Wiederaufnehmbare Dateiuploads",
+        "vue": "Frontend-Framework"
+      },
+      "database": "Datenbank",
       "description": "Informationen über Ihre Erugo-Installation.",
+      "discord": "Diskord",
+      "documentation": "Dokumentation",
+      "donate": "Entwicklung unterstützen",
+      "intro": "Erugo ist eine kostenlose, quelloffene, selbst gehostete File-Sharing-Plattform. Kein Tracking, keine Metriken - nur einfache, private Dateifreigabe, die Ihre Daten respektiert.",
+      "license": "Lizenz",
+      "loading": "Systeminformationen laden...",
+      "max_upload": "Maximaler Upload",
+      "of": "von",
+      "storage": "Lagerung",
+      "support_cta": "Wenn Sie Erugo nützlich finden, sollten Sie",
+      "support_link": "Unterstützung seiner Entwicklung",
+      "system_info": "System-Informationen",
       "title": "Über Erugo",
       "version": "Version",
-      "visit_website": "Besuchen Sie erugo.app"
+      "visit_github": "GitHub",
+      "visit_website": "Website"
     },
     "account": {
       "change_password": "Mein Passwort ändern",

@@ -16,7 +16,7 @@ RUN npm ci && \
     && rm -rf node_modules
 
 # Final production image
-FROM alpine:3.19
+FROM alpine:3.21
 
 LABEL maintainer="Dean Ward"
 
@@ -35,7 +35,7 @@ ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
 # Enable community repository for PHP packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.21/community" >> /etc/apk/repositories
 
 # Install production requirements
 RUN apk add --no-cache \
@@ -45,6 +45,11 @@ RUN apk add --no-cache \
     supervisor \
     cronie \
     ffmpeg \
+    poppler-utils \
+    imagemagick \
+    librsvg \
+    libheif \
+    exiftool \
     php83 \
     php83-pdo_pgsql \
     php83-pdo_sqlite \
@@ -68,12 +73,13 @@ RUN apk add --no-cache \
     php83-dom \
     php83-tokenizer \
     php83-fileinfo \
+    php83-pecl-imagick \
     tzdata \
     libcap \
     zip \
     php83-fpm \
     caddy \
-    && ln -s /usr/bin/php83 /usr/bin/php \
+    && ln -sf /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Download and install tusd for the correct architecture

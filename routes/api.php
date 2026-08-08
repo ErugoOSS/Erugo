@@ -19,6 +19,7 @@ use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
+use App\Http\Controllers\LivesharesController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -212,6 +213,75 @@ Route::group([], function ($router) {
     Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
 
+
+    //admin liveshare management [auth, admin] -- must come before wildcard routes
+    Route::group(['prefix' => 'liveshares/admin', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/all', [LivesharesController::class, 'adminListAll'])->name('liveshares.admin.listAll');
+        Route::put('/{id}/limits', [LivesharesController::class, 'adminSetLimits'])->name('liveshares.admin.setLimits');
+    });
+
+    //manage liveshares [auth]
+    Route::group(['prefix' => 'liveshares', 'middleware' => ['auth']], function ($router) {
+        Route::get('/', [LivesharesController::class, 'index'])->name('liveshares.index');
+        Route::post('/', [LivesharesController::class, 'create'])->name('liveshares.create');
+        Route::get('/{longId}', [LivesharesController::class, 'show'])->name('liveshares.show');
+        Route::put('/{longId}', [LivesharesController::class, 'update'])->name('liveshares.update');
+        Route::delete('/{longId}', [LivesharesController::class, 'destroy'])->name('liveshares.destroy');
+
+        // Members
+        Route::get('/{longId}/members', [LivesharesController::class, 'listMembers'])->name('liveshares.members.list');
+        Route::post('/{longId}/members', [LivesharesController::class, 'addMember'])->name('liveshares.members.add');
+        Route::put('/{longId}/members/{memberId}', [LivesharesController::class, 'updateMember'])->name('liveshares.members.update');
+        Route::delete('/{longId}/members/{memberId}', [LivesharesController::class, 'removeMember'])->name('liveshares.members.remove');
+
+        // Files
+        Route::get('/{longId}/files', [LivesharesController::class, 'listFiles'])->name('liveshares.files.list');
+        Route::post('/{longId}/files', [LivesharesController::class, 'addFiles'])->name('liveshares.files.add');
+        Route::delete('/{longId}/files/{fileId}', [LivesharesController::class, 'removeFile'])->name('liveshares.files.remove');
+
+        // Tags
+        Route::get('/{longId}/tags', [LivesharesController::class, 'listTags'])->name('liveshares.tags.list');
+        Route::post('/{longId}/tags', [LivesharesController::class, 'createTag'])->name('liveshares.tags.create');
+        Route::put('/{longId}/tags/{tagId}', [LivesharesController::class, 'updateTag'])->name('liveshares.tags.update');
+        Route::delete('/{longId}/tags/{tagId}', [LivesharesController::class, 'deleteTag'])->name('liveshares.tags.delete');
+
+        // Bulk file tags (must come before {fileId} routes)
+        Route::post('/{longId}/files/bulk-tag', [LivesharesController::class, 'bulkAddFileTags'])->name('liveshares.files.bulkTag');
+        Route::post('/{longId}/files/bulk-untag', [LivesharesController::class, 'bulkRemoveFileTags'])->name('liveshares.files.bulkUntag');
+
+        // File tags
+        Route::post('/{longId}/files/{fileId}/tags', [LivesharesController::class, 'addFileTags'])->name('liveshares.files.tags.add');
+        Route::delete('/{longId}/files/{fileId}/tags/{tagId}', [LivesharesController::class, 'removeFileTag'])->name('liveshares.files.tags.remove');
+
+        // Invites (owner/manager only)
+        Route::post('/{longId}/invites/email', [LivesharesController::class, 'createEmailInvite'])->name('liveshares.invites.createEmail');
+        Route::post('/{longId}/invites/link', [LivesharesController::class, 'createLinkInvite'])->name('liveshares.invites.createLink');
+        Route::get('/{longId}/invites', [LivesharesController::class, 'listInvites'])->name('liveshares.invites.list');
+        Route::delete('/{longId}/invites/{inviteId}', [LivesharesController::class, 'revokeInvite'])->name('liveshares.invites.revoke');
+    });
+
+    // Liveshare invite - accept (authenticated)
+    Route::post('/liveshares/invite/{token}/accept', [LivesharesController::class, 'acceptInvite'])
+        ->middleware('auth')
+        ->name('liveshares.invites.accept');
+
+    // Liveshare invite - public endpoints (no auth)
+    Route::get('/liveshares/invite/{token}', [LivesharesController::class, 'getInviteInfo'])
+        ->name('liveshares.invites.info');
+    Route::post('/liveshares/invite/{token}/register', [AuthController::class, 'registerViaInvite'])
+        ->name('liveshares.invites.register');
+
+    // Liveshare file download (outside auth middleware to allow ?token= query param auth)
+    Route::get('/liveshares/{longId}/files/{fileId}/download', [LivesharesController::class, 'downloadFile'])->name('liveshares.files.download');
+
+    // Liveshare bulk download as zip (outside auth middleware to allow ?token= query param auth)
+    Route::post('/liveshares/{longId}/files/download', [LivesharesController::class, 'downloadFiles'])->name('liveshares.files.downloadBulk');
+
+    // Liveshare file thumbnail (outside auth middleware to allow ?token= query param auth for <img> src)
+    Route::get('/liveshares/{longId}/files/{fileId}/thumb', [LivesharesController::class, 'fileThumbnail'])->name('liveshares.files.thumb');
+
+    // Liveshare avatar (random image thumb; auth via JWT token or invite_token query param)
+    Route::get('/liveshares/{longId}/avatar', [LivesharesController::class, 'avatar'])->name('liveshares.avatar');
 
 // tusd webhook handler (called by tusd server, not authenticated via middleware)
 Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');

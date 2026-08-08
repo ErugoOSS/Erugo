@@ -1,5 +1,5 @@
 # Development image based on Alpine - matches production architecture
-FROM alpine:3.19
+FROM alpine:3.21
 
 LABEL maintainer="Dean Ward"
 
@@ -14,7 +14,7 @@ ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
 # Enable community repository for PHP packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.21/community" >> /etc/apk/repositories
 
 # Install production requirements + development tools
 RUN apk add --no-cache \
@@ -24,6 +24,11 @@ RUN apk add --no-cache \
     supervisor \
     cronie \
     ffmpeg \
+    poppler-utils \
+    imagemagick \
+    librsvg \
+    libheif \
+    exiftool \
     php83 \
     php83-pdo_pgsql \
     php83-pdo_sqlite \
@@ -47,6 +52,7 @@ RUN apk add --no-cache \
     php83-dom \
     php83-tokenizer \
     php83-fileinfo \
+    php83-pecl-imagick \
     php83-ctype \
     php83-session \
     php83-simplexml \
@@ -61,7 +67,7 @@ RUN apk add --no-cache \
     caddy \
     nodejs \
     npm \
-    && ln -s /usr/bin/php83 /usr/bin/php \
+    && ln -sf /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Install Composer

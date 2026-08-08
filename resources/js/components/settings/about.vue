@@ -1,9 +1,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { Info, ExternalLink, Server, Database, HardDrive, Loader2 } from 'lucide-vue-next'
+import { Info, ExternalLink, Server, Database, HardDrive, Loader2, Share2, Activity, CloudUpload, Settings } from 'lucide-vue-next'
 import { domData } from '../../domData'
 import { getSystemInfo } from '../../api'
 import { store } from '../../store'
+
+// iOS app assets
+import iosAppIcon from '../../assets/ios-app/erugo-ios-icon.png'
+import appStoreBadge from '../../assets/ios-app/app-store-badge.svg'
+import iosMockupUpload from '../../assets/ios-app/ios-mockup-upload.png'
 
 const version = ref('unknown')
 const systemInfo = ref(null)
@@ -101,6 +106,69 @@ const OpenExternalLink = (url) => {
                       <ExternalLink />
                       {{ $t('settings.about.donate') }}
                     </button>
+                  </div>
+                </div>
+
+                <div class="ios-app-section">
+                  <div class="ios-app-header">
+                    <div class="ios-app-icon">
+                      <img :src="iosAppIcon" alt="Erugo iOS App" />
+                    </div>
+                    <div class="ios-app-title-area">
+                      <h3 class="ios-app-name">{{ $t('settings.about.ios_app.app_name') }}</h3>
+                      <p class="ios-app-tagline">{{ $t('settings.about.ios_app.tagline') }}</p>
+                      <div class="ios-app-links">
+                        <a href="https://testflight.apple.com/join/Zz2DdSm5" target="_blank" rel="noopener noreferrer" class="app-store-link">
+                          <img :src="appStoreBadge" alt="Download on the App Store" class="app-store-badge" />
+                        </a>
+                        <a href="https://erugo.app/erugo-mobile-app" target="_blank" class="more-info-link">
+                          {{ $t('settings.about.ios_app.more_info') }}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ios-app-mockup">
+                    <img :src="iosMockupUpload" alt="Erugo iOS Upload Screen" />
+                  </div>
+
+                  <div class="ios-app-features">
+                    <div class="feature-card">
+                      <div class="feature-icon">
+                        <Share2 />
+                      </div>
+                      <div class="feature-text">
+                        <span class="feature-title">{{ $t('settings.about.ios_app.feature_1_title') }}</span>
+                        <span class="feature-desc">{{ $t('settings.about.ios_app.feature_1_desc') }}</span>
+                      </div>
+                    </div>
+                    <div class="feature-card">
+                      <div class="feature-icon">
+                        <Activity />
+                      </div>
+                      <div class="feature-text">
+                        <span class="feature-title">{{ $t('settings.about.ios_app.feature_2_title') }}</span>
+                        <span class="feature-desc">{{ $t('settings.about.ios_app.feature_2_desc') }}</span>
+                      </div>
+                    </div>
+                    <div class="feature-card">
+                      <div class="feature-icon">
+                        <CloudUpload />
+                      </div>
+                      <div class="feature-text">
+                        <span class="feature-title">{{ $t('settings.about.ios_app.feature_3_title') }}</span>
+                        <span class="feature-desc">{{ $t('settings.about.ios_app.feature_3_desc') }}</span>
+                      </div>
+                    </div>
+                    <div class="feature-card">
+                      <div class="feature-icon">
+                        <Settings />
+                      </div>
+                      <div class="feature-text">
+                        <span class="feature-title">{{ $t('settings.about.ios_app.feature_4_title') }}</span>
+                        <span class="feature-desc">{{ $t('settings.about.ios_app.feature_4_desc') }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -242,10 +310,174 @@ const OpenExternalLink = (url) => {
   }
 }
 
+.ios-app-section {
+  margin-top: 32px;
+  padding: 32px;
+  background: var(--panel-section-background-color-alt);
+  border-radius: var(--panel-border-radius);
+  overflow: hidden;
+}
+
+.ios-app-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 500px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.ios-app-icon {
+  flex-shrink: 0;
+  
+  img {
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.ios-app-title-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ios-app-name {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--panel-text-color);
+}
+
+.ios-app-tagline {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--panel-text-color-alt);
+}
+
+.ios-app-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app-store-link {
+  display: inline-block;
+}
+
+.more-info-link {
+  color: var(--link-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.app-store-badge {
+  height: 40px;
+  width: auto;
+}
+
+.ios-app-mockup {
+  display: flex;
+  justify-content: center;
+  margin: -100px -20px -80px -20px;
+  position: relative;
+  z-index: 0;
+  
+  img {
+    max-width: calc(100% + 40px);
+    height: auto;
+    max-height: 400px;
+  }
+  
+  @media (max-width: 500px) {
+    margin: -60px -10px -50px -10px;
+    
+    img {
+      max-height: 300px;
+    }
+  }
+}
+
+.ios-app-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--panel-background-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--link-color);
+  border-radius: 10px;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+    color: white;
+  }
+}
+
+.feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feature-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--panel-text-color);
+}
+
+.feature-desc {
+  font-size: 0.8rem;
+  color: var(--panel-text-color-alt);
+  line-height: 1.4;
+}
+
 .credits-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt);
+  border-top: 1px solid var(--input-border-color);
   
   h4 {
     font-size: 0.9rem;
@@ -293,7 +525,7 @@ const OpenExternalLink = (url) => {
 .system-info-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt);
+  border-top: 1px solid var(--input-border-color);
   
   h4 {
     font-size: 0.9rem;

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
-import { Search, Settings, Palette, Users, User, Boxes, FolderOpen, BarChart3, Mail, Fingerprint, Share2, Send, AtSign, Database, Images, Image, Pipette } from 'lucide-vue-next'
+import { Search, Settings, Palette, Users, User, Boxes, FolderOpen, BarChart3, Mail, Fingerprint, Share2, Send, AtSign, Database, Images, Image, Pipette, Key } from 'lucide-vue-next'
 import { useSettingsNavigation } from '../composables/useSettingsNavigation'
 import { store } from '../store'
 
@@ -38,6 +38,7 @@ const commands = computed(() => {
     { id: 'system.smtp', label: t.value('settings.system.smtp'), keywords: 'smtp mail server host port encryption', path: 'system.smtp', icon: AtSign, category: 'system', adminOnly: true },
     { id: 'system.auth', label: t.value('settings.system.auth'), keywords: 'auth authentication providers login sso oauth', path: 'system.auth', icon: Fingerprint, category: 'system', adminOnly: true },
     { id: 'system.backups', label: t.value('settings.system.backups.title'), keywords: 'backups database backup restore', path: 'system.backups', icon: Database, category: 'system', adminOnly: true },
+    { id: 'system.licence', label: t.value('settings.system.licence.title'), keywords: 'licence license pro app mobile key', path: 'system.licence', icon: Key, category: 'system', adminOnly: true },
     
     // System sub-sections
     { id: 'system.auth.self_registration', label: t.value('settings.system.self_registration'), keywords: 'self registration signup sign up new users', path: 'system.auth.self_registration', icon: Fingerprint, category: 'system', adminOnly: true },
@@ -289,14 +290,14 @@ defineExpose({ open, close })
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  border: 1px solid var(--panel-section-background-color-alt, #333);
+  border: 1px solid var(--input-border-color);
 }
 
 .command-palette-header {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--panel-section-background-color-alt, #333);
+  border-bottom: 1px solid var(--input-border-color);
   gap: 12px;
   
   .search-icon {
@@ -413,7 +414,7 @@ defineExpose({ open, close })
   justify-content: center;
   gap: 24px;
   padding: 12px 20px;
-  border-top: 1px solid var(--panel-section-background-color-alt, #333);
+  border-top: 1px solid var(--input-border-color);
   background: var(--panel-section-background-color-alt, #1f1f1f);
   
   .hint {

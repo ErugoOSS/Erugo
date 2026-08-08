@@ -38,6 +38,15 @@ mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/storage/database
 
+# Seed default logo/background assets from the skeleton. Copied file-by-file
+# rather than wiping storage first, since dev bind-mounts the host directory.
+echo "Seeding default storage assets..."
+for asset in _default-logo.png logo.png _default-background.jpg default-background.jpg; do
+    if [ ! -f "/var/www/html/storage/app/public/images/$asset" ]; then
+        cp "/var/www/html/storage_skell/app/public/images/$asset" /var/www/html/storage/app/public/images/
+    fi
+done
+
 # Set correct permissions on storage directory
 echo "Setting storage permissions..."
 chown -R erugo:erugo /var/www/html/storage

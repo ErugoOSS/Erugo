@@ -10,7 +10,6 @@ table {
     z-index: 10;
     background: var(--table-header-background-color);
     th {
-      
       padding: 10px;
       text-align: left;
       svg {
@@ -20,6 +19,19 @@ table {
         margin-left: 10px;
         cursor: pointer;
       }
+    }
+
+    &:first-of-type tr th:first-child {
+      border-top-left-radius: 8px;
+    }
+
+    &:first-of-type tr th:last-child {
+      border-top-right-radius: 8px;
+    }
+
+    &.secondary {
+      background: var(--panel-section-background-color-alt);
+      color: var(--panel-section-text-color-alt);
     }
   }
   tbody {
@@ -35,6 +47,19 @@ table {
       text-align: left;
       border: 1px solid rgba(175, 175, 175, 0.2);
       color: var(--table-row-text-color);
+    }
+  }
+  tfoot {
+    background: var(--panel-section-background-color-alt);
+    color: var(--panel-section-text-color-alt);
+
+
+    td:first-child {
+      border-bottom-left-radius: 8px;
+    }
+
+    td:last-child {
+      border-bottom-right-radius: 8px;
     }
   }
 }

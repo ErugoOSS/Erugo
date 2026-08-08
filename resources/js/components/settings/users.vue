@@ -209,6 +209,12 @@ const confirmForceResetPassword = () => {
             <template v-if="user.admin">
               {{ $t('settings.users.admin') }}
             </template>
+            <template v-else-if="user.is_guest">
+              {{ $t('settings.users.guest') }}
+            </template>
+            <template v-else-if="user.is_restricted">
+              {{ $t('settings.users.restricted') }}
+            </template>
             <template v-else>
               {{ $t('settings.users.user') }}
             </template>
@@ -219,7 +225,7 @@ const confirmForceResetPassword = () => {
               <UserPen />
               {{ $t('settings.users.edit') }}
             </button>
-            <button class="secondary" @click="handleViewUserShares(user)">
+            <button class="secondary" @click="handleViewUserShares(user)" :disabled="user.is_guest || user.is_restricted">
               <FolderOpen />
               {{ $t('settings.users.view_shares') }}
             </button>

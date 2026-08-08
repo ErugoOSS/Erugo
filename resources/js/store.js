@@ -19,12 +19,15 @@ const store = reactive({
   userId: null,
   admin: false,
   guest: false,
+  restricted: false,
   jwt: null,
   jwtExpires: null,
   loggedIn: false,
   settingsOpen: false,
   mode: 'upload',
   shareCode: null,
+  liveshareCode: null,
+  inviteToken: null,
   mustChangePassword: false,
 
   setUserId(userId) {
@@ -59,6 +62,22 @@ const store = reactive({
     this.shareCode = shareCode
   },
 
+  setLiveshareCode(liveshareCode) {
+    this.liveshareCode = liveshareCode
+  },
+
+  setRestricted(restricted) {
+    this.restricted = restricted
+  },
+
+  setInviteToken(inviteToken) {
+    this.inviteToken = inviteToken
+  },
+
+  isRestricted() {
+    return this.restricted
+  },
+
   setMultiple(data) {
     const keys = Object.keys(data)
     keys.forEach(key => {
@@ -88,6 +107,7 @@ const store = reactive({
     })
     this.mustChangePassword = data.mustChangePassword
     this.guest = data.guest
+    this.restricted = data.restricted || false
     this.logState()
   },
 
