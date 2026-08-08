@@ -15,7 +15,9 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Only identity fields are mass assignable. Privileged account flags
+     * (admin, active, guest, etc.) must be set via createAccount() or
+     * direct property assignment — never from request::all()/fill().
      *
      * @var list<string>
      */
@@ -23,6 +25,14 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+    ];
+
+    /**
+     * Privileged columns that may be set through createAccount()'s $flags.
+     *
+     * @var list<string>
+     */
+    private const ACCOUNT_FLAGS = [
         'admin',
         'active',
         'must_change_password',
@@ -31,6 +41,39 @@ class User extends Authenticatable implements JWTSubject
         'email_verification_code',
         'email_verification_code_expires_at',
     ];
+
+    /**
+     * Create a user with mass-assignable identity fields, then apply privileged
+     * flags via direct assignment so they cannot ride in on request input.
+     *
+     * @param  array{name: string, email: string, password: string}  $identity
+     * @param  array<string, mixed>  $flags
+     */
+    public static function createAccount(array $identity, array $flags = []): self
+    {
+        foreach (array_keys($flags) as $key) {
+            if (!in_array($key, self::ACCOUNT_FLAGS, true)) {
+                throw new \InvalidArgumentException("Unsupported account flag: {$key}");
+            }
+        }
+
+        $user = new static();
+        $user->fill([
+            'name' => $identity['name'],
+            'email' => $identity['email'],
+            'password' => $identity['password'],
+        ]);
+
+        // Single insert, so a row never briefly exists with the column defaults
+        // for flags the caller is overriding (notably active, which defaults true).
+        foreach ($flags as $key => $value) {
+            $user->{$key} = $value;
+        }
+
+        $user->save();
+
+        return $user;
+    }
 
     /**
      * The attributes that should be hidden for serialization.

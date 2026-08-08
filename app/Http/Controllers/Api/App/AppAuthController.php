@@ -309,10 +309,11 @@ class AppAuthController extends Controller
         $expiresAt = Carbon::now()->addMinutes(15);
 
         try {
-            $user = User::create([
+            $user = User::createAccount([
                 'email' => $request->email,
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
+            ], [
                 'admin' => false,
                 'active' => false,
                 'must_change_password' => false,
@@ -524,10 +525,11 @@ class AppAuthController extends Controller
         $selfRegEnabled = Setting::where('key', 'self_registration_enabled')->first();
         $isRestricted = !($selfRegEnabled && $selfRegEnabled->value === 'true');
 
-        $user = User::create([
+        $user = User::createAccount([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ], [
             'admin' => false,
             'active' => true,
             'must_change_password' => false,
@@ -993,14 +995,15 @@ class AppAuthController extends Controller
      */
     private function createUserFromProvider($authProviderUser): User
     {
-        $user = User::create([
+        $user = User::createAccount([
             'name' => $authProviderUser->name,
             'email' => $authProviderUser->email,
             'password' => bcrypt(bin2hex(random_bytes(32))),
+        ], [
             'admin' => false,
             'active' => true,
             'must_change_password' => false,
-            'is_guest' => false
+            'is_guest' => false,
         ]);
 
         // Migrate any existing reverse share invites

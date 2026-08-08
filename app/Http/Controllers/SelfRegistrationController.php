@@ -72,10 +72,11 @@ class SelfRegistrationController extends Controller
         $expiresAt = Carbon::now()->addMinutes(15);
 
         try {
-            $user = User::create([
+            $user = User::createAccount([
                 'email' => $request->email,
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
+            ], [
                 'admin' => false,
                 'active' => false, // Account is inactive until verified
                 'must_change_password' => false,

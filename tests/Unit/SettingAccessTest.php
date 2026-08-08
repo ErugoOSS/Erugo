@@ -57,7 +57,7 @@ class SettingAccessTest extends TestCase
 
     public function test_non_admin_cannot_read_admin_keys(): void
     {
-        $user = new User(['admin' => false]);
+        $user = $this->userWithAdmin(false);
 
         $this->assertFalse(SettingAccess::canRead($user, 'smtp_password'));
         $this->assertFalse(SettingAccess::canRead($user, 'licence'));
@@ -66,7 +66,7 @@ class SettingAccessTest extends TestCase
 
     public function test_admin_can_read_all_keys_including_unknown(): void
     {
-        $user = new User(['admin' => true]);
+        $user = $this->userWithAdmin(true);
 
         $this->assertTrue(SettingAccess::canRead($user, 'smtp_password'));
         $this->assertTrue(SettingAccess::canRead($user, 'licence'));
@@ -75,7 +75,7 @@ class SettingAccessTest extends TestCase
 
     public function test_filter_readable_strips_admin_keys_for_non_admins(): void
     {
-        $user = new User(['admin' => false]);
+        $user = $this->userWithAdmin(false);
         $settings = new Collection([
             (object) ['key' => 'max_share_size', 'value' => '2'],
             (object) ['key' => 'smtp_password', 'value' => 'secret'],
@@ -85,6 +85,17 @@ class SettingAccessTest extends TestCase
         $filtered = SettingAccess::filterReadable($user, $settings);
 
         $this->assertSame(['max_share_size'], $filtered->pluck('key')->all());
+    }
+
+    /**
+     * admin is not mass assignable, so it has to be set directly.
+     */
+    private function userWithAdmin(bool $admin): User
+    {
+        $user = new User();
+        $user->admin = $admin;
+
+        return $user;
     }
 
     /**

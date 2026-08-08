@@ -99,11 +99,12 @@ class AppReverseSharesController extends Controller
             $guestUserId = null;
         } else {
             // Create a guest user for the invite
-            $guestUser = User::create([
+            $guestUser = User::createAccount([
                 'name' => $request->recipient_name,
                 'email' => Str::random(20), // Random email for the guest user
                 'password' => Hash::make(Str::random(20)), // Random password
-                'is_guest' => true
+            ], [
+                'is_guest' => true,
             ]);
             $guestUserId = $guestUser->id;
 

@@ -218,10 +218,11 @@ class AuthController extends Controller
         $selfRegEnabled = Setting::where('key', 'self_registration_enabled')->first();
         $isRestricted = !($selfRegEnabled && $selfRegEnabled->value === 'true');
 
-        $user = User::create([
+        $user = User::createAccount([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ], [
             'admin' => false,
             'active' => true,
             'must_change_password' => false,

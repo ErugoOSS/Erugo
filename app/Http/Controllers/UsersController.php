@@ -191,11 +191,12 @@ class UsersController extends Controller
     }
 
     try {
-      $user = User::create([
+      $user = User::createAccount([
         'email' => $request->email,
         'name' => $request->name,
-        'admin' => $request->admin,
         'password' => Hash::make(Str::random(20)),
+      ], [
+        'admin' => (bool) $request->admin,
         'active' => true,
         'must_change_password' => false,
       ]);
@@ -271,7 +272,25 @@ class UsersController extends Controller
     }
 
     try {
-      $user->update($validator->validated());
+      $validated = $validator->validated();
+
+      if (array_key_exists('name', $validated)) {
+        $user->name = $validated['name'];
+      }
+      if (array_key_exists('email', $validated)) {
+        $user->email = $validated['email'];
+      }
+      if (array_key_exists('password', $validated)) {
+        $user->password = $validated['password'];
+      }
+      if (array_key_exists('admin', $validated)) {
+        $user->admin = $validated['admin'];
+      }
+      if (array_key_exists('must_change_password', $validated)) {
+        $user->must_change_password = $validated['must_change_password'];
+      }
+
+      $user->save();
 
       return response()->json([
         'status' => 'success',
@@ -439,10 +458,11 @@ class UsersController extends Controller
     }
 
     try {
-      $user = User::create([
+      $user = User::createAccount([
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
+      ], [
         'admin' => true,
         'active' => true,
         'must_change_password' => false,

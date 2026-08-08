@@ -333,14 +333,15 @@ class ExternalAuthController extends Controller
      */
     private function createUserFromProvider($authProviderUser)
     {
-        return User::create([
+        return User::createAccount([
             'name' => $authProviderUser->name,
             'email' => $authProviderUser->email,
             'password' => bcrypt(bin2hex(random_bytes(32))), // Random password since they'll use SSO
+        ], [
             'admin' => false,
             'active' => true,
             'must_change_password' => false,
-            'is_guest' => false
+            'is_guest' => false,
         ]);
     }
 

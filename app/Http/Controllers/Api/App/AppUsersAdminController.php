@@ -74,11 +74,12 @@ class AppUsersAdminController extends Controller
     public function create(CreateUserRequest $request): JsonResponse
     {
         try {
-            $user = User::create([
+            $user = User::createAccount([
                 'email' => $request->email,
                 'name' => $request->name,
-                'admin' => $request->boolean('admin', false),
                 'password' => Hash::make(Str::random(20)),
+            ], [
+                'admin' => $request->boolean('admin', false),
                 'active' => true,
                 'must_change_password' => false,
             ]);
@@ -136,7 +137,22 @@ class AppUsersAdminController extends Controller
         }
 
         try {
-            $user->update($request->validated());
+            $validated = $request->validated();
+
+            if (array_key_exists('name', $validated)) {
+                $user->name = $validated['name'];
+            }
+            if (array_key_exists('email', $validated)) {
+                $user->email = $validated['email'];
+            }
+            if (array_key_exists('admin', $validated)) {
+                $user->admin = $validated['admin'];
+            }
+            if (array_key_exists('must_change_password', $validated)) {
+                $user->must_change_password = $validated['must_change_password'];
+            }
+
+            $user->save();
 
             return response()->json([
                 'status' => 'success',
