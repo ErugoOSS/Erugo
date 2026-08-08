@@ -52,6 +52,14 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        if (!$user->active) {
+            Auth::logout();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Account is not active'
+            ], 403);
+        }
+
         return $this->respondWithToken($user);
     }
 
@@ -75,6 +83,13 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Unauthorized'
             ], 401);
+        }
+
+        if (!$user->active) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Account is not active'
+            ], 403);
         }
 
         return $this->respondWithToken($user);
