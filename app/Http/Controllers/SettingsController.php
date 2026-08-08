@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
+use App\Settings\SettingAccess;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -73,6 +75,14 @@ class SettingsController extends Controller
                 'message' => 'Setting not found',
             ], 404);
         }
+
+        if (!SettingAccess::canRead(Auth::user(), $setting->key)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Forbidden',
+            ], 403);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -98,7 +108,7 @@ class SettingsController extends Controller
             $query->where('group', $group);
         }
 
-        $settings = $query->get();
+        $settings = SettingAccess::filterReadable(Auth::user(), $query->get());
 
         return response()->json([
             'status' => 'success',
@@ -159,7 +169,7 @@ class SettingsController extends Controller
             Log::error('Logo upload error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to save logo: ' . $e->getMessage(),
+                'message' => 'Failed to save logo',
             ], 500);
         }
     }
@@ -199,7 +209,7 @@ class SettingsController extends Controller
             Log::error('Logo reset error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to reset logo: ' . $e->getMessage(),
+                'message' => 'Failed to reset logo',
             ], 500);
         }
     }
