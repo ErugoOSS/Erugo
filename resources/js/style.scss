@@ -186,7 +186,13 @@ body {
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-  overflow: hidden;
+  /* Allow the column to shrink (flex min-height defaults to auto) and to
+     scroll. On short viewports the panel is taller than the space left
+     below the logo; without this, overflow:hidden cuts the download button
+     off with no way to reach it. */
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   width: min(500px, 100%);
   margin-bottom: 20px;
   @media (min-width: 900px) {
@@ -209,6 +215,24 @@ body {
     z-index: 200;
     padding-bottom: 20px;
     padding-top: 10px;
+    /* The logo is user-supplied and may be square; cap it by viewport
+       height so large branding cannot push the panel out of view. */
+    max-height: 20vh;
+    max-width: 60vw;
+    object-fit: contain;
+    object-position: left center;
+
+    @media (max-width: 900px) {
+      object-position: center;
+    }
+  }
+}
+
+/* On very short viewports (high browser zoom, phone landscape) branding is
+   less important than keeping the primary action reachable. */
+@media (max-height: 480px) {
+  .logo-container {
+    display: none;
   }
 }
 

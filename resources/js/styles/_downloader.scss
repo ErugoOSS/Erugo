@@ -4,6 +4,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Align from the top when the content is taller than the panel (centring
+     would clip the share name). Browsers without `safe` keep the line
+     above. */
+  justify-content: safe center;
   background: var(--panel-background-color);
   backdrop-filter: blur(10px);
   width: 100%;
@@ -37,6 +41,9 @@
     overflow-y: auto;
     overflow-x: hidden;
     flex-grow: 1;
+    /* Without this a long file list refuses to shrink and pushes the
+       download button out of the panel. */
+    min-height: 0;
     width: 100%;
 
     .upload-basket-folder {
