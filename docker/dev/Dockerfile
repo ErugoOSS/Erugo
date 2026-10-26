@@ -1,5 +1,5 @@
 # Development image based on Alpine - matches production architecture
-FROM alpine:3.19
+FROM alpine:3.23
 
 LABEL maintainer="Dean Ward"
 
@@ -9,12 +9,12 @@ ARG TARGETARCH
 WORKDIR /var/www/html
 
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm83 -F"
+ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm85 -F"
 ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
 # Enable community repository for PHP packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.23/community" >> /etc/apk/repositories
 
 # Install production requirements + development tools
 RUN apk add --no-cache \
@@ -24,44 +24,44 @@ RUN apk add --no-cache \
     supervisor \
     cronie \
     ffmpeg \
-    php83 \
-    php83-pdo_pgsql \
-    php83-pdo_sqlite \
-    php83-gd \
-    php83-curl \
-    php83-pecl-mongodb \
-    php83-imap \
-    php83-pdo_mysql \
-    php83-mbstring \
-    php83-xml \
-    php83-zip \
-    php83-bcmath \
-    php83-soap \
-    php83-intl \
-    php83-ldap \
-    php83-pecl-redis \
-    php83-pecl-memcached \
-    php83-phar \
-    php83-openssl \
-    php83-json \
-    php83-dom \
-    php83-tokenizer \
-    php83-fileinfo \
-    php83-ctype \
-    php83-session \
-    php83-simplexml \
-    php83-xmlwriter \
-    php83-sodium \
+    php85 \
+    php85-pdo_pgsql \
+    php85-pdo_sqlite \
+    php85-gd \
+    php85-curl \
+    php85-pecl-mongodb \
+    php85-pecl-imap \
+    php85-pdo_mysql \
+    php85-mbstring \
+    php85-xml \
+    php85-zip \
+    php85-bcmath \
+    php85-soap \
+    php85-intl \
+    php85-ldap \
+    php85-pecl-redis \
+    php85-pecl-memcached \
+    php85-phar \
+    php85-openssl \
+    php85-json \
+    php85-dom \
+    php85-tokenizer \
+    php85-fileinfo \
+    php85-ctype \
+    php85-session \
+    php85-simplexml \
+    php85-xmlwriter \
+    php85-sodium \
     tzdata \
     libcap \
     zip \
     unzip \
     git \
-    php83-fpm \
+    php85-fpm \
     caddy \
     nodejs \
     npm \
-    && ln -s /usr/bin/php83 /usr/bin/php \
+    && ln -s /usr/bin/php85 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Install Composer
@@ -80,16 +80,16 @@ RUN TUSD_ARCH="${TARGETARCH}" && \
     rm -rf /tmp/tusd.tar.gz /tmp/tusd_linux_${TUSD_ARCH}
 
 # Create necessary directories
-RUN mkdir -p /run/php /var/www/html/public /etc/php83/php-fpm.d /etc/caddy
+RUN mkdir -p /run/php /var/www/html/public /etc/php85/php-fpm.d /etc/caddy
 
-COPY ./www.conf /etc/php83/php-fpm.d/www.conf
+COPY ./www.conf /etc/php85/php-fpm.d/www.conf
 COPY ./Caddyfile /etc/caddy/Caddyfile
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Configure PHP capabilities
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php83
+RUN setcap "cap_net_bind_service=+ep" /usr/bin/php85
 
 # Create erugo user and group
 RUN addgroup erugo && \
@@ -101,7 +101,7 @@ RUN chown -R erugo:erugo /run/php
 # Copy configuration files
 COPY ./start-container /usr/local/bin/start-container
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./php.ini /etc/php83/conf.d/99-erugo.ini
+COPY ./php.ini /etc/php85/conf.d/99-erugo.ini
 RUN chmod +x /usr/local/bin/start-container
 
 # Create supervisor log directory
