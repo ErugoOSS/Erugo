@@ -392,7 +392,6 @@ const saveAuthProviders = async () => {
   try {
     await bulkUpdateAuthProviders(authProviders.value)
     saving.value = false
-    toast.success(t.value('settings.authProvidersSavedSuccessfully'))
     if (!onLocalhost.value) {
       await loadAuthProviders()
     }
