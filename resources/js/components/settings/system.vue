@@ -395,10 +395,12 @@ const saveAuthProviders = async () => {
     if (!onLocalhost.value) {
       await loadAuthProviders()
     }
+    return true
   } catch (error) {
     saving.value = false
     toast.error(t.value('settings.failedToSaveAuthProviders'))
     console.error(error)
+    return false
   }
 }
 
@@ -420,10 +422,12 @@ const saveSettings = async () => {
       ...settings.value
     })
 
-    await saveAuthProviders()
+    const providersSaved = await saveAuthProviders()
 
     saving.value = false
-    toast.success(t.value('settings.settingsSavedSuccessfully'))
+    if (providersSaved) {
+      toast.success(t.value('settings.settingsSavedSuccessfully'))
+    }
     await loadSettings()
     
     // Notify other components that settings have changed
