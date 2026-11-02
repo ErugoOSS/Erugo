@@ -43,7 +43,10 @@ class sendDeletionWarningEmails implements ShouldQueue
       ->get();
 
     foreach ($shares as $share) {
-      sendEmail::dispatch($share->user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      // The owner can be gone (shares.user_id is SET NULL on user delete): no mail, but still mark it processed.
+      if ($share->user && $share->user->email) {
+        sendEmail::dispatch($share->user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      }
       $share->sent_deletion_warning = true;
       $share->save();
     }
