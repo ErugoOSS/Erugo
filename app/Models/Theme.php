@@ -74,16 +74,13 @@ class Theme extends Model
         $value = preg_replace($pattern, '[removed]', $value);
       }
 
-      // Absolute stylesheet URLs (used by fonts -> importUrl). Handled before the
-      // generic filter below, which would otherwise strip the query string.
-      if (preg_match('#^https?://#i', trim($value))) {
-        return $this->sanitizeRemoteUrl($value);
-      }
+      // Stylesheet URLs (fonts -> importUrl): absolute https on a trusted host, or a
+      // same-origin path. Handled before the generic filter below, which would
+      // otherwise strip the query string and break font URLs.
+      $trimmedValue = trim($value);
 
-      // Protocol-relative URLs are rejected outright: a font stylesheet must be
-      // explicit https or a same-origin path.
-      if (str_starts_with(trim($value), '//')) {
-        return '[url-removed]';
+      if (preg_match('#^https?://#i', $trimmedValue) || str_starts_with($trimmedValue, '/')) {
+        return $this->sanitizeRemoteUrl($trimmedValue);
       }
 
       // Only allow specific patterns for gradients and colors
@@ -255,9 +252,10 @@ class Theme extends Model
   {
     $value = trim((string) $value);
 
-    // Same-origin path, e.g. /fonts/myfont.css. Protocol-relative URLs are rejected.
+    // Same-origin path, e.g. /storage/fonts/myfont.css (query string allowed so
+    // uploads can be cache-busted). Protocol-relative URLs fall through and are rejected.
     if (str_starts_with($value, '/') && !str_starts_with($value, '//')) {
-      return preg_match('#^/[A-Za-z0-9\-._~/%]+$#', $value) ? $value : '[url-removed]';
+      return preg_match('@^/[A-Za-z0-9\-._~/%?=&#]*$@', $value) ? $value : '[url-removed]';
     }
 
     $parts = parse_url($value);
@@ -276,7 +274,10 @@ class Theme extends Model
       return '[url-removed]';
     }
 
-    return preg_replace('/["\'<>()\s;\\\\]/', '', $value);
+    // Strip only characters that could break out of the attribute/CSS context.
+    // Semicolons are kept: Google Fonts URLs use them for per-axis weight ranges
+    // (e.g. wght@400;700).
+    return preg_replace('/["\'<>()\s\\\\]/', '', $value);
   }
 
   /**

@@ -159,6 +159,35 @@ class ThemeSanitizationTest extends TestCase
     $this->assertSame('/fonts/myfont.css', $theme->fonts->importUrl);
   }
 
+  public function test_same_origin_font_path_keeps_cache_busting_query()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['importUrl' => '/storage/fonts/myfont.css?v=2'],
+    ]))->theme;
+
+    $this->assertSame('/storage/fonts/myfont.css?v=2', $theme->fonts->importUrl);
+  }
+
+  public function test_same_origin_font_path_with_spaces_is_rejected()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['importUrl' => '/fonts/My Font.css'],
+    ]))->theme;
+
+    $this->assertSame('[url-removed]', $theme->fonts->importUrl);
+  }
+
+  public function test_font_import_url_keeps_multi_weight_query_intact()
+  {
+    $url = 'https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;700&display=swap';
+
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['importUrl' => $url],
+    ]))->theme;
+
+    $this->assertSame($url, $theme->fonts->importUrl);
+  }
+
   public function test_image_size_rejects_script_url()
   {
     $theme = $this->theme($this->minimalTheme([
