@@ -193,8 +193,12 @@
 
       /* Fonts */
       @if(isset($theme->theme->fonts))
-      --font-family-body: {{ $theme->theme->fonts->body ?? 'Outfit, sans-serif' }};
-      --font-family-heading: {{ $theme->theme->fonts->heading ?? $theme->theme->fonts->body ?? 'Outfit, sans-serif' }};
+      {{-- Raw output: font families are re-quoted server side ("Source Sans 3"), and
+           htmlspecialchars() would turn those quotes into &quot;. The value is limited
+           to letters, digits, spaces, hyphens, commas and quotes, so it cannot close
+           this style block or start a new declaration. --}}
+      --font-family-body: {!! $theme->theme->fonts->body ?? '"Outfit", sans-serif' !!};
+      --font-family-heading: {!! $theme->theme->fonts->heading ?? $theme->theme->fonts->body ?? '"Outfit", sans-serif' !!};
       @endif
     }
   </style>

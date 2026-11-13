@@ -103,8 +103,8 @@ class ThemeSanitizationTest extends TestCase
       ],
     ]))->theme;
 
-    $this->assertSame('IBM Plex Sans, sans-serif', $theme->fonts->body);
-    $this->assertSame('Outfit, sans-serif', $theme->fonts->heading);
+    $this->assertSame('"IBM Plex Sans", sans-serif', $theme->fonts->body);
+    $this->assertSame('"Outfit", sans-serif', $theme->fonts->heading);
   }
 
   public function test_font_import_url_on_allowlisted_host_is_kept_intact()
@@ -203,5 +203,33 @@ class ThemeSanitizationTest extends TestCase
 
     $this->assertFalse(isset($theme->background));
     $this->assertFalse(isset($theme->fonts));
+  }
+
+  public function test_font_family_ending_in_digit_is_quoted()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['body' => 'Source Sans 3, sans-serif', 'heading' => 'Source Sans 3, sans-serif'],
+    ]))->theme;
+
+    $this->assertSame('"Source Sans 3", sans-serif', $theme->fonts->body);
+    $this->assertSame('"Source Sans 3", sans-serif', $theme->fonts->heading);
+  }
+
+  public function test_font_family_keeps_generic_families_unquoted()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['body' => '"My Font", system-ui, sans-serif'],
+    ]))->theme;
+
+    $this->assertSame('"My Font", system-ui, sans-serif', $theme->fonts->body);
+  }
+
+  public function test_font_family_cannot_inject_css_through_quotes()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'fonts' => ['body' => 'Evil", sans-serif; } body { display: none'],
+    ]))->theme;
+
+    $this->assertSame('"Outfit", sans-serif', $theme->fonts->body);
   }
 }

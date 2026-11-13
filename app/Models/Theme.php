@@ -140,6 +140,18 @@ class Theme extends Model
       return $obj;
     };
 
+    // Font family names are captured before the generic pass, because it strips the
+    // quotes that families such as "Source Sans 3" need to be valid CSS.
+    $rawFontFamilies = [];
+
+    if (isset($theme->fonts) && is_object($theme->fonts)) {
+      foreach (['body', 'heading'] as $fontKey) {
+        if (isset($theme->fonts->{$fontKey})) {
+          $rawFontFamilies[$fontKey] = $theme->fonts->{$fontKey};
+        }
+      }
+    }
+
     // Sanitize the entire theme object
     $sanitizeThemeObject($theme);
 
@@ -153,12 +165,10 @@ class Theme extends Model
       }
     }
 
-    // Fonts: family names are restricted to plain font stacks
+    // Fonts: families are re-normalized from the raw values captured above
     if (isset($theme->fonts) && is_object($theme->fonts)) {
-      foreach (['body', 'heading'] as $fontKey) {
-        if (isset($theme->fonts->{$fontKey})) {
-          $theme->fonts->{$fontKey} = $this->sanitizeFontFamily($theme->fonts->{$fontKey});
-        }
+      foreach ($rawFontFamilies as $fontKey => $rawFamily) {
+        $theme->fonts->{$fontKey} = $this->sanitizeFontFamily($rawFamily);
       }
     }
 
@@ -234,14 +244,44 @@ class Theme extends Model
   }
 
   /**
-   * font-family values: plain font stacks only (letters, digits, spaces,
-   * commas and hyphens). Quotes are stripped by the generic value filter.
+   * font-family values: normalized to an explicitly quoted font stack so that
+   * names ending in a digit ("Source Sans 3") stay valid CSS, while generic
+   * families (sans-serif, monospace, ...) stay unquoted so they keep resolving
+   * to the generic font. Anything outside a plain font stack is replaced.
    */
-  private function sanitizeFontFamily($value, string $fallback = 'Outfit, sans-serif'): string
+  private function sanitizeFontFamily($value, string $fallback = '"Outfit", sans-serif'): string
   {
     $value = trim(preg_replace('/\s+/', ' ', (string) $value));
 
-    return preg_match('/^[A-Za-z0-9][A-Za-z0-9 ,\-]*$/', $value) ? $value : $fallback;
+    if ($value === '') {
+      return $fallback;
+    }
+
+    $genericFamilies = [
+      'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui',
+      'ui-serif', 'ui-sans-serif', 'ui-monospace', 'emoji', 'math', 'fangsong',
+    ];
+
+    $normalized = [];
+
+    foreach (explode(',', $value) as $family) {
+      $family = trim(trim($family), "\"'");
+
+      if ($family === '') {
+        continue;
+      }
+
+      // Plain family names only: letters, digits, spaces and hyphens.
+      if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 \-]*$/', $family)) {
+        return $fallback;
+      }
+
+      $normalized[] = in_array(strtolower($family), $genericFamilies, true)
+        ? strtolower($family)
+        : '"' . $family . '"';
+    }
+
+    return $normalized === [] ? $fallback : implode(', ', $normalized);
   }
 
   /**
@@ -301,8 +341,8 @@ class Theme extends Model
         ]
       ],
       'fonts' => (object) [
-        'body' => 'Outfit, sans-serif',
-        'heading' => 'Outfit, sans-serif',
+        'body' => '"Outfit", sans-serif',
+        'heading' => '"Outfit", sans-serif',
         'importUrl' => ''
       ],
       'buttons' => (object) [
