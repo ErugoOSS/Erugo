@@ -156,7 +156,7 @@
 }
 
 body {
-  font-family: "Outfit", sans-serif;
+  font-family: var(--font-family-body, "Outfit", sans-serif);
   background: var(--panel-background-color);
   color: var(--panel-text-color);
 
@@ -167,6 +167,15 @@ body {
       color: var(--link-color-hover);
     }
   }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-heading, inherit);
 }
 
 #app {
@@ -227,11 +236,18 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: center center;
+    background-size: var(--background-image-size, cover);
+    background-position: var(--background-image-position, center center);
     background-repeat: no-repeat;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
+
+    // Mobile viewports crop cover-scaled backgrounds very aggressively, so themes
+    // can supply their own scaling for small screens.
+    @media (max-width: 900px) {
+      background-size: var(--background-image-size-mobile, var(--background-image-size, cover));
+      background-position: var(--background-image-position-mobile, var(--background-image-position, center center));
+    }
     .backgrounds-item-credit {
       position: fixed;
       top: 20px;

@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>{{ $settings['application_name'] }}</title>
+  @if(!empty($theme->theme->fonts->importUrl) && $theme->theme->fonts->importUrl !== '[url-removed]')
+  <link rel="stylesheet" href="{{ $theme->theme->fonts->importUrl }}">
+  @endif
   @vite('resources/js/app.js')
  
 </head>
@@ -178,6 +181,20 @@
         --settings-width: {{ $theme->theme->dimensions->settings->width ?? '100vw' }};
         --settings-height: {{ $theme->theme->dimensions->settings->height ?? '100vh' }};
         @endif
+      @endif
+
+      /* Background image scaling */
+      @if(isset($theme->theme->background))
+      --background-image-size: {{ $theme->theme->background->imageSize ?? 'cover' }};
+      --background-image-position: {{ $theme->theme->background->imagePosition ?? 'center center' }};
+      --background-image-size-mobile: {{ $theme->theme->background->mobile->imageSize ?? $theme->theme->background->imageSize ?? 'cover' }};
+      --background-image-position-mobile: {{ $theme->theme->background->mobile->imagePosition ?? $theme->theme->background->imagePosition ?? 'center center' }};
+      @endif
+
+      /* Fonts */
+      @if(isset($theme->theme->fonts))
+      --font-family-body: {{ $theme->theme->fonts->body ?? 'Outfit, sans-serif' }};
+      --font-family-heading: {{ $theme->theme->fonts->heading ?? $theme->theme->fonts->body ?? 'Outfit, sans-serif' }};
       @endif
     }
   </style>
