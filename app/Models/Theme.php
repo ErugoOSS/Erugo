@@ -74,6 +74,15 @@ class Theme extends Model
         $value = preg_replace($pattern, '[removed]', $value);
       }
 
+      // Stylesheet URLs (fonts -> importUrl): absolute https on a trusted host, or a
+      // same-origin path. Handled before the generic filter below, which would
+      // otherwise strip the query string and break font URLs.
+      $trimmedValue = trim($value);
+
+      if (preg_match('#^https?://#i', $trimmedValue) || str_starts_with($trimmedValue, '/')) {
+        return $this->sanitizeRemoteUrl($trimmedValue);
+      }
+
       // Only allow specific patterns for gradients and colors
       if (preg_match('/^(#[0-9a-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|[a-z-]+|linear-gradient\(([^()]|(\([^()]*\)))*\))$/i', $value)) {
         return $value;
@@ -131,8 +140,51 @@ class Theme extends Model
       return $obj;
     };
 
+    // Font family names are captured before the generic pass, because it strips the
+    // quotes that families such as "Source Sans 3" need to be valid CSS.
+    $rawFontFamilies = [];
+
+    if (isset($theme->fonts) && is_object($theme->fonts)) {
+      foreach (['body', 'heading'] as $fontKey) {
+        if (isset($theme->fonts->{$fontKey})) {
+          $rawFontFamilies[$fontKey] = $theme->fonts->{$fontKey};
+        }
+      }
+    }
+
     // Sanitize the entire theme object
     $sanitizeThemeObject($theme);
+
+    // Background scaling: strict keyword allowlist so a theme cannot inject
+    // arbitrary declarations into the background shorthand.
+    if (isset($theme->background) && is_object($theme->background)) {
+      $theme->background = $this->sanitizeBackgroundNode($theme->background);
+
+      if (isset($theme->background->mobile) && is_object($theme->background->mobile)) {
+        $theme->background->mobile = $this->sanitizeBackgroundNode($theme->background->mobile);
+      }
+    }
+
+    // Logo placement: left / center / right, mapped to flex alignment
+    if (isset($theme->logo) && is_object($theme->logo)) {
+      if (isset($theme->logo->align)) {
+        $theme->logo->align = $this->sanitizeLogoAlignment($theme->logo->align, 'flex-start');
+      }
+
+      if (isset($theme->logo->mobileAlign)) {
+        $theme->logo->mobileAlign = $this->sanitizeLogoAlignment(
+          $theme->logo->mobileAlign,
+          $theme->logo->align ?? 'center'
+        );
+      }
+    }
+
+    // Fonts: families are re-normalized from the raw values captured above
+    if (isset($theme->fonts) && is_object($theme->fonts)) {
+      foreach ($rawFontFamilies as $fontKey => $rawFamily) {
+        $theme->fonts->{$fontKey} = $this->sanitizeFontFamily($rawFamily);
+      }
+    }
 
     // Validate mandatory structure to prevent missing elements
     if (
@@ -148,6 +200,192 @@ class Theme extends Model
   }
 
   /**
+   * Sanitize a background scaling node (imageSize / imagePosition),
+   * either the top level background block or its mobile override.
+   */
+  private function sanitizeBackgroundNode($node)
+  {
+    if (isset($node->imageSize)) {
+      $node->imageSize = $this->sanitizeBackgroundSize($node->imageSize);
+    }
+
+    if (isset($node->imagePosition)) {
+      $node->imagePosition = $this->sanitizeBackgroundPosition($node->imagePosition);
+    }
+
+    if (isset($node->image)) {
+      $node->image = $this->sanitizeBackgroundImage($node->image);
+    }
+
+    return $node;
+  }
+
+  /**
+   * A background image reference must be a bare filename of an uploaded
+   * background, never a path: it is joined onto the /backgrounds route.
+   */
+  private function sanitizeBackgroundImage($value): string
+  {
+    $value = trim((string) $value);
+
+    if ($value === '' || basename($value) !== $value) {
+      return '';
+    }
+
+    // Same characters the upload sanitiser allows, with a media extension.
+    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 ._-]*\.(jpe?g|png|gif|webp|mp4|webm)$/i', $value)) {
+      return '';
+    }
+
+    if (str_contains($value, '..')) {
+      return '';
+    }
+
+    return $value;
+  }
+
+  /**
+   * Logo alignment: left / center / right (or the flex keywords) mapped to a
+   * justify-content value.
+   */
+  private function sanitizeLogoAlignment($value, string $fallback = 'flex-start'): string
+  {
+    $map = [
+      'left' => 'flex-start',
+      'flex-start' => 'flex-start',
+      'start' => 'flex-start',
+      'center' => 'center',
+      'centre' => 'center',
+      'middle' => 'center',
+      'right' => 'flex-end',
+      'flex-end' => 'flex-end',
+      'end' => 'flex-end',
+    ];
+
+    $key = strtolower(trim((string) $value));
+
+    return $map[$key] ?? $fallback;
+  }
+
+  /**
+   * background-size values: keywords or one/two lengths, e.g.
+   * "cover", "contain", "100% auto", "auto 100%"
+   */
+  private function sanitizeBackgroundSize($value, string $fallback = 'cover'): string
+  {
+    $tokens = preg_split('/\s+/', strtolower(trim((string) $value)), -1, PREG_SPLIT_NO_EMPTY);
+
+    if (empty($tokens) || count($tokens) > 2) {
+      return $fallback;
+    }
+
+    foreach ($tokens as $token) {
+      if (!preg_match('/^(auto|cover|contain|[0-9]+(\.[0-9]+)?(%|px|rem|em|vh|vw|vmin|vmax))$/', $token)) {
+        return $fallback;
+      }
+    }
+
+    return implode(' ', $tokens);
+  }
+
+  /**
+   * background-position values, e.g. "center center", "center top", "50% 25%"
+   */
+  private function sanitizeBackgroundPosition($value, string $fallback = 'center center'): string
+  {
+    $tokens = preg_split('/\s+/', strtolower(trim((string) $value)), -1, PREG_SPLIT_NO_EMPTY);
+
+    if (empty($tokens) || count($tokens) > 4) {
+      return $fallback;
+    }
+
+    foreach ($tokens as $token) {
+      if (!preg_match('/^(auto|center|left|right|top|bottom|[0-9]+(\.[0-9]+)?(%|px|rem|em|vh|vw))$/', $token)) {
+        return $fallback;
+      }
+    }
+
+    return implode(' ', $tokens);
+  }
+
+  /**
+   * font-family values: normalized to an explicitly quoted font stack so that
+   * names ending in a digit ("Source Sans 3") stay valid CSS, while generic
+   * families (sans-serif, monospace, ...) stay unquoted so they keep resolving
+   * to the generic font. Anything outside a plain font stack is replaced.
+   */
+  private function sanitizeFontFamily($value, string $fallback = '"Outfit", sans-serif'): string
+  {
+    $value = trim(preg_replace('/\s+/', ' ', (string) $value));
+
+    if ($value === '') {
+      return $fallback;
+    }
+
+    $genericFamilies = [
+      'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui',
+      'ui-serif', 'ui-sans-serif', 'ui-monospace', 'emoji', 'math', 'fangsong',
+    ];
+
+    $normalized = [];
+
+    foreach (explode(',', $value) as $family) {
+      $family = trim(trim($family), "\"'");
+
+      if ($family === '') {
+        continue;
+      }
+
+      // Plain family names only: letters, digits, spaces and hyphens.
+      if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 \-]*$/', $family)) {
+        return $fallback;
+      }
+
+      $normalized[] = in_array(strtolower($family), $genericFamilies, true)
+        ? strtolower($family)
+        : '"' . $family . '"';
+    }
+
+    return $normalized === [] ? $fallback : implode(', ', $normalized);
+  }
+
+  /**
+   * Allow https URLs on trusted font hosts only, or a same-origin path.
+   * Used for the optional font stylesheet (fonts.importUrl).
+   */
+  private function sanitizeRemoteUrl($value): string
+  {
+    $value = trim((string) $value);
+
+    // Same-origin path, e.g. /storage/fonts/myfont.css (query string allowed so
+    // uploads can be cache-busted). Protocol-relative URLs fall through and are rejected.
+    if (str_starts_with($value, '/') && !str_starts_with($value, '//')) {
+      return preg_match('@^/[A-Za-z0-9\-._~/%?=&#]*$@', $value) ? $value : '[url-removed]';
+    }
+
+    $parts = parse_url($value);
+
+    if (
+      $parts === false ||
+      !isset($parts['scheme'], $parts['host']) ||
+      strtolower($parts['scheme']) !== 'https'
+    ) {
+      return '[url-removed]';
+    }
+
+    $allowedHosts = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+
+    if (!in_array(strtolower($parts['host']), $allowedHosts, true)) {
+      return '[url-removed]';
+    }
+
+    // Strip only characters that could break out of the attribute/CSS context.
+    // Semicolons are kept: Google Fonts URLs use them for per-axis weight ranges
+    // (e.g. wght@400;700).
+    return preg_replace('/["\'<>()\s\\\\]/', '', $value);
+  }
+
+  /**
    * Get default theme structure when theme is invalid or missing parts
    */
   private function getDefaultTheme()
@@ -158,6 +396,24 @@ class Theme extends Model
         'hover' => 'rgb(203, 166, 247)',
         'active' => 'rgb(221, 195, 255)',
         'disabled' => 'rgba(190, 190, 190, 0.4)'
+      ],
+      'background' => (object) [
+        'imageSize' => 'cover',
+        'imagePosition' => 'center center',
+        'mobile' => (object) [
+          'imageSize' => '100% auto',
+          'imagePosition' => 'center top',
+          'image' => ''
+        ]
+      ],
+      'logo' => (object) [
+        'align' => 'left',
+        'mobileAlign' => 'center'
+      ],
+      'fonts' => (object) [
+        'body' => '"Outfit", sans-serif',
+        'heading' => '"Outfit", sans-serif',
+        'importUrl' => ''
       ],
       'buttons' => (object) [
         'primary' => (object) [
