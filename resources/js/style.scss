@@ -205,12 +205,12 @@ h6 {
 
 .logo-container {
   display: flex;
-  justify-content: flex-start;
+  justify-content: var(--logo-alignment, flex-start);
   align-items: flex-start;
   width: 100%;
 
   @media (max-width: 900px) {
-    justify-content: center;
+    justify-content: var(--logo-alignment-mobile, center);
     padding-top: 10px;
   }
 
@@ -229,6 +229,22 @@ h6 {
   height: 100%;
   z-index: -100;
   overflow: hidden;
+
+  // When the theme supplies a dedicated mobile background, the slideshow steps
+  // aside on small screens and the mobile layer below takes over.
+  &.has-mobile-background {
+    @media (max-width: 900px) {
+      display: none;
+    }
+  }
+
+  &.backgrounds-mobile {
+    display: none;
+
+    @media (max-width: 900px) {
+      display: block;
+    }
+  }
 
   .backgrounds-item {
     position: absolute;

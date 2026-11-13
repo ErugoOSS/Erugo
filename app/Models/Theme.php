@@ -165,6 +165,20 @@ class Theme extends Model
       }
     }
 
+    // Logo placement: left / center / right, mapped to flex alignment
+    if (isset($theme->logo) && is_object($theme->logo)) {
+      if (isset($theme->logo->align)) {
+        $theme->logo->align = $this->sanitizeLogoAlignment($theme->logo->align, 'flex-start');
+      }
+
+      if (isset($theme->logo->mobileAlign)) {
+        $theme->logo->mobileAlign = $this->sanitizeLogoAlignment(
+          $theme->logo->mobileAlign,
+          $theme->logo->align ?? 'center'
+        );
+      }
+    }
+
     // Fonts: families are re-normalized from the raw values captured above
     if (isset($theme->fonts) && is_object($theme->fonts)) {
       foreach ($rawFontFamilies as $fontKey => $rawFamily) {
@@ -199,7 +213,58 @@ class Theme extends Model
       $node->imagePosition = $this->sanitizeBackgroundPosition($node->imagePosition);
     }
 
+    if (isset($node->image)) {
+      $node->image = $this->sanitizeBackgroundImage($node->image);
+    }
+
     return $node;
+  }
+
+  /**
+   * A background image reference must be a bare filename of an uploaded
+   * background, never a path: it is joined onto the /backgrounds route.
+   */
+  private function sanitizeBackgroundImage($value): string
+  {
+    $value = trim((string) $value);
+
+    if ($value === '' || basename($value) !== $value) {
+      return '';
+    }
+
+    // Same characters the upload sanitiser allows, with a media extension.
+    if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 ._-]*\.(jpe?g|png|gif|webp|mp4|webm)$/i', $value)) {
+      return '';
+    }
+
+    if (str_contains($value, '..')) {
+      return '';
+    }
+
+    return $value;
+  }
+
+  /**
+   * Logo alignment: left / center / right (or the flex keywords) mapped to a
+   * justify-content value.
+   */
+  private function sanitizeLogoAlignment($value, string $fallback = 'flex-start'): string
+  {
+    $map = [
+      'left' => 'flex-start',
+      'flex-start' => 'flex-start',
+      'start' => 'flex-start',
+      'center' => 'center',
+      'centre' => 'center',
+      'middle' => 'center',
+      'right' => 'flex-end',
+      'flex-end' => 'flex-end',
+      'end' => 'flex-end',
+    ];
+
+    $key = strtolower(trim((string) $value));
+
+    return $map[$key] ?? $fallback;
   }
 
   /**
@@ -337,8 +402,13 @@ class Theme extends Model
         'imagePosition' => 'center center',
         'mobile' => (object) [
           'imageSize' => '100% auto',
-          'imagePosition' => 'center top'
+          'imagePosition' => 'center top',
+          'image' => ''
         ]
+      ],
+      'logo' => (object) [
+        'align' => 'left',
+        'mobileAlign' => 'center'
       ],
       'fonts' => (object) [
         'body' => '"Outfit", sans-serif',

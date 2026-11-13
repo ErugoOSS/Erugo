@@ -232,4 +232,94 @@ class ThemeSanitizationTest extends TestCase
 
     $this->assertSame('"Outfit", sans-serif', $theme->fonts->body);
   }
+
+  public function test_logo_alignment_maps_to_flex_values()
+  {
+    $cases = [
+      'left' => 'flex-start',
+      'LEFT' => 'flex-start',
+      'center' => 'center',
+      'right' => 'flex-end',
+      'flex-end' => 'flex-end',
+      'end' => 'flex-end',
+      'sideways' => 'flex-start',
+      'display: none' => 'flex-start',
+    ];
+
+    foreach ($cases as $input => $expected) {
+      $theme = $this->theme($this->minimalTheme([
+        'logo' => ['align' => $input],
+      ]))->theme;
+
+      $this->assertSame($expected, $theme->logo->align);
+    }
+  }
+
+  public function test_logo_mobile_alignment_falls_back_to_desktop_value()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'logo' => ['align' => 'right', 'mobileAlign' => 'nonsense'],
+    ]))->theme;
+
+    $this->assertSame('flex-end', $theme->logo->align);
+    $this->assertSame('flex-end', $theme->logo->mobileAlign);
+  }
+
+  public function test_logo_mobile_alignment_can_differ_from_desktop()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'logo' => ['align' => 'left', 'mobileAlign' => 'center'],
+    ]))->theme;
+
+    $this->assertSame('flex-start', $theme->logo->align);
+    $this->assertSame('center', $theme->logo->mobileAlign);
+  }
+
+  public function test_mobile_background_accepts_uploaded_filename()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'background' => ['mobile' => ['image' => 'bastion mobile-bg_2.webp']],
+    ]))->theme;
+
+    $this->assertSame('bastion mobile-bg_2.webp', $theme->background->mobile->image);
+  }
+
+  public function test_mobile_background_rejects_paths_and_other_files()
+  {
+    $rejected = [
+      '../../app.key',
+      '../backgrounds/x.jpg',
+      '/etc/passwd.jpg',
+      'C:\temp\x.jpg',
+      'frontend.js',
+      'shell.php.jpg.txt',
+      'x.jpg?cache=1',
+      'x.php',
+      'noextension',
+    ];
+
+    foreach ($rejected as $candidate) {
+      $theme = $this->theme($this->minimalTheme([
+        'background' => ['mobile' => ['image' => $candidate]],
+      ]))->theme;
+
+      $this->assertSame('', $theme->background->mobile->image);
+    }
+  }
+
+  public function test_mobile_background_accepts_video_uploads()
+  {
+    $theme = $this->theme($this->minimalTheme([
+      'background' => ['mobile' => ['image' => 'loop.mp4']],
+    ]))->theme;
+
+    $this->assertSame('loop.mp4', $theme->background->mobile->image);
+  }
+
+  public function test_themes_without_logo_block_are_unchanged()
+  {
+    $theme = $this->theme($this->minimalTheme())->theme;
+
+    $this->assertFalse(isset($theme->logo));
+  }
 }
