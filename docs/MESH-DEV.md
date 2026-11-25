@@ -170,6 +170,7 @@ The local Caddy gateway remains the UI/control-plane entry point and the legacy 
 | Peer health works only on localhost | `MESH_BIND` still loopback and gateway needs direct access | For the enrolled direct-URL design this is fine; clients use the public HTTPS URL, not this port |
 | `peer-init` returns HTTP 401 for `/api/mesh/public-key` | `MESH_COORDINATOR_URL` points at an Authelia/SSO-protected hostname, not the public Erugo coordinator | Use the public Erugo URL (for example `https://share.bastionmedia.co.za`) and bypass auth for `/api/mesh/*` |
 | `peer-init` returns HTTP 404 for `/api/mesh/public-key` | Coordinator is running an older Erugo build without the mesh routes | Deploy this branch to the coordinator first; `/api/health` returning 200 does not prove the mesh routes exist |
+| `peer-init` returns HTTP 502 | Cloudflare/tunnel cannot reach the origin | Confirm `curl http://127.0.0.1:18090/api/mesh/public-key` works on the coordinator host, then set the tunnel service to `HTTP` → `localhost:18090` on that same host |
 | `peer-init` cannot fetch public key | `MESH_COORDINATOR_URL` unreachable or wrong scheme | Use the coordinator's public HTTPS URL reachable from the peer |
 | Chunk PUT returns 401 | Node not enrolled, revoked, or blob was forged | Approve a fresh blob in Settings → Mesh |
 | Commit stays 409 with missing indexes | Peer ACKs rejected — node revoked or key mismatch | Revoke and re-enroll the node with a fresh blob |
