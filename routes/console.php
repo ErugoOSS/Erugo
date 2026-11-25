@@ -74,7 +74,12 @@ Artisan::command('mesh:peer-init {node} {url}', function (
     }
 
     if (!$response->successful()) {
-        $this->error('Coordinator public-key endpoint returned HTTP ' . $response->status());
+        $endpoint = $coordinator . '/api/mesh/public-key';
+        $this->error('Coordinator public-key endpoint ' . $endpoint . ' returned HTTP ' . $response->status());
+        $body = trim(substr($response->body(), 0, 300));
+        if ($body !== '') {
+            $this->line('Response body: ' . $body);
+        }
         return 1;
     }
 
