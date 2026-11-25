@@ -16,6 +16,13 @@ class MeshTokenService
 {
     private const VERSION = 'v1';
 
+    private const SIGNED_VERSION = 'v2';
+
+    public function __construct(private MeshIdentityService $identity)
+    {
+        //
+    }
+
     private const MIN_SECRET_LENGTH = 32;
 
     /**
@@ -110,6 +117,146 @@ class MeshTokenService
 
         // A token is single use. Fail closed if the replay store is unavailable:
         // accepting an unrecorded nonce would make replay protection optional.
+        $replayKey = 'mesh:token:' . hash('sha256', $payload['nonce']);
+        try {
+            $stored = Cache::add($replayKey, 1, $remaining);
+        } catch (\Throwable $e) {
+            throw new InvalidMeshTokenException('Mesh token replay store unavailable');
+        }
+
+        if (!$stored) {
+            throw new InvalidMeshTokenException('Mesh token already used');
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Issue a host-bound token for direct peer URLs. v2 tokens are signed with
+     * the coordinator Ed25519 key and verified by peers with its public key.
+     */
+    public function issueForUrl(
+        string $operation,
+        string $method,
+        string $url,
+        array $claims,
+        ?int $ttlSeconds = null
+    ): string {
+        $parts = parse_url($url);
+        if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+            throw new InvalidMeshTokenException('Invalid token URL');
+        }
+
+        $this->assertOperation($operation);
+        $this->assertMethod($method);
+        $this->assertObject($claims['obj'] ?? null);
+        $this->assertIndex($claims['idx'] ?? '');
+        $this->assertHash($claims['sha'] ?? '');
+
+        $ttl = $ttlSeconds ?? (int) config('mesh.token_ttl');
+        $ttl = min(max(30, $ttl), (int) config('mesh.max_token_ttl'));
+
+        $payload = [
+            'v' => self::SIGNED_VERSION,
+            'op' => $operation,
+            'm' => strtoupper($method),
+            'h' => strtolower($parts['scheme']) . '://' . strtolower($parts['host'])
+                . (isset($parts['port']) ? ':' . $parts['port'] : ''),
+            'p' => ($parts['path'] ?? '') ?: '/',
+            'obj' => $claims['obj'],
+            'idx' => (string) ($claims['idx'] ?? ''),
+            'sha' => (string) ($claims['sha'] ?? ''),
+            'exp' => time() + $ttl,
+            'nonce' => bin2hex(random_bytes(16)),
+        ];
+
+        $encoded = $this->encode($payload);
+        $signature = base64_decode($this->identity->sign($this->decode($encoded), 'coordinator'), true);
+
+        if ($signature === false) {
+            throw new InvalidMeshTokenException('Could not sign token');
+        }
+
+        return self::SIGNED_VERSION . '.'
+            . $encoded . '.'
+            . $this->encode($signature);
+    }
+
+    /**
+     * Verify either a legacy v1 HMAC token or a v2 host-bound signed token.
+     */
+    public function verifyForUrl(string $token, string $method, string $url): array
+    {
+        $version = explode('.', $token)[0] ?? '';
+
+        if ($version === self::VERSION) {
+            $parts = parse_url($url);
+            $path = is_array($parts) ? ltrim($parts['path'] ?? '', '/') : '';
+
+            return $this->verify($token, $method, $path);
+        }
+
+        if ($version !== self::SIGNED_VERSION) {
+            throw new InvalidMeshTokenException('Unsupported mesh token version');
+        }
+
+        $parts = explode('.', $token);
+        if (count($parts) !== 3) {
+            throw new InvalidMeshTokenException('Malformed mesh token');
+        }
+
+        $json = $this->decode($parts[1]);
+        $signature = $this->decode($parts[2]);
+        $payload = json_decode($json, true);
+
+        if (!is_array($payload)) {
+            throw new InvalidMeshTokenException('Malformed mesh token');
+        }
+
+        $required = ['v', 'op', 'm', 'h', 'p', 'obj', 'idx', 'sha', 'exp', 'nonce'];
+        foreach ($required as $key) {
+            if (!array_key_exists($key, $payload)) {
+                throw new InvalidMeshTokenException('Incomplete mesh token');
+            }
+        }
+
+        $this->assertOperation($payload['op']);
+        $this->assertMethod($payload['m']);
+        $this->assertObject($payload['obj']);
+        $this->assertIndex($payload['idx']);
+        $this->assertHash($payload['sha']);
+
+        if ($payload['v'] !== self::SIGNED_VERSION || !is_int($payload['exp'])
+            || !is_string($payload['nonce'])
+            || !preg_match('/^[a-f0-9]{32}$/', $payload['nonce'])) {
+            throw new InvalidMeshTokenException('Invalid mesh token claims');
+        }
+
+        $coordinatorKey = $this->identity->storedCoordinatorPublicKey();
+        if ($coordinatorKey === null || !$this->identity->verify($json, base64_encode($signature), $coordinatorKey)) {
+            throw new InvalidMeshTokenException('Bad mesh token signature');
+        }
+
+        $requestParts = parse_url($url);
+        if (!is_array($requestParts) || empty($requestParts['scheme']) || empty($requestParts['host'])) {
+            throw new InvalidMeshTokenException('Invalid token URL');
+        }
+
+        $host = strtolower($requestParts['scheme']) . '://' . strtolower($requestParts['host'])
+            . (isset($requestParts['port']) ? ':' . $requestParts['port'] : '');
+        $path = ($requestParts['path'] ?? '') ?: '/';
+
+        if (!hash_equals(strtoupper($method), $payload['m'])
+            || !hash_equals($host, $payload['h'])
+            || !hash_equals($path, $payload['p'])) {
+            throw new InvalidMeshTokenException('Mesh token does not match request');
+        }
+
+        $remaining = $payload['exp'] - time();
+        if ($remaining <= 0 || $remaining > (int) config('mesh.max_token_ttl')) {
+            throw new InvalidMeshTokenException('Mesh token expired or invalid lifetime');
+        }
+
         $replayKey = 'mesh:token:' . hash('sha256', $payload['nonce']);
         try {
             $stored = Cache::add($replayKey, 1, $remaining);

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Exceptions\InvalidMeshEnrollmentException;
 use App\Services\MeshEnrollmentService;
+use App\Services\MeshTokenService;
 use App\Services\MeshIdentityService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -128,6 +129,30 @@ class MeshIdentityTest extends TestCase
         $this->expectExceptionMessage('https');
 
         $enrollment->createBlob('peer1', 'http://peer1.example.test');
+    }
+
+    public function test_host_bound_token_cannot_be_replayed_on_another_host(): void
+    {
+        $identity = app(MeshIdentityService::class);
+        $identity->rememberCoordinatorPublicKey($identity->coordinatorPublicKey());
+        $tokens = app(MeshTokenService::class);
+
+        $url = 'https://peer1.example.test/n/peer1/chunks/abc123/0';
+        $token = $tokens->issueForUrl(
+            'chunk.put',
+            'PUT',
+            $url,
+            ['obj' => 'abc123', 'idx' => '0', 'sha' => str_repeat('a', 64)]
+        );
+
+        $this->assertSame('peer1', $tokens->verifyForUrl($token, 'PUT', $url)['obj'] === 'abc123' ? 'peer1' : 'wrong');
+
+        $this->expectException(\App\Exceptions\InvalidMeshTokenException::class);
+        $tokens->verifyForUrl(
+            $token,
+            'PUT',
+            'https://peer2.example.test/n/peer1/chunks/abc123/0'
+        );
     }
 
     public function test_public_key_endpoint_serves_only_the_public_key(): void

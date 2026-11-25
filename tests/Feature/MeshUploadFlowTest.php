@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Contracts\Mesh\ManifestRepository;
+use App\Contracts\Mesh\NodeRepository;
 use App\Models\MeshTombstone;
 use App\Models\User;
 use App\Services\MeshTokenService;
@@ -174,6 +175,30 @@ class MeshUploadFlowTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.chunk_size', 4)
             ->assertJsonStructure(['data' => ['tokens' => ['peer1' => ['1'], 'peer2' => ['1']]]]);
+    }
+
+    public function test_enrolled_peers_get_absolute_urls_and_signed_tokens(): void
+    {
+        app(NodeRepository::class)->enroll([
+            'node_id' => 'peer1',
+            'endpoint' => 'https://peer1.example.test',
+            'public_key' => base64_encode(random_bytes(32)),
+            'status' => 'active',
+            'revoked_at' => null,
+        ]);
+
+        $intent = $this->createIntent();
+        $response = $this->postJson(
+            '/api/mesh/uploads/' . $intent['intent_id'] . '/tokens',
+            ['indices' => [0]]
+        )->assertOk();
+
+        $this->assertStringStartsWith(
+            'https://peer1.example.test/n/peer1/chunks/',
+            $response->json('data.upload_urls.peer1.0')
+        );
+        $this->assertStringStartsWith('v2.', $response->json('data.tokens.peer1.0'));
+        $this->assertStringStartsWith('v1.', $response->json('data.tokens.peer2.0'));
     }
 
     public function test_commit_requires_two_acks_and_names_the_missing_chunk(): void

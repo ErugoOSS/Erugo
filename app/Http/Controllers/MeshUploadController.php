@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Mesh\ManifestRepository;
+use App\Contracts\Mesh\NodeRepository;
 use App\Services\MeshTokenService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
@@ -117,7 +118,8 @@ class MeshUploadController extends Controller
         Request $request,
         string $intentId,
         ManifestRepository $manifests,
-        MeshTokenService $tokens
+        MeshTokenService $tokens,
+        NodeRepository $nodes
     ) {
         $intent = $manifests->findIntent($intentId);
 
@@ -136,8 +138,9 @@ class MeshUploadController extends Controller
 
         $indices = $validated['indices'] ?? range(0, $intent->chunk_count - 1);
         $hashes = $intent->chunk_hashes;
-        $nodes = config('mesh.nodes');
+        $configuredNodes = config('mesh.nodes');
         $tokensByNode = [];
+        $urlsByNode = [];
 
         foreach ($indices as $index) {
             if (!array_key_exists($index, $hashes)) {
@@ -147,14 +150,29 @@ class MeshUploadController extends Controller
                 ], 422);
             }
 
-            foreach (array_keys($nodes) as $nodeId) {
+            foreach (array_keys($configuredNodes) as $nodeId) {
+                $registered = $nodes->find($nodeId);
+                $signed = $registered && $registered->status === 'active' && $registered->public_key;
+                $endpoint = $signed
+                    ? $registered->endpoint
+                    : (string) $configuredNodes[$nodeId];
                 $path = '/n/' . $nodeId . '/chunks/' . $intentId . '/' . $index;
-                $tokensByNode[$nodeId][$index] = $tokens->issue(
-                    'chunk.put',
-                    'PUT',
-                    $path,
-                    ['obj' => $intentId, 'idx' => (string) $index, 'sha' => $hashes[$index]]
-                );
+                $url = rtrim($endpoint, '/') . $path;
+
+                $urlsByNode[$nodeId][$index] = $url;
+                $tokensByNode[$nodeId][$index] = $signed
+                    ? $tokens->issueForUrl(
+                        'chunk.put',
+                        'PUT',
+                        $url,
+                        ['obj' => $intentId, 'idx' => (string) $index, 'sha' => $hashes[$index]]
+                    )
+                    : $tokens->issue(
+                        'chunk.put',
+                        'PUT',
+                        ltrim($path, '/'),
+                        ['obj' => $intentId, 'idx' => (string) $index, 'sha' => $hashes[$index]]
+                    );
             }
         }
 
@@ -162,6 +180,7 @@ class MeshUploadController extends Controller
             'status' => 'success',
             'data' => [
                 'tokens' => $tokensByNode,
+                'upload_urls' => $urlsByNode,
                 'chunk_size' => $intent->chunk_size,
             ],
         ]);

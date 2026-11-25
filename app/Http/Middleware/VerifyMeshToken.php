@@ -29,7 +29,7 @@ class VerifyMeshToken
         }
 
         try {
-            $claims = $this->tokens->verify($token, $request->getMethod(), $request->path());
+            $claims = $this->tokens->verifyForUrl($token, $request->getMethod(), $request->url());
         } catch (InvalidMeshTokenException $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 401);
         } catch (\Throwable $e) {
