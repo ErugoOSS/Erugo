@@ -74,7 +74,7 @@ One coordinator and two peers run on separate hosts. Enrolled peers use Ed25519 
 cd ~/erugoshard/Erugo
 git fetch origin feat/chunk-mesh-phase1
 git checkout -B feat/chunk-mesh-phase1 origin/feat/chunk-mesh-phase1
-git rev-parse --short HEAD   # must be fb5602e or newer
+git rev-parse --short HEAD   # must be 09d3722 or newer
 ls -la .env.mesh.example docker-compose.mesh-node.yml scripts/mesh-bootstrap.sh
 ```
 
@@ -82,7 +82,7 @@ ls -la .env.mesh.example docker-compose.mesh-node.yml scripts/mesh-bootstrap.sh
 
 | Thing | Value | Notes |
 |---|---|---|
-| Public coordinator | reuse `https://share.bastionmedia.co.za` if that is the existing Erugo site | No new coordinator hostname is required. `/api/mesh/public-key` and `/api/mesh/uploads` are served by the same app. |
+| Public coordinator | `https://dev.bastionmedia.co.za` for testing; reuse `https://share.bastionmedia.co.za` if that is the existing Erugo site | No new coordinator hostname is required for production if the existing site runs this branch. `/api/mesh/public-key` and `/api/mesh/uploads` are served by the same app. |
 | Public peer 1 / peer 2 | new hostnames, e.g. `https://peer1.bastionmedia.co.za` | Required for direct data URLs. Do not point both at the coordinator hostname, or the coordinator uplink becomes the bottleneck again. |
 | Public port | 443 | TLS terminates at Cloudflare/an existing tunnel. |
 | Peer app bind | `127.0.0.1:18090` by default | Container port 80 maps to this host port. A tunnel on the same host forwards to `http://localhost:18090`; loopback is safe and correct. |
@@ -117,7 +117,7 @@ The script asks for:
 
 - node id: `coordinator`, `peer1` or `peer2` (unique per host)
 - the **public HTTPS URL of this host**, e.g. `https://peer1.example.com` — used as `APP_URL` and as this node's data URL
-- the coordinator API URL reachable **from this host**, e.g. `https://studio.example.com`
+- the coordinator API URL reachable **from this host**, e.g. `https://dev.bastionmedia.co.za` (never an SSO-protected hostname such as `studio...`)
 
 It generates a unique `APP_KEY` and `JWT_SECRET` per host and a random legacy-only `MESH_SECRET`. Nothing has to be copied between hosts. Each peer needs public DNS and TLS for its data URL.
 
@@ -140,7 +140,7 @@ curl -sS http://127.0.0.1:18090/n/peer1/health
 From that host, confirm the peer can reach the coordinator (needed for signed ACK callbacks):
 
 ```sh
-curl -sS https://studio.example.com/api/health
+curl -sS https://dev.bastionmedia.co.za/api/health
 ```
 
 ### 4. Enroll the peer
@@ -150,10 +150,18 @@ On each peer host, generate a registration blob:
 ```sh
 sudo docker compose --env-file .env.mesh -p erugo-mesh-node \
   -f docker-compose.mesh-node.yml exec app \
-  php artisan mesh:peer-init peer1 https://peer1.example.com
+  php artisan mesh:peer-init peer1 https://peer1.everill.co.za
 ```
 
+Use the same node id and public URL that you entered in `.env.mesh`.
+
 The command fetches the coordinator public key from `/api/mesh/public-key`, creates a local Ed25519 keypair (private key stays in `storage/app/mesh/identity.json`, mode `600`), and prints a short-lived single-use blob. Copy that blob into **Settings → Mesh** on the coordinator and click **Approve peer**. The coordinator stores only the peer's public key and data URL. Revoke a peer from the same page if its key is compromised.
+
+Complete these checks before an upload test:
+
+1. Create the first admin account on the coordinator if the site is fresh; Settings → Mesh is admin-only.
+2. Verify each peer's public URL from outside its host: `curl -sS https://peer1.everill.co.za/n/peer1/health` must return `"node":"peer1"`. A 502 means the Cloudflare hostname has no reachable origin on that host.
+3. On the coordinator, edit `.env.mesh` so `MESH_NODES` lists **every** enrolled peer URL, then recreate the coordinator container. With `MESH_WRITE_COPIES=2`, enrolling only one peer will leave every commit at 409.
 
 ### 5. Data flow after enrollment
 
@@ -170,7 +178,10 @@ The local Caddy gateway remains the UI/control-plane entry point and the legacy 
 | Peer health works only on localhost | `MESH_BIND` still loopback and gateway needs direct access | For the enrolled direct-URL design this is fine; clients use the public HTTPS URL, not this port |
 | `peer-init` returns HTTP 401 for `/api/mesh/public-key` | `MESH_COORDINATOR_URL` points at an Authelia/SSO-protected hostname, not the public Erugo coordinator | Use the public Erugo URL (for example `https://share.bastionmedia.co.za`) and bypass auth for `/api/mesh/*` |
 | `peer-init` returns HTTP 404 for `/api/mesh/public-key` | Coordinator is running an older Erugo build without the mesh routes | Deploy this branch to the coordinator first; `/api/health` returning 200 does not prove the mesh routes exist |
-| `peer-init` returns HTTP 502 | Cloudflare/tunnel cannot reach the origin | Confirm `curl http://127.0.0.1:18090/api/mesh/public-key` works on the coordinator host, then set the tunnel service to `HTTP` → `localhost:18090` on that same host |
+| `peer-init` returns HTTP 502 | Cloudflare/tunnel cannot reach the coordinator origin | Confirm `curl http://127.0.0.1:18090/api/mesh/public-key` works on the coordinator host, then set the tunnel service to `HTTP` → `localhost:18090` on that same host |
+| `https://peer1.../n/peer1/health` returns 502 | Peer hostname has no origin | On that peer host confirm local `curl http://127.0.0.1:18090/n/peer1/health` is 200, then route the public hostname to `http://localhost:18090` on that host |
+| White page with a message about connecting to `127.0.0.1:5173` | Stale `public/hot` baked into the image | Pull `09d3722` or newer and rebuild; `.dockerignore` now excludes `public/hot` |
+| Root page 500 / no settings on a fresh coordinator | Old image created before the SQLite entrypoint fix | Pull `09d3722` or newer, rebuild, then `php artisan db:seed --force` if the database was already empty |
 | `peer-init` cannot fetch public key | `MESH_COORDINATOR_URL` unreachable or wrong scheme | Use the coordinator's public HTTPS URL reachable from the peer |
 | Chunk PUT returns 401 | Node not enrolled, revoked, or blob was forged | Approve a fresh blob in Settings → Mesh |
 | Commit stays 409 with missing indexes | Peer ACKs rejected — node revoked or key mismatch | Revoke and re-enroll the node with a fresh blob |
@@ -227,7 +238,7 @@ If any chunk is short of two ACKs the response is `409` and names the missing in
 
 ## What is deliberately not here yet
 
-- Chunked download assembly and the browser fast path (phase 1 task 1.5).
+- Browser-side sharded upload/download: the Erugo UI still uses its existing tus upload path. The mesh protocol in this branch is exercised through the documented API with curl.
 - Background replication to full copies on every peer (task 1.6).
 - Delete/expiry fan-out to peers and DB-backed stats (task 1.7).
 - Shared Postgres, full app failover, erasure coding, dynamic node discovery or migration of existing local shares.
