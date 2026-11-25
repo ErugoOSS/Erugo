@@ -137,3 +137,19 @@ Local harness with 2-3 containers, no live hosts:
 - Metadata store portability and app failover design.
 - Measured throughput target and cost model per node count.
 - Whether cold full copies should be compacted later (a hybrid erasure tier).
+- Peer enrollment / per-node identity (research below; design not yet confirmed).
+
+## 10. Prior Art — peer enrollment and transport
+
+Research date: 2026-11-25. No implementation decision has been confirmed yet.
+
+| Candidate | Source | Verdict | Notes |
+|---|---|---|---|
+| Tailscale auth keys | https://tailscale.com/docs/features/access-control/auth-keys | extend | One-off and reusable keys with expiry; a one-off, expiring invite is the established pattern for headless enrollment. |
+| NetBird setup keys | https://docs.netbird.io/manage/peers/register-machines-using-setup-keys | extend | One-off vs reusable, usage limits, expiry, auto-groups. Confirms one-time token + usage limit as the expected UX. Revoking a key does not remove already-enrolled peers — revoke the peer separately. |
+| Lattice ADR-0003 | https://docs.alattice.io/adr/0003-peer-enrollment-approval-and-client-side-keygen | adopt / extend | Client-side key generation: the control plane stores only public keys. Lifecycle `pending → approved → revoked`, with re-registration under a different public key treated as a new device. This directly addresses the shared-secret problem. |
+| libsodium Ed25519 detached signatures | https://www.php.net/manual/en/function.sodium-crypto-sign-detached.php | adopt | Verified `ext-sodium` is present in the Erugo image and `sodium_crypto_sign_keypair()` works. No composer dependency needed. |
+| WireGuard | https://routerd.net/docs/adr/wireguard-peer-enrollment and https://github.com/florolf/autowg | compose / defer | Solves encrypted peer-to-peer transport and gives a key-based peer identity, but needs `wg` tooling (absent from the image), `NET_ADMIN`, endpoint management and NAT traversal. It does not replace application-layer chunk-token authorization. Best treated as a later transport layer, not the enrollment mechanism. |
+| SPIFFE / SPIRE join tokens | https://spiffe.io/docs/latest/deploying/spire_agent/ | build / reject for now | Join tokens are short-lived bootstrap secrets, but full workload attestation (trust bundles, SVID rotation) is disproportionate to a dev-scale three-node test. |
+
+Observation: the repeated pattern across mature systems is **one-time invite token + client-generated keypair + server stores only public keys**. That removes the shared `MESH_SECRET` from every host without adding WireGuard to the container.

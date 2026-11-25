@@ -188,7 +188,7 @@ Do not reuse the throwaway secret in `docker-compose.mesh-dev.yml`. Do not share
 
 ### Can a peer register itself automatically?
 
-Not in this phase. The coordinator currently trusts a static `MESH_NODES` map plus one shared secret. Proper enrollment needs per-node keys: the peer generates a keypair, an operator registers its public key and endpoint on the coordinator, and the coordinator signs chunk tokens per node while verifying ACKs with that node's key. That is a protocol change, not a config tweak. The bootstrap script is the supported shortcut for this phase; do not paste the shared secret into tickets or chat.
+Not yet implemented. The coordinator currently trusts a static `MESH_NODES` map plus one shared secret. Proper enrollment needs per-node keys: the peer generates a keypair, an operator registers its public key and endpoint on the coordinator, and the coordinator signs chunk tokens per node while verifying ACKs with that node's key. That is a protocol change, not a config tweak. Research and prior art are in `specs/chunk-mesh-storage.md` under `Prior Art — peer enrollment and transport`. The bootstrap script is the supported shortcut until enrollment is designed and built; do not paste the shared secret into tickets or chat.
 
 ## Upload protocol (for testing with curl)
 
