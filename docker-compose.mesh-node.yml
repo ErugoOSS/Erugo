@@ -44,7 +44,7 @@ services:
       MESH_TOKEN_TTL: ${MESH_TOKEN_TTL:-300}
       MESH_MAX_TOKEN_TTL: ${MESH_MAX_TOKEN_TTL:-900}
     ports:
-      - "${MESH_BIND:-127.0.0.1:8090}:80"
+      - "${MESH_BIND:-127.0.0.1:18090}:80"
     volumes:
       - mesh-storage:/var/www/html/storage
 

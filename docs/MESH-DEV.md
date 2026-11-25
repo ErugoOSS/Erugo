@@ -18,7 +18,7 @@ One **coordinator** serves Erugo's UI/API and owns users, shares, manifests and 
 
 ## Local three-instance gateway (recommended main gate)
 
-The compose file starts three app containers and one Caddy gateway. It uses ports 18091-18094 so it does not collide with a normal Erugo dev stack.
+The compose file starts three app containers and one Caddy gateway. It uses ports 18091-18094 so it does not collide with a normal Erugo dev stack. A single remote node uses 18090; neither range uses the already-occupied 8090.
 
 ```sh
 # from the repository root
@@ -78,7 +78,19 @@ git rev-parse --short HEAD   # must be fb5602e or newer
 ls -la .env.mesh.example docker-compose.mesh-node.yml scripts/mesh-bootstrap.sh
 ```
 
-### 1. Create `.env.mesh` on each host
+### 1. Addresses and ports
+
+| Thing | Value | Notes |
+|---|---|---|
+| Public coordinator | reuse `https://share.bastionmedia.co.za` if that is the existing Erugo site | No new coordinator hostname is required. `/api/mesh/public-key` and `/api/mesh/uploads` are served by the same app. |
+| Public peer 1 / peer 2 | new hostnames, e.g. `https://peer1.bastionmedia.co.za` | Required for direct data URLs. Do not point both at the coordinator hostname, or the coordinator uplink becomes the bottleneck again. |
+| Public port | 443 | TLS terminates at Cloudflare/an existing tunnel. |
+| Peer app bind | `127.0.0.1:18090` by default | Container port 80 maps to this host port. A tunnel on the same host forwards to `http://localhost:18090`; loopback is safe and correct. |
+| Local three-node harness | 18091-18094 | Separate from single-node deployments. |
+
+Use a private IP or `0.0.0.0` for `MESH_BIND` only if a proxy on a **different** host must connect directly; firewall that port. Never expose 18090 publicly.
+
+### 2. Create `.env.mesh` on each host
 
 Do **not** copy `.env.mesh.example` by hand; it contains placeholders. Run:
 
@@ -94,7 +106,7 @@ The script asks for:
 
 It generates a unique `APP_KEY` and `JWT_SECRET` per host and a random legacy-only `MESH_SECRET`. Nothing has to be copied between hosts. Each peer needs public DNS and TLS for its data URL.
 
-### 2. Start the node
+### 3. Start the node
 
 ```sh
 sudo docker compose --env-file .env.mesh -p erugo-mesh-node \
@@ -106,7 +118,7 @@ sudo docker compose --env-file .env.mesh -p erugo-mesh-node \
 Health check locally (use the literal id, not `<node-id>`; angle brackets are shell redirection):
 
 ```sh
-curl -sS http://127.0.0.1:8090/n/peer1/health
+curl -sS http://127.0.0.1:18090/n/peer1/health
 # expected: {"status":"ok","node":"peer1","mesh_enabled":true}
 ```
 
@@ -116,7 +128,7 @@ From that host, confirm the peer can reach the coordinator (needed for signed AC
 curl -sS https://studio.example.com/api/health
 ```
 
-### 3. Enroll the peer
+### 4. Enroll the peer
 
 On each peer host, generate a registration blob:
 
@@ -128,7 +140,7 @@ sudo docker compose --env-file .env.mesh -p erugo-mesh-node \
 
 The command fetches the coordinator public key from `/api/mesh/public-key`, creates a local Ed25519 keypair (private key stays in `storage/app/mesh/identity.json`, mode `600`), and prints a short-lived single-use blob. Copy that blob into **Settings → Mesh** on the coordinator and click **Approve peer**. The coordinator stores only the peer's public key and data URL. Revoke a peer from the same page if its key is compromised.
 
-### 4. Data flow after enrollment
+### 5. Data flow after enrollment
 
 The upload token response now contains `upload_urls` with absolute URLs per node, for example `https://peer1.example.com/n/peer1/chunks/<intent>/<index>`. Tokens are `v2`, bound to scheme + host + path, and signed by the coordinator; peers verify them with the stored coordinator public key. ACKs are signed by the peer and verified against its registered public key.
 

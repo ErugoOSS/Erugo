@@ -21,8 +21,12 @@ esac
 printf 'Public HTTPS URL of THIS host (e.g. https://peer1.example.com): '
 read -r DATA_URL
 
-printf 'Coordinator API URL reachable FROM THIS HOST (e.g. https://studio.example.com): '
+printf 'Coordinator API URL reachable FROM THIS HOST (e.g. https://share.example.com): '
 read -r COORD_URL
+
+printf 'Bind address for the app port [127.0.0.1:18090]: '
+read -r BIND
+BIND=${BIND:-127.0.0.1:18090}
 
 if [ -z "$DATA_URL" ] || [ -z "$COORD_URL" ]; then
     echo "ERROR: both URLs are required." >&2
@@ -54,9 +58,9 @@ JWT_SECRET=${JWT_SECRET}
 MESH_ENABLED=true
 MESH_SECRET=${LEGACY_SECRET}
 MESH_NODE_ID=${NODE_ID}
-MESH_NODES='{"peer1":"https://peer1.example.com","peer2":"https://peer2.example.com"}'
+MESH_NODES='{"${NODE_ID}":"${DATA_URL}"}'
 MESH_COORDINATOR_URL=${COORD_URL}
-MESH_BIND=127.0.0.1:8090
+MESH_BIND=${BIND}
 TRUSTED_PROXIES=
 
 MESH_CHUNK_SIZE=8388608
@@ -72,6 +76,10 @@ chmod 600 .env.mesh
 
 echo
 echo "Wrote .env.mesh (mode 600) for node '${NODE_ID}'."
+echo "Bind: ${BIND} (container port 80). Public traffic normally enters on"
+echo "443 via a tunnel/proxy that forwards to this address."
+echo "MESH_NODES currently lists only this node. On the coordinator, edit it"
+echo "to list every peer's public HTTPS URL before creating upload intents."
 echo
 echo "Next steps:"
 echo "  sudo docker compose --env-file .env.mesh -p erugo-mesh-node \\"
