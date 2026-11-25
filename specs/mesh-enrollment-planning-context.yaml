@@ -1,0 +1,36 @@
+feature_name: "Mesh peer enrollment with per-node Ed25519 identity and direct peer URLs"
+problem_statement: >-
+  Phase 1 required the same MESH_SECRET on every host and a static node map,
+  which makes expansion unsafe and manual. It also routed every chunk through
+  the coordinator-hosted gateway, making that host's uplink the data-plane
+  bottleneck. Enrollment lets a peer generate its own identity and an admin
+  approve it in the coordinator UI; the coordinator then hands clients direct
+  HTTPS URLs for each peer.
+constraints:
+  - "Peer generates its Ed25519 keypair locally; private key never leaves the peer."
+  - "Coordinator generates its own Ed25519 signing key; public key served from an unauthenticated endpoint."
+  - "Registration blob: version, node id, data_url, public key, expiry, nonce, peer signature; short TTL and single use."
+  - "Admin approves by pasting the blob into Settings -> Mesh on the coordinator; no token possession alone admits a peer."
+  - "Chunk tokens bind scheme + host + path so they cannot be replayed against another peer."
+  - "Peer ACKs are signed with the peer private key and verified against the registered public key."
+  - "Revoked nodes and re-enrollment with a different key for an existing id are rejected until an admin revokes."
+  - "Legacy shared-secret tokens remain only as a migration fallback."
+  - "Each peer has its own public HTTPS URL (public DNS + TLS). Coordinator handles control plane only."
+  - "No WireGuard, client VPN, gossip, auto-approval or app-level failover in this slice."
+out_of_scope:
+  - "WireGuard tunnels and NET_ADMIN container changes."
+  - "Client-side VPN enrollment."
+  - "Dynamic node discovery or gossip."
+  - "Auto-approval without an admin pasting the blob."
+  - "Full app failover / shared metadata database."
+key_decisions:
+  - decision: "Peer-generated blob approved by admin"
+    rationale: "User chose request-blob flow with an admin settings page; no peer-to-coordinator join call is needed."
+  - decision: "Ed25519 via ext-sodium"
+    rationale: "Verified present in the Erugo image; no new dependency, and the control plane stores only public keys."
+  - decision: "Direct peer URLs now"
+    rationale: "Testing the gateway bottleneck would not validate the intended production topology."
+  - decision: "No WireGuard in this slice"
+    rationale: "wg tooling and NET_ADMIN are absent; WG between servers would not remove the coordinator uplink bottleneck without client-side VPN."  
+  - decision: "Host-bound tokens"
+    rationale: "Absolute peer URLs require binding the token to scheme + host + path, not only path."

@@ -153,3 +153,34 @@ Research date: 2026-11-25. No implementation decision has been confirmed yet.
 | SPIFFE / SPIRE join tokens | https://spiffe.io/docs/latest/deploying/spire_agent/ | build / reject for now | Join tokens are short-lived bootstrap secrets, but full workload attestation (trust bundles, SVID rotation) is disproportionate to a dev-scale three-node test. |
 
 Observation: the repeated pattern across mature systems is **one-time invite token + client-generated keypair + server stores only public keys**. That removes the shared `MESH_SECRET` from every host without adding WireGuard to the container.
+
+## 11. Phase 2 — enrollment and direct peer URLs (confirmed)
+
+The operator chose a peer-generated blob approved in the coordinator admin UI, direct peer HTTPS URLs, and no WireGuard in this slice. Rationale: testing a gateway-bottlenecked topology would not validate the intended data plane.
+
+### Actors and flow
+
+1. **Peer operator** runs `php artisan mesh:peer-init --node-id=peer1 --data-url=https://peer1.example` on the peer host. The command generates an Ed25519 keypair in persistent local storage, stores the coordinator public key fetched from `/api/mesh/public-key`, and prints a short-lived signed blob containing node id, data URL, public key, expiry and nonce. The private key never leaves the peer.
+2. **Coordinator admin** opens Settings → Mesh, pastes the blob, and submits. The coordinator verifies the peer signature, TTL, nonce and node id; stores the node with its public key and data URL; and shows it in a list with revoke controls.
+3. **Coordinator** signs chunk tokens with its own Ed25519 key and binds them to scheme + host + path. The upload token response returns absolute URLs per node. Clients PUT chunks directly to those peer URLs in parallel.
+4. **Peer** verifies chunk tokens with the coordinator public key, stores hash-verified chunks, and signs its ACK with its own private key. The coordinator verifies ACKs against the registered node public key.
+
+### Constraints
+
+- Replay nonce cache stays on both token and blob verification.
+- Reusing a node id with a different public key is rejected until an admin revokes the old node.
+- Revoked nodes cannot obtain new signed tokens; their ACKs are rejected.
+- Legacy shared-secret mode remains as a migration fallback until all test hosts are enrolled.
+- Each peer has public DNS and TLS; the coordinator is control plane only for data transfer.
+
+### Success criteria
+
+- Blob approval stores only a public key and data URL; no private key appears in the database or API.
+- Tokens issued for `https://peer1.example/...` fail when replayed against `https://peer2.example/...`.
+- Peer ACKs signed by the registered key are accepted; wrong-key and revoked-node ACKs are rejected.
+- Admin UI and its API are admin-only, with list, paste-approval and revoke.
+- Existing mesh upload tests and the full suite stay at their current pass/fail baseline.
+
+### Not in this slice
+
+WireGuard, client VPN, gossip/discovery, auto-approval without admin paste, and app-level failover.

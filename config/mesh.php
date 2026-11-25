@@ -26,6 +26,12 @@ return [
     // Local chunk storage on a peer. Must be writable and persistent.
     'chunk_root' => env('MESH_CHUNK_ROOT', storage_path('app/mesh')),
 
+    // Ed25519 identity file. Private keys live here only, mode 0600.
+    'identity_path' => env('MESH_IDENTITY_PATH', storage_path('app/mesh/identity.json')),
+
+    // Registration blobs are short-lived and single use.
+    'enrollment_ttl' => max(30, (int) env('MESH_ENROLLMENT_TTL', 300)),
+
     // Map of node id => private base URL, e.g. {"peer1":"http://peer1:80"}.
     'nodes' => (function () {
         $raw = env('MESH_NODES', '');
