@@ -90,6 +90,21 @@ ls -la .env.mesh.example docker-compose.mesh-node.yml scripts/mesh-bootstrap.sh
 
 Use a private IP or `0.0.0.0` for `MESH_BIND` only if a proxy on a **different** host must connect directly; firewall that port. Never expose 18090 publicly.
 
+Example test setup with `dev.bastionmedia.co.za` as the coordinator:
+
+```sh
+# on the coordinator host
+APP_URL=https://dev.bastionmedia.co.za
+MESH_NODE_ID=coordinator
+MESH_BIND=127.0.0.1:18090
+
+# on each peer host
+MESH_COORDINATOR_URL=https://dev.bastionmedia.co.za
+MESH_BIND=127.0.0.1:18090
+```
+
+In Cloudflare, create the public hostname `dev.bastionmedia.co.za` with service type `HTTP` and URL `localhost:18090`. Do not put a port in the public URL; clients use HTTPS on 443. Each peer gets its own hostname (for example `peer1.bastionmedia.co.za`) with the same `localhost:18090` origin on that peer's host. Do not reuse `8090` or `8181`; they are already in use on the current hosts.
+
 ### 2. Create `.env.mesh` on each host
 
 Do **not** copy `.env.mesh.example` by hand; it contains placeholders. Run:
