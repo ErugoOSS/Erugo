@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\MeshAckSigner;
 use App\Services\MeshTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -51,7 +52,8 @@ class MeshNodeController extends Controller
         string $node,
         string $intent,
         string $index,
-        MeshTokenService $tokens
+        MeshTokenService $tokens,
+        MeshAckSigner $acks
     ) {
         $claims = $request->attributes->get('mesh_claims', []);
         $index = (int) $index;
@@ -135,7 +137,15 @@ class MeshNodeController extends Controller
             Log::warning('Could not set mesh chunk permissions: ' . $target);
         }
 
-        $acknowledged = $this->acknowledge($tokens, $intent, $index, $hash, $node);
+        $acknowledged = $this->acknowledge(
+            $tokens,
+            $acks,
+            ($claims['v'] ?? null) === 'v2',
+            $intent,
+            $index,
+            $hash,
+            $node
+        );
 
         return response()->json([
             'status' => $acknowledged ? 'ok' : 'error',
@@ -149,27 +159,38 @@ class MeshNodeController extends Controller
 
     private function acknowledge(
         MeshTokenService $tokens,
+        MeshAckSigner $acks,
+        bool $signed,
         string $intent,
         int $index,
         string $hash,
         string $node
     ): bool {
         try {
-            $token = $tokens->issue(
-                'placement.ack',
-                'POST',
-                '/api/mesh/internal/placements',
-                ['obj' => $intent, 'idx' => (string) $index, 'sha' => $hash]
-            );
+            $payload = [
+                'intent_id' => $intent,
+                'index' => $index,
+                'hash' => $hash,
+                'node' => $node,
+            ];
 
-            $response = Http::withHeaders(['X-Erugo-Mesh-Token' => $token])
+            $headers = $signed
+                ? [
+                    'X-Erugo-Mesh-Node' => $node,
+                    'X-Erugo-Mesh-Signature' => $acks->sign($payload),
+                ]
+                : [
+                    'X-Erugo-Mesh-Token' => $tokens->issue(
+                        'placement.ack',
+                        'POST',
+                        '/api/mesh/internal/placements',
+                        ['obj' => $intent, 'idx' => (string) $index, 'sha' => $hash]
+                    ),
+                ];
+
+            $response = Http::withHeaders($headers)
                 ->timeout(10)
-                ->post(rtrim((string) config('mesh.coordinator_url'), '/') . '/api/mesh/internal/placements', [
-                    'intent_id' => $intent,
-                    'index' => $index,
-                    'hash' => $hash,
-                    'node' => $node,
-                ]);
+                ->post(rtrim((string) config('mesh.coordinator_url'), '/') . '/api/mesh/internal/placements', $payload);
 
             return $response->successful();
         } catch (\Throwable $e) {

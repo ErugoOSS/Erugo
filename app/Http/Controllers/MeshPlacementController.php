@@ -36,8 +36,17 @@ class MeshPlacementController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Acknowledgement does not match token'], 401);
         }
 
+        if (isset($claims['node']) && $claims['node'] !== $validated['node']) {
+            return response()->json(['status' => 'error', 'message' => 'Acknowledgement does not match token'], 401);
+        }
+
         $configuredNodes = config('mesh.nodes');
-        if (!is_array($configuredNodes) || !isset($configuredNodes[$validated['node']])) {
+        $registered = $nodes->find($validated['node']);
+        $endpoint = $registered && $registered->public_key
+            ? $registered->endpoint
+            : (is_array($configuredNodes) ? ($configuredNodes[$validated['node']] ?? null) : null);
+
+        if (!is_string($endpoint) || $endpoint === '') {
             return response()->json(['status' => 'error', 'message' => 'Unknown mesh node'], 400);
         }
 
@@ -51,10 +60,7 @@ class MeshPlacementController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Chunk hash does not match intent'], 409);
         }
 
-        $node = $nodes->upsert(
-            $validated['node'],
-            (string) $configuredNodes[$validated['node']]
-        );
+        $node = $nodes->upsert($validated['node'], $endpoint);
 
         $chunkSize = min(
             (int) $intent->chunk_size,

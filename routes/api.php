@@ -235,7 +235,7 @@ Route::prefix('mesh')->group(function ($router) {
         ->name('mesh.publicKey');
 
     Route::post('/internal/placements', [MeshPlacementController::class, 'store'])
-        ->middleware('mesh.token');
+        ->middleware('mesh.ack');
 
     Route::middleware(['auth'])->group(function ($router) {
         Route::post('/uploads', [MeshUploadController::class, 'createIntent'])

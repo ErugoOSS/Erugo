@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'mesh.token' => \App\Http\Middleware\VerifyMeshToken::class,
+            'mesh.ack' => \App\Http\Middleware\VerifyMeshAck::class,
         ]);
 
         // Opt in to proxy headers so rate limits and the IP allowlist see the real
