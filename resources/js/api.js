@@ -1277,6 +1277,50 @@ export const updateEmailTemplates = async (templates) => {
   return data.data
 }
 
+// Mesh peer enrollment (admin only)
+export const getMeshPeers = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.peers
+}
+
+export const approveMeshPeer = async (blob) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ blob })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const revokeMeshPeer = async (nodeId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers/${encodeURIComponent(nodeId)}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 // Database Backup Methods
 export const getBackups = async () => {
   const response = await fetchWithAuth(`${apiUrl}/api/backups`, {

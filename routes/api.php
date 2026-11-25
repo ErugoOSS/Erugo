@@ -20,6 +20,7 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
 use App\Http\Controllers\MeshPlacementController;
+use App\Http\Controllers\MeshPeerAdminController;
 use App\Http\Controllers\MeshPublicKeyController;
 use App\Http\Controllers\MeshUploadController;
 
@@ -89,6 +90,11 @@ Route::group([], function ($router) {
 
     //manage settings [auth, admin]
     Route::group(['prefix' => 'settings', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/mesh-peers', [MeshPeerAdminController::class, 'index'])->name('settings.meshPeers');
+        Route::post('/mesh-peers', [MeshPeerAdminController::class, 'store'])->name('settings.meshPeers.store');
+        Route::delete('/mesh-peers/{node}', [MeshPeerAdminController::class, 'destroy'])
+            ->where('node', '[A-Za-z0-9_-]+');
+
         //create or update a setting
         Route::put('/', [SettingsController::class, 'write'])->name('settings.write');
         Route::post('/logo', [SettingsController::class, 'writeLogo'])->name('settings.writeLogo');

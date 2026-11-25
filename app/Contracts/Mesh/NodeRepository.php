@@ -14,4 +14,10 @@ interface NodeRepository
     public function markSeen(string $nodeId, bool $healthy = true): void;
 
     public function healthyNodes(): Collection;
+
+    public function enroll(array $attributes): MeshNode;
+
+    public function revoke(string $nodeId): bool;
+
+    public function enrolled(): Collection;
 }

@@ -33,4 +33,34 @@ class EloquentNodeRepository implements NodeRepository
     {
         return MeshNode::where('healthy', true)->orderBy('node_id')->get();
     }
+
+    public function enroll(array $attributes): MeshNode
+    {
+        return MeshNode::updateOrCreate(
+            ['node_id' => $attributes['node_id']],
+            $attributes
+        );
+    }
+
+    public function revoke(string $nodeId): bool
+    {
+        $node = $this->find($nodeId);
+        if (!$node) {
+            return false;
+        }
+
+        $node->status = 'revoked';
+        $node->revoked_at = now();
+        $node->healthy = false;
+        $node->save();
+
+        return true;
+    }
+
+    public function enrolled(): Collection
+    {
+        return MeshNode::whereIn('status', ['active', 'revoked'])
+            ->orderBy('node_id')
+            ->get();
+    }
 }
