@@ -17,6 +17,9 @@ services:
         INSTALL_ASR: ${INSTALL_ASR:-0}
     image: erugo-mesh-node:local
     container_name: ${MESH_CONTAINER_NAME:-erugo-mesh-node}
+    # The production image expects the SQLite file to exist. Create it before
+    # start-container runs migrations when DB_DATABASE is absolute.
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /var/www/html/storage/database && touch /var/www/html/storage/database/database.sqlite && chown erugo:erugo /var/www/html/storage/database /var/www/html/storage/database/database.sqlite && exec /usr/local/bin/start-container"]
     restart: unless-stopped
     environment:
       APP_ENV: ${APP_ENV:-production}

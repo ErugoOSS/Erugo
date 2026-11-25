@@ -13,6 +13,9 @@
 /storage/templates/*
 /vendor
 .env
+.env.mesh
+.env.mesh.*
+!.env.mesh.example
 .env.backup
 .env.production
 .env.development.local
