@@ -10,6 +10,8 @@ use App\Jobs\pruneLogs;
 use App\Jobs\updateLegacySharePaths;
 use App\Jobs\backUpDatabase;
 use App\Services\SettingsService;
+use App\Contracts\Mesh\TombstoneRepository;
+use App\Models\MeshUploadIntent;
 
 //daily jobs
 Schedule::job(cleanExpiredShares::class)->daily();
@@ -52,6 +54,20 @@ Artisan::command('update-legacy-share-paths', function () {
 Artisan::command('back-up-database', function () {
     backUpDatabase::dispatch();
 })->purpose('Back up the database');
+
+Artisan::command('mesh:gc', function (TombstoneRepository $tombstones) {
+    $stale = MeshUploadIntent::where('status', 'pending')
+        ->where('expires_at', '<', now())
+        ->get();
+
+    foreach ($stale as $intent) {
+        $intent->status = 'expired';
+        $intent->save();
+        $tombstones->enqueue($intent->object_id, 1, now());
+    }
+
+    $this->info('Expired ' . $stale->count() . ' mesh upload intents; tombstones queued.');
+})->purpose('Expire stale mesh upload intents and queue peer cleanup');
 
 Artisan::command('clear-settings-cache', function () {
     app(SettingsService::class)->clearCache();

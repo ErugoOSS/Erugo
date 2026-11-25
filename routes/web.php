@@ -8,8 +8,33 @@ use App\Jobs\sendEmail;
 use App\Models\Share;
 use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
+use App\Http\Controllers\MeshNodeController;
 use App\Services\SettingsService;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
+// Data-plane routes for the storage mesh. Peers are private in phase 1 and the
+// public gateway routes /n/<node>/* to them. The ping route exists to prove the
+// token contract before chunk endpoints are added.
+Route::prefix('n/{node}')->group(function () {
+    Route::get('/health', [MeshNodeController::class, 'health'])
+        ->where('node', '[A-Za-z0-9_-]+');
+
+    Route::get('/ping', [MeshNodeController::class, 'ping'])
+        ->middleware('mesh.token')
+        ->withoutMiddleware(ValidateCsrfToken::class)
+        ->where('node', '[A-Za-z0-9_-]+');
+
+    Route::put('/chunks/{intent}/{index}', [MeshNodeController::class, 'putChunk'])
+        ->middleware('mesh.token')
+        ->withoutMiddleware(ValidateCsrfToken::class)
+        ->where('node', '[A-Za-z0-9_-]+')
+        ->where('intent', '[a-f0-9]{32}')
+        ->where('index', '[0-9]+');
+});
+
+// Feature tests boot the application more than once in a process, so the
+// routes file can be included repeatedly. Guard the global helper.
+if (!function_exists('getSettings')) {
 function getSettings()
 {
     
@@ -49,6 +74,7 @@ function getSettings()
     $indexedSettings['version'] = config('app.version');
 
     return $indexedSettings;
+}
 }
 
 Route::get('/', function () {

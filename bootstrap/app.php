@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'refresh_token',
         ]);
 
+        $middleware->alias([
+            'mesh.token' => \App\Http\Middleware\VerifyMeshToken::class,
+        ]);
+
         // Opt in to proxy headers so rate limits and the IP allowlist see the real
         // client address. Read straight from the process environment: this runs
         // while the kernel is being configured, before anything guarantees that the

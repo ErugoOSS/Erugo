@@ -19,6 +19,8 @@ use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
+use App\Http\Controllers\MeshPlacementController;
+use App\Http\Controllers\MeshUploadController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -218,6 +220,22 @@ Route::group([], function ($router) {
 
 // tusd webhook handler (called by tusd server, not authenticated via middleware)
 Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');
+
+// Sharded uploads. The internal placement callback is authenticated with the
+// mesh HMAC; the upload endpoints use the normal user auth guard.
+Route::prefix('mesh')->group(function ($router) {
+    Route::post('/internal/placements', [MeshPlacementController::class, 'store'])
+        ->middleware('mesh.token');
+
+    Route::middleware(['auth'])->group(function ($router) {
+        Route::post('/uploads', [MeshUploadController::class, 'createIntent'])
+            ->name('mesh.uploads.create');
+        Route::post('/uploads/{intent}/tokens', [MeshUploadController::class, 'tokens'])
+            ->where('intent', '[a-f0-9]{32}');
+        Route::post('/uploads/{intent}/commit', [MeshUploadController::class, 'commit'])
+            ->where('intent', '[a-f0-9]{32}');
+    });
+});
 
 // Upload routes (now using tusd for actual uploads)
 Route::group(['prefix' => 'uploads', 'middleware' => ['auth']], function ($router) {

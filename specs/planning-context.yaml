@@ -1,0 +1,44 @@
+# planning context for scope-work / slice-tasks; produced by elaborate-spec
+feature_name: "Chunked mesh storage (Phase 1: data-plane sharding, replication and failover)"
+problem_statement: >-
+  Erugo uploads, downloads and metadata are bound to one instance's local tusd,
+  filesystem and SQLite database. Phase 1 shards uploads across private peers
+  for parallel transfer, makes committed shares downloadable before replication,
+  then replicates verified full copies to every node so file data survives the
+  loss of a node. Application-level failover is deferred.
+constraints:
+  - "One public hostname; node-specific paths are routed to private peers. Clients never reach peers directly."
+  - "Full-copy parity on every node after background replication; shards during upload."
+  - "At least two ACKs per chunk before commit; write copies configurable, minimum two in phase 1."
+  - "Keep the current tus upload path as fallback for single-node installs and existing clients."
+  - "Browser fast path for chunked downloads plus coordinator-side assembly fallback for CLI/old clients."
+  - "Dedicated mesh HMAC secret and short-lived scoped tokens; do not share APP_KEY or use Laravel signed URLs for peers."
+  - "SQLite stays on one primary in phase 1, hidden behind metadata repository interfaces."
+  - "All chunk writes idempotent and hash-verified; downloads counted once atomically at the coordinator."
+  - "Deletes and expiry fan out with retries, tombstones and generation guards; orphan chunks are GC'd."
+  - "Node list is static/configurable; dev harness targets 2-3 nodes."
+  - "Work stays on dev branch spec/chunk-mesh-storage; no live environment changes."
+out_of_scope:
+  # Deferred to later phases, not permanently excluded.
+  - "Phase 2: erasure coding / Reed-Solomon parity."
+  - "Phase 2: shared Postgres, replicated sessions/queue, full public-app failover."
+  - "Phase 2: dynamic node discovery/gossip and WAN-aware placement."
+  - "Phase 2: migration of pre-existing local shares into the mesh."
+  - "Phase 2: cold-tier erasure compaction and UI redesign beyond uploader/downloader hooks."
+key_decisions:
+  - decision: "Full copy on every node rather than erasure coding"
+    rationale: "Matches the operator's parity requirement and avoids introducing a sidecar codec in a PHP app."
+  - decision: "One public URL with node-specific routed paths"
+    rationale: "Keeps a single public surface while still allowing parallel client connections to distinct peers."
+  - decision: "Staged failover: data first, app later"
+    rationale: "Avoids a SQLite-to-shared-DB migration in the same change as the storage protocol."
+  - decision: "Dual upload path (tus fallback plus sharded path)"
+    rationale: "Single-node installs and existing clients keep working while the new path is proven."
+  - decision: "Both download paths (browser assembly plus coordinator fallback)"
+    rationale: "Fast downloads for JS clients without breaking curl/wget or older clients."
+  - decision: "Dedicated HMAC, not Laravel signed URLs"
+    rationale: "Signed URLs depend on APP_KEY; sharing that key with peers widens trust beyond the coordinator."
+  - decision: "Two ACKs per chunk before commit"
+    rationale: "A single node loss during upload must not lose the file; configured copies can grow later."
+  - decision: "Tombstones with generation guards for deletion"
+    rationale: "Offline nodes and delayed replication must not resurrect deleted shares."

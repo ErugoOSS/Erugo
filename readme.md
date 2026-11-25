@@ -205,6 +205,10 @@ If you would like to push the image to Docker Hub, run the following command. Yo
 DOCKER_HUB_USERNAME=<your-docker-hub-username> ./publish-docker-image.sh
 ```
 
+## Development — chunked mesh storage (experimental)
+
+This branch contains an opt-in, dev-only sharded upload prototype with a three-instance Docker gateway. It is not a production feature. See [docs/MESH-DEV.md](docs/MESH-DEV.md) for the harness, multi-host test setup and upload protocol.
+
 ## Contributing
 
 We welcome community contributions! Feel free to:
