@@ -1,0 +1,52 @@
+# One Erugo storage instance for multi-host mesh testing.
+#
+#   cp .env.mesh.example .env.mesh   # then edit it
+#   docker compose --env-file .env.mesh -p erugo-mesh-node -f docker-compose.mesh-node.yml up -d --build
+#
+# This uses the production Dockerfile, so the app code comes from the image
+# rather than a bind mount. Only /var/www/html/storage is persistent. Bind the
+# app to a private address and let the mesh gateway be the public entry point.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/alpine/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-dev}
+        INSTALL_ASR: ${INSTALL_ASR:-0}
+    image: erugo-mesh-node:local
+    container_name: ${MESH_CONTAINER_NAME:-erugo-mesh-node}
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:?set APP_URL in .env.mesh}
+      APP_KEY: ${APP_KEY:?set APP_KEY in .env.mesh}
+      APP_LOCALE: en
+      APP_FALLBACK_LOCALE: en
+      APP_TIMEZONE: UTC
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/storage/database/database.sqlite
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: database
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env.mesh}
+      JWT_ALGO: HS256
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      MESH_ENABLED: "true"
+      MESH_SECRET: ${MESH_SECRET:?set MESH_SECRET in .env.mesh}
+      MESH_NODE_ID: ${MESH_NODE_ID:?set MESH_NODE_ID in .env.mesh}
+      MESH_NODES: ${MESH_NODES:?set MESH_NODES in .env.mesh}
+      MESH_COORDINATOR_URL: ${MESH_COORDINATOR_URL:?set MESH_COORDINATOR_URL in .env.mesh}
+      MESH_CHUNK_SIZE: ${MESH_CHUNK_SIZE:-8388608}
+      MESH_WRITE_COPIES: ${MESH_WRITE_COPIES:-2}
+      MESH_TOKEN_TTL: ${MESH_TOKEN_TTL:-300}
+      MESH_MAX_TOKEN_TTL: ${MESH_MAX_TOKEN_TTL:-900}
+    ports:
+      - "${MESH_BIND:-127.0.0.1:8090}:80"
+    volumes:
+      - mesh-storage:/var/www/html/storage
+
+volumes:
+  mesh-storage:

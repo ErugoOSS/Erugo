@@ -4,6 +4,14 @@
 
 Do **not** put these settings on a production Erugo instance. Phase 1 keeps one SQLite database on the coordinator and does not provide application-level failover.
 
+These files are on branch `feat/chunk-mesh-phase1`, not on `main`. If you cloned the repository normally, check out the branch first:
+
+```sh
+git fetch origin feat/chunk-mesh-phase1
+git checkout -b feat/chunk-mesh-phase1 --track origin/feat/chunk-mesh-phase1
+ls docker-compose.mesh-dev.yml docker-compose.mesh-node.yml
+```
+
 ## Architecture in one paragraph
 
 One **coordinator** serves the familiar Erugo UI/API and owns users, shares, manifests and download accounting. Two private **storage peers** hold chunks. All client traffic enters through one **gateway**: normal paths go to the coordinator, `/n/<node>/*` paths are routed to the named peer. Peers never make authorization decisions; they accept only short-lived HMAC tokens issued by the coordinator and verify the SHA-256 of the bytes they receive. After a peer stores a chunk it calls the coordinator back with a signed acknowledgement. The coordinator commits the upload only when every chunk has the configured number of ACKs.
@@ -56,7 +64,22 @@ git checkout -- package-lock.json
 
 ## Multi-host test deployment
 
-You can run one coordinator and two peers on separate hosts. Keep all peer ports private; only the gateway should be reachable by clients.
+You can run one coordinator and two peers on separate hosts. Keep all peer ports private; only the gateway should be reachable by clients. Use `docker-compose.mesh-node.yml` on each host. It builds the production image (code is baked into the image, only `storage` is persistent) and takes all differences from `.env.mesh`:
+
+```sh
+cd Erugo
+git fetch origin feat/chunk-mesh-phase1
+git checkout -b feat/chunk-mesh-phase1 --track origin/feat/chunk-mesh-phase1
+cp .env.mesh.example .env.mesh
+# edit .env.mesh: unique APP_KEY/JWT_SECRET, shared MESH_SECRET,
+# correct MESH_NODE_ID, MESH_COORDINATOR_URL and MESH_BIND
+docker compose --env-file .env.mesh -p erugo-mesh-node \
+  -f docker-compose.mesh-node.yml up -d --build
+docker compose --env-file .env.mesh -p erugo-mesh-node \
+  -f docker-compose.mesh-node.yml ps
+```
+
+On the coordinator host use `MESH_NODE_ID=coordinator`. On the other two hosts use `peer1` and `peer2`. The coordinator can also run through this file; the three-instance compose file is only for a single-host local gate.
 
 Set these on **every** app instance:
 
