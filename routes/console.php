@@ -12,6 +12,9 @@ use App\Jobs\backUpDatabase;
 use App\Services\SettingsService;
 use App\Contracts\Mesh\TombstoneRepository;
 use App\Models\MeshUploadIntent;
+use App\Services\MeshEnrollmentService;
+use App\Services\MeshIdentityService;
+use Illuminate\Support\Facades\Http;
 
 //daily jobs
 Schedule::job(cleanExpiredShares::class)->daily();
@@ -54,6 +57,47 @@ Artisan::command('update-legacy-share-paths', function () {
 Artisan::command('back-up-database', function () {
     backUpDatabase::dispatch();
 })->purpose('Back up the database');
+
+Artisan::command('mesh:peer-init {node} {url}', function (
+    string $node,
+    string $url,
+    MeshIdentityService $identity,
+    MeshEnrollmentService $enrollment
+) {
+    $coordinator = rtrim((string) config('mesh.coordinator_url'), '/');
+
+    try {
+        $response = Http::timeout(10)->get($coordinator . '/api/mesh/public-key');
+    } catch (\Throwable $e) {
+        $this->error('Could not reach the coordinator public-key endpoint: ' . $e->getMessage());
+        return 1;
+    }
+
+    if (!$response->successful()) {
+        $this->error('Coordinator public-key endpoint returned HTTP ' . $response->status());
+        return 1;
+    }
+
+    $publicKey = $response->json('data.public_key');
+    if (!is_string($publicKey)) {
+        $this->error('Coordinator returned an invalid public key.');
+        return 1;
+    }
+
+    try {
+        $identity->rememberCoordinatorPublicKey($publicKey);
+        $blob = $enrollment->createBlob($node, $url);
+    } catch (\Throwable $e) {
+        $this->error($e->getMessage());
+        return 1;
+    }
+
+    $this->info('Paste this blob into Settings -> Mesh on the coordinator:');
+    $this->line($blob);
+    $this->comment('The blob expires soon and can be used once. Private keys never leave this host.');
+
+    return 0;
+})->purpose('Generate a peer enrollment blob using the coordinator public key');
 
 Artisan::command('mesh:gc', function (TombstoneRepository $tombstones) {
     $stale = MeshUploadIntent::where('status', 'pending')

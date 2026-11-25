@@ -20,6 +20,7 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
 use App\Http\Controllers\MeshPlacementController;
+use App\Http\Controllers\MeshPublicKeyController;
 use App\Http\Controllers\MeshUploadController;
 
 Route::get('/user', function (Request $request) {
@@ -224,6 +225,9 @@ Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tu
 // Sharded uploads. The internal placement callback is authenticated with the
 // mesh HMAC; the upload endpoints use the normal user auth guard.
 Route::prefix('mesh')->group(function ($router) {
+    Route::get('/public-key', [MeshPublicKeyController::class, 'show'])
+        ->name('mesh.publicKey');
+
     Route::post('/internal/placements', [MeshPlacementController::class, 'store'])
         ->middleware('mesh.token');
 

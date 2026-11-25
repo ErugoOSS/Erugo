@@ -41,7 +41,7 @@ class MeshIdentityService
      */
     public function storedCoordinatorPublicKey(): ?string
     {
-        $identity = $this->load();
+        $identity = $this->loadFresh();
 
         return $identity['peer']['coordinator_public'] ?? null;
     }
@@ -50,7 +50,7 @@ class MeshIdentityService
     {
         $this->assertPublicKey($publicKey);
 
-        $identity = $this->load();
+        $identity = $this->loadFresh();
         $identity['peer']['coordinator_public'] = $publicKey;
         $this->save($identity);
     }
@@ -85,14 +85,17 @@ class MeshIdentityService
 
     private function keys(string $role): array
     {
-        $identity = $this->load();
+        // Multiple service instances can exist in one process. Always re-read
+        // before generating or saving so one instance cannot clobber another's
+        // freshly stored coordinator public key.
+        $identity = $this->loadFresh();
 
         if (!isset($identity[$role]['public'], $identity[$role]['secret'])) {
             $pair = sodium_crypto_sign_keypair();
-            $identity[$role] = [
+            $identity[$role] = array_merge($identity[$role] ?? [], [
                 'public' => base64_encode(sodium_crypto_sign_publickey($pair)),
                 'secret' => base64_encode(sodium_crypto_sign_secretkey($pair)),
-            ];
+            ]);
             $this->save($identity);
         }
 
@@ -105,6 +108,11 @@ class MeshIdentityService
             return $this->identity;
         }
 
+        return $this->loadFresh();
+    }
+
+    private function loadFresh(): array
+    {
         $path = (string) config('mesh.identity_path');
         if (!is_file($path)) {
             return $this->identity = [];
