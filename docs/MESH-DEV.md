@@ -90,6 +90,8 @@ ls -la .env.mesh.example docker-compose.mesh-node.yml scripts/mesh-bootstrap.sh
 
 Use a private IP or `0.0.0.0` for `MESH_BIND` only if a proxy on a **different** host must connect directly; firewall that port. Never expose 18090 publicly.
 
+The mesh is not limited to three nodes. Any number of peers can be added: give each a unique id, a public HTTPS hostname, run `mesh-bootstrap.sh`, start the node, and approve its blob. Add every enrolled peer URL to the coordinator's `MESH_NODES` map. No code or gateway route changes are needed for direct data URLs.
+
 Example test setup with `dev.bastionmedia.co.za` as the coordinator:
 
 ```sh
@@ -115,7 +117,7 @@ sh scripts/mesh-bootstrap.sh
 
 The script asks for:
 
-- node id: `coordinator`, `peer1` or `peer2` (unique per host)
+- node id: any unique lowercase id (`coordinator`, `peer1`, `peer2`, `peer3`, ...); the script validates the format
 - the **public HTTPS URL of this host**, e.g. `https://peer1.example.com` — used as `APP_URL` and as this node's data URL
 - the coordinator API URL reachable **from this host**, e.g. `https://dev.bastionmedia.co.za` (never an SSO-protected hostname such as `studio...`)
 
@@ -161,7 +163,7 @@ Complete these checks before an upload test:
 
 1. Create the first admin account on the coordinator if the site is fresh; Settings → Mesh is admin-only.
 2. Verify each peer's public URL from outside its host: `curl -sS https://peer1.everill.co.za/n/peer1/health` must return `"node":"peer1"`. A 502 means the Cloudflare hostname has no reachable origin on that host.
-3. On the coordinator, edit `.env.mesh` so `MESH_NODES` lists **every** enrolled peer URL, then recreate the coordinator container. With `MESH_WRITE_COPIES=2`, enrolling only one peer will leave every commit at 409.
+3. On the coordinator, edit `.env.mesh` so `MESH_NODES` lists **every** enrolled peer URL, then recreate the coordinator container. Production should keep `MESH_WRITE_COPIES=2`. For a two-host test with only one peer, set `MESH_WRITE_COPIES=1` on the coordinator; otherwise every commit will stop at 409.
 
 ### 5. Data flow after enrollment
 

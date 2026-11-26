@@ -10,13 +10,13 @@ if [ -f .env.mesh ]; then
     exit 1
 fi
 
-printf 'Mesh node id (coordinator|peer1|peer2): '
+printf 'Mesh node id (lowercase letters, digits, - or _; e.g. coordinator, peer1, peer2, peer3): '
 read -r NODE_ID
 
-case "$NODE_ID" in
-    coordinator|peer1|peer2) ;;
-    *) echo "ERROR: node id must be coordinator, peer1 or peer2." >&2; exit 1 ;;
-esac
+if ! printf '%s' "$NODE_ID" | grep -Eq '^[a-z][a-z0-9_-]{1,63}$'; then
+    echo "ERROR: node id must start with a lowercase letter and be 2-64 characters of lowercase letters, digits, - or _." >&2
+    exit 1
+fi
 
 printf 'Public HTTPS URL of THIS host (e.g. https://peer1.example.com): '
 read -r DATA_URL

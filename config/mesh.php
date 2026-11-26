@@ -46,9 +46,9 @@ return [
 
     'chunk_size' => max(1024 * 1024, (int) env('MESH_CHUNK_SIZE', 8 * 1024 * 1024)),
 
-    // At least two acknowledgements are required before an upload commits so a
-    // single node loss during upload cannot lose the file.
-    'write_copies' => max(2, (int) env('MESH_WRITE_COPIES', 2)),
+    // Production default is two acknowledgements so one node loss during
+    // upload cannot lose the file. A two-host dev test can set this to 1.
+    'write_copies' => max(1, (int) env('MESH_WRITE_COPIES', 2)),
 
     'max_upload_bytes' => max(1, (int) env('MESH_MAX_UPLOAD_BYTES', 4 * 1024 * 1024 * 1024)),
 
