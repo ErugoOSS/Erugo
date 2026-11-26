@@ -4,6 +4,46 @@
       "auth_providers_description_localhost": "A configuração de autenticação externa não está disponível no localhost. Os provedores OAuth exigem um nome de domínio totalmente qualificado (FQDN) para funcionar corretamente. Aceda ao Erugo através de um domínio registado para configurar estas definições.",
       "callback_url": "URL de chamada de retorno",
       "callback_url_description": "Utilize o URL de retorno de chamada fornecido na configuração do seu fornecedor de identidade."
+    },
+    "branding": {
+      "background_scaling": "Background scaling",
+      "background_scaling_description": "How the background image is sized and positioned. Use cover to fill the screen, contain to show the whole image, or 100% auto to fit the width. If the image has text or a subject, its position is what keeps that part visible.",
+      "mobile_background": "Mobile background",
+      "mobile_background_description": "Phones and narrow screens (under 900px) can use their own background: an image uploaded here, a gradient, or a solid colour. It is stored separately from your desktop backgrounds, so it never appears in that gallery or slideshow. Leave it on \"Same as desktop\" to use the desktop backgrounds instead.",
+      "mobile_background_none": "Same as desktop",
+      "logo_alignment": "Logo alignment",
+      "logo_alignment_description": "Where the logo sits horizontally, on desktop and on phones (under 900px). The container keeps a 20px gutter so a left or right aligned logo never touches the screen edge.",
+      "align_left": "Left",
+      "align_center": "Centre",
+      "align_right": "Right",
+      "fonts": "Fonts",
+      "fonts_description": "Override the interface font. Enter a font stack, not a single name, so there is a fallback: for example Source Sans 3, sans-serif. Multi-word family names are quoted automatically.",
+      "font_family_body": "Body font",
+      "font_family_heading": "Heading font",
+      "font_stylesheet_url": "Font stylesheet URL",
+      "font_stylesheet_url_description": "Optional stylesheet that loads the font files, for example a Google Fonts CSS URL or a self-hosted stylesheet under /storage/fonts/. Only Google Fonts hosts and same-origin paths are accepted.",
+      "desktop": "Desktop",
+      "mobile": "Mobile",
+      "source": "Source",
+      "size": "Size",
+      "position": "Position",
+      "colour": "Colour",
+      "remove": "Remove",
+      "background_size": "Background size",
+      "background_position": "Background position",
+      "gradient_from": "From",
+      "gradient_to": "To",
+      "gradient_angle": "Angle (deg)",
+      "upload_mobile_background": "Upload a portrait image",
+      "mobile_background_uploaded": "Mobile background uploaded",
+      "mobile_background_upload_failed": "Could not upload the mobile background",
+      "mobile_background_removed": "Mobile background removed",
+      "mobile_background_remove_failed": "Could not remove the mobile background"
+    }
+  },
+  "share": {
+    "download": {
+      "too_many_attempts": "Too many wrong passwords. Please try again in a few minutes."
     }
   }
 }

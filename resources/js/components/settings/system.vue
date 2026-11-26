@@ -30,7 +30,10 @@ import {
   getBackups,
   createBackup,
   downloadBackup,
-  deleteBackup
+  deleteBackup,
+  getMeshPeers,
+  approveMeshPeer,
+  revokeMeshPeer
 } from '../../api'
 import HelpTip from '../helpTip.vue'
 
@@ -241,12 +244,20 @@ const backupCreating = ref(false)
 const backupDownloading = ref(null)
 const backupDeleting = ref(null)
 
+// Mesh peer enrollment state
+const meshPeers = ref([])
+const meshBlob = ref('')
+const meshLoading = ref(false)
+const meshSaving = ref(false)
+const meshError = ref('')
+
 const emit = defineEmits(['navItemClicked'])
 
 onMounted(async () => {
   await loadSettings()
   await loadAuthProviders()
   await loadBackups()
+  await loadMeshPeers()
   onLocalhost.value = window.location.hostname === 'localhost'
 })
 
@@ -288,6 +299,48 @@ const loadBackups = async () => {
     toast.error(t.value('settings.system.backups.load_failed'))
   } finally {
     backupsLoading.value = false
+  }
+}
+
+// Mesh peer enrollment methods
+const loadMeshPeers = async () => {
+  meshLoading.value = true
+  try {
+    meshPeers.value = await getMeshPeers()
+  } catch (error) {
+    console.error('Failed to load mesh peers:', error)
+    meshError.value = error.message
+  } finally {
+    meshLoading.value = false
+  }
+}
+
+const submitMeshPeer = async () => {
+  if (!meshBlob.value.trim()) return
+  meshSaving.value = true
+  meshError.value = ''
+  try {
+    await approveMeshPeer(meshBlob.value.trim())
+    meshBlob.value = ''
+    await loadMeshPeers()
+    toast.success(t.value('settings.system.mesh.approve_success'))
+  } catch (error) {
+    meshError.value = error.message
+    toast.error(t.value('settings.system.mesh.approve_failed'))
+  } finally {
+    meshSaving.value = false
+  }
+}
+
+const revokePeer = async (nodeId) => {
+  meshError.value = ''
+  try {
+    await revokeMeshPeer(nodeId)
+    await loadMeshPeers()
+    toast.success(t.value('settings.system.mesh.revoke_success'))
+  } catch (error) {
+    meshError.value = error.message
+    toast.error(t.value('settings.system.mesh.revoke_failed'))
   }
 }
 
@@ -526,6 +579,12 @@ const handleDeleteAuthProvider = async (id) => {
             <a href="#" @click.prevent="handleNavItemClicked('auth')">
               <Fingerprint />
               {{ $t('settings.system.auth') }}
+            </a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="handleNavItemClicked('mesh')">
+              <ShieldCheck />
+              {{ $t('settings.system.mesh.title') }}
             </a>
           </li>
           <li>
@@ -1007,7 +1066,7 @@ const handleDeleteAuthProvider = async (id) => {
                       <div class="col-auto">
                         <div class="icon">
                           <Fingerprint v-if="!authProvider.icon" />
-                          <svg v-else v-html="authProvider.icon" class="custom"></svg>
+                          <svg v-else v-html="DOMPurify.sanitize(authProvider.icon, { USE_PROFILES: { svg: true } })" class="custom"></svg>
                         </div>
                       </div>
                       <div class="col">
@@ -1169,6 +1228,64 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.auth_provider_allow_registration_description') }}</p>
               <h6>{{ $t('settings.system.provider_trust_warning') }}</h6>
               <p>{{ $t('settings.system.provider_trust_warning_description') }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-5">
+          <div class="col-12 col-md-6 pe-0 ps-0 ps-md-3">
+            <div class="setting-group" id="mesh">
+              <div class="setting-group-header">
+                <h3>
+                  <ShieldCheck />
+                  {{ $t('settings.system.mesh.title') }}
+                </h3>
+              </div>
+              <p>{{ $t('settings.system.mesh.description') }}</p>
+              <div class="setting-item">
+                <label for="mesh-blob">{{ $t('settings.system.mesh.blob_label') }}</label>
+                <textarea id="mesh-blob" v-model="meshBlob" rows="4" class="form-control"></textarea>
+                <small class="form-text text-muted">{{ $t('settings.system.mesh.blob_help') }}</small>
+              </div>
+              <div class="backup-actions mb-3">
+                <button class="create-backup-button" :disabled="meshSaving || !meshBlob.trim()" @click="submitMeshPeer">
+                  {{ $t('settings.system.mesh.approve') }}
+                </button>
+                <button class="refresh-backups-button" :disabled="meshLoading" @click="loadMeshPeers">
+                  {{ $t('settings.system.backups.refresh') }}
+                </button>
+              </div>
+              <p v-if="meshError" class="text-danger">{{ meshError }}</p>
+              <p v-if="meshLoading && meshPeers.length === 0">{{ $t('settings.system.mesh.loading') }}</p>
+              <p v-else-if="meshPeers.length === 0">{{ $t('settings.system.mesh.no_peers') }}</p>
+              <table v-else class="backups-table">
+                <thead>
+                  <tr>
+                    <th>{{ $t('settings.system.mesh.node') }}</th>
+                    <th>{{ $t('settings.system.mesh.endpoint') }}</th>
+                    <th>{{ $t('settings.system.mesh.status') }}</th>
+                    <th>{{ $t('settings.system.mesh.fingerprint') }}</th>
+                    <th>{{ $t('settings.system.backups.actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="peer in meshPeers" :key="peer.node_id">
+                    <td>{{ peer.node_id }}</td>
+                    <td>{{ peer.endpoint }}</td>
+                    <td>{{ peer.status }}</td>
+                    <td><code>{{ peer.key_fingerprint }}</code></td>
+                    <td>
+                      <button
+                        class="delete-backup-button"
+                        :disabled="peer.status === 'revoked'"
+                        @click="revokePeer(peer.node_id)"
+                      >
+                        {{ $t('settings.system.mesh.revoke') }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

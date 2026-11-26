@@ -1,0 +1,26 @@
+# Dev gateway for the three-instance mesh harness.
+# One public hostname, node paths routed to private peers. Not for production.
+# Upstreams come from the environment so the same file works with local
+# containers or remote test instances.
+{
+    admin off
+    auto_https off
+}
+
+:8080 {
+    log {
+        output stdout
+    }
+
+    handle /n/peer1/* {
+        reverse_proxy {$MESH_PEER1_URL}
+    }
+
+    handle /n/peer2/* {
+        reverse_proxy {$MESH_PEER2_URL}
+    }
+
+    handle {
+        reverse_proxy {$MESH_COORDINATOR_URL}
+    }
+}

@@ -79,8 +79,33 @@ class BackgroundsController extends Controller
 
         try {
             $file = $request->file('background_image');
-            $fileName = $file->getClientOriginalName();
-            $safeFilename = FileHelper::sanitizeFilename($fileName);
+
+            // Content-based MIME verification (finfo reads file magic bytes)
+            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+            $realMime = $finfo->file($file->getRealPath());
+            $allowedMimes = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'video/mp4', 'video/webm',
+            ];
+            if (!in_array($realMime, $allowedMimes, true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Background file upload failed: unsupported file type',
+                ], 422);
+            }
+
+            // The extension comes from the sniffed media type, not from the client
+            // filename, so a media file can never be stored as e.g. ".php" in a
+            // directory that is served (and executed) by the web server.
+            $safeFilename = FileHelper::forceMediaExtension($file->getClientOriginalName(), $realMime);
+
+            if ($safeFilename === null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Background file upload failed: unsupported file type',
+                ], 422);
+            }
+
             $file->storeAs('', $safeFilename, 'backgrounds');
 
             return response()->json([

@@ -252,7 +252,7 @@ const handleUnlinkProvider = async (provider) => {
                     <div class="col-auto">
                       <div class="icon">
                         <Fingerprint v-if="!provider.icon" />
-                        <svg v-else v-html="provider.icon" class="custom"></svg>
+                        <svg v-else v-html="DOMPurify.sanitize(provider.icon, { USE_PROFILES: { svg: true } })" class="custom"></svg>
                       </div>
                     </div>
                     <div class="col">

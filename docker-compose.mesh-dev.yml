@@ -1,0 +1,124 @@
+# Dev-only three-instance harness for the chunked mesh spike.
+#
+#   docker compose -p erugo-mesh-dev -f docker-compose.mesh-dev.yml config
+#   docker compose -p erugo-mesh-dev -f docker-compose.mesh-dev.yml up -d --build
+#
+# Nothing here shares volumes with the normal dev stack or any deployed host.
+# Ports 18091-18094 are deliberately outside the ranges used by this machine's
+# other services. MESH_SECRET is a throwaway dev value; never reuse it.
+
+x-app: &app
+  build:
+    context: ./docker/dev
+    dockerfile: Dockerfile
+  image: erugo-mesh-dev:local
+  # The dev image writes .env.runtime, but Laravel's test bootstrap expects a
+  # .env file to exist. Create an empty one before the normal entrypoint.
+  entrypoint: ["/bin/sh", "-c", "touch /var/www/html/.env && exec /usr/local/bin/start-container"]
+  restart: unless-stopped
+  environment: &app_env
+    APP_ENV: local
+    APP_DEBUG: "true"
+    APP_KEY: "base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+    APP_URL: http://localhost:18094
+    APP_LOCALE: en
+    APP_FALLBACK_LOCALE: en
+    APP_TIMEZONE: UTC
+    DB_CONNECTION: sqlite
+    DB_DATABASE: /var/www/html/storage/database/database.sqlite
+    CACHE_STORE: file
+    SESSION_DRIVER: file
+    QUEUE_CONNECTION: database
+    JWT_SECRET: dev-only-mesh-jwt-secret-not-for-production
+    JWT_ALGO: HS256
+    MESH_ENABLED: "true"
+    MESH_SECRET: dev-only-mesh-secret-0123456789abcdef0123456789abcdef
+    MESH_NODES: '{"peer1":"http://peer1:80","peer2":"http://peer2:80"}'
+    MESH_COORDINATOR_URL: http://coordinator:80
+    MESH_CHUNK_SIZE: "8388608"
+    MESH_WRITE_COPIES: "2"
+    MESH_TOKEN_TTL: "300"
+    MESH_MAX_TOKEN_TTL: "900"
+    SUPERVISOR_PHP_USER: erugo
+    VITE_DEV_HOST: 127.0.0.1
+  networks:
+    - meshdev
+
+services:
+  coordinator:
+    <<: *app
+    container_name: erugo-mesh-coordinator
+    hostname: coordinator
+    environment:
+      <<: *app_env
+      MESH_NODE_ID: coordinator
+    ports:
+      - "18091:80"
+    volumes:
+      - .:/var/www/html
+      - mesh-coordinator-node:/var/www/html/node_modules
+      - mesh-coordinator-vendor:/var/www/html/vendor
+      - mesh-coordinator-db:/var/www/html/storage/database
+
+  peer1:
+    <<: *app
+    container_name: erugo-mesh-peer1
+    hostname: peer1
+    environment:
+      <<: *app_env
+      MESH_NODE_ID: peer1
+    ports:
+      - "18092:80"
+    volumes:
+      - .:/var/www/html
+      - mesh-peer1-node:/var/www/html/node_modules
+      - mesh-peer1-vendor:/var/www/html/vendor
+      - mesh-peer1-db:/var/www/html/storage/database
+
+  peer2:
+    <<: *app
+    container_name: erugo-mesh-peer2
+    hostname: peer2
+    environment:
+      <<: *app_env
+      MESH_NODE_ID: peer2
+    ports:
+      - "18093:80"
+    volumes:
+      - .:/var/www/html
+      - mesh-peer2-node:/var/www/html/node_modules
+      - mesh-peer2-vendor:/var/www/html/vendor
+      - mesh-peer2-db:/var/www/html/storage/database
+
+  gateway:
+    image: caddy:2-alpine
+    container_name: erugo-mesh-gateway
+    ports:
+      - "18094:8080"
+    environment:
+      MESH_PEER1_URL: http://peer1:80
+      MESH_PEER2_URL: http://peer2:80
+      MESH_COORDINATOR_URL: http://coordinator:80
+    volumes:
+      - ./docker/mesh/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - coordinator
+      - peer1
+      - peer2
+    networks:
+      - meshdev
+
+networks:
+  meshdev:
+    driver: bridge
+
+volumes:
+  mesh-coordinator-node:
+  mesh-coordinator-vendor:
+  mesh-coordinator-db:
+  mesh-peer1-node:
+  mesh-peer1-vendor:
+  mesh-peer1-db:
+  mesh-peer2-node:
+  mesh-peer2-vendor:
+  mesh-peer2-db:

@@ -3,9 +3,17 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\Mesh\ManifestRepository;
+use App\Contracts\Mesh\NodeRepository;
+use App\Contracts\Mesh\ReplicationRepository;
+use App\Contracts\Mesh\TombstoneRepository;
+use App\Repositories\Mesh\EloquentManifestRepository;
+use App\Repositories\Mesh\EloquentNodeRepository;
+use App\Repositories\Mesh\EloquentReplicationRepository;
+use App\Repositories\Mesh\EloquentTombstoneRepository;
+use App\Services\MeshIdentityService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +22,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Mesh metadata stays behind interfaces so SQLite can be swapped for a
+        // shared database in a later phase without touching the data plane.
+        $this->app->bind(ManifestRepository::class, EloquentManifestRepository::class);
+        $this->app->bind(NodeRepository::class, EloquentNodeRepository::class);
+        $this->app->bind(ReplicationRepository::class, EloquentReplicationRepository::class);
+        $this->app->bind(TombstoneRepository::class, EloquentTombstoneRepository::class);
+
+        // One process must share a single identity view; otherwise a peer-init
+        // command and the enrollment service can write stale copies of the file.
+        $this->app->singleton(MeshIdentityService::class);
     }
 
     /**

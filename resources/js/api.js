@@ -723,6 +723,34 @@ export const resetLogo = async () => {
 }
 
 // Save settings during first-run setup (after authentication)
+export const saveMobileBackground = async (file) => {
+  const formData = new FormData()
+  formData.append('mobile_background', file)
+
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mobile-background`, {
+    method: 'POST',
+    body: formData
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    const error = new Error(data.message)
+    error.code = data.error_code || 'unknown_error'
+    throw error
+  }
+  return data
+}
+
+export const deleteMobileBackground = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mobile-background`, {
+    method: 'DELETE'
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
 export const saveFirstRunSettings = async (settings) => {
   // Save text-based settings first
   const settingsToSave = []
@@ -1241,6 +1269,50 @@ export const updateEmailTemplates = async (templates) => {
       ...addJsonHeader()
     },
     body: JSON.stringify(templates)
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+// Mesh peer enrollment (admin only)
+export const getMeshPeers = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.peers
+}
+
+export const approveMeshPeer = async (blob) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ blob })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
+export const revokeMeshPeer = async (nodeId) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/mesh-peers/${encodeURIComponent(nodeId)}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
   })
   const data = await response.json()
   if (!response.ok) {

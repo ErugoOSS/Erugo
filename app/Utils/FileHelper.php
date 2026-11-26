@@ -188,4 +188,56 @@ class FileHelper
         
         return false;
     }
+
+    /**
+     * Media type to the file extension we are willing to store it under.
+     *
+     * @return string|null Null when the type is not an allowed media type.
+     */
+    public static function extensionForMime(string $mime): ?string
+    {
+        $map = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            'video/mp4' => 'mp4',
+            'video/webm' => 'webm',
+        ];
+
+        return $map[strtolower(trim($mime))] ?? null;
+    }
+
+    /**
+     * Sanitize an upload filename and force its extension to match the content.
+     *
+     * The extension is derived from the detected media type, never from the
+     * client-supplied name: a file whose bytes are an image but whose name ends
+     * in .php would otherwise be stored with an executable extension in a
+     * web-served directory.
+     *
+     * @return string|null Null when the media type is not allowed.
+     */
+    public static function forceMediaExtension(string $filename, string $mime): ?string
+    {
+        $extension = self::extensionForMime($mime);
+
+        if ($extension === null) {
+            return null;
+        }
+
+        $safeFilename = self::sanitizeFilename($filename);
+        $base = pathinfo($safeFilename, PATHINFO_FILENAME);
+
+        // Dots in the base name are dropped as well, so "payload.php.jpg" cannot
+        // become a multi-extension file that some web server configs execute.
+        $base = preg_replace('/[^A-Za-z0-9 _-]+/', '_', $base);
+        $base = trim(preg_replace('/[ _]+/', '_', $base), '_ .');
+
+        if ($base === '') {
+            $base = 'file';
+        }
+
+        return $base . '.' . $extension;
+    }
 }

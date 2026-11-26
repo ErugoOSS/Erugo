@@ -22,8 +22,14 @@
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
+        # Share links carry their identifier in the path; don't hand it to any
+        # third party the page happens to load a resource from.
+        Referrer-Policy "no-referrer"
         X-XSS-Protection "1; mode=block"
+        # Nothing here needs a camera, microphone, location or payment handler.
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        # Keep the app window isolated from anything it opens or embeds.
+        Cross-Origin-Opener-Policy "same-origin"
         
         # Remove server header
         -Server

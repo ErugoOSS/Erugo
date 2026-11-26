@@ -11,6 +11,7 @@ const useMyBackgrounds = ref(false)
 const backgroundFiles = ref([])
 const interval = ref(null)
 const currentBackgroundIndex = ref(0)
+const hasMobileBackground = ref(false)
 
 const isVideo = (filename) => {
   const extension = filename.split('.').pop().toLowerCase()
@@ -24,7 +25,8 @@ const isActive = (index) => {
 onMounted(() => {
   slideshowSpeed.value = domData().background_slideshow_speed
   useMyBackgrounds.value = domData().use_my_backgrounds
-  
+  hasMobileBackground.value = document.body.getAttribute('data-mobile-background-active') === '1'
+
   if (useMyBackgrounds.value) {
     //remove the interval if it exists
     if (interval.value) {
@@ -46,7 +48,7 @@ const changeBackground = () => {
 }
 </script>
 <template>
-  <div class="backgrounds" v-if="!useMyBackgrounds">
+  <div class="backgrounds" :class="{ 'has-mobile-background': hasMobileBackground }" v-if="!useMyBackgrounds">
     <div
       class="backgrounds-item active"
       :style="{
@@ -55,7 +57,7 @@ const changeBackground = () => {
     ></div>
   </div>
 
-  <div class="backgrounds" v-else>
+  <div class="backgrounds" :class="{ 'has-mobile-background': hasMobileBackground }" v-else>
     <template v-for="(file, index) in backgroundFiles" :key="file">
       <!-- Video backgrounds - only render when active -->
       <div 
@@ -79,4 +81,9 @@ const changeBackground = () => {
       ></div>
     </template>
   </div>
+
+  <!-- Mobile background: an uploaded portrait image, a gradient or a flat colour.
+       The CSS values are resolved and validated server side (see
+       App\Utils\UiStyleSettings) and painted by the backgrounds-mobile rules. -->
+  <div class="backgrounds backgrounds-mobile" v-if="hasMobileBackground"></div>
 </template>

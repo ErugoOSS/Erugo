@@ -2,8 +2,12 @@
 import { Folder, Trash, File, Loader, Check, Clock } from 'lucide-vue-next'
 import { niceFileSize, niceFileType, niceFileName, getApiUrl } from '../utils'
 import { ref, computed } from 'vue'
+import { useToast } from 'vue-toastification'
+import { useTranslate } from '@tolgee/vue'
 
 const apiUrl = getApiUrl()
+const toast = useToast()
+const { t } = useTranslate()
 
 const props = defineProps({
   structure: {
@@ -21,6 +25,15 @@ const props = defineProps({
   shareCode: {
     type: String,
     default: null
+  },
+  // Share password, sent in the POST body (never in the URL) when downloading a single file
+  password: {
+    type: String,
+    default: ''
+  },
+  passwordProtected: {
+    type: Boolean,
+    default: false
   },
   currentPath: {
     type: String,
@@ -82,7 +95,28 @@ function downloadFile(file, dirName = null) {
   }
   
   const downloadUrl = `${apiUrl}/api/shares/${props.shareCode}/download/file/${encodeURIComponent(filePath)}`
-  window.location.href = downloadUrl
+
+  if (!props.passwordProtected) {
+    window.location.href = downloadUrl
+    return
+  }
+
+  if (!props.password) {
+    toast.error(t.value('share.download.password_required'))
+    return
+  }
+
+  const form = document.createElement('form')
+  form.action = downloadUrl
+  form.method = 'POST'
+  const passwordInput = document.createElement('input')
+  passwordInput.type = 'hidden'
+  passwordInput.name = 'password'
+  passwordInput.value = props.password
+  form.appendChild(passwordInput)
+  document.body.appendChild(form)
+  form.submit()
+  document.body.removeChild(form)
 }
 
 // Helper function to get directories from structure
@@ -213,6 +247,8 @@ function getDirectories(structure) {
           class="subdirectory"
           :read-only="readOnly"
           :share-code="shareCode"
+          :password="password"
+          :password-protected="passwordProtected"
           :current-path="currentPath ? `${currentPath}/${dirName}` : dirName"
           :is-uploading="isUploading"
           :current-uploading-file="currentUploadingFile"

@@ -19,6 +19,10 @@ use App\Http\Controllers\TusdHooksController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\SelfRegistrationController;
 use App\Http\Controllers\BackupsController;
+use App\Http\Controllers\MeshPlacementController;
+use App\Http\Controllers\MeshPeerAdminController;
+use App\Http\Controllers\MeshPublicKeyController;
+use App\Http\Controllers\MeshUploadController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -44,16 +48,16 @@ Route::group([], function ($router) {
 
     //auth
     Route::group(['prefix' => 'auth'], function ($router) {
-        Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+        Route::post('login', [AuthController::class, 'login'])->name('auth.login')->middleware('throttle:10,1');
         Route::post('refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
-        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword');
-        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword');
-        
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword')->middleware('throttle:5,5');
+        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword')->middleware('throttle:5,5');
+
         // Self-registration routes
-        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register');
-        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail');
-        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification');
+        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register')->middleware('throttle:5,1');
+        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail')->middleware('throttle:5,15');
+        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification')->middleware('throttle:3,5');
         Route::get('registration-settings', [SelfRegistrationController::class, 'getSettings'])->name('auth.registrationSettings');
     });
 
@@ -86,6 +90,11 @@ Route::group([], function ($router) {
 
     //manage settings [auth, admin]
     Route::group(['prefix' => 'settings', 'middleware' => ['auth', Admin::class]], function ($router) {
+        Route::get('/mesh-peers', [MeshPeerAdminController::class, 'index'])->name('settings.meshPeers');
+        Route::post('/mesh-peers', [MeshPeerAdminController::class, 'store'])->name('settings.meshPeers.store');
+        Route::delete('/mesh-peers/{node}', [MeshPeerAdminController::class, 'destroy'])
+            ->where('node', '[A-Za-z0-9_-]+');
+
         //create or update a setting
         Route::put('/', [SettingsController::class, 'write'])->name('settings.write');
         Route::post('/logo', [SettingsController::class, 'writeLogo'])->name('settings.writeLogo');
@@ -94,6 +103,9 @@ Route::group([], function ($router) {
         Route::post('/favicon', [SettingsController::class, 'writeFavicon'])->name('settings.writeFavicon');
         Route::delete('/favicon', [SettingsController::class, 'deleteFavicon'])->name('settings.deleteFavicon');
         Route::get('/favicon/status', [SettingsController::class, 'hasFavicon'])->name('settings.hasFavicon');
+        //mobile background management
+        Route::post('/mobile-background', [SettingsController::class, 'writeMobileBackground'])->name('settings.writeMobileBackground');
+        Route::delete('/mobile-background', [SettingsController::class, 'deleteMobileBackground'])->name('settings.deleteMobileBackground');
         //list background images
         Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
         //upload a background image
@@ -199,7 +211,7 @@ Route::group([], function ($router) {
     Route::any('/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
     
     //download specific file from share [public] - filepath can include nested directories
-    Route::get('/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
+    Route::match(['get', 'post'], '/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
         ->where('filepath', '.*')
         ->name('shares.downloadFile');
 
@@ -215,6 +227,25 @@ Route::group([], function ($router) {
 
 // tusd webhook handler (called by tusd server, not authenticated via middleware)
 Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');
+
+// Sharded uploads. The internal placement callback is authenticated with the
+// mesh HMAC; the upload endpoints use the normal user auth guard.
+Route::prefix('mesh')->group(function ($router) {
+    Route::get('/public-key', [MeshPublicKeyController::class, 'show'])
+        ->name('mesh.publicKey');
+
+    Route::post('/internal/placements', [MeshPlacementController::class, 'store'])
+        ->middleware('mesh.ack');
+
+    Route::middleware(['auth'])->group(function ($router) {
+        Route::post('/uploads', [MeshUploadController::class, 'createIntent'])
+            ->name('mesh.uploads.create');
+        Route::post('/uploads/{intent}/tokens', [MeshUploadController::class, 'tokens'])
+            ->where('intent', '[a-f0-9]{32}');
+        Route::post('/uploads/{intent}/commit', [MeshUploadController::class, 'commit'])
+            ->where('intent', '[a-f0-9]{32}');
+    });
+});
 
 // Upload routes (now using tusd for actual uploads)
 Route::group(['prefix' => 'uploads', 'middleware' => ['auth']], function ($router) {

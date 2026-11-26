@@ -1,4 +1,5 @@
 /.phpunit.cache
+/.pi/
 /node_modules
 /public/build
 /public/hot
@@ -6,11 +7,15 @@
 /public/backgrounds
 /public/images
 /storage/*.key
+/storage/jwt.secret
 /storage/instance.guid
 /storage/pail
 /storage/templates/*
 /vendor
 .env
+.env.mesh
+.env.mesh.*
+!.env.mesh.example
 .env.backup
 .env.production
 .env.development.local

@@ -37,6 +37,8 @@ onMounted(() => {
         toast.error(t.value('share.download.password_required'))
       } else if (errorMessage == 'invalid_password') {
         toast.error(t.value('share.download.invalid_password'))
+      } else if (errorMessage == 'too_many_attempts') {
+        toast.error(t.value('share.download.too_many_attempts'))
       }
     }
   }, 100)
@@ -179,6 +181,8 @@ const filesByDirectory = computed(() => {
           :is-root="true"
           :read-only="true"
           :share-code="downloadShareCode"
+          :password="password"
+          :password-protected="!!share.password_protected"
         />
       </div>
       <div class="share-message mt-3" v-if="share.description">

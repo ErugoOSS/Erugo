@@ -85,9 +85,10 @@ class UsersController extends Controller
         'message' => 'Provider unlinked successfully'
       ]);
     } catch (\Exception $e) {
+      \Log::error('Failed to unlink provider for user ' . $user->id . ': ' . $e->getMessage());
       return response()->json([
         'status' => 'error',
-        'message' => 'Failed to unlink provider: ' . $e->getMessage()
+        'message' => 'Failed to unlink provider'
       ], 500);
     }
   }
@@ -194,11 +195,12 @@ class UsersController extends Controller
       $user = User::create([
         'email' => $request->email,
         'name' => $request->name,
-        'admin' => $request->admin,
         'password' => Hash::make(Str::random(20)),
-        'active' => true,
-        'must_change_password' => false,
       ]);
+      $user->admin = (bool) $request->admin;
+      $user->active = true;
+      $user->must_change_password = false;
+      $user->save();
 
       // Migrate any existing reverse share invites to the new user
       // This is in its own try-catch so it doesn't prevent the password email from being sent
@@ -271,7 +273,15 @@ class UsersController extends Controller
     }
 
     try {
-      $user->update($validator->validated());
+      $validated = $validator->validated();
+
+      if (isset($validated['name']))                 $user->name                 = $validated['name'];
+      if (isset($validated['email']))                $user->email                = $validated['email'];
+      if (isset($validated['password']))             $user->password             = $validated['password'];
+      if (isset($validated['admin']))                $user->admin                = $validated['admin'];
+      if (isset($validated['must_change_password'])) $user->must_change_password = $validated['must_change_password'];
+
+      $user->save();
 
       return response()->json([
         'status' => 'success',
@@ -443,10 +453,11 @@ class UsersController extends Controller
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'admin' => true,
-        'active' => true,
-        'must_change_password' => false,
       ]);
+      $user->admin = true;
+      $user->active = true;
+      $user->must_change_password = false;
+      $user->save();
 
       return response()->json([
         'status' => 'success',

@@ -118,4 +118,32 @@ class FileHelperTest extends TestCase
         $this->assertStringStartsWith('file_', FileHelper::sanitizeFilename('PRN.txt'));
         $this->assertStringStartsWith('file_', FileHelper::sanitizeFilename('AUX.txt'));
     }
+
+    /**
+     * The stored extension must come from the detected media type, never from
+     * the client filename: a media file named "*.php" would otherwise land in a
+     * web-served directory with an executable extension.
+     */
+    public function test_force_media_extension_uses_detected_type()
+    {
+        $this->assertEquals('photo.jpg', FileHelper::forceMediaExtension('photo.jpg', 'image/jpeg'));
+        $this->assertEquals('photo.jpg', FileHelper::forceMediaExtension('photo.jpeg', 'image/jpeg'));
+        $this->assertEquals('clip.webm', FileHelper::forceMediaExtension('clip.webm', 'video/webm'));
+
+        // executable extensions are replaced
+        $this->assertEquals('payload.jpg', FileHelper::forceMediaExtension('payload.php', 'image/jpeg'));
+        $this->assertEquals('payload_php.jpg', FileHelper::forceMediaExtension('payload.php.jpg', 'image/jpeg'));
+        $this->assertEquals('my_photo.jpg', FileHelper::forceMediaExtension('my.photo.jpeg', 'image/jpeg'));
+        $this->assertEquals('payload.png', FileHelper::forceMediaExtension('payload.phtml', 'image/png'));
+
+        // names without an extension get one
+        $this->assertEquals('photo.png', FileHelper::forceMediaExtension('photo', 'image/png'));
+
+        // traversal in the client name is still stripped by the sanitiser
+        $this->assertEquals('passwd.jpg', FileHelper::forceMediaExtension('../../etc/passwd', 'image/jpeg'));
+
+        // unknown types are refused outright
+        $this->assertNull(FileHelper::forceMediaExtension('photo.jpg', 'application/x-php'));
+        $this->assertNull(FileHelper::forceMediaExtension('photo.svg', 'image/svg+xml'));
+    }
 }

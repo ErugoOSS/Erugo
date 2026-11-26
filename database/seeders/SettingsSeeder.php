@@ -87,6 +87,126 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
+                'key' => 'background_image_size',
+                'value' => 'cover',
+                'previous_value' => 'cover',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'background_image_position',
+                'value' => 'center center',
+                'previous_value' => 'center center',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_type',
+                'value' => 'desktop',
+                'previous_value' => 'desktop',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_image',
+                'value' => '',
+                'previous_value' => '',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_size',
+                'value' => '100% auto',
+                'previous_value' => '100% auto',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_position',
+                'value' => 'center top',
+                'previous_value' => 'center top',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_color',
+                'value' => '#0f101e',
+                'previous_value' => '#0f101e',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_gradient_from',
+                'value' => '#0f101e',
+                'previous_value' => '#0f101e',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_gradient_to',
+                'value' => '#00a8cc',
+                'previous_value' => '#00a8cc',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'mobile_background_gradient_angle',
+                'value' => '180',
+                'previous_value' => '180',
+                'group' => 'ui.background',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'logo_alignment',
+                'value' => 'left',
+                'previous_value' => 'left',
+                'group' => 'ui.logo',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'logo_mobile_alignment',
+                'value' => 'center',
+                'previous_value' => 'center',
+                'group' => 'ui.logo',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'font_family_body',
+                'value' => '',
+                'previous_value' => '',
+                'group' => 'ui.fonts',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'font_family_heading',
+                'value' => '',
+                'previous_value' => '',
+                'group' => 'ui.fonts',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'key' => 'font_stylesheet_url',
+                'value' => '',
+                'previous_value' => '',
+                'group' => 'ui.fonts',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
                 'key' => 'show_powered_by',
                 'value' => 'true',
                 'previous_value' => 'true',

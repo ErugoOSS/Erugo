@@ -1,5 +1,5 @@
 # Build Stage for PHP dependencies
-FROM php:8.3-cli-alpine AS composer
+FROM php:8.4-cli-alpine AS composer
 WORKDIR /app
 RUN apk add --no-cache git unzip \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -16,7 +16,7 @@ RUN npm ci && \
     && rm -rf node_modules
 
 # Final production image
-FROM alpine:3.19
+FROM alpine:3.24
 
 LABEL maintainer="Dean Ward"
 
@@ -30,14 +30,18 @@ ENV APP_VERSION=${VERSION}
 WORKDIR /var/www/html
 
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm83 -F"
+ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm84 -F"
 ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
 # Enable community repository for PHP packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.24/community" >> /etc/apk/repositories
 
-# Install production requirements
+# Install production requirements.
+# Alpine builds PHP's core extensions as shared modules, so every extension the
+# application loads has to be listed here explicitly — including the ones
+# Laravel requires at runtime (ctype, session) which are not pulled in by the
+# meta packages.
 RUN apk add --no-cache \
     curl \
     su-exec \
@@ -45,39 +49,45 @@ RUN apk add --no-cache \
     supervisor \
     cronie \
     ffmpeg \
-    php83 \
-    php83-pdo_pgsql \
-    php83-pdo_sqlite \
-    php83-gd \
-    php83-curl \
-    php83-pecl-mongodb \
-    php83-imap \
-    php83-pdo_mysql \
-    php83-mbstring \
-    php83-xml \
-    php83-zip \
-    php83-bcmath \
-    php83-soap \
-    php83-intl \
-    php83-ldap \
-    php83-pecl-redis \
-    php83-pecl-memcached \
-    php83-phar \
-    php83-openssl \
-    php83-json \
-    php83-dom \
-    php83-tokenizer \
-    php83-fileinfo \
+    php84 \
+    php84-ctype \
+    php84-session \
+    php84-iconv \
+    php84-posix \
+    php84-simplexml \
+    php84-xmlreader \
+    php84-xmlwriter \
+    php84-sodium \
+    php84-pdo_pgsql \
+    php84-pdo_sqlite \
+    php84-gd \
+    php84-curl \
+    php84-pecl-mongodb \
+    php84-pdo_mysql \
+    php84-mbstring \
+    php84-xml \
+    php84-zip \
+    php84-bcmath \
+    php84-soap \
+    php84-intl \
+    php84-ldap \
+    php84-pecl-redis \
+    php84-pecl-memcached \
+    php84-phar \
+    php84-openssl \
+    php84-dom \
+    php84-tokenizer \
+    php84-fileinfo \
     tzdata \
     libcap \
     zip \
-    php83-fpm \
+    php84-fpm \
     caddy \
-    && ln -s /usr/bin/php83 /usr/bin/php \
+    && ln -s /usr/bin/php84 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Download and install tusd for the correct architecture
-ENV TUSD_VERSION=2.6.0
+ENV TUSD_VERSION=2.10.1
 RUN TUSD_ARCH="${TARGETARCH}" && \
     if [ "$TUSD_ARCH" = "amd64" ]; then TUSD_ARCH="amd64"; \
     elif [ "$TUSD_ARCH" = "arm64" ]; then TUSD_ARCH="arm64"; \
@@ -89,16 +99,16 @@ RUN TUSD_ARCH="${TARGETARCH}" && \
     rm -rf /tmp/tusd.tar.gz /tmp/tusd_linux_${TUSD_ARCH}
 
 # Create necessary directories
-RUN mkdir -p /run/php /var/www/html/public /etc/php83/php-fpm.d /etc/caddy
+RUN mkdir -p /run/php /var/www/html/public /etc/php84/php-fpm.d /etc/caddy
 
-COPY ./docker/alpine/www.conf /etc/php83/php-fpm.d/www.conf
+COPY ./docker/alpine/www.conf /etc/php84/php-fpm.d/www.conf
 COPY ./docker/alpine/Caddyfile /etc/caddy/Caddyfile
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Configure PHP capabilities
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php83
+RUN setcap "cap_net_bind_service=+ep" /usr/bin/php84
 
 # Create erugo user and group
 RUN addgroup erugo && \
@@ -119,7 +129,7 @@ RUN echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>
 # Copy configuration files
 COPY ./docker/alpine/start-container /usr/local/bin/start-container
 COPY ./docker/alpine/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./docker/alpine/php.ini /etc/php83/conf.d/99-erugo.ini
+COPY ./docker/alpine/php.ini /etc/php84/conf.d/99-erugo.ini
 RUN chmod +x /usr/local/bin/start-container
 
 # Create supervisor log directory
