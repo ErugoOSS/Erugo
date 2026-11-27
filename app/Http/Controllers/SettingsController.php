@@ -41,7 +41,7 @@ class SettingsController extends Controller
             } catch (\Exception $e) {
                 $errors[] = [
                     'key' => $settingData['key'],
-                    'error' => $e->getMessage()
+                    'error' => 'Failed to save setting',
                 ];
             }
         }
