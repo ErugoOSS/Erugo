@@ -16,7 +16,7 @@ RUN npm ci && \
     && rm -rf node_modules
 
 # Final production image
-FROM alpine:3.19
+FROM alpine:3.24
 
 LABEL maintainer="Dean Ward"
 
@@ -34,9 +34,8 @@ ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm83 -F"
 ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
-# Enable community repository for PHP packages
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
-
+# The php83 -r check at the end of this step fails the build unless PHP is
+# 8.3.36 or later on the 8.3 branch (fixes CVE-2026-109618 and CVE-2026-109619).
 # Install production requirements
 RUN apk add --no-cache \
     curl \
@@ -73,6 +72,7 @@ RUN apk add --no-cache \
     zip \
     php83-fpm \
     caddy \
+    && php83 -r 'exit(PHP_VERSION_ID >= 80336 && PHP_VERSION_ID < 80400 ? 0 : 1);' \
     && ln -s /usr/bin/php83 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
