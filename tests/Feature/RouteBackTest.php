@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Jobs\cleanExpiredShares;
+use App\Jobs\CreateShareZip;
 use App\Models\File;
 use App\Models\Share;
 use App\Models\User;
@@ -258,10 +259,79 @@ class RouteBackTest extends TestCase
         $this->assertSame(2, $original->files()->count());
     }
 
-    public function test_clone_of_zip_only_share_restores_files(): void
+    private function zipEntries(string $zipPath): array
+    {
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($zipPath) === true, 'zip should open: ' . $zipPath);
+        $entries = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (!str_ends_with($name, '/')) {
+                $entries[$name] = $zip->getFromIndex($i);
+            }
+        }
+        $zip->close();
+        ksort($entries);
+
+        return $entries;
+    }
+
+    public function test_zipping_a_multi_file_share_removes_its_folder(): void
     {
         $owner = $this->makeUser('owner@example.com');
-        // A multi-file share as 0.2.16 left it: the zip, but no folder.
+        $share = $this->makeShare($owner, ['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], ['status' => 'pending']);
+
+        (new CreateShareZip($share))->handle();
+
+        $this->assertSame('ready', $share->fresh()->status);
+        $this->assertDirectoryDoesNotExist($this->sharePath($share));
+        $this->assertSame(['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], $this->zipEntries($this->sharePath($share) . '.zip'));
+    }
+
+    public function test_zipping_leaves_a_single_file_share_alone(): void
+    {
+        $owner = $this->makeUser('owner@example.com');
+        $share = $this->makeShare($owner, ['only.txt' => 'one'], ['status' => 'pending']);
+
+        (new CreateShareZip($share))->handle();
+
+        $this->assertSame('ready', $share->fresh()->status);
+        $this->assertFileExists($this->sharePath($share, 'only.txt'));
+        $this->assertFileDoesNotExist($this->sharePath($share) . '.zip');
+    }
+
+    public function test_removing_the_folder_after_zipping_does_not_follow_symlinks(): void
+    {
+        $owner = $this->makeUser('owner@example.com');
+        $outside = storage_path('app/routeback-outside-' . Str::random(6));
+        mkdir($outside);
+        file_put_contents($outside . '/keep.txt', 'keep');
+        $this->createdDirs[] = $outside;
+
+        $share = $this->makeShare($owner, ['a.txt' => 'a', 'b.txt' => 'b'], ['status' => 'pending']);
+        symlink($outside, $this->sharePath($share, 'link'));
+
+        (new CreateShareZip($share))->handle();
+
+        $this->assertDirectoryDoesNotExist($this->sharePath($share));
+        $this->assertFileExists($outside . '/keep.txt');
+    }
+
+    public function test_single_file_downloads_from_a_zip_only_share(): void
+    {
+        $owner = $this->makeUser('owner@example.com');
+        $share = $this->makeShare($owner, ['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], zip: true);
+        $this->removeTree($this->sharePath($share));
+
+        $response = $this->get("/api/shares/{$share->long_id}/download/file/sub/b.txt");
+        $response->assertOk();
+        $this->assertSame('bbb', $response->streamedContent());
+    }
+
+    public function test_clone_of_zipped_share_hard_links_the_zip(): void
+    {
+        $owner = $this->makeUser('owner@example.com');
+        // A multi-file share as 0.3.0 leaves it: the zip, but no folder.
         $original = $this->makeShare($owner, ['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], zip: true);
         $this->removeTree($this->sharePath($original));
 
@@ -270,8 +340,45 @@ class RouteBackTest extends TestCase
         $clone = Share::find($cloneId);
         $this->createdDirs[] = $this->sharePath($clone);
 
-        $this->assertSame('aaa', file_get_contents($this->sharePath($clone, 'a.txt')));
-        $this->assertSame('bbb', file_get_contents($this->sharePath($clone, 'sub/b.txt')));
+        $this->assertSame('ready', $clone->status);
+        $this->assertSame(2, $clone->files()->count());
+        $this->assertDirectoryDoesNotExist($this->sharePath($original));
+        $this->assertDirectoryDoesNotExist($this->sharePath($clone));
+        $this->assertSame(fileinode($this->sharePath($original) . '.zip'), fileinode($this->sharePath($clone) . '.zip'));
+        $this->assertSame(['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], $this->zipEntries($this->sharePath($clone) . '.zip'));
+    }
+
+    public function test_adding_files_to_a_clone_leaves_the_original_zip_alone(): void
+    {
+        $owner = $this->makeUser('owner@example.com');
+        $original = $this->makeShare($owner, ['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], zip: true);
+        $this->removeTree($this->sharePath($original));
+
+        $token = $this->webToken('owner@example.com');
+        $clone = Share::find($this->withToken($token)->postJson("/api/shares/{$original->id}/clone")->assertOk()->json('data.share.id'));
+        $this->createdDirs[] = $this->sharePath($clone);
+
+        $uploadId = Str::uuid()->toString();
+        @mkdir(storage_path('app/uploads'), 0755, true);
+        file_put_contents(storage_path('app/uploads/' . $uploadId), 'ccc');
+        $file = File::create([
+            'name' => 'c.txt', 'original_name' => 'c.txt', 'size' => 3, 'type' => 'text/plain',
+            'temp_path' => 'uploads/' . $uploadId, 'storage_id' => (string) Str::uuid(),
+        ]);
+        \App\Models\UploadSession::create([
+            'upload_id' => $uploadId, 'user_id' => $owner->id, 'filename' => 'c.txt', 'filesize' => 3,
+            'filetype' => 'text/plain', 'total_chunks' => 1, 'chunks_received' => 1,
+            'status' => 'complete', 'file_id' => $file->id,
+        ]);
+
+        $this->withToken($token)->postJson("/api/shares/{$clone->id}/add-files", [
+            'uploadIds' => [$uploadId],
+        ])->assertOk();
+        (new CreateShareZip($clone->fresh()))->handle();
+
+        $this->assertDirectoryDoesNotExist($this->sharePath($clone));
+        $this->assertSame(['a.txt' => 'aaa', 'c.txt' => 'ccc', 'sub/b.txt' => 'bbb'], $this->zipEntries($this->sharePath($clone) . '.zip'));
+        $this->assertSame(['a.txt' => 'aaa', 'sub/b.txt' => 'bbb'], $this->zipEntries($this->sharePath($original) . '.zip'));
     }
 
     public function test_clean_files_does_not_follow_symlinks(): void

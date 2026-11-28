@@ -7,6 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\RecalculatePhysicalStorage;
+use App\Utils\PathGuard;
 
 class CreateShareZip implements ShouldQueue
 {
@@ -53,9 +54,12 @@ class CreateShareZip implements ShouldQueue
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();
+      // The zip now holds everything, so drop the loose copies to keep disk
+      // use at one copy per share. Adding files unpacks the zip again first
+      // (Share::restoreFolderFromZip), single files are read straight from
+      // the zip, and clones hard-link the zip.
+      $this->removeSourceFolder($sourcePath);
       RecalculatePhysicalStorage::dispatch();
-      // Directory is intentionally kept alongside the zip so files can be
-      // added later (F1) and cloned by reference (F3).
     } catch (\Exception $e) {
       // Don't leave a half-written zip behind: the check at the top would
       // treat it as finished on the next run.
@@ -124,8 +128,31 @@ class CreateShareZip implements ShouldQueue
     return true;
   }
 
+  private function removeSourceFolder(string $sourcePath): void
+  {
+    $sharesRoot = storage_path('app/shares');
+    if (is_link($sourcePath) || !is_dir($sourcePath)) {
+      return;
+    }
+    $resolved = realpath($sourcePath);
+    if (!PathGuard::isWithin($sourcePath, $sharesRoot) || $resolved === realpath($sharesRoot)) {
+      Log::error('Refusing to remove share folder outside the shares root', ['share_id' => $this->share->id]);
+      return;
+    }
+    // Hard-linked files (clones) only lose this share's link, not their data.
+    if (!$this->removeDirectory($sourcePath)) {
+      Log::warning('Could not remove share folder after zipping', ['share_id' => $this->share->id]);
+    }
+  }
+
   private function removeDirectory($dir)
   {
+    // Check for a link first: is_dir() follows links, and recursing into one
+    // would delete files outside the share.
+    if (is_link($dir)) {
+      return unlink($dir);
+    }
+
     if (!file_exists($dir)) {
       return true;
     }

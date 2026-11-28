@@ -573,10 +573,10 @@ class AddFilesEndToEndTest extends TestCase
     }
 
     /**
-     * The disk files copied into the share directory must survive even if the
-     * zip job fails — the user's data is the primary concern.
+     * After adding a file, both files must end up in the rebuilt zip with the
+     * right contents. The loose copies are removed once the zip is built.
      */
-    public function test_if_zip_creation_fails_disk_files_are_preserved(): void
+    public function test_added_files_end_up_in_the_zip_and_loose_copies_are_removed(): void
     {
         $owner  = $this->makeUser();
         $share  = $this->makeShareWithDiskFiles($owner, [
@@ -585,16 +585,16 @@ class AddFilesEndToEndTest extends TestCase
         $upload = $this->makeUploadSession($owner, 'also-keep.txt', 'also important');
 
         $this->actingAs($owner, 'sanctum')
-            ->postJson("/api/shares/{$share->id}/add-files", ['uploadIds' => [$upload]]);
+            ->postJson("/api/shares/{$share->id}/add-files", ['uploadIds' => [$upload]])
+            ->assertStatus(200);
 
-        $shareDir     = storage_path('app/shares/' . $share->path);
-        $originalFile = $shareDir . '/keep-me.txt';
-        $addedFile    = $shareDir . '/also-keep.txt';
+        $this->assertDirectoryDoesNotExist(storage_path('app/shares/' . $share->path));
 
-        $this->assertFileExists($originalFile,
-            'Original file must remain on disk after adding more files');
-        $this->assertFileExists($addedFile,
-            'Newly added file must be on disk regardless of zip outcome');
+        $zip = new ZipArchive();
+        $this->assertTrue($zip->open($this->zipPath($share)) === true, 'Zip archive must be openable');
+        $this->assertEquals('do not lose this', $zip->getFromName('keep-me.txt'));
+        $this->assertEquals('also important', $zip->getFromName('also-keep.txt'));
+        $zip->close();
     }
 
     /**

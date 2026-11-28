@@ -1009,9 +1009,14 @@ class SharesController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Validation failed', 'data' => ['errors' => $validator->errors()]], 422);
     }
 
-    // Shares zipped before 0.3.0 only have the zip, so put the loose files
-    // back first. Without them the clone would have rows but no files.
-    if (!$share->restoreFolderFromZip()) {
+    // A zipped multi-file share keeps only its zip on disk, and the clone's
+    // zip would be identical, so hard-link it and skip the loose files. Any
+    // other share is cloned file by file from its folder.
+    $originalFiles = $share->files()->get();
+    $sourceZip     = storage_path('app/shares/' . trim((string) $share->path, '/') . '.zip');
+    $linkZip       = $originalFiles->count() > 1 && is_file($sourceZip) && !is_link($sourceZip);
+
+    if (!$linkZip && !$share->restoreFolderFromZip()) {
       return response()->json(['status' => 'error', 'message' => 'Some of this share\'s files are missing on disk'], 409);
     }
 
@@ -1035,15 +1040,30 @@ class SharesController extends Controller
     ]);
 
     $cloneDir = storage_path('app/shares/' . $clonePath);
-    if (!is_dir($cloneDir)) {
+
+    if ($linkZip) {
+      if (!is_dir(dirname($cloneDir))) {
+        mkdir(dirname($cloneDir), 0750, true);
+      }
+      // Fall back to a copy when the filesystem can't link.
+      if (!@link($sourceZip, $cloneDir . '.zip') && !copy($sourceZip, $cloneDir . '.zip')) {
+        $clone->delete();
+        return response()->json(['status' => 'error', 'message' => 'Could not copy the share\'s files'], 500);
+      }
+    } elseif (!is_dir($cloneDir)) {
       mkdir($cloneDir, 0750, true);
     }
 
     $sourceDir     = storage_path('app/shares/' . $share->path);
-    $originalFiles = $share->files()->get();
     $totalSize     = 0;
 
     foreach ($originalFiles as $file) {
+      if ($linkZip) {
+        $this->cloneFileRow($file, $clone);
+        $totalSize += $file->size;
+        continue;
+      }
+
       // Same lookup the download uses: the file must exist and resolve inside
       // the original share's folder.
       $sourcePath = PathGuard::singleShareFile($sourceDir, $file->full_path, $file->name);
@@ -1066,30 +1086,40 @@ class SharesController extends Controller
         }
       }
 
-      File::create([
-        'name'          => $file->name,
-        'original_name' => $file->original_name,
-        'size'          => $file->size,
-        'type'          => $file->type,
-        'full_path'     => $file->full_path,
-        'share_id'      => $clone->id,
-        'temp_path'     => null,
-        'storage_id'    => $file->storage_id,
-      ]);
+      $this->cloneFileRow($file, $clone);
 
       $totalSize += $file->size;
     }
 
     $clone->size       = $totalSize;
     $clone->file_count = $originalFiles->count();
+    if ($linkZip) {
+      $clone->status = 'ready';
+    }
     $clone->save();
 
-    CreateShareZip::dispatch($clone);
+    if (!$linkZip) {
+      CreateShareZip::dispatch($clone);
+    }
     RecalculatePhysicalStorage::dispatch();
 
     return response()->json([
       'status' => 'success',
       'data'   => ['share' => $clone->fresh(['files'])],
+    ]);
+  }
+
+  private function cloneFileRow(File $file, Share $clone): void
+  {
+    File::create([
+      'name'          => $file->name,
+      'original_name' => $file->original_name,
+      'size'          => $file->size,
+      'type'          => $file->type,
+      'full_path'     => $file->full_path,
+      'share_id'      => $clone->id,
+      'temp_path'     => null,
+      'storage_id'    => $file->storage_id,
     ]);
   }
 }
