@@ -568,6 +568,16 @@ class AppSharesController extends Controller
             ], 422);
         }
 
+        // A share with no expiry (an admin can set this on the web) would get
+        // a date from now + days, which shortens it. Refuse instead.
+        if ($share->expires_at === null) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_NO_EXPIRY',
+                'message' => 'Share has no expiry date to extend'
+            ], 422);
+        }
+
         // Optional days parameter, default to 7. Clamp it to at least one day
         // and at most the admin's max expiry (or a year if no max is set), so
         // a huge value can't push the date out of range.

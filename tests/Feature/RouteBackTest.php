@@ -307,6 +307,12 @@ class RouteBackTest extends TestCase
         $this->get("/api/shares/{$share->long_id}/download")->assertOk();
         $this->getJson("/api/app/v1/shares/{$share->long_id}")->assertOk();
 
+        // The app's extend sets now + days, which would shorten it.
+        $this->withToken($token)->postJson("/api/app/v1/shares/{$share->id}/extend", ['days' => 7])
+            ->assertStatus(422)
+            ->assertJsonPath('code', 'SHARE_NO_EXPIRY');
+        $this->assertNull($share->fresh()->expires_at);
+
         (new cleanExpiredShares())->handle();
         $this->assertSame('ready', $share->fresh()->status);
         $this->assertFileExists($this->sharePath($share, 'one.txt'));
