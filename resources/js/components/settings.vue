@@ -100,12 +100,15 @@ const clickOutside = (e) => {
   }
 }
 
-const ADMIN_TABS = ['stats', 'branding', 'system', 'emailTemplates', 'users', 'allShares', 'backups']
+// Keep in step with the tabs marked v-if="store.isAdmin()" in the template
+const ADMIN_TABS = ['stats', 'branding', 'system', 'emailTemplates', 'users', 'allShares', 'allLiveshares']
 
 const setActiveTab = (tab, options = {}) => {
   // Silently block non-admins from landing on admin-only tabs (e.g. via stale URL hash)
   if (ADMIN_TABS.includes(tab) && !store.isAdmin()) {
-    activeTab.value = 'myShares'
+    const fallback = getInitialTab()
+    activeTab.value = fallback
+    updateUrlHash(fallback, true)
     return
   }
   const { updateUrl = true } = options
