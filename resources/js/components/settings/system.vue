@@ -38,6 +38,7 @@ import {
 import HelpTip from '../helpTip.vue'
 
 import { useToast } from 'vue-toastification'
+import { sanitizeSvg } from '../../lib/sanitize'
 import { mapSettings } from '../../utils'
 import { notifySettingsChanged } from '../../composables/useSetting'
 import { useConfirmDialog } from '../../composables/useConfirmDialog'
@@ -1078,7 +1079,7 @@ const handleDeleteAuthProvider = async (id) => {
                       <div class="col-auto">
                         <div class="icon">
                           <Fingerprint v-if="!authProvider.icon" />
-                          <svg v-else v-html="DOMPurify.sanitize(authProvider.icon, { USE_PROFILES: { svg: true } })" class="custom"></svg>
+                          <svg v-else v-html="sanitizeSvg(authProvider.icon)" class="custom"></svg>
                         </div>
                       </div>
                       <div class="col">

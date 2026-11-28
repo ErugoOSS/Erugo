@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import DOMPurify from 'dompurify'
+import { ref, onMounted } from 'vue'
+import { sanitizeSvg } from '../lib/sanitize'
 import { getApiUrl } from '../utils'
 import { useToast } from 'vue-toastification'
 import { domData } from '../domData'
@@ -78,10 +78,7 @@ onMounted(async () => {
   attemptRefresh()
 
   getAvailableAuthProviders().then((data) => {
-    authProviders.value = data.map((p) => ({
-      ...p,
-      icon: p.icon ? DOMPurify.sanitize(p.icon, { USE_PROFILES: { svg: true, svgFilters: true } }) : null
-    }))
+    authProviders.value = data
   })
 
   // Check if self-registration is enabled
@@ -460,7 +457,7 @@ const switchToLogin = () => {
           <div class="col-6 pe-1 ps-1 mb-2" v-for="provider in authProviders" :key="provider.id">
             <button class="block secondary provider-button" @click="attemptAuthProviderLogin(provider.id)">
               <Fingerprint v-if="!provider.icon" />
-              <svg v-else v-html="DOMPurify.sanitize(provider.icon, { USE_PROFILES: { svg: true } })" class="custom"></svg>
+              <svg v-else v-html="sanitizeSvg(provider.icon)" class="custom"></svg>
               {{ provider.name }}
             </button>
           </div>
