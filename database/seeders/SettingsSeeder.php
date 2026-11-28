@@ -159,6 +159,14 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
+                'key' => 'allow_file_replacement',
+                'value' => '1',
+                'previous_value' => null,
+                'group' => 'system.shares',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
                 'key' => 'clean_files_after_days',
                 'value' => '30',
                 'previous_value' => null,

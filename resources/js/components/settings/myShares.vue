@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, inject, defineExpose } from 'vue'
 import { getMyShares, expireShare, extendShare, setDownloadLimit, pruneExpiredShares } from '../../api'
+import { RefreshCcw } from 'lucide-vue-next'
+import { useSetting } from '../../composables/useSetting'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -10,11 +12,15 @@ import {
   Rocket,
   Lock,
   LockOpen,
-  ArrowLeftRight
+  ArrowLeftRight,
+  FilePlus2,
+  Copy
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
+import ManageShareFilesModal from '../ManageShareFilesModal.vue'
+import CloneShareModal from '../CloneShareModal.vue'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
@@ -28,6 +34,12 @@ const loadedShares = ref(false)
 
 const shares = ref([])
 const showDeletedShares = ref(false)
+const { value: allowFileReplacement } = useSetting('allow_file_replacement', 'system.shares', '1')
+
+const manageFilesShare = ref(null)
+const replaceFileShare = ref(null)
+const cloneShareTarget = ref(null)
+
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
   loadShares()
@@ -124,6 +136,26 @@ defineExpose({
 
 <template>
   <div>
+    <ManageShareFilesModal
+      v-if="manageFilesShare"
+      :share="manageFilesShare"
+      mode="add"
+      @close="manageFilesShare = null"
+      @done="loadShares"
+    />
+    <ManageShareFilesModal
+      v-if="replaceFileShare"
+      :share="replaceFileShare"
+      mode="replace"
+      @close="replaceFileShare = null"
+      @done="loadShares"
+    />
+    <CloneShareModal
+      v-if="cloneShareTarget"
+      :share="cloneShareTarget"
+      @close="cloneShareTarget = null"
+      @done="loadShares"
+    />
     <HelpTip id="download-limit-help-tip" :header="$t('settings.help.downloadLimit.title')">
       <p>
         {{ $t('settings.help.downloadLimit.description') }}
@@ -255,6 +287,30 @@ defineExpose({
             >
               <HardDriveDownload style="margin-right: 0" />
             </button>
+            <button
+              v-if="!share.deleted"
+              class="secondary icon-only"
+              @click="manageFilesShare = share"
+              title="Add files"
+            >
+              <FilePlus2 style="margin-right: 0" />
+            </button>
+            <button
+              v-if="!share.deleted && share.files.length === 1 && allowFileReplacement == '1'"
+              class="secondary icon-only"
+              @click="replaceFileShare = share"
+              title="Replace file"
+            >
+              <RefreshCcw style="margin-right: 0" />
+            </button>
+            <button
+              v-if="!share.deleted"
+              @click="cloneShareTarget = share"
+              class="secondary icon-only"
+              title="Clone share"
+            >
+              <Copy style="margin-right: 0" />
+            </button>
           </td>
         </tr>
       </tbody>
@@ -272,9 +328,10 @@ defineExpose({
 <style lang="scss" scoped>
 .files-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 220px;
   .file {
     display: flex;
     flex-direction: column;
@@ -282,10 +339,14 @@ defineExpose({
     border-radius: 5px;
     padding: 5px 10px;
     gap: 1px;
+    width: 100%;
     .file-name {
       font-size: 0.85rem;
       font-weight: bold;
       color: var(--panel-section-text-color);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .file-size {
       font-size: 0.7rem;

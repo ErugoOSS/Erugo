@@ -718,6 +718,8 @@
       "allow_chunked_uploads_description": "Chunked upload mode breaks files into smaller segments that are transferred sequentially. While slightly slower than direct upload for smaller files, this method provides greater stability and reliability when transferring large files. Chunked uploads support progress tracking and allow users to manually pause and resume transfers, making it ideal for files over 100MB or when using unstable network connections.",
       "allow_direct_uploads": "Allow direct upload mode",
       "allow_direct_uploads_description": "Direct upload mode transmits files in a single, uninterrupted request. While this method offers the fastest transfer speeds for most files, extremely large files may cause stability issues or timeouts. For optimal performance with files exceeding 100MB, chunked uploads may be a better option.",
+      "allow_file_replacement": "Allow file replacement",
+      "allow_file_replacement_description": "When enabled, users can replace the file in a single-file share without creating a new share. Disable for audit scenarios where files must not change after sharing.",
       "allow_reverse_shares": "Allow reverse shares",
       "allow_reverse_shares_description": "Determines whether your registered users should have permission to send reverse share requests. These requests provide external individuals with a one-time upload pass, allowing them to deliver files directly to the registered user who initiated the request.\n\n\n\n\n",
       "application_name": "Application Name",
@@ -873,7 +875,8 @@
       "smtp_username": "SMTP Username",
       "smtp_username_description": "The username required to authenticate with your SMTP server. This is typically the email address or account name associated with your email service.",
       "upload_modes": "Upload modes",
-      "your_auth_providers": "Your Auth Providers"
+      "your_auth_providers": "Your Auth Providers",
+      "file_replacement": "File Replacement"
     },
     "system_auth_provider_info_link": "About {name}",
     "table": {
@@ -1010,6 +1013,14 @@
       "including": "including:"
     },
     "not_found": "The share you are looking for was not found. You may need to log in to see it.",
+    "processing": {
+      "title": "Files are being prepared for download",
+      "eta": "Ready in approximately {seconds} {seconds, plural, one {second} other {seconds}}",
+      "overdue": "Almost there, taking a little longer than expected\u2026",
+      "ready_toast": "Your files are ready to download!",
+      "failed_title": "Something went wrong preparing your files",
+      "failed_message": "The files could not be packaged for download. Please contact the share owner."
+    },
     "passwordNotProtected": "Open",
     "passwordProtected": "Password protected"
   },
