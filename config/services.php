@@ -36,13 +36,15 @@ return [
     ],
 
     'tusd' => [
-        // Optional shared secret for tusd hook requests. When set, a hook
-        // request must pass the internal IP check and also carry a matching
-        // Hook-Secret header. tusd itself cannot add a fixed header (its
-        // -hooks-http-forward-headers flag only copies headers from the
-        // client's upload request), so leave this unset with the bundled
-        // tusd. It is for setups where something between tusd and Erugo
-        // adds the header.
+        // Shared key that every tusd hook request must carry. Hook requests
+        // without it are refused, and if it is empty all of them are, so
+        // uploads stop working. In the Docker image, start-container makes a
+        // random key at every boot unless TUSD_HOOK_SECRET is set, and hands
+        // it to tusd as the password in the hook URL
+        // (http://tusd:<key>@127.0.0.1/api/tusd-hooks), which arrives here as
+        // HTTP basic auth. A proxy in front of Erugo can send it in a
+        // Hook-Secret header instead. Caddy also refuses /api/tusd-hooks to
+        // anything that isn't connecting from loopback.
         'hook_secret' => env('TUSD_HOOK_SECRET'),
     ],
 

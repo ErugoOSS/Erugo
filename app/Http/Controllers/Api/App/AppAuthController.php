@@ -30,11 +30,13 @@ use Carbon\Carbon;
 class AppAuthController extends Controller
 {
     /**
-     * Access token TTL in minutes (default from JWT config)
+     * Access token TTL in minutes. Read from config rather than the JWT
+     * factory, because issuing the refresh token calls Auth::setTTL() and
+     * changes the factory's TTL for the rest of the request.
      */
     private function getAccessTokenTTL(): int
     {
-        return Auth::factory()->getTTL();
+        return (int) config('jwt.ttl');
     }
 
     /**
@@ -42,7 +44,7 @@ class AppAuthController extends Controller
      */
     private function getRefreshTokenTTL(): int
     {
-        return 60 * 24 * 30; // 30 days
+        return (int) config('jwt.refresh_token_ttl.app');
     }
 
     /**

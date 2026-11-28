@@ -153,6 +153,19 @@ if [ -z "$DB_DATABASE" ]; then
     export DB_DATABASE=/var/www/html/storage/database/database.sqlite
 fi
 
+# tusd must send this key with every hook call to Laravel (see
+# config/services.php). supervisord passes it to tusd as the password in the
+# hook URL, and php-fpm and the queue worker inherit it from this environment.
+# It is not written to the cron .env file below and never printed. Make a new
+# one at every boot unless one was given.
+if [ -z "$TUSD_HOOK_SECRET" ]; then
+    TUSD_HOOK_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+elif ! printf '%s' "$TUSD_HOOK_SECRET" | grep -qE '^[A-Za-z0-9._~-]+$'; then
+    echo "TUSD_HOOK_SECRET may only contain letters, numbers and . _ ~ - characters."
+    exit 1
+fi
+export TUSD_HOOK_SECRET
+
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
 env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" > /var/www/html/.env.runtime
