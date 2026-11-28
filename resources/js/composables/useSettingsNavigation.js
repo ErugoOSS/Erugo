@@ -1,4 +1,4 @@
-import { emitter } from '../store'
+import { emitter, store } from '../store'
 
 /**
  * Valid settings tabs that can be navigated to
@@ -16,6 +16,16 @@ const VALID_TABS = [
   'myProfile',
   'about'
 ]
+
+// Only reachable when live shares are switched on (ERUGO_LIVESHARES)
+const LIVESHARE_TABS = ['myLiveshares', 'allLiveshares']
+
+const isValidTab = (tab) => {
+  if (!tab || !VALID_TABS.includes(tab)) {
+    return false
+  }
+  return store.livesharesAvailable() || !LIVESHARE_TABS.includes(tab)
+}
 
 /**
  * Parse a settings path into its components
@@ -67,7 +77,7 @@ export function checkUrlHash() {
   const parsed = parseSettingsPath(path)
 
   // Validate that the tab is valid
-  if (!parsed.tab || !VALID_TABS.includes(parsed.tab)) {
+  if (!isValidTab(parsed.tab)) {
     return null
   }
 
@@ -112,7 +122,7 @@ export function useSettingsNavigation() {
 
     const parsed = parseSettingsPath(path)
 
-    if (!parsed.tab || !VALID_TABS.includes(parsed.tab)) {
+    if (!isValidTab(parsed.tab)) {
       console.warn(`[useSettingsNavigation] Invalid tab: ${parsed.tab}`)
       return
     }

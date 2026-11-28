@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsersController;
 use App\Http\Middleware\AdminMiddleware as Admin;
 use App\Http\Middleware\NoUsersMiddleware as NoUsers;
+use App\Http\Middleware\EnsureLivesharesAvailable as LivesharesAvailable;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharesController;
 use App\Http\Controllers\BackgroundsController;
@@ -236,6 +237,8 @@ Route::group([], function ($router) {
     Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
 
+// Live-share routes 404 unless ERUGO_LIVESHARES is on.
+Route::middleware(LivesharesAvailable::class)->group(function () {
 
     //admin liveshare management [auth, admin] -- must come before wildcard routes
     Route::group(['prefix' => 'liveshares/admin', 'middleware' => ['auth', Admin::class]], function ($router) {
@@ -306,6 +309,7 @@ Route::group([], function ($router) {
 
     // Liveshare avatar (random image thumb; auth via JWT token or invite_token query param)
     Route::get('/liveshares/{longId}/avatar', [LivesharesController::class, 'avatar'])->name('liveshares.avatar');
+});
 
 // tusd webhook handler (called by tusd server, not authenticated via middleware)
 Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');

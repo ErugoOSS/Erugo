@@ -2,8 +2,10 @@ import { reactive, nextTick } from 'vue'
 import { useToast } from 'vue-toastification'
 import mitt from 'mitt'
 import debounce from './debounce'
+import { domData } from './domData'
 const emitter = mitt()
 const toast = useToast()
+const livesharesAvailable = domData().liveshares_available === true
 
 const uploadController = reactive({
   pause: false,
@@ -76,6 +78,11 @@ const store = reactive({
 
   isRestricted() {
     return this.restricted
+  },
+
+  // false unless the server was started with ERUGO_LIVESHARES=true
+  livesharesAvailable() {
+    return livesharesAvailable
   },
 
   setMultiple(data) {
