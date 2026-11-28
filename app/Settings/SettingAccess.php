@@ -112,6 +112,12 @@ final class SettingAccess
             return true;
         }
 
+        // Live share settings stay hidden from non-admins while the feature is
+        // switched off (ERUGO_LIVESHARES).
+        if (str_starts_with($key, 'liveshares_') && !self::livesharesAvailable()) {
+            return false;
+        }
+
         // Public only for non-admins. Admin and Secret are both privileged today;
         // Secret is reserved for stricter handling later (see SettingVisibility::Secret).
         return self::visibility($key) === SettingVisibility::Public;
@@ -135,6 +141,16 @@ final class SettingAccess
     /**
      * @return list<string>
      */
+    private static function livesharesAvailable(): bool
+    {
+        try {
+            return \App\Support\Liveshares::available();
+        } catch (\Throwable) {
+            // No app container (plain unit tests): treat the feature as off.
+            return false;
+        }
+    }
+
     public static function keys(): array
     {
         return array_keys(self::MAP);
