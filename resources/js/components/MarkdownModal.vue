@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { CircleX, FileWarning } from 'lucide-vue-next'
 import { useTolgee } from '@tolgee/vue'
+import DOMPurify from 'dompurify'
 
 const props = defineProps({
   topic: {
@@ -69,21 +70,24 @@ const parseMarkdown = async (text) => {
     return placeholder
   })
   
-  // Headers
-  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>')
-  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>')
-  text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>')
-  
+  // Headers — escape text content before wrapping
+  text = text.replace(/^### (.*$)/gim, (_, t) => `<h3>${escapeHtml(t)}</h3>`)
+  text = text.replace(/^## (.*$)/gim, (_, t) => `<h2>${escapeHtml(t)}</h2>`)
+  text = text.replace(/^# (.*$)/gim, (_, t) => `<h1>${escapeHtml(t)}</h1>`)
+
   // Bold and italic
   text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
   text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   text = text.replace(/\*(.*?)\*/g, '<em>$1</em>')
-  
-  // Inline code
-  text = text.replace(/`([^`]+)`/g, '<code>$1</code>')
-  
-  // Links
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+
+  // Inline code — escape content
+  text = text.replace(/`([^`]+)`/g, (_, code) => `<code>${escapeHtml(code)}</code>`)
+
+  // Links — block javascript:/data: URLs; escape link text
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+    const safeUrl = /^(javascript|data|vbscript):/i.test(url.trim()) ? '#' : url
+    return `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`
+  })
   
   // Process lists - collect consecutive list items
   const lines = text.split('\n')
@@ -148,7 +152,11 @@ const parseMarkdown = async (text) => {
     result = result.replace(`___CODEBLOCK_${index}___`, block)
   })
   
-  return result
+  return DOMPurify.sanitize(result, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'strong', 'em', 'code', 'pre', 'p', 'ul', 'li', 'a', 'br'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    ALLOW_DATA_ATTR: false,
+  })
 }
 
 const escapeHtml = (text) => {

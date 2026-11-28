@@ -29,7 +29,8 @@
     "vue": "^3.5.13",
     "vue-codemirror": "^6.1.1",
     "vue-color-kit": "^1.0.6",
-    "vue-toastification": "^2.0.0-rc.5"
+    "vue-toastification": "^2.0.0-rc.5",
+    "dompurify": "^3.2.6"
   },
   "tolgee": {
     "apiUrl": "https://toglee.yixe.co.uk",
