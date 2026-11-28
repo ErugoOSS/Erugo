@@ -8,7 +8,9 @@ use App\Jobs\sendEmail;
 use App\Models\Share;
 use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
+use App\Http\Middleware\EnsureLivesharesAvailable;
 use App\Services\SettingsService;
+use App\Support\Liveshares;
 
 if (! function_exists('getSettings')) {
     function getSettings()
@@ -45,6 +47,9 @@ if (! function_exists('getSettings')) {
 
         // Add app version
         $indexedSettings['version'] = config('app.version');
+
+        // Lets the frontend hide live shares when ERUGO_LIVESHARES is off
+        $indexedSettings['liveshares_available'] = Liveshares::available();
 
         return $indexedSettings;
     }
@@ -118,22 +123,25 @@ Route::get('/shares/{share}/file/{filepath}', function ($shareId, $filepath) {
     return $controller->downloadFile($shareId, $filepath);
 })->where('filepath', '.*');
 
-// Liveshare invite acceptance page
-Route::get('/liveshares/invite/{token}', function ($token) {
-    $indexedSettings = getSettings();
+// Live-share pages 404 unless ERUGO_LIVESHARES is on.
+Route::middleware(EnsureLivesharesAvailable::class)->group(function () {
+    // Liveshare invite acceptance page
+    Route::get('/liveshares/invite/{token}', function ($token) {
+        $indexedSettings = getSettings();
 
-    $theme = Theme::where('active', true)->first();
+        $theme = Theme::where('active', true)->first();
 
-    return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
-});
+        return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
+    });
 
-// Liveshare workspace
-Route::get('/liveshares/{liveshare}', function ($liveshareId) {
-    $indexedSettings = getSettings();
+    // Liveshare workspace
+    Route::get('/liveshares/{liveshare}', function ($liveshareId) {
+        $indexedSettings = getSettings();
 
-    $theme = Theme::where('active', true)->first();
+        $theme = Theme::where('active', true)->first();
 
-    return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
+        return view('app', ['settings' => $indexedSettings, 'theme' => $theme]);
+    });
 });
 
 //auth provider login

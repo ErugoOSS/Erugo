@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\LiveshareInvite;
 use App\Models\User;
 use App\Models\Setting;
+use App\Support\Liveshares;
 
 class liveshareInviteMail extends Mailable
 {
@@ -49,5 +50,18 @@ class liveshareInviteMail extends Mailable
     public function attachments(): array
     {
         return [];
+    }
+
+    /**
+     * Drop the invite instead of sending it when live shares are switched off,
+     * for example an invite that was still queued when the flag was turned off.
+     */
+    public function send($mailer)
+    {
+        if (!Liveshares::available()) {
+            return null;
+        }
+
+        return parent::send($mailer);
     }
 }
