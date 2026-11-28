@@ -53,6 +53,11 @@ class CreateShareZip implements ShouldQueue
       $this->share->save();
       $this->removeDirectory($sourcePath);
     } catch (\Exception $e) {
+      // Don't leave a half-written zip behind: the check at the top would
+      // treat it as finished on the next run.
+      if (file_exists($zipPath)) {
+        @unlink($zipPath);
+      }
       $this->share->status = 'failed';
       $this->share->save();
       Log::error('Error creating share zip: ' . $e->getMessage());
@@ -67,16 +72,16 @@ class CreateShareZip implements ShouldQueue
       mkdir($zipDir, 0755, true);
     }
 
+    $resolvedSource = realpath($sourcePath);
+    if ($resolvedSource === false || !is_dir($resolvedSource)) {
+      throw new \Exception('Source directory not found or not accessible');
+    }
+    $sourcePath = rtrim($resolvedSource, DIRECTORY_SEPARATOR);
+
     $zip = new \ZipArchive();
     $result = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
     if ($result !== true) {
       throw new \Exception("Failed to create zip archive (ZipArchive code: {$result})");
-    }
-
-    $sourcePath = rtrim(realpath($sourcePath), DIRECTORY_SEPARATOR);
-    if ($sourcePath === false || !is_dir($sourcePath)) {
-      $zip->close();
-      throw new \Exception('Source directory not found or not accessible');
     }
 
     $iterator = new \RecursiveIteratorIterator(
@@ -85,6 +90,13 @@ class CreateShareZip implements ShouldQueue
     );
 
     foreach ($iterator as $file) {
+      // Skip symlinks so a link can't pull in a file from outside the share
+      // folder. Uploads never create them, so anything here is unexpected.
+      if ($file->isLink()) {
+        Log::warning('Skipping symlink while zipping share', ['path' => $file->getPathname()]);
+        continue;
+      }
+
       $relativePath = substr($file->getPathname(), strlen($sourcePath) + 1);
       if ($file->isDir()) {
         $zip->addEmptyDir($relativePath);
