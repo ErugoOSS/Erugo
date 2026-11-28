@@ -100,8 +100,13 @@ const clickOutside = (e) => {
   }
 }
 
+const LIVESHARE_TABS = ['myLiveshares', 'allLiveshares']
+
 const setActiveTab = (tab, options = {}) => {
   const { updateUrl = true } = options
+  if (LIVESHARE_TABS.includes(tab) && !store.livesharesAvailable()) {
+    return
+  }
   activeTab.value = tab
   if (tab === 'allShares' && allSharesUsers.value.length === 0) {
     loadAllSharesUsers()
@@ -115,7 +120,7 @@ const setActiveTab = (tab, options = {}) => {
 
 const getInitialTab = () => {
   if (store.isRestricted()) {
-    return 'myLiveshares'
+    return store.livesharesAvailable() ? 'myLiveshares' : 'myProfile'
   }
   return 'myShares'
 }
@@ -362,14 +367,14 @@ const handleLiveshareOwnerFilterChange = (event) => {
             class="settings-tab"
             :class="{ active: activeTab === 'allLiveshares' }"
             @click="setActiveTab('allLiveshares')"
-            v-if="store.isAdmin()"
+            v-if="store.isAdmin() && store.livesharesAvailable()"
           >
             <h2>
               <Share2 />
               {{ $t('settings.title.allLiveshares') }}
             </h2>
           </div>
-          <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')">
+          <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')" v-if="store.livesharesAvailable()">
             <h2>
               <Share2 />
               {{ $t('settings.title.myLiveshares') }}
@@ -621,7 +626,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
               </div>
             </div>
             <div
-              v-else-if="activeTab === 'myLiveshares'"
+              v-else-if="activeTab === 'myLiveshares' && store.livesharesAvailable()"
               class="settings-tab-content"
               ref="tabContents.myLiveshares"
               key="myLiveshares"
@@ -650,7 +655,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
               </div>
             </div>
             <div
-              v-else-if="activeTab === 'allLiveshares'"
+              v-else-if="activeTab === 'allLiveshares' && store.livesharesAvailable()"
               class="settings-tab-content"
               ref="tabContents.allLiveshares"
               key="allLiveshares"
