@@ -396,6 +396,10 @@ class ExternalAuthController extends Controller
      */
     private function createAuthCookieAndRedirect($user)
     {
+        if (!$user->active) {
+            return redirect('/')->with('error', 'Account is not active');
+        }
+
         // Set refresh token with 24 hour expiry
         $twentyFourHours = 60 * 60 * 24;
         $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
