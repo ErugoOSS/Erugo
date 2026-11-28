@@ -64,7 +64,10 @@ class BackgroundsController extends Controller
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'background_image' => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,webm',
+            // mimes checks the type worked out from the file's contents. extensions
+            // checks the name it is saved under, since Caddy serves the file with
+            // a Content-Type taken from that name.
+            'background_image' => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,webm|extensions:jpg,jpeg,png,gif,webp,mp4,webm',
         ]);
 
         if ($validator->fails()) {
