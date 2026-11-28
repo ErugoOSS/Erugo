@@ -187,7 +187,7 @@ class ShareCloneTest extends TestCase
         $this->assertEquals('My Custom Clone', $response->json('data.share.name'));
     }
 
-    public function test_clone_defaults_to_clone_of_name(): void
+    public function test_clone_defaults_to_original_name(): void
     {
         Queue::fake();
 
@@ -198,7 +198,8 @@ class ShareCloneTest extends TestCase
             ->postJson("/api/shares/{$share->id}/clone")
             ->assertStatus(200);
 
-        $this->assertEquals('Clone of ' . $share->name, $response->json('data.share.name'));
+        // 6f411d5 changed the default from "Clone of ..." to the original name.
+        $this->assertEquals($share->name, $response->json('data.share.name'));
     }
 
     public function test_clone_file_exists_in_clone_directory(): void
