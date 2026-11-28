@@ -19,7 +19,8 @@ import {
   RefreshCw,
   Loader2,
   LogIn,
-  Info
+  Info,
+  PackageSearch
 } from 'lucide-vue-next'
 import { ref, onMounted } from 'vue'
 import Users from './settings/users.vue'
@@ -31,7 +32,8 @@ import MyProfile from './settings/myProfile.vue'
 import MyShares from './settings/myShares.vue'
 import AllShares from './settings/allShares.vue'
 import About from './settings/about.vue'
-import { getUsers } from '../api'
+import DiagnosticsModal from './DiagnosticsModal.vue'
+import { getUsers, generateDiagnosticsBundle, downloadDiagnosticsBundle } from '../api'
 import ButtonWithMenu from './buttonWithMenu.vue'
 import { useSetting } from '../composables/useSetting'
 import { useSettingsNavigation, updateUrlHash, buildSettingsPath, clearUrlHash } from '../composables/useSettingsNavigation'
@@ -106,6 +108,28 @@ const setActiveTab = (tab, options = {}) => {
 
 const getInitialTab = () => {
   return 'myShares'
+}
+
+// Diagnostics bundle
+const diagnosticsGenerating = ref(false)
+const diagnosticsKey = ref(null)
+const diagnosticsFilename = ref(null)
+
+const handleDownloadDiagnostics = async () => {
+  if (!confirm(t.value('settings.diagnostics.confirm') || 'Collect and download a diagnostic bundle? This may take a few seconds.')) return
+  diagnosticsGenerating.value = true
+  try {
+    const { token, key, filename } = await generateDiagnosticsBundle()
+    diagnosticsKey.value = key
+    diagnosticsFilename.value = filename
+    // Trigger download in background before showing the modal
+    await downloadDiagnosticsBundle(token, filename)
+  } catch (e) {
+    alert(e.message || 'Failed to generate diagnostics bundle')
+    diagnosticsKey.value = null
+  } finally {
+    diagnosticsGenerating.value = false
+  }
 }
 
 // Track active tab
@@ -243,6 +267,11 @@ const handleUserFilterChange = (event) => {
         </h1>
         <button class="settings-help-button icon-only" @click="goToHelp">
           <HelpCircle />
+        </button>
+        <button v-if="store.isAdmin()" class="secondary" @click="handleDownloadDiagnostics" :disabled="diagnosticsGenerating">
+          <Loader2 v-if="diagnosticsGenerating" class="spinner" />
+          <PackageSearch v-else />
+          {{ diagnosticsGenerating ? ($t('settings.diagnostics.generating') || 'Collecting…') : ($t('settings.diagnostics.button') || 'Diagnostics') }}
         </button>
         <button class="close-settings-button icon-only" @click="closeSettings">
           <CircleX />
@@ -597,6 +626,13 @@ const handleUserFilterChange = (event) => {
       </div>
     </div>
   </div>
+
+  <DiagnosticsModal
+    v-if="diagnosticsKey"
+    :decryption-key="diagnosticsKey"
+    :filename="diagnosticsFilename"
+    @close="diagnosticsKey = null"
+  />
 </template>
 
 <style lang="scss" scoped>

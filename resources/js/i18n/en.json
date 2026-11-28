@@ -619,6 +619,11 @@
       "password_protect_description": "Create a password for your share. Anyone downloading this share will need this password to access it. Please note: After creation, this password will be encrypted and we cannot retrieve it for you. Make sure to save it in a secure location.",
       "remove_password": "Remove Password"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "All-Time Downloads",

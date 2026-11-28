@@ -598,6 +598,11 @@
       "password_protect_description": "Crea una password per la tua condivisione. Chiunque scarichi questa condivisione avrà bisogno di questa password per accedervi. Nota bene: dopo la creazione, la password sarà crittografata e non sarà possibile recuperarla. Assicurati di salvarla in un luogo sicuro.",
       "remove_password": "Rimuovi la password"
     },
+    "diagnostics": {
+      "button": "Diagnostics",
+      "generating": "Collecting…",
+      "confirm": "Collect and download a diagnostic bundle? This may take a few seconds."
+    },
     "stats": {
       "downloads": {
         "all_time": "Download di sempre",
