@@ -360,38 +360,38 @@ class EmailCaseInsensitivityTest extends TestCase
 
     private function runNormalizationMigration(): void
     {
-        $collisions = DB::table('users')
-            ->select(DB::raw('LOWER(email) as normalized_email'), DB::raw('COUNT(*) as cnt'))
-            ->groupBy(DB::raw('LOWER(email)'))
-            ->having('cnt', '>', 1)
-            ->pluck('normalized_email');
+        // Run the real migration file. This used to copy its logic, so the
+        // tests passed even when the migration itself failed on case-clashing
+        // password reset tokens.
+        $migration = require database_path('migrations/2026_07_28_000001_normalize_user_emails_to_lowercase.php');
+        $migration->up();
+    }
 
-        foreach ($collisions as $normalizedEmail) {
-            $duplicates = DB::table('users')
-                ->whereRaw('LOWER(email) = ?', [$normalizedEmail])
-                ->orderBy('id')
-                ->get();
+    /** @test */
+    public function migration_handles_reset_tokens_that_clash_by_case(): void
+    {
+        $kept = DB::table('users')->insertGetId(['name' => 'Kept', 'email' => 'Clash@Example.com', 'password' => 'x', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        $dup = DB::table('users')->insertGetId(['name' => 'Dup', 'email' => 'clash@example.com', 'password' => 'x', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('password_reset_tokens')->insert([
+            ['email' => 'Clash@Example.com', 'token' => 'kept-token', 'created_at' => now()->subMinutes(5)],
+            ['email' => 'clash@example.com', 'token' => 'dup-token', 'created_at' => now()],
+            // No user for these two; the newer one wins.
+            ['email' => 'Gone@Example.com', 'token' => 'old', 'created_at' => now()->subMinutes(10)],
+            ['email' => 'GONE@example.com', 'token' => 'new', 'created_at' => now()],
+        ]);
 
-            $isFirst = true;
-            foreach ($duplicates as $duplicate) {
-                if ($isFirst) {
-                    $isFirst = false;
-                    continue;
-                }
-                DB::table('users')
-                    ->where('id', $duplicate->id)
-                    ->update([
-                        'email'      => $duplicate->email . '__dup_' . $duplicate->id,
-                        'active'     => false,
-                        'updated_at' => now(),
-                    ]);
-            }
-        }
+        $this->runNormalizationMigration();
 
-        DB::statement('UPDATE users SET email = LOWER(email), updated_at = ? WHERE email != LOWER(email)', [now()]);
+        $this->assertDatabaseHas('users', ['id' => $kept, 'email' => 'clash@example.com']);
+        $this->assertStringEndsWith('__dup_' . $dup, DB::table('users')->where('id', $dup)->value('email'));
 
-        if (DB::getSchemaBuilder()->hasTable('password_reset_tokens')) {
-            DB::statement('UPDATE password_reset_tokens SET email = LOWER(email) WHERE email != LOWER(email)');
-        }
+        // The deactivated account's token is gone, so it can't reset the kept one.
+        $this->assertSame('kept-token', DB::table('password_reset_tokens')->where('email', 'clash@example.com')->value('token'));
+        $this->assertSame('new', DB::table('password_reset_tokens')->where('email', 'gone@example.com')->value('token'));
+        $this->assertSame(2, DB::table('password_reset_tokens')->count());
+
+        // Running it again is a no-op.
+        $this->runNormalizationMigration();
+        $this->assertSame(2, DB::table('password_reset_tokens')->count());
     }
 }

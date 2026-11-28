@@ -45,9 +45,16 @@ return new class extends Migration
             return;
         }
 
-        // ── Quarantine collisions ────────────────────────────────────────────
+        // Everything below runs in one transaction. Without it, a failure
+        // part-way through left users renamed but the migration unrecorded,
+        // and every later start failed on the same step.
         $quarantined = [];
+        $tokensDropped = 0;
 
+        DB::transaction(function () use ($collisionGroups, $tokensToNormalize, &$quarantined, &$tokensDropped) {
+            $hasTokens = DB::getSchemaBuilder()->hasTable('password_reset_tokens');
+
+        // ── Quarantine collisions ────────────────────────────────────────────
         foreach ($collisionGroups as $normalizedEmail) {
             $group = DB::table('users')
                 ->whereRaw('LOWER(email) = ?', [$normalizedEmail])
@@ -67,6 +74,14 @@ return new class extends Migration
                         'updated_at' => now(),
                     ]);
 
+                // A reset token issued to the deactivated account would, once
+                // lowercased, reset the kept account instead. Drop it.
+                if ($hasTokens) {
+                    $tokensDropped += DB::table('password_reset_tokens')
+                        ->where('email', $duplicate->email)
+                        ->delete();
+                }
+
                 $quarantined[] = [
                     'id'             => $duplicate->id,
                     'name'           => $duplicate->name,
@@ -83,10 +98,34 @@ return new class extends Migration
             [now()]
         );
 
-        if ($tokensToNormalize > 0) {
+        if ($hasTokens && $tokensToNormalize > 0) {
+            // password_reset_tokens.email is the primary key, so two tokens
+            // that differ only by case can't both be lowercased. Keep the
+            // newest of each group.
+            $tokenGroups = DB::table('password_reset_tokens')
+                ->select(DB::raw('LOWER(email) as normalized_email'), DB::raw('COUNT(*) as cnt'))
+                ->groupBy(DB::raw('LOWER(email)'))
+                ->having('cnt', '>', 1)
+                ->pluck('normalized_email');
+
+            foreach ($tokenGroups as $normalizedEmail) {
+                $rows = DB::table('password_reset_tokens')
+                    ->whereRaw('LOWER(email) = ?', [$normalizedEmail])
+                    ->orderByDesc('created_at')
+                    ->get();
+                foreach ($rows->skip(1) as $row) {
+                    $tokensDropped += DB::table('password_reset_tokens')->where('email', $row->email)->delete();
+                }
+            }
+
             DB::statement(
                 'UPDATE password_reset_tokens SET email = LOWER(email) WHERE email != LOWER(email)'
             );
+        }
+        });
+
+        if ($tokensDropped > 0) {
+            Log::warning('Email normalization: removed ' . $tokensDropped . ' password reset token(s) that clashed by case or belonged to a deactivated account.');
         }
 
         // ── Logging ──────────────────────────────────────────────────────────
