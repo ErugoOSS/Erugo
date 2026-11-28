@@ -10,12 +10,31 @@
     # Enable Gzip compression
     encode gzip
     
-    # Simplified logging
-    log {
-        output file /var/www/html/storage/logs/caddy.log
+    # Error-only log — catches Caddy-internal failures, upstream errors, TLS issues
+    log errors {
+        output file /var/www/html/storage/logs/caddy-error.log {
+            roll_size 10MiB
+            roll_keep 3
+            roll_keep_for 168h
+        }
         format json
+        level ERROR
     }
-    
+
+    # Access log — API and page requests only, static assets excluded
+    log access {
+        output file /var/www/html/storage/logs/caddy-access.log {
+            roll_size 20MiB
+            roll_keep 7
+            roll_keep_for 168h
+        }
+        format json
+        level INFO
+    }
+
+    # Skip access logging for Vite build assets (high-volume, no diagnostic value)
+    skip_log @build_assets
+
     # Provide security headers
     header {
         # Security headers
