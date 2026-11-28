@@ -101,17 +101,29 @@ const clickOutside = (e) => {
 }
 
 const LIVESHARE_TABS = ['myLiveshares', 'allLiveshares']
+// Keep in step with the tabs marked v-if="store.isAdmin()" in the template
+const ADMIN_TABS = ['stats', 'branding', 'system', 'emailTemplates', 'users', 'allShares', 'allLiveshares']
 
 const setActiveTab = (tab, options = {}) => {
+  // Silently block non-admins from landing on admin-only tabs (e.g. via stale URL hash)
+  if (ADMIN_TABS.includes(tab) && !store.isAdmin()) {
+    const fallback = getInitialTab()
+    activeTab.value = fallback
+    updateUrlHash(fallback, true)
+    return
+  }
   const { updateUrl = true } = options
   if (LIVESHARE_TABS.includes(tab) && !store.livesharesAvailable()) {
+    const fallback = getInitialTab()
+    activeTab.value = fallback
+    updateUrlHash(fallback, true)
     return
   }
   activeTab.value = tab
   if (tab === 'allShares' && allSharesUsers.value.length === 0) {
     loadAllSharesUsers()
   }
-  
+
   // Update URL hash with the new tab
   if (updateUrl) {
     updateUrlHash(tab)
@@ -273,7 +285,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
           <Settings />
           <span>
             {{ $t('settings.title.manage') }}
-            <span v-html="getSettingsTitle()" />
+            <span>{{ getSettingsTitle() }}</span>
           </span>
         </h1>
         <button class="settings-help-button icon-only" @click="goToHelp">

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { sanitizeSvg } from '../lib/sanitize'
 import { getApiUrl } from '../utils'
 import { useToast } from 'vue-toastification'
 import { domData } from '../domData'
@@ -460,7 +461,7 @@ const switchToLogin = () => {
           <div class="col-6 pe-1 ps-1 mb-2" v-for="provider in authProviders" :key="provider.id">
             <button class="block secondary provider-button" @click="attemptAuthProviderLogin(provider.id)">
               <Fingerprint v-if="!provider.icon" />
-              <svg v-else v-html="provider.icon" class="custom"></svg>
+              <svg v-else v-html="sanitizeSvg(provider.icon)" class="custom"></svg>
               {{ provider.name }}
             </button>
           </div>

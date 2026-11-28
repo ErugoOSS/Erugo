@@ -20,6 +20,7 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "bootstrap": "^5.3.3",
     "codemirror": "^6.0.1",
+    "dompurify": "^3.5.0",
     "flag-icons": "^7.3.2",
     "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",

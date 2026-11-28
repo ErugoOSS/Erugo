@@ -3,6 +3,7 @@ import { ref, onMounted, defineExpose, nextTick } from 'vue'
 import { getMyProfile, updateMyProfile, getAvailableAuthProviders, unlinkProvider } from '../../api'
 import { User, CircleX, UserRoundCheck, UserRoundPen, Fingerprint, Link, Unlink } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
+import { sanitizeSvg } from '../../lib/sanitize'
 import { store } from '../../store'
 
 import { useTranslate } from '@tolgee/vue'
@@ -252,7 +253,7 @@ const handleUnlinkProvider = async (provider) => {
                     <div class="col-auto">
                       <div class="icon">
                         <Fingerprint v-if="!provider.icon" />
-                        <svg v-else v-html="provider.icon" class="custom"></svg>
+                        <svg v-else v-html="sanitizeSvg(provider.icon)" class="custom"></svg>
                       </div>
                     </div>
                     <div class="col">
