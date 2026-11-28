@@ -84,7 +84,7 @@ class AppAuthController extends Controller
                 'status' => 'error',
                 'code' => 'AUTH_ACCOUNT_INACTIVE',
                 'message' => 'Account is not active'
-            ], 401);
+            ], 403);
         }
 
         return $this->respondWithTokens($user, $request->input('device_name'));
@@ -128,7 +128,7 @@ class AppAuthController extends Controller
                     'status' => 'error',
                     'code' => 'AUTH_ACCOUNT_INACTIVE',
                     'message' => 'Account is not active'
-                ], 401);
+                ], 403);
             }
 
             // Invalidate old token and generate new ones
@@ -610,6 +610,16 @@ class AppAuthController extends Controller
      */
     private function respondWithTokens(User $user, ?string $deviceName = null, string $message = 'Authentication successful'): JsonResponse
     {
+        // Every path that hands out tokens comes through here, including
+        // password reset and linking an SSO provider, so check once more.
+        if (!$user->active) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'AUTH_ACCOUNT_INACTIVE',
+                'message' => 'Account is not active'
+            ], 403);
+        }
+
         $accessToken = Auth::login($user);
 
         if (!$accessToken) {
@@ -826,7 +836,7 @@ class AppAuthController extends Controller
                         'status' => 'error',
                         'code' => 'AUTH_ACCOUNT_INACTIVE',
                         'message' => 'Account is not active'
-                    ], 401);
+                    ], 403);
                 }
 
                 $authState->delete();
@@ -871,7 +881,7 @@ class AppAuthController extends Controller
                     'status' => 'error',
                     'code' => 'AUTH_ACCOUNT_INACTIVE',
                     'message' => 'Account is not active'
-                ], 401);
+                ], 403);
             }
 
             // Link the provider to the user
