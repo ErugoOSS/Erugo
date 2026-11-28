@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * Loopback plus the RFC1918/ULA ranges. Reverse proxies (Nginx Proxy Manager,
-     * Traefik, cloudflared, a sidecar Caddy) reach Erugo from a Docker bridge or
-     * LAN address, so this makes proxied installs key on the real client IP without
-     * the admin having to configure anything. Spoofing X-Forwarded-* still requires
-     * the attacker's packets to arrive from a private address.
+     * Loopback only. Caddy passes forwarded headers on from private addresses,
+     * so trusting the private ranges here would let any device on the LAN set
+     * X-Forwarded-For and dodge the per-IP rate limits. Admins behind a reverse
+     * proxy add its address in System settings; the settings page warns when it
+     * sees forwarded headers from an address that isn't trusted.
      */
-    private const DEFAULT_TRUSTED_PROXIES = '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7';
+    private const DEFAULT_TRUSTED_PROXIES = '127.0.0.1,::1';
 
     /**
      * Run the migrations.
