@@ -11,6 +11,7 @@ use App\Jobs\sendEmail;
 use App\Jobs\cleanSpecificShares;
 use App\Services\SettingsService;
 use App\Services\ThumbnailService;
+use App\Utils\PathGuard;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -242,11 +243,13 @@ class AppSharesController extends Controller
 
         // Single file share - download directly
         if ($share->file_count == 1) {
-            if (file_exists($sharePath . '/' . $share->files[0]->name)) {
+            $file = $share->files[0];
+            $diskFilePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
+            if ($diskFilePath) {
                 $this->createDownloadRecord($share);
                 return response()->download(
-                    $sharePath . '/' . $share->files[0]->name,
-                    $this->sanitizeDownloadFilename($share->files[0]->display_name)
+                    $diskFilePath,
+                    $this->sanitizeDownloadFilename($file->display_name)
                 );
             } else {
                 return response()->json([
@@ -357,9 +360,9 @@ class AppSharesController extends Controller
 
             if ($filePath === $expectedPath || $filePath === $file->display_name) {
                 $sharePath = storage_path('app/shares/' . $share->path);
-                $diskFilePath = $sharePath . '/' . $file->name;
+                $diskFilePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
 
-                if (file_exists($diskFilePath)) {
+                if ($diskFilePath) {
                     $this->createDownloadRecord($share);
                     return response()->download(
                         $diskFilePath,
@@ -887,8 +890,8 @@ class AppSharesController extends Controller
 
         // Single file share - file is on disk directly
         if ($share->file_count == 1) {
-            $sourcePath = $sharePath . '/' . $file->name;
-            if (!file_exists($sourcePath)) {
+            $sourcePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
+            if (!$sourcePath) {
                 return response()->json([
                     'status' => 'error',
                     'code' => 'SOURCE_FILE_NOT_FOUND',

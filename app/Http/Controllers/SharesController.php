@@ -15,6 +15,7 @@ use App\Jobs\sendEmail;
 use App\Services\SettingsService;
 use App\Services\PatternGenerator;
 use App\Jobs\cleanSpecificShares;
+use App\Utils\PathGuard;
 use Illuminate\Support\Facades\Hash;
 
 class SharesController extends Controller
@@ -192,13 +193,15 @@ class SharesController extends Controller
 
     //if there is only one file, download it directly
     if ($share->file_count == 1) {
-      if (file_exists($sharePath . '/' . $share->files[0]->name)) {
+      $file = $share->files[0];
+      $diskFilePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
+      if ($diskFilePath) {
 
         $this->createDownloadRecord($share);
 
         return response()->download(
-          $sharePath . '/' . $share->files[0]->name,
-          $this->sanitizeDownloadFilename($share->files[0]->display_name)
+          $diskFilePath,
+          $this->sanitizeDownloadFilename($file->display_name)
         );
       } else {
         return redirect()->to('/shares/' . $shareId);

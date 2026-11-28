@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
+use App\Utils\PathGuard;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -304,8 +305,7 @@ class AppUploadsController extends Controller
             $resolvedPath = realpath($destPath);
             $resolvedSharePath = realpath($completePath);
             
-            if ($resolvedPath === false || $resolvedSharePath === false ||
-                strpos($resolvedPath, $resolvedSharePath) !== 0) {
+            if (!PathGuard::isWithin($destPath, $completePath)) {
                 Log::warning('Path traversal attempt detected in App API', [
                     'user_id' => $user->id,
                     'original_path' => $filePaths[$uploadId] ?? '',
