@@ -14,7 +14,7 @@
 
 </head>
 
-<body data-settings='{!! json_encode($settings) !!}'>
+<body data-settings='{!! htmlspecialchars(json_encode($settings)) !!}'>
   <style id="erugo-css-variables">
     :root {
       --primary-color: {{ $settings['css_primary_color'] }};
