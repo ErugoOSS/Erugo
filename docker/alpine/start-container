@@ -82,6 +82,7 @@ fi
 # Always ensure correct permissions on storage directory
 echo "Setting storage permissions..."
 chown -R erugo:erugo /var/www/html/storage
+chmod -R u=rwX,g=rX,o= /var/www/html/storage
 
 # Make sure php-fpm run directory exists and has correct permissions
 mkdir -p /run/php
@@ -122,7 +123,8 @@ fi
 
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
-env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" | sed 's/=\(.*\)/="\1"/' > /var/www/html/.env
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" | \
+  awk -F= '{key=$1; val=substr($0, length($1)+2); gsub(/"/, "\\\"", val); printf "%s=\"%s\"\n", key, val}' > /var/www/html/.env
 
 # Create a temporary crontab file
 echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab
