@@ -1,16 +1,4 @@
 # Basic Caddyfile for Laravel
-{
-    servers {
-        # Pass X-Forwarded-* through from reverse proxies on private
-        # networks instead of overwriting them. Without this, PHP always
-        # sees X-Forwarded-Proto: http and X-Forwarded-For set to the proxy,
-        # so the trusted proxies setting in Erugo has nothing to act on.
-        # Laravel still ignores these headers unless the peer is listed in
-        # that setting.
-        trusted_proxies static private_ranges
-    }
-}
-
 :80 {
     root * /var/www/html/public
 
