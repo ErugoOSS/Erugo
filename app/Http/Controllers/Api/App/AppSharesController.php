@@ -549,9 +549,12 @@ class AppSharesController extends Controller
             ], 403);
         }
 
-        // Optional days parameter, default to 7
-        $days = $request->input('days', 7);
-        
+        // Optional days parameter, default to 7. Clamp it to at least one day
+        // and at most the admin's max expiry (or a year if no max is set), so
+        // a huge value can't push the date out of range.
+        $maxDays = (int) ((new SettingsService())->get('max_expiry_time') ?: 365);
+        $days = max(1, min($maxDays, (int) $request->input('days', 7)));
+
         $share->expires_at = Carbon::now()->addDays($days);
         $share->save();
 
