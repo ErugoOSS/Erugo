@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,7 +51,7 @@ class EmailCaseInsensitivityTest extends TestCase
     // A. Input normalisation
     // -------------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function admin_create_user_stores_email_as_lowercase(): void
     {
         $admin = $this->makeUser('admin@example.com');
@@ -67,7 +68,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'NEWUSER@Example.COM']);
     }
 
-    /** @test */
+    #[Test]
     public function self_registration_stores_email_as_lowercase(): void
     {
         $this->postJson('/api/auth/register', [
@@ -81,7 +82,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'SelfReg@Example.COM']);
     }
 
-    /** @test */
+    #[Test]
     public function create_first_user_stores_email_as_lowercase(): void
     {
         $this->postJson('/api/setup', [
@@ -94,7 +95,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'admin@example.com']);
     }
 
-    /** @test */
+    #[Test]
     public function update_user_normalizes_email_to_lowercase(): void
     {
         $admin = $this->makeUser('admin@example.com');
@@ -114,7 +115,7 @@ class EmailCaseInsensitivityTest extends TestCase
     // B. Auth flows with mismatched casing
     // -------------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function login_succeeds_with_uppercase_email(): void
     {
         $this->makeUser('user@example.com');
@@ -125,7 +126,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(200)->assertJsonPath('status', 'success');
     }
 
-    /** @test */
+    #[Test]
     public function login_succeeds_with_mixed_case_email(): void
     {
         $this->makeUser('user@example.com');
@@ -136,7 +137,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(200)->assertJsonPath('status', 'success');
     }
 
-    /** @test */
+    #[Test]
     public function forgot_password_finds_user_with_different_casing(): void
     {
         $this->makeUser('user@example.com');
@@ -152,7 +153,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function forgot_password_with_mixed_case_creates_token(): void
     {
         $this->makeUser('user@example.com');
@@ -166,7 +167,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function reset_password_succeeds_with_different_email_casing(): void
     {
         $user = $this->makeUser('user@example.com');
@@ -180,7 +181,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(200)->assertJsonPath('status', 'success');
     }
 
-    /** @test */
+    #[Test]
     public function self_registration_verify_succeeds_with_different_email_casing(): void
     {
         // Register with lowercase
@@ -204,7 +205,7 @@ class EmailCaseInsensitivityTest extends TestCase
     // C. Uniqueness enforcement
     // -------------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function self_registration_rejects_duplicate_email_different_case(): void
     {
         $this->makeUser('existing@example.com');
@@ -217,7 +218,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function admin_create_user_rejects_duplicate_email_different_case(): void
     {
         $admin = $this->makeUser('admin@example.com');
@@ -232,7 +233,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(400);
     }
 
-    /** @test */
+    #[Test]
     public function camel_case_email_is_normalized_to_lowercase(): void
     {
         $this->makeUser('camel@example.com');
@@ -244,7 +245,7 @@ class EmailCaseInsensitivityTest extends TestCase
         ])->assertStatus(200)->assertJsonPath('status', 'success');
     }
 
-    /** @test */
+    #[Test]
     public function email_with_leading_trailing_whitespace_is_trimmed_and_normalized(): void
     {
         $this->makeUser('trim@example.com');
@@ -259,7 +260,7 @@ class EmailCaseInsensitivityTest extends TestCase
     // D. Collision migration
     // -------------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function migration_normalizes_emails_to_lowercase(): void
     {
         // Seed users with mixed-case emails (no collisions)
@@ -277,7 +278,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'Bob@Example.COM']);
     }
 
-    /** @test */
+    #[Test]
     public function migration_quarantines_collision_duplicate_and_keeps_oldest(): void
     {
         // Seed two users with same email in different casing
@@ -299,7 +300,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertEquals(0, $quarantined->active);
     }
 
-    /** @test */
+    #[Test]
     public function migration_handles_triple_collision(): void
     {
         $id1 = DB::table('users')->insertGetId(['name' => 'A', 'email' => 'same@example.com',  'password' => 'x', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
@@ -319,7 +320,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $this->assertEquals(0, $dup3->active);
     }
 
-    /** @test */
+    #[Test]
     public function migration_normalizes_password_reset_tokens(): void
     {
         DB::table('password_reset_tokens')->insert([
@@ -338,7 +339,7 @@ class EmailCaseInsensitivityTest extends TestCase
     // E. Reverse share invite normalisation
     // -------------------------------------------------------------------------
 
-    /** @test */
+    #[Test]
     public function reverse_share_invite_stores_recipient_email_as_lowercase(): void
     {
         $sender = $this->makeUser('sender@example.com');
@@ -367,7 +368,7 @@ class EmailCaseInsensitivityTest extends TestCase
         $migration->up();
     }
 
-    /** @test */
+    #[Test]
     public function migration_handles_reset_tokens_that_clash_by_case(): void
     {
         $kept = DB::table('users')->insertGetId(['name' => 'Kept', 'email' => 'Clash@Example.com', 'password' => 'x', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);

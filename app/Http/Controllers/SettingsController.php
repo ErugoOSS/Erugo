@@ -123,7 +123,7 @@ class SettingsController extends Controller
     public function writeLogo(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'logo' => 'required|image|mimes:png,svg|max:2048',
+            'logo' => 'required|image:allow_svg|mimes:png,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
