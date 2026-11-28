@@ -278,7 +278,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
           <Settings />
           <span>
             {{ $t('settings.title.manage') }}
-            <span v-html="getSettingsTitle()" />
+            <span>{{ getSettingsTitle() }}</span>
           </span>
         </h1>
         <button class="settings-help-button icon-only" @click="goToHelp">
