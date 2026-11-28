@@ -37,12 +37,13 @@ const toast = useToast()
 const maxFilesToShow = 4
 const loadedShares = ref(false)
 
+const { value: allowFileReplacement } = useSetting('allow_file_replacement', 'system.shares', '1')
 const shares = ref([])
 const showDeletedShares = ref(false)
-const { value: allowFileReplacement } = useSetting('allow_file_replacement', 'system.shares', '1')
 const extendModalShare = ref(null)
 const manageFilesShare = ref(null)
 const replaceFileShare = ref(null)
+const cloneShareTarget = ref(null)
 const openDropdownId = ref(null)
 
 const toggleDropdown = (id) => {
@@ -52,7 +53,6 @@ const toggleDropdown = (id) => {
 const closeDropdown = () => {
   openDropdownId.value = null
 }
-const cloneShareTarget = ref(null)
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('showDeletedShares') === 'true'
@@ -242,6 +242,7 @@ defineExpose({
         {{ $t('settings.help.downloadLimit.description2') }}
       </p>
     </HelpTip>
+    <!-- Expired shares notice (informational) -->
     <div v-if="expiredShares.length > 0" class="expired-shares-notice">
       <div class="expired-shares-notice-content">
         <CalendarX2 class="expired-notice-icon" />
@@ -412,6 +413,7 @@ defineExpose({
               >
                 <HardDriveDownload style="margin-right: 0" />
               </button>
+              <!-- Add files button — always shown for non-deleted shares -->
               <button
                 v-if="!share.deleted"
                 class="secondary icon-only"
@@ -420,6 +422,7 @@ defineExpose({
               >
                 <FilePlus2 style="margin-right: 0" />
               </button>
+              <!-- Replace file button — single-file shares only, when system allows it -->
               <button
                 v-if="!share.deleted && share.files.length === 1 && allowFileReplacement == '1'"
                 class="secondary icon-only"
@@ -429,17 +432,9 @@ defineExpose({
                 <RefreshCcw style="margin-right: 0" />
               </button>
               <button
-                @click="handleExtendShareClick(share)"
-                class="secondary"
-                :disabled="!enableExtendShareButton(share)"
-              >
-                <CalendarPlus />
-                {{ $t('share.button.extend') }}
-              </button>
-              <button
                 v-if="!share.deleted"
-                @click="cloneShareTarget = share"
                 class="secondary icon-only"
+                @click="cloneShareTarget = share"
                 title="Clone share"
               >
                 <Copy style="margin-right: 0" />
@@ -514,51 +509,6 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-.expired-shares-notice {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-
-  .expired-shares-notice-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-
-    .expired-notice-icon {
-      width: 1.2rem;
-      height: 1.2rem;
-      color: #f59e0b;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    strong {
-      display: block;
-      font-size: 0.9rem;
-      color: var(--panel-section-text-color);
-      margin-bottom: 2px;
-    }
-
-    p {
-      margin: 0;
-      font-size: 0.82rem;
-      color: var(--panel-section-text-color);
-      opacity: 0.8;
-      line-height: 1.5;
-    }
-  }
-
-  button {
-    flex-shrink: 0;
-  }
-}
-
 .files-container {
   display: flex;
   flex-direction: column;
@@ -783,6 +733,12 @@ td {
   opacity: 0.7;
 }
 
+.pending-deletion-section {
+  margin-top: 2rem;
+  border-top: 2px solid var(--panel-section-background-color-alt);
+  padding-top: 1rem;
+}
+
 .pending-deletion-section-header {
   display: flex;
   align-items: flex-start;
@@ -794,12 +750,6 @@ td {
     flex-shrink: 0;
     margin-top: 4px;
   }
-}
-
-.pending-deletion-section {
-  margin-top: 2rem;
-  border-top: 2px solid var(--panel-section-background-color-alt);
-  padding-top: 1rem;
 }
 
 .pending-deletion-header {
@@ -932,6 +882,51 @@ td {
         flex-shrink: 0;
       }
     }
+  }
+}
+
+.expired-shares-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+
+  .expired-shares-notice-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    .expired-notice-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+      color: #f59e0b;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--panel-section-text-color);
+      margin-bottom: 2px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--panel-section-text-color);
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
   }
 }
 </style>
