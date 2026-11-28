@@ -75,8 +75,9 @@ class ReverseSharesController extends Controller
                 'name' => $request->recipient_name,
                 'email' => Str::random(20), //we don't need a real email for the guest user
                 'password' => Hash::make(Str::random(20)), //set a random password so the user can't login
-                'is_guest' => true
             ]);
+            $guestUser->is_guest = true;
+            $guestUser->save();
             $guestUserId = $guestUser->id;
 
             // Generate a token only for guest users
