@@ -1,5 +1,19 @@
 <!doctype html>
 <html lang="en">
+@php
+  // A theme can point at an uploaded background to use on small screens. Only emit it
+  // when the file really exists, so a renamed or deleted upload falls back to the
+  // normal background instead of leaving mobile screens blank.
+  $mobileBackground = '';
+  $mobileBackgroundFile = $theme->theme->background->mobile->image ?? '';
+
+  if (
+    $mobileBackgroundFile !== '' &&
+    \Illuminate\Support\Facades\Storage::disk('backgrounds')->exists($mobileBackgroundFile)
+  ) {
+    $mobileBackground = $mobileBackgroundFile;
+  }
+@endphp
 
 <head>
   <meta charset="UTF-8" />
@@ -9,12 +23,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>{{ $settings['application_name'] }}</title>
+  @if(!empty($theme->theme->fonts->importUrl) && $theme->theme->fonts->importUrl !== '[url-removed]')
+  <link rel="stylesheet" href="{{ $theme->theme->fonts->importUrl }}">
+  @endif
   @vite('resources/js/app.js')
  
 </head>
 
 
-<body data-settings='{!! htmlspecialchars(json_encode($settings)) !!}' data-version="{{ config('app.version') }}" data-error="{{ session()->get('error') }}" data-success="{{ session()->get('success') }}">
+<body data-settings='{!! htmlspecialchars(json_encode($settings)) !!}' data-version="{{ config('app.version') }}" data-error="{{ session()->get('error') }}" data-success="{{ session()->get('success') }}" data-theme-mobile-background="{{ $mobileBackground }}">
   
 <style id="erugo-css-variables">
     :root {
@@ -178,6 +195,30 @@
         --settings-width: {{ $theme->theme->dimensions->settings->width ?? '100vw' }};
         --settings-height: {{ $theme->theme->dimensions->settings->height ?? '100vh' }};
         @endif
+      @endif
+
+      /* Background image scaling */
+      @if(isset($theme->theme->background))
+      --background-image-size: {{ $theme->theme->background->imageSize ?? 'cover' }};
+      --background-image-position: {{ $theme->theme->background->imagePosition ?? 'center center' }};
+      --background-image-size-mobile: {{ $theme->theme->background->mobile->imageSize ?? $theme->theme->background->imageSize ?? 'cover' }};
+      --background-image-position-mobile: {{ $theme->theme->background->mobile->imagePosition ?? $theme->theme->background->imagePosition ?? 'center center' }};
+      @endif
+
+      /* Logo placement */
+      @if(isset($theme->theme->logo))
+      --logo-alignment: {{ $theme->theme->logo->align ?? 'flex-start' }};
+      --logo-alignment-mobile: {{ $theme->theme->logo->mobileAlign ?? $theme->theme->logo->align ?? 'center' }};
+      @endif
+
+      /* Fonts */
+      @if(isset($theme->theme->fonts))
+      {{-- Raw output: font families are re-quoted server side ("Source Sans 3"), and
+           htmlspecialchars() would turn those quotes into &quot;. The value is limited
+           to letters, digits, spaces, hyphens, commas and quotes, so it cannot close
+           this style block or start a new declaration. --}}
+      --font-family-body: {!! $theme->theme->fonts->body ?? '"Outfit", sans-serif' !!};
+      --font-family-heading: {!! $theme->theme->fonts->heading ?? $theme->theme->fonts->body ?? '"Outfit", sans-serif' !!};
       @endif
     }
   </style>
