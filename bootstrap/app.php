@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureLivesharesAvailable;
 use App\Http\Middleware\TrustProxies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -29,6 +30,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->replace(IlluminateTrustProxies::class, TrustProxies::class);
+
+        // Check the live shares flag before cookies, sessions, throttling and
+        // auth, so a switched-off route answers like one that doesn't exist.
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+            prepend: EnsureLivesharesAvailable::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {

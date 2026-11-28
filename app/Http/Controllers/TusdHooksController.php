@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Models\File;
 use App\Models\UploadSession;
 use App\Utils\FileHelper;
@@ -17,7 +18,7 @@ class TusdHooksController extends Controller
      * tusd sends different hook types: pre-create, post-create, post-receive, post-finish, post-terminate
      * 
      * Security: This endpoint should only be called by the tusd process.
-     * We validate the request comes from localhost or internal Docker network IPs.
+     * We check the source IP and require the TUSD_HOOK_SECRET key.
      */
     public function handleHook(Request $request)
     {
@@ -43,6 +44,19 @@ class TusdHooksController extends Controller
             Log::warning('tusd hook rejected: unauthorized source IP', [
                 'ip' => $clientIp
             ]);
+            return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
+        }
+
+        // The IP check alone is not enough, because Docker's port mapping can
+        // make outside clients arrive from a 172.x address. Every hook call
+        // must also carry TUSD_HOOK_SECRET. The bundled tusd sends it as the
+        // password in its hook URL (http://tusd:<key>@127.0.0.1/...), which
+        // reaches us as HTTP basic auth. A proxy can send a Hook-Secret header
+        // instead. With no key configured, every hook call is refused.
+        $hookSecret = (string) config('services.tusd.hook_secret');
+        $providedSecret = (string) ($request->getPassword() ?? $request->header('Hook-Secret'));
+        if ($hookSecret === '' || !hash_equals($hookSecret, $providedSecret)) {
+            Log::warning('tusd hook rejected: missing or invalid hook key');
             return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
         }
 
@@ -166,7 +180,7 @@ class TusdHooksController extends Controller
 
             return response()->json([
                 'ok' => false,
-                'message' => 'Unauthorized: ' . $e->getMessage()
+                'message' => 'Unauthorized'
             ], 401);
         }
     }
@@ -321,11 +335,12 @@ class TusdHooksController extends Controller
 
             // Create file record
             $file = File::create([
-                'name' => $sanitizedFilename,
+                'name'          => $sanitizedFilename,
                 'original_name' => $filename,
-                'type' => $filetype,
-                'size' => $filesize,
-                'temp_path' => 'uploads/' . $uploadId // Path relative to storage/app
+                'type'          => $filetype,
+                'size'          => $filesize,
+                'temp_path'     => 'uploads/' . $uploadId, // Path relative to storage/app
+                'storage_id'    => Str::uuid()->toString(),
             ]);
 
             // Update session
@@ -441,7 +456,7 @@ class TusdHooksController extends Controller
                 $resolvedExtractDir = realpath($extractDir);
                 
                 if ($resolvedPath === false || $resolvedExtractDir === false ||
-                    strpos($resolvedPath, $resolvedExtractDir) !== 0) {
+                    ($resolvedPath !== $resolvedExtractDir && strpos($resolvedPath, $resolvedExtractDir . DIRECTORY_SEPARATOR) !== 0)) {
                     Log::warning('tusd post-finish: Path traversal attempt in bundle', [
                         'upload_id' => $uploadId,
                         'file_path' => $filePath,
@@ -462,11 +477,12 @@ class TusdHooksController extends Controller
 
                 // Create file record - store relative path for bundle files
                 $file = File::create([
-                    'name' => $sanitizedFilename,
+                    'name'          => $sanitizedFilename,
                     'original_name' => $fileInfo['originalName'],
-                    'type' => $fileInfo['type'] ?? 'application/octet-stream',
-                    'size' => $fileInfo['size'],
-                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $safePath
+                    'type'          => $fileInfo['type'] ?? 'application/octet-stream',
+                    'size'          => $fileInfo['size'],
+                    'temp_path'     => 'uploads/' . $uploadId . '_extracted/' . $safePath,
+                    'storage_id'    => Str::uuid()->toString(),
                 ]);
 
                 $fileIds[] = $file->id;

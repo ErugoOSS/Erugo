@@ -112,6 +112,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Erugo refresh token lifetimes
+    |--------------------------------------------------------------------------
+    |
+    | Erugo issues its own long-lived refresh tokens alongside the short access
+    | token, and the lifetime depends on the client. The web app keeps its
+    | refresh token in an HttpOnly cookie that lasts as long as the token. The
+    | native apps get theirs in the response body and store it themselves.
+    | Values are in minutes, because that is what Auth::setTTL() and cookie()
+    | expect.
+    |
+    */
+
+    'refresh_token_ttl' => [
+        'web' => 60 * 24,       // 24 hours
+        'app' => 60 * 24 * 30,  // 30 days
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | JWT hashing algorithm
     |--------------------------------------------------------------------------
     |

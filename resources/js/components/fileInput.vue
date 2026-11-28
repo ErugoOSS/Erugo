@@ -51,7 +51,7 @@ const buttonMessage = computed(() => {
 const sensibleButtonMessage = (message) => {
   const maxLength = 25
   if (message.length > maxLength) {
-    return message.slice(0, maxLength) + `&hellip;`
+    return message.slice(0, maxLength) + '\u2026'
   }
   return message
 }
@@ -64,7 +64,7 @@ const sensibleButtonMessage = (message) => {
       <div class="file-input-preview" v-if="preview">
         <img :src="preview.url" :alt="preview.filename || 'Preview'" class="preview-img" />
       </div>
-      <div class="file-label" v-html="buttonMessage"></div>
+      <div class="file-label">{{ buttonMessage }}</div>
       <div class="file-input-actions">
         <button class="file-input-search" @click.stop="triggerFileInput">
           <Search />

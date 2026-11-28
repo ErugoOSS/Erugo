@@ -19,11 +19,13 @@ use Illuminate\Support\Str;
 class AppReverseSharesController extends Controller
 {
     /**
-     * Access token TTL in minutes (default from JWT config)
+     * Access token TTL in minutes. Read from config rather than the JWT
+     * factory, because issuing the refresh token calls Auth::setTTL() and
+     * changes the factory's TTL for the rest of the request.
      */
     private function getAccessTokenTTL(): int
     {
-        return Auth::factory()->getTTL();
+        return (int) config('jwt.ttl');
     }
 
     /**
@@ -31,7 +33,7 @@ class AppReverseSharesController extends Controller
      */
     private function getRefreshTokenTTL(): int
     {
-        return 60 * 24 * 30; // 30 days
+        return (int) config('jwt.refresh_token_ttl.app');
     }
 
     /**
@@ -54,6 +56,8 @@ class AppReverseSharesController extends Controller
                 'message' => 'Reverse shares are not allowed'
             ], 400);
         }
+
+        User::normalizeRequestEmail($request, 'recipient_email');
 
         $validator = Validator::make($request->all(), [
             'recipient_name' => ['required', 'string', 'max:255'],

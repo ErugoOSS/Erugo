@@ -38,10 +38,14 @@ class sendExpiryWarningEmails implements ShouldQueue
         $shares = Share::where('expires_at', '<', now()->addDays($expiry_warning_days))
             ->where('expires_at', '>', now())
             ->where('sent_expiry_warning', false)
+            ->whereNotIn('status', ['pending_deletion', 'deleted'])
             ->get();
 
         foreach ($shares as $share) {
-            sendEmail::dispatch($share->user->email, shareExpiryWarningMail::class, ['share' => $share]);
+            // The owner can be gone (shares.user_id is SET NULL on user delete): no mail, but still mark it processed.
+            if ($share->user && $share->user->email) {
+                sendEmail::dispatch($share->user->email, shareExpiryWarningMail::class, ['share' => $share]);
+            }
             $share->sent_expiry_warning = true;
             $share->save();
         }

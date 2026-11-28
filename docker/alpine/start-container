@@ -27,27 +27,10 @@ echo "================================================"
 export APP_URL=/
 export ASSET_URL=/
 
-# Increment patch version to account for Komodo's pre-increment tagging
-# Handles formats like: 0.0.18, v1.2.3, RC 0.0.18
-if [ -n "$APP_VERSION" ] && [ "$APP_VERSION" != "unknown" ]; then
-    # Extract the version number part (last occurrence of X.Y.Z pattern)
-    VERSION_NUM=$(echo "$APP_VERSION" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1)
-    
-    if [ -n "$VERSION_NUM" ]; then
-        # Split into major.minor.patch
-        MAJOR=$(echo "$VERSION_NUM" | cut -d. -f1)
-        MINOR=$(echo "$VERSION_NUM" | cut -d. -f2)
-        PATCH=$(echo "$VERSION_NUM" | cut -d. -f3)
-        
-        # Increment patch
-        NEW_PATCH=$((PATCH + 1))
-        NEW_VERSION_NUM="${MAJOR}.${MINOR}.${NEW_PATCH}"
-        
-        # Replace the old version number with the new one in the full string
-        export APP_VERSION=$(echo "$APP_VERSION" | sed "s/${VERSION_NUM}/${NEW_VERSION_NUM}/")
-        echo "Version: $APP_VERSION"
-    fi
-fi
+# APP_VERSION comes from the VERSION build argument and is shown exactly as
+# built. Release builds pass the tag without its leading "v".
+export APP_VERSION="${APP_VERSION:-unknown}"
+echo "Version: $APP_VERSION"
 
 # First time setup check
 if [ ! -f /var/www/html/storage/.setup-lock ]; then
@@ -82,6 +65,7 @@ fi
 # Always ensure correct permissions on storage directory
 echo "Setting storage permissions..."
 chown -R erugo:erugo /var/www/html/storage
+chmod -R u=rwX,g=rX,o= /var/www/html/storage
 
 # Make sure php-fpm run directory exists and has correct permissions
 mkdir -p /run/php
@@ -120,9 +104,23 @@ if [ -z "$DB_CONNECTION" ]; then
     export DB_DATABASE=./storage/app/private/database.sqlite
 fi
 
+# tusd must send this key with every hook call to Laravel (see
+# config/services.php). supervisord passes it to tusd as the password in the
+# hook URL, and php-fpm and the queue worker inherit it from this environment.
+# It is not written to the cron .env file below and never printed. Make a new
+# one at every boot unless one was given.
+if [ -z "$TUSD_HOOK_SECRET" ]; then
+    TUSD_HOOK_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+elif ! printf '%s' "$TUSD_HOOK_SECRET" | grep -qE '^[A-Za-z0-9._~-]+$'; then
+    echo "TUSD_HOOK_SECRET may only contain letters, numbers and . _ ~ - characters."
+    exit 1
+fi
+export TUSD_HOOK_SECRET
+
 # Create an environment file for cron jobs
 echo "Creating environment file for cron jobs..."
-env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" | sed 's/=\(.*\)/="\1"/' > /var/www/html/.env
+env | grep -E "^(APP_|DB_|REDIS_|MAIL_|QUEUE_|JWT_|ASSET_)" | \
+  awk -F= '{key=$1; val=substr($0, length($1)+2); gsub(/[\\"$]/, "\\\\&", val); printf "%s=\"%s\"\n", key, val}' > /var/www/html/.env
 
 # Create a temporary crontab file
 echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /tmp/erugo-crontab

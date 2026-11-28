@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep this in step with the PHP version in docker/alpine/Dockerfile.
+        php: ['8.4']
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # The same extensions as the php84-* packages in docker/alpine/Dockerfile.
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: >-
+            bcmath, curl, dom, fileinfo, gd, imagick, imap, intl, json, ldap,
+            mbstring, memcached, mongodb, openssl, pdo_mysql, pdo_pgsql,
+            pdo_sqlite, phar, redis, soap, tokenizer, xml, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Create .env
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run tests
+        run: php artisan test
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # Node 20 matches the node:20-alpine stage in docker/alpine/Dockerfile.
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install and build
+        run: npm ci && npx vite build
+      - name: Frontend static checks
+        run: node tests/frontend/static-checks.mjs

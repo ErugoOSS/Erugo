@@ -36,7 +36,7 @@ class backUpDatabase implements ShouldQueue
 
         // Check the backups directory exists
         if (!file_exists($backupPath)) {
-            mkdir($backupPath, 0777, true);
+            mkdir($backupPath, 0750, true);
         }
 
         $backupName = 'database_backup_' . now()->format('Y-m-d_H-i-s') . '.sqlite';

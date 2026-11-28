@@ -481,7 +481,7 @@ class AppBrandingController extends Controller
     public function uploadLogo(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'logo' => 'required|image|mimes:png,svg|max:2048',
+            'logo' => 'required|image:allow_svg|mimes:png,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -527,7 +527,7 @@ class AppBrandingController extends Controller
             Log::error('Logo upload error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to save logo: ' . $e->getMessage(),
+                'message' => 'Failed to save logo',
             ], 500);
         }
     }
@@ -566,7 +566,7 @@ class AppBrandingController extends Controller
             Log::error('Logo reset error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to reset logo: ' . $e->getMessage(),
+                'message' => 'Failed to reset logo',
             ], 500);
         }
     }

@@ -16,6 +16,7 @@ use App\Models\UploadSession;
 use App\Models\File;
 use App\Models\User;
 use App\Services\SettingsService;
+use App\Support\Liveshares;
 use App\Services\ThumbnailService;
 use App\Services\AutoTaggingService;
 use App\Haikunator;
@@ -81,9 +82,7 @@ class LivesharesController extends Controller
             ], 403);
         }
 
-        $settingsService = app(SettingsService::class);
-        $enabled = $settingsService->get('liveshares_enabled') ?? true;
-        if (!$enabled) {
+        if (!Liveshares::enabled()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Liveshares are disabled'
@@ -645,7 +644,7 @@ class LivesharesController extends Controller
         // Create the liveshare storage directory
         $completePath = storage_path('app/liveshares/' . $liveshare->id);
         if (!file_exists($completePath)) {
-            mkdir($completePath, 0777, true);
+            mkdir($completePath, 0750, true);
         }
 
         $createdFiles = [];

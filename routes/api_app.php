@@ -13,6 +13,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AdminMiddleware as Admin;
+use App\Http\Middleware\EnsureLivesharesAvailable as LivesharesAvailable;
 
 use App\Http\Controllers\Api\App\AppAuthController;
 use App\Http\Controllers\Api\App\AppConfigController;
@@ -181,65 +182,68 @@ Route::group(['prefix' => 'reverse-shares', 'middleware' => ['auth']], function 
 | Liveshares Routes
 |--------------------------------------------------------------------------
 */
-// Admin routes
-Route::group(['prefix' => 'liveshares/admin', 'middleware' => ['auth', Admin::class]], function () {
-    Route::get('/all', 'AppLivesharesController@adminListAll')->name('app.liveshares.admin.all');
-    Route::put('/{id}/limits', 'AppLivesharesController@adminSetLimits')->name('app.liveshares.admin.limits');
+// Everything here 404s unless ERUGO_LIVESHARES is on.
+Route::middleware(LivesharesAvailable::class)->group(function () {
+    // Admin routes
+    Route::group(['prefix' => 'liveshares/admin', 'middleware' => ['auth', Admin::class]], function () {
+        Route::get('/all', 'AppLivesharesController@adminListAll')->name('app.liveshares.admin.all');
+        Route::put('/{id}/limits', 'AppLivesharesController@adminSetLimits')->name('app.liveshares.admin.limits');
+    });
+
+    // Authenticated routes
+    Route::group(['prefix' => 'liveshares', 'middleware' => ['auth']], function () {
+        // CRUD
+        Route::get('/', 'AppLivesharesController@index')->name('app.liveshares.index');
+        Route::post('/', 'AppLivesharesController@create')->name('app.liveshares.create');
+        Route::get('/{longId}', 'AppLivesharesController@show')->name('app.liveshares.show');
+        Route::put('/{longId}', 'AppLivesharesController@update')->name('app.liveshares.update');
+        Route::delete('/{longId}', 'AppLivesharesController@destroy')->name('app.liveshares.destroy');
+
+        // Members
+        Route::get('/{longId}/members', 'AppLivesharesController@listMembers')->name('app.liveshares.members.list');
+        Route::post('/{longId}/members', 'AppLivesharesController@addMember')->name('app.liveshares.members.add');
+        Route::put('/{longId}/members/{memberId}', 'AppLivesharesController@updateMember')->name('app.liveshares.members.update');
+        Route::delete('/{longId}/members/{memberId}', 'AppLivesharesController@removeMember')->name('app.liveshares.members.remove');
+
+        // Files
+        Route::get('/{longId}/files', 'AppLivesharesController@listFiles')->name('app.liveshares.files.list');
+        Route::post('/{longId}/files', 'AppLivesharesController@addFiles')->name('app.liveshares.files.add');
+        Route::delete('/{longId}/files/{fileId}', 'AppLivesharesController@removeFile')->name('app.liveshares.files.remove');
+        Route::get('/{longId}/files/{fileId}/download', 'AppLivesharesController@downloadFile')->name('app.liveshares.files.download');
+        Route::post('/{longId}/files/download', 'AppLivesharesController@downloadFiles')->name('app.liveshares.files.downloadMultiple');
+        Route::get('/{longId}/files/{fileId}/thumb', 'AppLivesharesController@fileThumbnail')->name('app.liveshares.files.thumb');
+
+        // Tags
+        Route::get('/{longId}/tags', 'AppLivesharesController@listTags')->name('app.liveshares.tags.list');
+        Route::post('/{longId}/tags', 'AppLivesharesController@createTag')->name('app.liveshares.tags.create');
+        Route::put('/{longId}/tags/{tagId}', 'AppLivesharesController@updateTag')->name('app.liveshares.tags.update');
+        Route::delete('/{longId}/tags/{tagId}', 'AppLivesharesController@deleteTag')->name('app.liveshares.tags.delete');
+
+        // File tags
+        Route::post('/{longId}/files/{fileId}/tags', 'AppLivesharesController@addFileTags')->name('app.liveshares.fileTags.add');
+        Route::delete('/{longId}/files/{fileId}/tags/{tagId}', 'AppLivesharesController@removeFileTag')->name('app.liveshares.fileTags.remove');
+        Route::post('/{longId}/files/bulk-tag', 'AppLivesharesController@bulkAddFileTags')->name('app.liveshares.fileTags.bulkAdd');
+        Route::post('/{longId}/files/bulk-untag', 'AppLivesharesController@bulkRemoveFileTags')->name('app.liveshares.fileTags.bulkRemove');
+
+        // Invites
+        Route::post('/{longId}/invites/email', 'AppLivesharesController@createEmailInvite')->name('app.liveshares.invites.email');
+        Route::post('/{longId}/invites/link', 'AppLivesharesController@createLinkInvite')->name('app.liveshares.invites.link');
+        Route::get('/{longId}/invites', 'AppLivesharesController@listInvites')->name('app.liveshares.invites.list');
+        Route::delete('/{longId}/invites/{inviteId}', 'AppLivesharesController@revokeInvite')->name('app.liveshares.invites.revoke');
+
+        // Accept invite (authenticated user)
+        Route::post('/invite/{token}/accept', 'AppLivesharesController@acceptInvite')->name('app.liveshares.invites.accept');
+    });
+
+    // Public liveshare routes (no auth required)
+    Route::get('/liveshares/invite/{token}', 'AppLivesharesController@getInviteInfo')
+        ->name('app.liveshares.invites.info');
+    Route::post('/liveshares/invite/{token}/register', 'AppAuthController@registerViaInvite')
+        ->middleware('throttle:auth-register')
+        ->name('app.liveshares.invites.register');
+    Route::get('/liveshares/{longId}/avatar', 'AppLivesharesController@avatar')
+        ->name('app.liveshares.avatar');
 });
-
-// Authenticated routes
-Route::group(['prefix' => 'liveshares', 'middleware' => ['auth']], function () {
-    // CRUD
-    Route::get('/', 'AppLivesharesController@index')->name('app.liveshares.index');
-    Route::post('/', 'AppLivesharesController@create')->name('app.liveshares.create');
-    Route::get('/{longId}', 'AppLivesharesController@show')->name('app.liveshares.show');
-    Route::put('/{longId}', 'AppLivesharesController@update')->name('app.liveshares.update');
-    Route::delete('/{longId}', 'AppLivesharesController@destroy')->name('app.liveshares.destroy');
-
-    // Members
-    Route::get('/{longId}/members', 'AppLivesharesController@listMembers')->name('app.liveshares.members.list');
-    Route::post('/{longId}/members', 'AppLivesharesController@addMember')->name('app.liveshares.members.add');
-    Route::put('/{longId}/members/{memberId}', 'AppLivesharesController@updateMember')->name('app.liveshares.members.update');
-    Route::delete('/{longId}/members/{memberId}', 'AppLivesharesController@removeMember')->name('app.liveshares.members.remove');
-
-    // Files
-    Route::get('/{longId}/files', 'AppLivesharesController@listFiles')->name('app.liveshares.files.list');
-    Route::post('/{longId}/files', 'AppLivesharesController@addFiles')->name('app.liveshares.files.add');
-    Route::delete('/{longId}/files/{fileId}', 'AppLivesharesController@removeFile')->name('app.liveshares.files.remove');
-    Route::get('/{longId}/files/{fileId}/download', 'AppLivesharesController@downloadFile')->name('app.liveshares.files.download');
-    Route::post('/{longId}/files/download', 'AppLivesharesController@downloadFiles')->name('app.liveshares.files.downloadMultiple');
-    Route::get('/{longId}/files/{fileId}/thumb', 'AppLivesharesController@fileThumbnail')->name('app.liveshares.files.thumb');
-
-    // Tags
-    Route::get('/{longId}/tags', 'AppLivesharesController@listTags')->name('app.liveshares.tags.list');
-    Route::post('/{longId}/tags', 'AppLivesharesController@createTag')->name('app.liveshares.tags.create');
-    Route::put('/{longId}/tags/{tagId}', 'AppLivesharesController@updateTag')->name('app.liveshares.tags.update');
-    Route::delete('/{longId}/tags/{tagId}', 'AppLivesharesController@deleteTag')->name('app.liveshares.tags.delete');
-
-    // File tags
-    Route::post('/{longId}/files/{fileId}/tags', 'AppLivesharesController@addFileTags')->name('app.liveshares.fileTags.add');
-    Route::delete('/{longId}/files/{fileId}/tags/{tagId}', 'AppLivesharesController@removeFileTag')->name('app.liveshares.fileTags.remove');
-    Route::post('/{longId}/files/bulk-tag', 'AppLivesharesController@bulkAddFileTags')->name('app.liveshares.fileTags.bulkAdd');
-    Route::post('/{longId}/files/bulk-untag', 'AppLivesharesController@bulkRemoveFileTags')->name('app.liveshares.fileTags.bulkRemove');
-
-    // Invites
-    Route::post('/{longId}/invites/email', 'AppLivesharesController@createEmailInvite')->name('app.liveshares.invites.email');
-    Route::post('/{longId}/invites/link', 'AppLivesharesController@createLinkInvite')->name('app.liveshares.invites.link');
-    Route::get('/{longId}/invites', 'AppLivesharesController@listInvites')->name('app.liveshares.invites.list');
-    Route::delete('/{longId}/invites/{inviteId}', 'AppLivesharesController@revokeInvite')->name('app.liveshares.invites.revoke');
-
-    // Accept invite (authenticated user)
-    Route::post('/invite/{token}/accept', 'AppLivesharesController@acceptInvite')->name('app.liveshares.invites.accept');
-});
-
-// Public liveshare routes (no auth required)
-Route::get('/liveshares/invite/{token}', 'AppLivesharesController@getInviteInfo')
-    ->name('app.liveshares.invites.info');
-Route::post('/liveshares/invite/{token}/register', 'AppAuthController@registerViaInvite')
-    ->middleware('throttle:auth-register')
-    ->name('app.liveshares.invites.register');
-Route::get('/liveshares/{longId}/avatar', 'AppLivesharesController@avatar')
-    ->name('app.liveshares.avatar');
 
 /*
 |--------------------------------------------------------------------------

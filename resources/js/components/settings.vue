@@ -100,13 +100,30 @@ const clickOutside = (e) => {
   }
 }
 
+const LIVESHARE_TABS = ['myLiveshares', 'allLiveshares']
+// Keep in step with the tabs marked v-if="store.isAdmin()" in the template
+const ADMIN_TABS = ['stats', 'branding', 'system', 'emailTemplates', 'users', 'allShares', 'allLiveshares']
+
 const setActiveTab = (tab, options = {}) => {
+  // Silently block non-admins from landing on admin-only tabs (e.g. via stale URL hash)
+  if (ADMIN_TABS.includes(tab) && !store.isAdmin()) {
+    const fallback = getInitialTab()
+    activeTab.value = fallback
+    updateUrlHash(fallback, true)
+    return
+  }
   const { updateUrl = true } = options
+  if (LIVESHARE_TABS.includes(tab) && !store.livesharesAvailable()) {
+    const fallback = getInitialTab()
+    activeTab.value = fallback
+    updateUrlHash(fallback, true)
+    return
+  }
   activeTab.value = tab
   if (tab === 'allShares' && allSharesUsers.value.length === 0) {
     loadAllSharesUsers()
   }
-  
+
   // Update URL hash with the new tab
   if (updateUrl) {
     updateUrlHash(tab)
@@ -115,7 +132,7 @@ const setActiveTab = (tab, options = {}) => {
 
 const getInitialTab = () => {
   if (store.isRestricted()) {
-    return 'myLiveshares'
+    return store.livesharesAvailable() ? 'myLiveshares' : 'myProfile'
   }
   return 'myShares'
 }
@@ -268,7 +285,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
           <Settings />
           <span>
             {{ $t('settings.title.manage') }}
-            <span v-html="getSettingsTitle()" />
+            <span>{{ getSettingsTitle() }}</span>
           </span>
         </h1>
         <button class="settings-help-button icon-only" @click="goToHelp">
@@ -362,14 +379,14 @@ const handleLiveshareOwnerFilterChange = (event) => {
             class="settings-tab"
             :class="{ active: activeTab === 'allLiveshares' }"
             @click="setActiveTab('allLiveshares')"
-            v-if="store.isAdmin()"
+            v-if="store.isAdmin() && store.livesharesAvailable()"
           >
             <h2>
               <Share2 />
               {{ $t('settings.title.allLiveshares') }}
             </h2>
           </div>
-          <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')">
+          <div class="settings-tab" :class="{ active: activeTab === 'myLiveshares' }" @click="setActiveTab('myLiveshares')" v-if="store.livesharesAvailable()">
             <h2>
               <Share2 />
               {{ $t('settings.title.myLiveshares') }}
@@ -621,7 +638,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
               </div>
             </div>
             <div
-              v-else-if="activeTab === 'myLiveshares'"
+              v-else-if="activeTab === 'myLiveshares' && store.livesharesAvailable()"
               class="settings-tab-content"
               ref="tabContents.myLiveshares"
               key="myLiveshares"
@@ -650,7 +667,7 @@ const handleLiveshareOwnerFilterChange = (event) => {
               </div>
             </div>
             <div
-              v-else-if="activeTab === 'allLiveshares'"
+              v-else-if="activeTab === 'allLiveshares' && store.livesharesAvailable()"
               class="settings-tab-content"
               ref="tabContents.allLiveshares"
               key="allLiveshares"

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
@@ -60,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
         $user = new static();
         $user->fill([
             'name' => $identity['name'],
-            'email' => $identity['email'],
+            'email' => self::normalizeEmail($identity['email']),
             'password' => $identity['password'],
         ]);
 
@@ -73,6 +74,38 @@ class User extends Authenticatable implements JWTSubject
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * Emails are stored lowercased and trimmed (issue #244). Mail servers
+     * treat addresses case-insensitively in practice, and a user who signed
+     * up as Bob@Example.com should be able to log in as bob@example.com.
+     */
+    public static function normalizeEmail(?string $email): ?string
+    {
+        return $email === null ? null : strtolower(trim($email));
+    }
+
+    /**
+     * Normalise an email field on the request before validation, so unique
+     * rules and lookups compare like with like. Leaves a missing or non-string
+     * field alone so optional-field validation still works.
+     */
+    public static function normalizeRequestEmail(Request $request, string $field = 'email'): void
+    {
+        $value = $request->input($field);
+        if (is_string($value)) {
+            $request->merge([$field => self::normalizeEmail($value)]);
+        }
+    }
+
+    /**
+     * Every write through the model is normalised too, as a backstop for any
+     * path that forgets to normalise first.
+     */
+    public function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = is_string($value) ? self::normalizeEmail($value) : $value;
     }
 
     /**

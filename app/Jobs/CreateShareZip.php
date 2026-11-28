@@ -6,6 +6,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\RecalculatePhysicalStorage;
+use App\Utils\PathGuard;
 
 class CreateShareZip implements ShouldQueue
 {
@@ -43,6 +45,7 @@ class CreateShareZip implements ShouldQueue
     if ($this->share->file_count == 1) {
       $this->share->status = 'ready';
       $this->share->save();
+      RecalculatePhysicalStorage::dispatch();
       return;
     }
 
@@ -51,8 +54,18 @@ class CreateShareZip implements ShouldQueue
       $this->createZipFromDirectory($sourcePath, $zipPath);
       $this->share->status = 'ready';
       $this->share->save();
-      $this->removeDirectory($sourcePath);
+      // The zip now holds everything, so drop the loose copies to keep disk
+      // use at one copy per share. Adding files unpacks the zip again first
+      // (Share::restoreFolderFromZip), single files are read straight from
+      // the zip, and clones hard-link the zip.
+      $this->removeSourceFolder($sourcePath);
+      RecalculatePhysicalStorage::dispatch();
     } catch (\Exception $e) {
+      // Don't leave a half-written zip behind: the check at the top would
+      // treat it as finished on the next run.
+      if (file_exists($zipPath)) {
+        @unlink($zipPath);
+      }
       $this->share->status = 'failed';
       $this->share->save();
       Log::error('Error creating share zip: ' . $e->getMessage());
@@ -61,43 +74,53 @@ class CreateShareZip implements ShouldQueue
 
   function createZipFromDirectory($sourcePath, $zipPath)
   {
-
     // Ensure the zip directory exists
     $zipDir = dirname($zipPath);
     if (!is_dir($zipDir)) {
       mkdir($zipDir, 0755, true);
     }
 
-    // Build the zip command to zip the entire directory
-    $zipCommand = sprintf(
-      'zip -r %s %s',
-      escapeshellarg($zipPath),
-      escapeshellarg('.')  // '.' represents current directory after we chdir
-    );
+    $resolvedSource = realpath($sourcePath);
+    if ($resolvedSource === false || !is_dir($resolvedSource)) {
+      throw new \Exception('Source directory not found or not accessible');
+    }
+    $sourcePath = rtrim($resolvedSource, DIRECTORY_SEPARATOR);
 
-    // Change to the source directory
-    $currentDir = getcwd();
-    chdir($sourcePath);
-
-    // Execute the command
-    $output = [];
-    $returnCode = 0;
-    exec($zipCommand . ' 2>&1', $output, $returnCode);
-
-    // Change back to original directory
-    chdir($currentDir);
-
-    //did it work?
-    if ($returnCode !== 0) {
-      throw new \Exception('Failed to create zip file: ' . implode("\n", $output));
+    $zip = new \ZipArchive();
+    $result = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+    if ($result !== true) {
+      throw new \Exception("Failed to create zip archive (ZipArchive code: {$result})");
     }
 
-    //check the zip file is valid
+    $iterator = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($sourcePath, \FilesystemIterator::SKIP_DOTS),
+      \RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($iterator as $file) {
+      // Skip symlinks so a link can't pull in a file from outside the share
+      // folder. Uploads never create them, so anything here is unexpected.
+      if ($file->isLink()) {
+        Log::warning('Skipping symlink while zipping share', ['path' => $file->getPathname()]);
+        continue;
+      }
+
+      $relativePath = substr($file->getPathname(), strlen($sourcePath) + 1);
+      if ($file->isDir()) {
+        $zip->addEmptyDir($relativePath);
+      } else {
+        $zip->addFile($file->getPathname(), $relativePath);
+      }
+    }
+
+    if (!$zip->close()) {
+      throw new \Exception('ZipArchive::close failed — archive may be incomplete');
+    }
+
     if (!file_exists($zipPath)) {
       throw new \Exception('The zip operation completed but the zip file was not created');
     }
 
-    //check the zip file is not empty
     if (filesize($zipPath) === 0) {
       throw new \Exception('The zip operation completed but the zip file was empty');
     }
@@ -105,8 +128,31 @@ class CreateShareZip implements ShouldQueue
     return true;
   }
 
+  private function removeSourceFolder(string $sourcePath): void
+  {
+    $sharesRoot = storage_path('app/shares');
+    if (is_link($sourcePath) || !is_dir($sourcePath)) {
+      return;
+    }
+    $resolved = realpath($sourcePath);
+    if (!PathGuard::isWithin($sourcePath, $sharesRoot) || $resolved === realpath($sharesRoot)) {
+      Log::error('Refusing to remove share folder outside the shares root', ['share_id' => $this->share->id]);
+      return;
+    }
+    // Hard-linked files (clones) only lose this share's link, not their data.
+    if (!$this->removeDirectory($sourcePath)) {
+      Log::warning('Could not remove share folder after zipping', ['share_id' => $this->share->id]);
+    }
+  }
+
   private function removeDirectory($dir)
   {
+    // Check for a link first: is_dir() follows links, and recursing into one
+    // would delete files outside the share.
+    if (is_link($dir)) {
+      return unlink($dir);
+    }
+
     if (!file_exists($dir)) {
       return true;
     }

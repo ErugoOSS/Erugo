@@ -547,7 +547,8 @@
     },
     "close": "Fermer",
     "confirm": {
-      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée."
+      "pruneExpiredShares": "Êtes-vous sûr de vouloir supprimer vos partages expirés ? Cette opération ne peut pas être annulée.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informations sur votre installation Erugo",
@@ -588,7 +589,9 @@
     "error": {
       "pruneExpiredShares": "Impossible de planifier la suppression des partages expirés !",
       "shareExpired": "Échec de l'expiration du partage",
-      "shareExtended": "Échec de la prolongation du partage"
+      "shareExtended": "Échec de la prolongation du partage",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -605,6 +608,18 @@
     },
     "loading": "Chargement des partages...",
     "noShares": "Vous n'avez pas de partages. Pourquoi ne pas en créer un ?",
+    "pendingDeletion": {
+      "title": "Suppression en attente",
+      "description": "Les partages suivants ont été demandés pour suppression. Vous pouvez annuler cela avant qu'ils soient définitivement supprimés.",
+      "requestedOn": "Demandé le",
+      "deleteAll": "Tout supprimer définitivement",
+      "confirmPrompt": "Saisissez DELETE (en majuscules) pour supprimer définitivement tous les partages en attente et leurs fichiers. Cette action est irréversible.",
+      "confirmMismatch": "La confirmation ne correspond pas — vous devez saisir DELETE en majuscules exactement."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partage expiré} other {# partages expirés}}",
+      "notice": "Ces partages ont expiré et leurs fichiers sont toujours stockés sur le disque. Pour les supprimer, sélectionnez 'Demander la suppression' dans le menu d'actions du partage."
+    },
     "provider": {
       "edit": "Editer",
       "view": "Voir"
@@ -665,7 +680,9 @@
         "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des partages.",
         "unique_downloaders_title": "Téléchargeur(s) unique(s)",
         "users_description": "Vue d'ensemble des comptes d'utilisateurs et de leurs niveaux d'activité.",
-        "users_title": "Statistiques sur les utilisateurs"
+        "users_title": "Statistiques sur les utilisateurs",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Chargement des statistiques...",
       "nav": {
@@ -695,7 +712,12 @@
         "of_disk": "de disque",
         "share_storage": "Stockage utilisé par les partages\n",
         "title": "Aperçu du stockage",
-        "used": "utilisé(s)"
+        "used": "utilisé(s)",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Actif(s)",
@@ -711,13 +733,17 @@
     "success": {
       "pruneExpiredShares": "Les partages expirés ont été programmées pour être supprimées et seront traités en arrière-plan.",
       "shareExpired": "Partage expiré",
-      "shareExtended": "Partage étendu"
+      "shareExtended": "Partage étendu",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Autoriser le mode de téléchargement en morceaux",
       "allow_chunked_uploads_description": "Le mode de téléchargement fragmenté, ou encore \"en morceaux\", divise les fichiers en segments plus petits, transférés séquentiellement. Bien que légèrement plus lente que le téléchargement direct pour les fichiers plus petits, cette méthode offre une stabilité et une fiabilité accrues lors du transfert de fichiers volumineux. Le téléchargement fragmenté prend en charge le suivi de la progression et permet aux utilisateurs de suspendre et de reprendre manuellement les transferts, ce qui est idéal pour les fichiers de plus de 100 Mo ou en cas de connexions réseau instables.",
       "allow_direct_uploads": "Autoriser le mode téléchargement direct",
       "allow_direct_uploads_description": "Le mode de téléchargement direct transmet les fichiers en une seule demande ininterrompue. Bien que cette méthode offre les vitesses de transfert les plus rapides pour la plupart des fichiers, les fichiers très volumineux peuvent entraîner des problèmes de stabilité ou des dépassements de délai. Pour des performances optimales avec des fichiers de plus de 100 Mo, il est préférable d'opter pour des téléchargements par morceaux.",
+      "allow_file_replacement": "Autoriser le remplacement de fichier",
+      "allow_file_replacement_description": "Lorsqu'activé, les utilisateurs peuvent remplacer le fichier dans un partage à fichier unique sans créer un nouveau partage. Désactiver pour les scénarios d'audit où les fichiers ne doivent pas changer après le partage.",
       "allow_reverse_shares": "Autoriser les partages inversés",
       "allow_reverse_shares_description": "Détermine si vos utilisateurs enregistrés doivent être autorisés à envoyer des demandes de partage inversé. Ces demandes permettent à des personnes externes d'obtenir une autorisation de téléchargement unique, ce qui leur permet de livrer des fichiers directement à l'utilisateur enregistré qui a initié la demande.",
       "application_name": "Nom de l'application",
@@ -858,7 +884,7 @@
       "show_language_selector_description": "Permet d'activer la visibilité de la liste déroulante de sélection de la langue dans le coin supérieur droit de l'application. Lorsque cette option est activée, les utilisateurs peuvent rapidement passer d'une langue à l'autre.",
       "trusted_proxies": "Proxys de confiance",
       "trusted_proxies_placeholder": "ex. 172.18.0.1, 10.0.0.0/8 ou *",
-      "trusted_proxies_description": "Erugo identifie chaque visiteur par son adresse IP afin de limiter les tentatives de connexion et d'enregistrer qui a téléchargé un partage. Si Erugo se trouve derrière un reverse proxy, toutes les requêtes semblent venir du proxy : ces limites s'appliquent alors à l'ensemble de votre instance et les journaux de téléchargement affichent l'adresse du proxy. Indiquer le proxy ici demande à Erugo de faire confiance à ses en-têtes X-Forwarded-* et d'utiliser l'IP réelle du client. La valeur par défaut couvre la boucle locale et les plages d'adresses privées, ce qui convient à presque toutes les installations, y compris Nginx Proxy Manager, Traefik et les tunnels Cloudflare. N'ajoutez une adresse publique que si votre proxy joint Erugo via Internet, et n'utilisez jamais * sur une instance exposée directement, car les visiteurs pourraient alors déclarer n'importe quelle IP et contourner totalement la limitation de débit.",
+      "trusted_proxies_description": "Erugo identifie chaque visiteur par son adresse IP afin de limiter les tentatives de connexion et d'enregistrer qui a téléchargé un partage. Si Erugo se trouve derrière un reverse proxy, toutes les requêtes semblent venir du proxy : ces limites s'appliquent alors à l'ensemble de votre instance et les journaux de téléchargement affichent l'adresse du proxy. Indiquer le proxy ici demande à Erugo de faire confiance à ses en-têtes X-Forwarded-* et d'utiliser l'IP réelle du client. Par défaut, seule la boucle locale est approuvée, afin que les autres appareils de votre réseau ne puissent pas usurper leur adresse. Si vous utilisez un reverse proxy comme Nginx Proxy Manager, Traefik ou un tunnel Cloudflare, ajoutez son adresse ici. Erugo affiche un avertissement ci-dessus, avec un bouton pour l'approuver, lorsqu'il reçoit des en-têtes transférés depuis une adresse non approuvée. N'ajoutez une adresse publique que si votre proxy joint Erugo via Internet, et n'utilisez jamais * sur une instance exposée directement, car les visiteurs pourraient alors déclarer n'importe quelle IP et contourner totalement la limitation de débit.",
       "trusted_proxies_untrusted_warning": "Erugo reçoit des en-têtes d'IP transmise depuis {peer}, qui ne figure pas dans votre liste de proxys de confiance. La limitation de débit et les journaux de téléchargement utilisent actuellement cette adresse au lieu de l'IP réelle de chaque visiteur.",
       "trusted_proxies_trust_detected": "Faire confiance à {peer}",
       "smtp": "SMTP",
@@ -890,7 +916,7 @@
     },
     "title": {
       "about": "A propos de",
-      "allShares": "Toutes les partages",
+      "allShares": "Tous les partages",
       "branding": "Identité visuelle et interface utilisateur",
       "cloudConnect": "Erugo Connect",
       "emailTemplates": "Modèles de mails",
@@ -990,7 +1016,11 @@
   "share": {
     "button": {
       "expireNow": "Expirer maintenant",
-      "extend": "Prolonger"
+      "extend": "Prolonger",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contient : fichier} other {Contient : fichiers {value}}}"
@@ -1016,7 +1046,10 @@
     },
     "not_found": "Le partage que vous recherchez n'a pas été trouvé. Il se peut que vous deviez vous connecter pour le voir.",
     "passwordNotProtected": "Ouvert",
-    "passwordProtected": "Protégé par un mot de passe"
+    "passwordProtected": "Protégé par un mot de passe",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Taille totale",
   "upload": {

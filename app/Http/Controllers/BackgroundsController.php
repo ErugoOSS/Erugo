@@ -64,7 +64,10 @@ class BackgroundsController extends Controller
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'background_image' => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,webm',
+            // mimes checks the type worked out from the file's contents. extensions
+            // checks the name it is saved under, since Caddy serves the file with
+            // a Content-Type taken from that name.
+            'background_image' => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,webm|extensions:jpg,jpeg,png,gif,webp,mp4,webm',
         ]);
 
         if ($validator->fails()) {
@@ -79,6 +82,21 @@ class BackgroundsController extends Controller
 
         try {
             $file = $request->file('background_image');
+
+            // Content-based MIME verification (finfo reads file magic bytes)
+            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+            $realMime = $finfo->file($file->getRealPath());
+            $allowedMimes = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'video/mp4', 'video/webm',
+            ];
+            if (!in_array($realMime, $allowedMimes, true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Background file upload failed: unsupported file type',
+                ], 422);
+            }
+
             $fileName = $file->getClientOriginalName();
             $safeFilename = FileHelper::sanitizeFilename($fileName);
             $file->storeAs('', $safeFilename, 'backgrounds');

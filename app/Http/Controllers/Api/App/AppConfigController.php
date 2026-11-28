@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuthProvider;
 use App\Models\Theme;
 use App\Services\SettingsService;
+use App\Support\Liveshares;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
@@ -68,7 +69,7 @@ class AppConfigController extends Controller
                     'self_registration_enabled' => (bool) $settings->get('self_registration_enabled'),
                     'reverse_shares_enabled' => (bool) $settings->get('allow_reverse_shares'),
                     'external_auth_enabled' => $authProviders->isNotEmpty(),
-                    'liveshares_enabled' => (bool) ($settings->get('liveshares_enabled') ?? true),
+                    'liveshares_enabled' => Liveshares::enabled(),
                 ],
                 'limits' => [
                     'max_share_size_bytes' => $settings->getMaxUploadSize(),

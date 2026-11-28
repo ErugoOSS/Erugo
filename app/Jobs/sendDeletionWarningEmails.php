@@ -39,10 +39,14 @@ class sendDeletionWarningEmails implements ShouldQueue
 
     $shares = Share::where('expires_at', '<=', now()->subDays($clean_files_after_days - $deletion_warning_days))
       ->where('sent_deletion_warning', false)
+      ->whereNotIn('status', ['pending_deletion', 'deleted'])
       ->get();
 
     foreach ($shares as $share) {
-      sendEmail::dispatch($share->user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      // The owner can be gone (shares.user_id is SET NULL on user delete): no mail, but still mark it processed.
+      if ($share->user && $share->user->email) {
+        sendEmail::dispatch($share->user->email, shareDeletionWarningMail::class, ['share' => $share]);
+      }
       $share->sent_deletion_warning = true;
       $share->save();
     }

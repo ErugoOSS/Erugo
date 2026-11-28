@@ -1,5 +1,5 @@
 # Build Stage for PHP dependencies
-FROM php:8.3-cli-alpine AS composer
+FROM php:8.4-cli-alpine AS composer
 WORKDIR /app
 RUN apk add --no-cache git unzip \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -30,12 +30,12 @@ ENV APP_VERSION=${VERSION}
 WORKDIR /var/www/html
 
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm83 -F"
+ENV SUPERVISOR_PHP_FPM_COMMAND="/usr/sbin/php-fpm84 -F"
 ENV SUPERVISOR_CADDY_COMMAND="/usr/sbin/caddy run --config /etc/caddy/Caddyfile"
 ENV SUPERVISOR_PHP_USER="erugo"
 
-# The php83 -r check at the end of this step fails the build unless PHP is
-# 8.3.36 or later on the 8.3 branch (fixes CVE-2026-109618 and CVE-2026-109619).
+# The php84 -r check at the end of this step fails the build unless PHP is
+# 8.4.27 or later on the 8.4 branch (fixes CVE-2026-109618 and CVE-2026-109619).
 # Install production requirements
 RUN apk add --no-cache \
     curl \
@@ -49,37 +49,36 @@ RUN apk add --no-cache \
     librsvg \
     libheif \
     exiftool \
-    php83 \
-    php83-pdo_pgsql \
-    php83-pdo_sqlite \
-    php83-gd \
-    php83-curl \
-    php83-pecl-mongodb \
-    php83-imap \
-    php83-pdo_mysql \
-    php83-mbstring \
-    php83-xml \
-    php83-zip \
-    php83-bcmath \
-    php83-soap \
-    php83-intl \
-    php83-ldap \
-    php83-pecl-redis \
-    php83-pecl-memcached \
-    php83-phar \
-    php83-openssl \
-    php83-json \
-    php83-dom \
-    php83-tokenizer \
-    php83-fileinfo \
-    php83-pecl-imagick \
+    php84 \
+    php84-pdo_pgsql \
+    php84-pdo_sqlite \
+    php84-gd \
+    php84-curl \
+    php84-pecl-mongodb \
+    php84-pecl-imap \
+    php84-pdo_mysql \
+    php84-mbstring \
+    php84-xml \
+    php84-zip \
+    php84-bcmath \
+    php84-soap \
+    php84-intl \
+    php84-ldap \
+    php84-pecl-redis \
+    php84-pecl-memcached \
+    php84-phar \
+    php84-openssl \
+    php84-dom \
+    php84-tokenizer \
+    php84-fileinfo \
+    php84-pecl-imagick \
     tzdata \
     libcap \
     zip \
-    php83-fpm \
+    php84-fpm \
     caddy \
-    && php83 -r 'exit(PHP_VERSION_ID >= 80336 && PHP_VERSION_ID < 80400 ? 0 : 1);' \
-    && ln -sf /usr/bin/php83 /usr/bin/php \
+    && php84 -r 'exit(PHP_VERSION_ID >= 80427 && PHP_VERSION_ID < 80500 ? 0 : 1);' \
+    && ln -sf /usr/bin/php84 /usr/bin/php \
     && rm -rf /var/cache/apk/*
 
 # Download and install tusd for the correct architecture
@@ -95,16 +94,16 @@ RUN TUSD_ARCH="${TARGETARCH}" && \
     rm -rf /tmp/tusd.tar.gz /tmp/tusd_linux_${TUSD_ARCH}
 
 # Create necessary directories
-RUN mkdir -p /run/php /var/www/html/public /etc/php83/php-fpm.d /etc/caddy
+RUN mkdir -p /run/php /var/www/html/public /etc/php84/php-fpm.d /etc/caddy
 
-COPY ./docker/alpine/www.conf /etc/php83/php-fpm.d/www.conf
+COPY ./docker/alpine/www.conf /etc/php84/php-fpm.d/www.conf
 COPY ./docker/alpine/Caddyfile /etc/caddy/Caddyfile
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Configure PHP capabilities
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php83
+RUN setcap "cap_net_bind_service=+ep" /usr/bin/php84
 
 # Create erugo user and group
 RUN addgroup erugo && \
@@ -125,7 +124,7 @@ RUN echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>
 # Copy configuration files
 COPY ./docker/alpine/start-container /usr/local/bin/start-container
 COPY ./docker/alpine/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./docker/alpine/php.ini /etc/php83/conf.d/99-erugo.ini
+COPY ./docker/alpine/php.ini /etc/php84/conf.d/99-erugo.ini
 RUN chmod +x /usr/local/bin/start-container
 
 # Create supervisor log directory

@@ -470,9 +470,11 @@ export const sendReverseShareInvite = async (email, name, message) => {
 }
 
 export const acceptReverseShareInvite = async (token) => {
-  const response = await fetch(`${apiUrl}/api/reverse-shares/accept?token=${token}`, {
-    method: 'GET',
-    credentials: 'include'
+  const response = await fetch(`${apiUrl}/api/reverse-shares/accept`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token })
   })
   const data = await response.json()
   if (!response.ok) {
@@ -931,17 +933,42 @@ export const expireShare = async (id) => {
   return data.data.share
 }
 
-export const extendShare = async (id) => {
+export const extendShare = async (id, payload = {}) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/extend`, {
     method: 'POST',
     headers: {
       ...addJsonHeader()
-    }
+    },
+    body: JSON.stringify(payload)
   })
   const data = await response.json()
   if (!response.ok) {
     throw new Error(data.message)
   }
+  return data.data.share
+}
+
+export const addFilesToShare = async (shareId, uploadIds, filePaths) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/add-files`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify({ uploadIds, filePaths })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
+}
+
+export const replaceShareFile = async (shareId, uploadId, filePath, name = null) => {
+  const payload = { uploadIds: [uploadId], filePaths: { [uploadId]: filePath } }
+  if (name) payload.name = name
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/replace-file`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify(payload)
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
   return data.data.share
 }
 
@@ -974,6 +1001,76 @@ export const pruneExpiredShares = async () => {
     throw new Error(data.message)
   }
   return data.data.shares
+}
+
+export const requestShareDeletion = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/request-deletion`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const deleteShareImmediately = async (id, confirmation) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/delete-immediately`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ confirmation })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const undoShareDeletion = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/undo-deletion`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const purgeShare = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
+}
+
+export const cloneShare = async (shareId, name = null) => {
+  const body = {}
+  if (name) body.name = name
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${shareId}/clone`, {
+    method: 'POST',
+    headers: { ...addJsonHeader() },
+    body: JSON.stringify(body)
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message)
+  return data.data.share
 }
 
 export const getShare = async (id) => {

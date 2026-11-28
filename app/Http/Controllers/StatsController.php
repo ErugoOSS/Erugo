@@ -8,6 +8,7 @@ use App\Models\Download;
 use App\Models\User;
 use App\Models\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class StatsController extends Controller
 {
@@ -109,7 +110,7 @@ class StatsController extends Controller
 
     public function getStats(Request $request)
     {
-        $days = (int) $request->input('days', 30);
+        $days = max(1, min(365, (int) $request->input('days', 30)));
         
         // Storage stats
         $storageStats = $this->getStorageStats();
@@ -166,19 +167,30 @@ class StatsController extends Controller
             'disk_used_formatted' => $this->formatBytes($totalDiskSpace - $freeDiskSpace),
             'disk_usage_percent' => round((($totalDiskSpace - $freeDiskSpace) / $totalDiskSpace) * 100, 1),
             'shares_usage_percent' => $totalDiskSpace > 0 ? round(($usedBytes / $totalDiskSpace) * 100, 1) : 0,
+            'logical_bytes' => (int) $usedBytes,
+            'logical_formatted' => $this->formatBytes($usedBytes),
+            'physical_bytes' => (int) Cache::get('physical_storage_bytes', $usedBytes),
+            'physical_formatted' => $this->formatBytes(Cache::get('physical_storage_bytes', $usedBytes)),
+            'physical_usage_percent' => $totalDiskSpace > 0 ? round((Cache::get('physical_storage_bytes', $usedBytes) / $totalDiskSpace) * 100, 1) : 0,
+            'dedup_savings_bytes' => (int) max(0, $usedBytes - Cache::get('physical_storage_bytes', $usedBytes)),
+            'physical_storage_calculated_at' => Cache::get('physical_storage_calculated_at'),
         ];
     }
     
     private function getShareStats()
     {
         $totalShares = Share::count();
-        $activeShares = Share::where('status', '!=', 'deleted')
-            ->where('expires_at', '>', now())
+        // A NULL expires_at means the share never expires, so it counts as
+        // active. Shares waiting for deletion count with the deleted ones.
+        $activeShares = Share::whereNotIn('status', Share::GONE_STATUSES)
+            ->where(function ($q) {
+                $q->where('expires_at', '>', now())->orWhereNull('expires_at');
+            })
             ->count();
-        $expiredShares = Share::where('status', '!=', 'deleted')
+        $expiredShares = Share::whereNotIn('status', Share::GONE_STATUSES)
             ->where('expires_at', '<=', now())
             ->count();
-        $deletedShares = Share::where('status', 'deleted')->count();
+        $deletedShares = Share::whereIn('status', Share::GONE_STATUSES)->count();
         
         // Password protected shares
         $passwordProtectedShares = Share::where('status', '!=', 'deleted')

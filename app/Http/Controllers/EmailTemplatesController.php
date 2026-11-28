@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Validator;
 use App\Utils\FileHelper;
+use App\Support\Liveshares;
 
 class EmailTemplatesController extends Controller
 {
@@ -19,6 +20,10 @@ class EmailTemplatesController extends Controller
       $templateName = basename($template_file, '.twig');
       //skip 'layout.twig'
       if ($templateName === 'layout') {
+        continue;
+      }
+      //hide the live share invite while live shares are switched off
+      if ($templateName === 'liveshareInviteMail' && !Liveshares::available()) {
         continue;
       }
       // Strip version suffix (e.g., V2, V3) from display name

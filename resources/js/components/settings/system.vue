@@ -38,6 +38,7 @@ import {
 import HelpTip from '../helpTip.vue'
 
 import { useToast } from 'vue-toastification'
+import { sanitizeSvg } from '../../lib/sanitize'
 import { mapSettings } from '../../utils'
 import { notifySettingsChanged } from '../../composables/useSetting'
 import { useConfirmDialog } from '../../composables/useConfirmDialog'
@@ -63,6 +64,7 @@ const settings = ref({
   max_expiry_time: '',
   max_share_size: '',
   max_share_size_unit: '',
+  allow_file_replacement: '1',
   clean_files_after_days: '',
   share_url_mode: 'haiku',
   share_url_pattern: '******',
@@ -390,14 +392,15 @@ const saveAuthProviders = async () => {
   try {
     await bulkUpdateAuthProviders(authProviders.value)
     saving.value = false
-    toast.success(t.value('settings.authProvidersSavedSuccessfully'))
     if (!onLocalhost.value) {
       await loadAuthProviders()
     }
+    return true
   } catch (error) {
     saving.value = false
     toast.error(t.value('settings.failedToSaveAuthProviders'))
     console.error(error)
+    return false
   }
 }
 
@@ -419,10 +422,12 @@ const saveSettings = async () => {
       ...settings.value
     })
 
-    await saveAuthProviders()
+    const providersSaved = await saveAuthProviders()
 
     saving.value = false
-    toast.success(t.value('settings.settingsSavedSuccessfully'))
+    if (providersSaved) {
+      toast.success(t.value('settings.settingsSavedSuccessfully'))
+    }
     await loadSettings()
     
     // Notify other components that settings have changed
@@ -742,6 +747,13 @@ const handleDeleteAuthProvider = async (id) => {
                     placeholder="30"
                   />
                 </div>
+                <h6 id="file_replacement" class="mt-3 mb-3">{{ $t('settings.system.file_replacement') }}</h6>
+                <div class="setting-group-body-item">
+                  <div class="checkbox-container">
+                    <input type="checkbox" id="allow_file_replacement_checkbox" :checked="settings.allow_file_replacement == '1'" @change="settings.allow_file_replacement = $event.target.checked ? '1' : '0'" />
+                    <label for="allow_file_replacement_checkbox">{{ $t('settings.system.allow_file_replacement') }}</label>
+                  </div>
+                </div>
                 <h6 id="reverse_shares" class="mt-3 mb-3">{{ $t('settings.system.reverse_shares') }}</h6>
                 <div class="setting-group-body-item">
                   <div class="checkbox-container">
@@ -799,6 +811,8 @@ const handleDeleteAuthProvider = async (id) => {
               <p>{{ $t('settings.system.max_share_size_description') }}</p>
               <h6>{{ $t('settings.system.clean_files_after') }}</h6>
               <p>{{ $t('settings.system.clean_files_after_description') }}</p>
+              <h6>{{ $t('settings.system.allow_file_replacement') }}</h6>
+              <p>{{ $t('settings.system.allow_file_replacement_description') }}</p>
               <h6>{{ $t('settings.system.allow_reverse_shares') }}</h6>
               <p>{{ $t('settings.system.allow_reverse_shares_description') }}</p>
               <h6>{{ $t('settings.system.share_url_mode') }}</h6>
@@ -1078,7 +1092,7 @@ const handleDeleteAuthProvider = async (id) => {
                       <div class="col-auto">
                         <div class="icon">
                           <Fingerprint v-if="!authProvider.icon" />
-                          <svg v-else v-html="authProvider.icon" class="custom"></svg>
+                          <svg v-else v-html="sanitizeSvg(authProvider.icon)" class="custom"></svg>
                         </div>
                       </div>
                       <div class="col">

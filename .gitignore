@@ -34,3 +34,6 @@ database.sqlite-journal
 database.sqlite-shm
 database.sqlite-wal
 ISSUES_TODO.md
+
+# Crash dumps
+/core

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\LiveshareInvite;
 use App\Models\LiveshareMember;
 use App\Models\Setting;
@@ -19,6 +20,7 @@ use App\Jobs\sendEmail;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 
 class AuthController extends Controller
@@ -42,6 +44,7 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only('email', 'password');
+        $credentials['email'] = strtolower(trim($credentials['email']));
 
         if (!Auth::attempt($credentials)) {
             return response()->json([
@@ -102,7 +105,7 @@ class AuthController extends Controller
         Auth::logout();
 
         //clear the refresh_token cookie
-        $cookie = cookie('refresh_token', '', 0, null, null, false, true);
+        $cookie = $this->refreshTokenCookie('', 0);
         return response()->json([
             'status' => 'success',
             'message' => 'Logout successful'
@@ -125,7 +128,14 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = Crypt::decryptString($request->token);
+        try {
+            $token = Crypt::decryptString($request->token);
+        } catch (DecryptException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired token'
+            ], 401);
+        }
 
         $user = Auth::setToken($token)->user();
 
@@ -190,6 +200,8 @@ class AuthController extends Controller
             ], 410);
         }
 
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
@@ -248,9 +260,9 @@ class AuthController extends Controller
             ], 500);
         }
 
-        $twentyFourHours = 60 * 60 * 24;
-        $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-        $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, false, true);
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
+        $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
+        $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
 
         return response()->json([
             'status' => 'success',
@@ -258,11 +270,23 @@ class AuthController extends Controller
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60,
+                'expires_in' => config('jwt.ttl') * 60,
                 'guest' => false,
                 'liveshare_long_id' => $invite->liveshare->long_id,
             ]
         ])->withCookie($cookie);
+    }
+
+    /**
+     * The refresh_token cookie. It is marked Secure when the request came in
+     * over HTTPS, either directly or through a proxy listed in the trusted
+     * proxies setting. Over plain HTTP it is sent without the flag, because
+     * browsers drop Secure cookies set on an http:// page and login would
+     * stop working for installs that run without TLS on a LAN.
+     */
+    private function refreshTokenCookie(string $value, int $minutes)
+    {
+        return cookie('refresh_token', $value, $minutes, null, null, request()->isSecure(), true);
     }
 
     private function respondWithToken($user)
@@ -276,10 +300,10 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $twentyFourHours = 60 * 60 * 24;
-        $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
+        $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
 
-        $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, false, true);
+        $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
 
         return response()->json([
             'status' => 'success',
@@ -287,7 +311,7 @@ class AuthController extends Controller
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60,
+                'expires_in' => config('jwt.ttl') * 60,
                 'guest' => $user->is_guest
             ]
         ])->withCookie($cookie);
@@ -309,6 +333,7 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $request->merge(['email' => strtolower(trim($request->email))]);
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -347,23 +372,36 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $status = Password::reset(
+        $request->merge(['email' => strtolower(trim($request->email))]);
+
+        $status = PasswordTokens::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
+                    'must_change_password' => false,
                 ])->save();
 
                 event(new PasswordReset($user));
             }
         );
 
-        $twentyFourHours = 60 * 60 * 24;
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
         if ($status === Password::PASSWORD_RESET) {
             $user = User::where('email', $request->email)->first();
-            $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-            $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, false, true);
+
+            // The password is changed either way, but an inactive account
+            // gets no refresh cookie, the same as at login.
+            if (!$user->active) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Account is not active'
+                ], 403);
+            }
+
+            $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
+            $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Password reset successfully'

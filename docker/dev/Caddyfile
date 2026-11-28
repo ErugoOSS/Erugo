@@ -1,3 +1,12 @@
+# Pass X-Forwarded-* headers on to Laravel when they come from a private
+# address, so a reverse proxy's real client IP isn't lost here. Laravel's own
+# trusted_proxies setting then decides whether to believe them.
+{
+    servers {
+        trusted_proxies static private_ranges
+    }
+}
+
 # Development Caddyfile for Laravel with Vite HMR support
 :80 {
     root * /var/www/html/public
@@ -69,6 +78,18 @@
     }
     handle @vite_ws {
         reverse_proxy localhost:5173
+    }
+
+    # Only tusd, running in this container, may call the upload hooks. It
+    # connects over loopback. remote_ip checks the TCP peer address, not
+    # X-Forwarded-For, so a forwarded header can't fake it. The regexp also
+    # catches variants Laravel would still route, such as /index.php/api/...
+    @tusd_hooks_external {
+        path_regexp (?i)tusd-hooks
+        not remote_ip 127.0.0.1 ::1
+    }
+    handle @tusd_hooks_external {
+        respond 404
     }
 
     # Proxy tusd uploads - must be handled before Laravel catches it

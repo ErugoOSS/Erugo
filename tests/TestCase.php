@@ -15,4 +15,13 @@ abstract class TestCase extends BaseTestCase
 
         return $app;
     }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Pages render without built frontend assets, so tests don't need a
+        // vite build first.
+        $this->withoutVite();
+    }
 }

@@ -547,7 +547,8 @@
     },
     "close": "Chiudi",
     "confirm": {
-      "pruneExpiredShares": "Sei sicuro di voler eliminare le condivisioni scadute? Non è possibile annullare questa operazione."
+      "pruneExpiredShares": "Sei sicuro di voler eliminare le condivisioni scadute? Non è possibile annullare questa operazione.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informazioni sull'installazione di Erugo",
@@ -588,7 +589,9 @@
     "error": {
       "pruneExpiredShares": "Impossibile pianificare l'eliminazione delle condivisioni scadute!",
       "shareExpired": "Condivisione non scaduta",
-      "shareExtended": "Impossibile estendere la condivisione"
+      "shareExtended": "Impossibile estendere la condivisione",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -605,6 +608,18 @@
     },
     "loading": "Caricamento delle condivisioni...",
     "noShares": "Non sono presenti condivisioni. Perché non ne crei una?",
+    "pendingDeletion": {
+      "title": "Eliminazione in attesa",
+      "description": "Le seguenti condivisioni sono state richieste per l'eliminazione. È possibile annullare prima che vengano rimosse definitivamente.",
+      "requestedOn": "Richiesto il",
+      "deleteAll": "Elimina tutto definitivamente",
+      "confirmPrompt": "Digita DELETE (maiuscolo) per rimuovere definitivamente tutte le condivisioni in attesa e i relativi file. Questa azione non può essere annullata.",
+      "confirmMismatch": "La conferma non corrisponde — devi digitare DELETE in maiuscolo esattamente."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 condivisione scaduta} other {# condivisioni scadute}}",
+      "notice": "Queste condivisioni sono scadute e i loro file sono ancora memorizzati sul disco. Per rimuoverli, seleziona 'Richiedi eliminazione' dal menu azioni della condivisione."
+    },
     "provider": {
       "edit": "Modifica",
       "view": "Visualizza"
@@ -665,7 +680,9 @@
         "unique_downloaders_description": "Conteggio degli indirizzi IP unici che hanno scaricato le condivisioni.",
         "unique_downloaders_title": "Scaricatori unici",
         "users_description": "Panoramica degli account utente e dei loro livelli di attività.",
-        "users_title": "Statistiche degli utenti"
+        "users_title": "Statistiche degli utenti",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Caricamento delle statistiche...",
       "nav": {
@@ -695,7 +712,12 @@
         "of_disk": "del disco",
         "share_storage": "Spazio condiviso",
         "title": "Panoramica sull'archiviazione",
-        "used": "usato"
+        "used": "usato",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Attivo",
@@ -711,7 +733,9 @@
     "success": {
       "pruneExpiredShares": "Le condivisioni scadute sono state contrassegnate per l'eliminazione e verranno processate in background.",
       "shareExpired": "Condivisione scaduta",
-      "shareExtended": "Condivisione estesa"
+      "shareExtended": "Condivisione estesa",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Consenti la modalità di caricamento chunked",
@@ -720,6 +744,8 @@
       "allow_direct_uploads_description": "La modalità di caricamento diretto trasmette i file in un'unica richiesta ininterrotta. Sebbene questa modalità offra una velocità di trasferimento più elevata per la maggior parte dei file, i file estremamente grandi possono causare problemi di stabilità o timeout. Per ottenere prestazioni ottimali con file di dimensioni superiori a 100 MB, l'opzione migliore è rappresentata dalla modalità Chunked.",
       "allow_reverse_shares": "Consenti le condivisioni inverse",
       "allow_reverse_shares_description": "Determina se gli utenti registrati devono avere il permesso di inviare richieste di condivisione inversa. Queste richieste forniscono a persone esterne un pass per il caricamento una tantum, consentendo loro di consegnare i file direttamente all'utente registrato che ha avviato la richiesta.",
+      "allow_file_replacement": "Consenti sostituzione file",
+      "allow_file_replacement_description": "Se abilitato, gli utenti possono sostituire il file in una condivisione a file singolo senza creare una nuova condivisione. Disabilitare per scenari di audit in cui i file non devono cambiare dopo la condivisione.",
       "application_name": "Nome dell'applicazione",
       "application_name_description": "Personalizza il nome dell'applicazione visualizzato nella barra del titolo, nelle finestre di dialogo e in altri elementi dell'interfaccia. Questo aiuta a mantenere un branding coerente in tutta l'esperienza dell'utente.",
       "application_url": "URL dell'applicazione",
@@ -858,7 +884,7 @@
       "show_language_selector_description": "Alterna la visibilità della tendina di selezione della lingua nell'angolo in alto a destra dell'applicazione. Se attivata, gli utenti possono passare rapidamente da una lingua all'altra dell'interfaccia.",
       "trusted_proxies": "Proxy attendibili",
       "trusted_proxies_placeholder": "es. 172.18.0.1, 10.0.0.0/8 oppure *",
-      "trusted_proxies_description": "Erugo identifica ogni visitatore tramite il suo indirizzo IP per limitare i tentativi di accesso e registrare chi ha scaricato una condivisione. Se Erugo si trova dietro un reverse proxy, tutte le richieste sembrano arrivare dal proxy, quindi questi limiti si applicano all'intera istanza contemporaneamente e i log dei download mostrano l'indirizzo del proxy. Indicando qui il proxy, Erugo si fida delle sue intestazioni X-Forwarded-* e usa l'IP reale del client. Il valore predefinito copre loopback e gli intervalli di rete privati, adatto a quasi tutte le configurazioni, inclusi Nginx Proxy Manager, Traefik e i tunnel Cloudflare. Aggiungi un indirizzo pubblico solo se il tuo proxy raggiunge Erugo tramite Internet e non usare mai * su un'istanza esposta direttamente, perché i visitatori potrebbero dichiarare qualsiasi IP e aggirare completamente il rate limiting.",
+      "trusted_proxies_description": "Erugo identifica ogni visitatore tramite il suo indirizzo IP per limitare i tentativi di accesso e registrare chi ha scaricato una condivisione. Se Erugo si trova dietro un reverse proxy, tutte le richieste sembrano arrivare dal proxy, quindi questi limiti si applicano all'intera istanza contemporaneamente e i log dei download mostrano l'indirizzo del proxy. Indicando qui il proxy, Erugo si fida delle sue intestazioni X-Forwarded-* e usa l'IP reale del client. Per impostazione predefinita è attendibile solo il loopback, così gli altri dispositivi della tua rete non possono falsificare il proprio indirizzo. Se usi un reverse proxy come Nginx Proxy Manager, Traefik o un tunnel Cloudflare, aggiungi qui il suo indirizzo. Erugo mostra un avviso qui sopra, con un pulsante per renderlo attendibile, quando riceve intestazioni inoltrate da un indirizzo non attendibile. Aggiungi un indirizzo pubblico solo se il tuo proxy raggiunge Erugo tramite Internet e non usare mai * su un'istanza esposta direttamente, perché i visitatori potrebbero dichiarare qualsiasi IP e aggirare completamente il rate limiting.",
       "trusted_proxies_untrusted_warning": "Erugo sta ricevendo intestazioni con IP inoltrato da {peer}, che non è presente nell'elenco dei proxy attendibili. Il rate limiting e i log dei download stanno attualmente usando quell'indirizzo invece dell'IP reale di ciascun visitatore.",
       "trusted_proxies_trust_detected": "Considera attendibile {peer}",
       "smtp": "SMTP",
@@ -990,7 +1016,11 @@
   "share": {
     "button": {
       "expireNow": "Scade ora",
-      "extend": "Estendi"
+      "extend": "Estendi",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contiene: 1 File} other {Contiene: {value} File} }"
@@ -1016,7 +1046,10 @@
     },
     "not_found": "La condivisione che si sta cercando non è stata trovata. Potrebbe essere necessario effettuare il login per visualizzarla.",
     "passwordNotProtected": "Aperto",
-    "passwordProtected": "Protetto da password"
+    "passwordProtected": "Protetto da password",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Dimensione totale",
   "upload": {

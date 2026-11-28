@@ -43,7 +43,7 @@ class SettingsController extends Controller
             } catch (\Exception $e) {
                 $errors[] = [
                     'key' => $settingData['key'],
-                    'error' => $e->getMessage()
+                    'error' => 'Failed to save setting',
                 ];
             }
         }
@@ -123,7 +123,7 @@ class SettingsController extends Controller
     public function writeLogo(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'logo' => 'required|image|mimes:png,svg|max:2048',
+            'logo' => 'required|image:allow_svg|mimes:png,svg|max:2048',
         ]);
 
         if ($validator->fails()) {

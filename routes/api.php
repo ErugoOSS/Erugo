@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsersController;
 use App\Http\Middleware\AdminMiddleware as Admin;
 use App\Http\Middleware\NoUsersMiddleware as NoUsers;
+use App\Http\Middleware\EnsureLivesharesAvailable as LivesharesAvailable;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SharesController;
 use App\Http\Controllers\BackgroundsController;
@@ -135,12 +136,33 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+
+        //request early deletion of a share (user or admin)
+        Route::post('/{id}/request-deletion', [SharesController::class, 'requestDeletion'])->name('shares.requestDeletion');
+
+        //undo a pending deletion request
+        Route::post('/{id}/undo-deletion', [SharesController::class, 'undoDeletion'])->name('shares.undoDeletion');
+
+        //permanently remove the DB record of a deleted share (owner or admin)
+        Route::delete('/{id}', [SharesController::class, 'purgeShare'])->name('shares.purge');
+
+        //add files to existing share (multi-file)
+        Route::post('/{id}/add-files', [UploadsController::class, 'addFilesToShare'])->name('shares.addFiles');
+
+        //replace the single file in a single-file share
+        Route::post('/{id}/replace-file', [UploadsController::class, 'replaceShareFile'])->name('shares.replaceFile');
+
+        //clone a share (hard-links files, preserves storage_id)
+        Route::post('/{id}/clone', [SharesController::class, 'cloneShare'])->name('shares.clone');
     });
 
     //all shares [auth, admin]
     Route::group(['prefix' => 'shares', 'middleware' => ['auth', Admin::class]], function ($router) {
         //get all shares (admin only)
         Route::get('/all', [SharesController::class, 'allShares'])->name('shares.allShares');
+
+        //immediately delete a share's files (admin only, requires typed confirmation)
+        Route::post('/{id}/delete-immediately', [SharesController::class, 'deleteImmediately'])->name('shares.deleteImmediately');
     });
 
     //manage themes [auth, admin]
@@ -186,7 +208,7 @@ Route::group([], function ($router) {
 
     //accept a reverse share invite [public] (for guests with token)
     Route::group(['prefix' => 'reverse-shares'], function ($router) {
-        Route::get('/accept', [ AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
+        Route::post('/accept', [AuthController::class, 'acceptReverseShareInvite'])->name('reverse-shares.acceptInvite');
     });
 
     //read auth providers [public]
@@ -199,7 +221,7 @@ Route::group([], function ($router) {
     Route::get('/shares/{share}', [SharesController::class, 'read'])->name('shares.read');
 
     //download shares [public]
-    Route::any('/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
+    Route::match(['GET', 'POST'], '/shares/{share}/download', [SharesController::class, 'download'])->name('shares.download');
     
     //download specific file from share [public] - filepath can include nested directories
     Route::get('/shares/{share}/download/file/{filepath}', [SharesController::class, 'downloadFile'])
@@ -215,6 +237,8 @@ Route::group([], function ($router) {
     Route::get('/favicon', [SettingsController::class, 'getFavicon'])->name('settings.getFavicon');
 });
 
+// Live-share routes 404 unless ERUGO_LIVESHARES is on.
+Route::middleware(LivesharesAvailable::class)->group(function () {
 
     //admin liveshare management [auth, admin] -- must come before wildcard routes
     Route::group(['prefix' => 'liveshares/admin', 'middleware' => ['auth', Admin::class]], function ($router) {
@@ -285,6 +309,7 @@ Route::group([], function ($router) {
 
     // Liveshare avatar (random image thumb; auth via JWT token or invite_token query param)
     Route::get('/liveshares/{longId}/avatar', [LivesharesController::class, 'avatar'])->name('liveshares.avatar');
+});
 
 // tusd webhook handler (called by tusd server, not authenticated via middleware)
 Route::post('/tusd-hooks', [TusdHooksController::class, 'handleHook'])->name('tusd.hooks');
