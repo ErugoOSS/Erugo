@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\Setting;
 use App\Models\ReverseShareInvite;
 use App\Models\LiveshareInvite;
@@ -232,12 +233,13 @@ class AppAuthController extends Controller
             ], 422);
         }
 
-        $status = Password::reset(
+        $status = PasswordTokens::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
+                    'must_change_password' => false,
                 ])->save();
 
                 event(new PasswordReset($user));

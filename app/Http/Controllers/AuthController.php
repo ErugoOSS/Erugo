@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\LiveshareInvite;
 use App\Models\LiveshareMember;
 use App\Models\Setting;
@@ -365,7 +366,7 @@ class AuthController extends Controller
 
         $request->merge(['email' => strtolower(trim($request->email))]);
 
-        $status = Password::reset(
+        $status = PasswordTokens::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([

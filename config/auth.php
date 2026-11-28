@@ -101,6 +101,17 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Welcome emails for accounts an admin creates. People don't always
+        // open these straight away, so the link lasts a day. Its own table
+        // keeps forgot-password tokens on the 60 minute expiry above.
+        // See App\Services\PasswordTokens.
+        'account_setup' => [
+            'provider' => 'users',
+            'table' => 'account_setup_tokens',
+            'expire' => 1440,
+            'throttle' => 60,
+        ],
     ],
 
     /*

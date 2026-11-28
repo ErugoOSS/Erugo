@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Password as PasswordFacade;
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
@@ -225,7 +226,7 @@ class UsersController extends Controller
         // Continue anyway - user creation and password email are more important
       }
 
-      $token = PasswordFacade::createToken($user);
+      $token = PasswordTokens::createSetupToken($user);
 
       sendEmail::dispatch($user->email, accountCreatedMail::class, ['token' => $token, 'user' => $user]);
 
@@ -359,7 +360,7 @@ class UsersController extends Controller
       $this->cleanupUserData($user);
 
       // Remove any pending password reset tokens for this user
-      DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+      PasswordTokens::forget($user->email);
 
       $user->delete();
 
