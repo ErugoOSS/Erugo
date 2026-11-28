@@ -527,7 +527,7 @@ class AppBrandingController extends Controller
             Log::error('Logo upload error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to save logo: ' . $e->getMessage(),
+                'message' => 'Failed to save logo',
             ], 500);
         }
     }
@@ -566,7 +566,7 @@ class AppBrandingController extends Controller
             Log::error('Logo reset error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to reset logo: ' . $e->getMessage(),
+                'message' => 'Failed to reset logo',
             ], 500);
         }
     }
