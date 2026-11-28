@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // RZA-SF's images already ran this. Skip if the columns are there
+        // anyway, for example if the migrations table was restored from elsewhere.
+        if (Schema::hasColumn('shares', 'deletion_requested_at')) {
+            return;
+        }
+
         Schema::table('shares', function (Blueprint $table) {
             // Tracks when a user or admin requested early deletion of a share.
             // Status 'pending_deletion' is the in-flight state between request and
