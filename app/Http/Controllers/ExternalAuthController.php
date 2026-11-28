@@ -400,12 +400,11 @@ class ExternalAuthController extends Controller
             return redirect('/')->with('error', 'Account is not active');
         }
 
-        // Set refresh token with 24 hour expiry
-        $twentyFourHours = 60 * 60 * 24;
-        $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
+        $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
 
         // Create HTTP-only secure cookie with refresh token
-        $cookie = cookie('refresh_token', urlencode($refreshToken), $twentyFourHours, null, null, true, true);
+        $cookie = cookie('refresh_token', urlencode($refreshToken), $refreshMinutes, null, null, true, true);
 
         // Redirect to home with the cookie
         return redirect('/')->withCookie($cookie);

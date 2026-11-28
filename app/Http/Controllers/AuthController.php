@@ -19,6 +19,7 @@ use App\Jobs\sendEmail;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 
 class AuthController extends Controller
@@ -125,7 +126,14 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = Crypt::decryptString($request->token);
+        try {
+            $token = Crypt::decryptString($request->token);
+        } catch (DecryptException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired token'
+            ], 401);
+        }
 
         $user = Auth::setToken($token)->user();
 
@@ -248,9 +256,9 @@ class AuthController extends Controller
             ], 500);
         }
 
-        $twentyFourHours = 60 * 60 * 24;
-        $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-        $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
+        $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
+        $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
 
         return response()->json([
             'status' => 'success',
@@ -258,7 +266,7 @@ class AuthController extends Controller
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60,
+                'expires_in' => config('jwt.ttl') * 60,
                 'guest' => false,
                 'liveshare_long_id' => $invite->liveshare->long_id,
             ]
@@ -288,10 +296,10 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $twentyFourHours = 60 * 60 * 24;
-        $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
+        $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
 
-        $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
+        $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
 
         return response()->json([
             'status' => 'success',
@@ -299,7 +307,7 @@ class AuthController extends Controller
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'expires_in' => Auth::factory()->getTTL() * 60,
+                'expires_in' => config('jwt.ttl') * 60,
                 'guest' => $user->is_guest
             ]
         ])->withCookie($cookie);
@@ -371,11 +379,21 @@ class AuthController extends Controller
             }
         );
 
-        $twentyFourHours = 60 * 60 * 24;
+        $refreshMinutes = config('jwt.refresh_token_ttl.web');
         if ($status === Password::PASSWORD_RESET) {
             $user = User::where('email', $request->email)->first();
-            $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-            $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
+
+            // The password is changed either way, but an inactive account
+            // gets no refresh cookie, the same as at login.
+            if (!$user->active) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Account is not active'
+                ], 403);
+            }
+
+            $refreshToken = Auth::setTTL($refreshMinutes)->tokenById($user->id);
+            $cookie = $this->refreshTokenCookie($refreshToken, $refreshMinutes);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Password reset successfully'
