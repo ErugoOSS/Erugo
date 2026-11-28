@@ -4,10 +4,16 @@ Releases are built by GitHub Actions (`.github/workflows/release.yml`). Pushing 
 
 ## One-time setup
 
-Add two repository secrets under Settings > Secrets and variables > Actions:
+The Docker Hub token is kept in a GitHub environment called `release`, not in the repository's own secrets. Anyone with write access can push a workflow to a branch, and repository secrets are given to every workflow that runs in the repo. Environment secrets are only given to a job that names the environment, from a ref the environment allows, after a reviewer approves it.
 
-- `DOCKERHUB_USERNAME`: the Docker Hub account that owns `wardy784/erugo`.
-- `DOCKERHUB_TOKEN`: a Docker Hub personal access token with Read & Write scope. Create it under Account settings > Personal access tokens on Docker Hub.
+1. **Docker Hub token.** On Docker Hub, go to Account settings > Personal access tokens > Generate new token. Give it a description such as `erugo-github-release`, an expiry, and the Read & Write scope (not Delete). Copy it; Docker Hub only shows it once. A personal access token works for every repository under the account, not just `wardy784/erugo`.
+2. **Environment.** In the GitHub repo, go to Settings > Environments > New environment and call it `release`. Then:
+   - Tick **Required reviewers** and add yourself. Leave **Prevent self-review** off if you're the only reviewer, or you won't be able to approve your own releases.
+   - Under **Deployment branches and tags**, choose **Selected branches and tags**, then **Add deployment branch or tag rule**, set the type to **Tag** and the pattern to `v*`.
+   - Under **Environment secrets**, add `DOCKERHUB_USERNAME` (`wardy784`) and `DOCKERHUB_TOKEN` (the token from step 1).
+3. **Tag ruleset.** Go to Settings > Rules > Rulesets > New ruleset > New tag ruleset. Name it `release tags`, set enforcement to **Active**, add the **Repository admin** role under **Bypass list**, add the target `v*` under **Target tags**, and tick **Restrict creations**, **Restrict updates** and **Restrict deletions**. Only repo admins and org owners can then create or move a version tag.
+4. **Repository secrets.** Make sure there's no `DOCKERHUB_USERNAME` or `DOCKERHUB_TOKEN` under Settings > Secrets and variables > Actions > Repository secrets. If there is, delete it.
+5. **Roles.** Anyone with the Admin role on the repo, and any org owner, can change environments and rulesets, so give other maintainers Write or Maintain, not Admin.
 
 ## Cutting a release
 
@@ -21,7 +27,7 @@ Add two repository secrets under Settings > Secrets and variables > Actions:
    git push origin v0.3.0
    ```
 
-3. Watch the Release workflow in the Actions tab. When it finishes, Docker Hub has `0.3.0`, `0.3`, `0`, `latest` and `sha-<commit>`.
+3. Open the Release run in the Actions tab. It waits at **Build and push** with "Review deployments". Check the run is for the tag you pushed, then approve it. When it finishes, Docker Hub has `0.3.0`, `0.3`, `0`, `latest` and `sha-<commit>`.
 4. Open the draft release on GitHub, write the notes and publish it.
 
 The version shown in the app comes from the tag, without the leading `v`.
@@ -34,7 +40,7 @@ Tag with a suffix after a hyphen, for example `v0.3.0-rc.1`. The workflow pushes
 
 If a run fails part way, open it in the Actions tab and use "Re-run failed jobs".
 
-To build a tag again from scratch, go to Actions > Release > Run workflow and enter the tag, for example `v0.3.0`. The tag must already exist. A plain release moves `latest`, `X.Y` and `X` to the new build, so only re-run the newest release this way. If a draft or published GitHub release already exists for the tag, it is left alone.
+To build a tag again from scratch, go to Actions > Release > Run workflow, choose the tag under **Use workflow from** (switch the dropdown to Tags), and enter the same tag, for example `v0.3.0`. The tag must already exist. Runs started from a branch are refused by the release environment. You'll need to approve the run as usual. A plain release moves `latest`, `X.Y` and `X` to the new build, so only re-run the newest release this way. If a draft or published GitHub release already exists for the tag, it is left alone.
 
 ## Manual fallback
 

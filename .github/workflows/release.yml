@@ -3,15 +3,21 @@ name: Release
 # Builds the multi-arch image for a version tag, pushes it to Docker Hub,
 # checks the amd64 image starts and reports the right version, then opens a
 # draft GitHub release for the maintainer to write up. See RELEASING.md.
+#
+# The Docker Hub secrets live in the "release" environment, not the repo.
+# That environment only accepts v* tags and waits for a reviewer to approve
+# each run, so a workflow pushed to some other branch can't read them.
 
 on:
   push:
     tags:
       - 'v*.*.*'
+  # Pick the tag itself under "Use workflow from". The release environment
+  # turns away runs started from a branch.
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to build again, for example v0.3.0'
+        description: 'Existing tag to build again, for example v0.3.0. Pick the same tag under "Use workflow from".'
         required: true
         type: string
 
@@ -29,6 +35,7 @@ jobs:
   build:
     name: Build and push
     runs-on: ubuntu-latest
+    environment: release
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
       version: ${{ steps.vars.outputs.version }}
@@ -41,6 +48,10 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             TAG="$INPUT_TAG"
+            if [ "$GITHUB_REF" != "refs/tags/$TAG" ]; then
+              echo "::error::Run this from the tag: choose $TAG under 'Use workflow from', not $GITHUB_REF_NAME"
+              exit 1
+            fi
           else
             TAG="$GITHUB_REF_NAME"
           fi
