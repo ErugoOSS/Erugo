@@ -12,6 +12,7 @@ use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
 use App\Jobs\sendEmail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UsersController extends Controller
@@ -171,6 +172,8 @@ class UsersController extends Controller
   //create a new user
   public function create(Request $request)
   {
+    $request->merge(['email' => strtolower(trim($request->email ?? ''))]);
+
     $validator = Validator::make($request->all(), [
       'email' => ['required', 'email', 'unique:users,email'],
       'name' => ['required', 'string', 'max:255'],
@@ -192,7 +195,7 @@ class UsersController extends Controller
 
     try {
       $user = User::create([
-        'email' => $request->email,
+        'email' => strtolower(trim($request->email)),
         'name' => $request->name,
         'admin' => $request->admin,
         'password' => Hash::make(Str::random(20)),
@@ -271,7 +274,15 @@ class UsersController extends Controller
     }
 
     try {
-      $user->update($validator->validated());
+      $validated = $validator->validated();
+
+      if (isset($validated['name']))                 $user->name                 = $validated['name'];
+      if (isset($validated['email']))                $user->email                = strtolower(trim($validated['email']));
+      if (isset($validated['password']))             $user->password             = $validated['password'];
+      if (isset($validated['admin']))                $user->admin                = $validated['admin'];
+      if (isset($validated['must_change_password'])) $user->must_change_password = $validated['must_change_password'];
+
+      $user->save();
 
       return response()->json([
         'status' => 'success',
@@ -330,6 +341,9 @@ class UsersController extends Controller
 
       // Clean up all the user's data (shares, files, downloads)
       $this->cleanupUserData($user);
+
+      // Remove any pending password reset tokens for this user
+      DB::table('password_reset_tokens')->where('email', $user->email)->delete();
 
       $user->delete();
 
@@ -441,7 +455,7 @@ class UsersController extends Controller
     try {
       $user = User::create([
         'name' => $request->name,
-        'email' => $request->email,
+        'email' => strtolower(trim($request->email)),
         'password' => Hash::make($request->password),
         'admin' => true,
         'active' => true,

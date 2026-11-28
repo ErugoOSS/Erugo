@@ -10,13 +10,14 @@ use App\Models\Theme;
 use App\Http\Controllers\ExternalAuthController;
 use App\Services\SettingsService;
 
+if (!function_exists('getSettings')) {
 function getSettings()
 {
-    
+
     $settingsService = new SettingsService();
 
-    
-    
+
+
     $settings = Setting::whereLike('group', 'ui%')
         ->orWhere('key', 'default_language')
         ->orWhere('key', 'show_language_selector')
@@ -49,6 +50,7 @@ function getSettings()
     $indexedSettings['version'] = config('app.version');
 
     return $indexedSettings;
+}
 }
 
 Route::get('/', function () {
