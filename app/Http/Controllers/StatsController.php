@@ -180,13 +180,17 @@ class StatsController extends Controller
     private function getShareStats()
     {
         $totalShares = Share::count();
-        $activeShares = Share::where('status', '!=', 'deleted')
-            ->where('expires_at', '>', now())
+        // A NULL expires_at means the share never expires, so it counts as
+        // active. Shares waiting for deletion count with the deleted ones.
+        $activeShares = Share::whereNotIn('status', Share::GONE_STATUSES)
+            ->where(function ($q) {
+                $q->where('expires_at', '>', now())->orWhereNull('expires_at');
+            })
             ->count();
-        $expiredShares = Share::where('status', '!=', 'deleted')
+        $expiredShares = Share::whereNotIn('status', Share::GONE_STATUSES)
             ->where('expires_at', '<=', now())
             ->count();
-        $deletedShares = Share::where('status', 'deleted')->count();
+        $deletedShares = Share::whereIn('status', Share::GONE_STATUSES)->count();
         
         // Password protected shares
         $passwordProtectedShares = Share::where('status', '!=', 'deleted')

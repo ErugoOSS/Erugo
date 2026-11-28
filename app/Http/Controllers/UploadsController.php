@@ -13,6 +13,7 @@ use App\Models\ReverseShareInvite;
 use Carbon\Carbon;
 use App\Jobs\CreateShareZip;
 use App\Jobs\RecalculatePhysicalStorage;
+use App\Utils\PathGuard;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
 use App\Models\Setting;
@@ -462,7 +463,7 @@ class UploadsController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
-    if ($share->status === 'deleted') {
+    if ($share->isGone()) {
       return response()->json(['status' => 'error', 'message' => 'Share has been deleted'], 422);
     }
 
@@ -484,6 +485,13 @@ class UploadsController extends Controller
       return response()->json(['status' => 'error', 'message' => 'No files found for the uploads'], 400);
     }
 
+    // Shares zipped before 0.3.0 only kept the zip. The zip is rebuilt from
+    // the folder below, so put the existing files back in the folder first or
+    // they would drop out of the new zip.
+    if (!$share->restoreFolderFromZip()) {
+      return response()->json(['status' => 'error', 'message' => 'Some of this share\'s files are missing on disk'], 409);
+    }
+
     $completePath = storage_path('app/shares/' . $share->path);
     if (!is_dir($completePath)) {
       mkdir($completePath, 0750, true);
@@ -498,15 +506,28 @@ class UploadsController extends Controller
       $destPath = rtrim($completePath . '/' . $originalPath, '/');
       if (!is_dir($destPath)) mkdir($destPath, 0750, true);
 
-      $resolvedDest  = realpath($destPath);
-      $resolvedShare = realpath($completePath);
-      if (!$resolvedDest || !$resolvedShare || strpos($resolvedDest, $resolvedShare) !== 0) {
+      if (!PathGuard::isWithin($destPath, $completePath)) {
         Log::warning('Path traversal attempt in addFilesToShare', ['user_id' => $user->id, 'path' => $originalPath]);
         continue;
       }
 
       $sourcePath = storage_path('app/' . $file->temp_path);
       $destFile   = $destPath . '/' . $file->name;
+
+      // A file with the same name and folder replaces the old one. Remove the
+      // old directory entry first: if a clone hard-links it, writing through
+      // it (copy() below truncates) would change the clone's file too.
+      if (file_exists($destFile) || is_link($destFile)) {
+        unlink($destFile);
+        $share->files()
+          ->where('name', $file->name)
+          ->where(function ($q) use ($originalPath) {
+            $originalPath ? $q->where('full_path', $originalPath) : $q->whereNull('full_path')->orWhere('full_path', '');
+          })
+          ->where('id', '!=', $file->id)
+          ->delete();
+      }
+
       if (file_exists($sourcePath)) {
         if (!rename($sourcePath, $destFile)) {
           if (copy($sourcePath, $destFile)) unlink($sourcePath);
@@ -564,8 +585,15 @@ class UploadsController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
-    if ($share->status === 'deleted') {
+    if ($share->isGone()) {
       return response()->json(['status' => 'error', 'message' => 'Share has been deleted'], 422);
+    }
+
+    // The admin setting only hid the button before. Enforce it here too, since
+    // it exists for instances where shared files must not change.
+    $allowReplacement = (new \App\Services\SettingsService())->get('allow_file_replacement');
+    if (in_array($allowReplacement, [false, 0, '0', 'false'], true)) {
+      return response()->json(['status' => 'error', 'message' => 'Replacing files is turned off'], 403);
     }
 
     if ($share->files()->count() !== 1) {
@@ -591,19 +619,20 @@ class UploadsController extends Controller
       return response()->json(['status' => 'error', 'message' => 'No file record found for upload'], 400);
     }
 
-    // Delete old physical file
+    // Remove the old file's directory entry. If a clone hard-links it, the
+    // clone keeps its own link and its data.
     $oldFile      = $share->files()->first();
     $shareDirPath = storage_path('app/shares/' . $share->path);
-    $oldFileFull  = $shareDirPath;
-    if ($oldFile->full_path) $oldFileFull .= '/' . $oldFile->full_path;
-    $oldFileFull .= '/' . $oldFile->name;
-    if (file_exists($oldFileFull)) unlink($oldFileFull);
+    $oldFileFull  = PathGuard::singleShareFile($shareDirPath, $oldFile->full_path, $oldFile->name);
+    if ($oldFileFull) unlink($oldFileFull);
     $oldFile->delete();
 
-    // Move new file into share directory root
+    // Move new file into share directory root. Unlink anything already at
+    // that name first, for the same hard-link reason.
     if (!is_dir($shareDirPath)) mkdir($shareDirPath, 0750, true);
     $sourcePath = storage_path('app/' . $newFile->temp_path);
     $destFile   = $shareDirPath . '/' . $newFile->name;
+    if (file_exists($destFile) || is_link($destFile)) unlink($destFile);
     if (file_exists($sourcePath)) {
       if (!rename($sourcePath, $destFile)) {
         if (copy($sourcePath, $destFile)) unlink($sourcePath);

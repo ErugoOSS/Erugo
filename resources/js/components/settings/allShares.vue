@@ -308,7 +308,7 @@ defineExpose({
                   <strong class="ps-1 text-danger">{{ $t('share.expired') }}</strong>
                 </template>
                 <template v-else>
-                  {{ niceDate(share.expires_at) }}
+                  {{ share.expires_at ? niceDate(share.expires_at) : $t('share.never', 'Never') }}
                 </template>
               </div>
               <div class="date">
@@ -317,7 +317,7 @@ defineExpose({
                   <strong class="ps-1 text-danger">{{ $t('share.deleted') }}</strong>
                 </template>
                 <template v-else>
-                  {{ niceDate(share.deletes_at) }}
+                  {{ share.deletes_at ? niceDate(share.deletes_at) : $t('share.never', 'Never') }}
                 </template>
               </div>
             </div>

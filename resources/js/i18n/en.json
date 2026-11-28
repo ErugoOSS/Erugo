@@ -1129,7 +1129,9 @@
       "failed_message": "The files could not be packaged for download. Please contact the share owner."
     },
     "passwordNotProtected": "Open",
-    "passwordProtected": "Password protected"
+    "passwordProtected": "Password protected",
+    "never": "Never",
+    "never_expires": "Never expires"
   },
   "total_size": "Total Size",
   "upload": {

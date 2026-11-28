@@ -21,6 +21,7 @@ use App\Jobs\cleanSpecificShares;
 use App\Utils\PathGuard;
 use App\Jobs\RecalculatePhysicalStorage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class SharesController extends Controller
 {
@@ -47,14 +48,14 @@ class SharesController extends Controller
       ], 404);
     }
 
-    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
+    if ($share->isGone()) {
       return response()->json([
         'status' => 'error',
         'message' => 'Share not found'
       ], 404);
     }
 
-    if ($share->expires_at < Carbon::now()) {
+    if ($share->isPastExpiry()) {
       return response()->json([
         'status' => 'error',
         'message' => 'Share expired'
@@ -180,7 +181,7 @@ class SharesController extends Controller
       return redirect()->to('/shares/' . $shareId);
     }
 
-    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
+    if ($share->isGone()) {
       return redirect()->to('/shares/' . $shareId);
     }
 
@@ -194,7 +195,7 @@ class SharesController extends Controller
       }
     }
 
-    if ($share->expires_at < Carbon::now()) {
+    if ($share->isPastExpiry()) {
       return redirect()->to('/shares/' . $shareId);
     }
 
@@ -276,7 +277,7 @@ class SharesController extends Controller
   public function downloadFile($shareId, $filepath)
   {
     $share = Share::where('long_id', $shareId)->with('files')->first();
-    if (!$share) {
+    if (!$share || $share->isGone()) {
       return response()->json(['error' => 'Share not found'], 404);
     }
 
@@ -290,7 +291,7 @@ class SharesController extends Controller
       }
     }
 
-    if ($share->expires_at < Carbon::now()) {
+    if ($share->isPastExpiry()) {
       return response()->json(['error' => 'Share expired'], 410);
     }
 
@@ -519,6 +520,12 @@ class SharesController extends Controller
         'message' => 'Unauthorized'
       ], 401);
     }
+    if ($share->isGone()) {
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Share is pending deletion or deleted'
+      ], 422);
+    }
     $share->expires_at = Carbon::now();
     $share->save();
 
@@ -547,8 +554,17 @@ class SharesController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
+    if ($share->isGone()) {
+      return response()->json(['status' => 'error', 'message' => 'Share is pending deletion or deleted'], 422);
+    }
+
     $settingsService = new SettingsService();
     $maxExpiryDays = $settingsService->get('max_expiry_time'); // null = no limit configured
+
+    // Nobody, admins included, can push a share more than ten years out. This
+    // keeps the date in range for Carbon and the database, the same reason the
+    // app API and the stats endpoint clamp their days values.
+    $hardLimit = Carbon::now()->addYears(10);
 
     // Admin can set unlimited (null expires_at)
     if ($user->admin && $request->boolean('unlimited')) {
@@ -559,7 +575,14 @@ class SharesController extends Controller
 
     // Any user can set a specific date; non-admins are subject to max_expiry_time
     if ($request->filled('expires_at')) {
-      $newExpiry = Carbon::parse($request->input('expires_at'));
+      try {
+        $newExpiry = Carbon::parse((string) $request->input('expires_at'));
+      } catch (\Throwable $e) {
+        return response()->json(['status' => 'error', 'message' => 'Invalid date'], 422);
+      }
+      if ($newExpiry > $hardLimit) {
+        return response()->json(['status' => 'error', 'message' => 'Date is too far in the future'], 422);
+      }
       if (!$user->admin && $maxExpiryDays !== null) {
         $maxAllowed = Carbon::now()->addDays((int) $maxExpiryDays);
         if ($newExpiry > $maxAllowed) {
@@ -593,11 +616,23 @@ class SharesController extends Controller
       ? $share->expires_at
       : Carbon::now();
 
+    // Cap the amount at ten years' worth before handing it to Carbon, so a huge
+    // number can't overflow the date.
+    $amount = min($amount, match ($unit) {
+      'weeks'  => 520,
+      'months' => 120,
+      default  => 3650,
+    });
+
     $newExpiry = match ($unit) {
       'weeks'  => $base->copy()->addWeeks($amount),
       'months' => $base->copy()->addMonths($amount),
       default  => $base->copy()->addDays($amount),
     };
+
+    if ($newExpiry > $hardLimit) {
+      return response()->json(['status' => 'error', 'message' => 'Extension would put the share more than ten years out'], 422);
+    }
 
     // Enforce max_expiry_time for non-admin users
     if (!$user->admin && $maxExpiryDays !== null) {
@@ -705,7 +740,7 @@ class SharesController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
-    if (in_array($share->status, ['pending_deletion', 'deleted'])) {
+    if ($share->isGone()) {
       return response()->json(['status' => 'error', 'message' => 'Share is already pending deletion or deleted'], 422);
     }
 
@@ -800,6 +835,8 @@ class SharesController extends Controller
     if (!$cleaned) {
       return response()->json(['status' => 'error', 'message' => 'Failed to delete share files'], 500);
     }
+
+    RecalculatePhysicalStorage::dispatch();
 
     return response()->json([
       'status' => 'success',
@@ -963,11 +1000,22 @@ class SharesController extends Controller
       return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
     }
 
-    if ($share->status === 'deleted') {
+    if ($share->isGone()) {
       return response()->json(['status' => 'error', 'message' => 'Cannot clone a deleted share'], 422);
     }
 
-    $name      = $request->input('name', $share->name);
+    $validator = Validator::make($request->all(), ['name' => ['nullable', 'string', 'max:255']]);
+    if ($validator->fails()) {
+      return response()->json(['status' => 'error', 'message' => 'Validation failed', 'data' => ['errors' => $validator->errors()]], 422);
+    }
+
+    // Shares zipped before 0.3.0 only have the zip, so put the loose files
+    // back first. Without them the clone would have rows but no files.
+    if (!$share->restoreFolderFromZip()) {
+      return response()->json(['status' => 'error', 'message' => 'Some of this share\'s files are missing on disk'], 409);
+    }
+
+    $name      = $request->input('name') ?: $share->name;
     $longId    = $this->generateLongId();
     $clonePath = $user->id . '/' . $longId;
 
@@ -988,30 +1036,32 @@ class SharesController extends Controller
 
     $cloneDir = storage_path('app/shares/' . $clonePath);
     if (!is_dir($cloneDir)) {
-      mkdir($cloneDir, 0755, true);
+      mkdir($cloneDir, 0750, true);
     }
 
+    $sourceDir     = storage_path('app/shares/' . $share->path);
     $originalFiles = $share->files()->get();
     $totalSize     = 0;
 
     foreach ($originalFiles as $file) {
-      $subdir     = $file->full_path ? rtrim($file->full_path, '/') . '/' : '';
-      $sourcePath = storage_path('app/shares/' . $share->path . '/' . $subdir . $file->name);
+      // Same lookup the download uses: the file must exist and resolve inside
+      // the original share's folder.
+      $sourcePath = PathGuard::singleShareFile($sourceDir, $file->full_path, $file->name);
 
-      $destSubdir = $file->full_path ?? '';
+      $destSubdir = trim((string) $file->full_path, '/');
       $destDir    = $cloneDir . ($destSubdir !== '' ? '/' . $destSubdir : '');
 
       if (!is_dir($destDir)) {
-        mkdir($destDir, 0755, true);
+        mkdir($destDir, 0750, true);
       }
 
       $destFile = $destDir . '/' . $file->name;
 
-      if (file_exists($sourcePath)) {
-        try {
-          link($sourcePath, $destFile);
-        } catch (\Throwable $e) {
-          // Cross-device hard-link failure — fall back to copy
+      if ($sourcePath && PathGuard::isWithin($destDir, $cloneDir) && !file_exists($destFile)) {
+        // Hard link so the clone costs no extra space. Deleting either share
+        // later only removes its own link. Fall back to a copy when the
+        // filesystem can't link (different devices, some network mounts).
+        if (!@link($sourcePath, $destFile)) {
           copy($sourcePath, $destFile);
         }
       }

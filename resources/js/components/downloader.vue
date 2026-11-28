@@ -231,7 +231,10 @@ const filesByDirectory = computed(() => {
           {{ $t('share.contains.count', 'Contains: {value} files', { value: share.file_count }) }}
         </div>
       </div>
-      <div class="share-expires">
+      <div class="share-expires" v-if="!share.expires_at">
+        {{ $t('share.never_expires', 'Never expires') }}
+      </div>
+      <div class="share-expires" v-else>
         {{
           $t('share.expires.in', {
             days: timeUntilExpiration(share.expires_at).days,

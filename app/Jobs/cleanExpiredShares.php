@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Share;
+use App\Jobs\RecalculatePhysicalStorage;
 use Illuminate\Support\Facades\Log;
 
 class cleanExpiredShares implements ShouldQueue
@@ -37,8 +38,15 @@ class cleanExpiredShares implements ShouldQueue
 
         foreach ($shares as $share) {
             Log::info('Cleaning share ' . $share->id);
-            $share->cleanFiles();
-            Log::info('Share ' . $share->id . ' cleaned');
+            if ($share->cleanFiles()) {
+                Log::info('Share ' . $share->id . ' cleaned');
+            } else {
+                Log::warning('Share ' . $share->id . ' could not be cleaned; will retry next run');
+            }
+        }
+
+        if ($shares->count() > 0) {
+            RecalculatePhysicalStorage::dispatch();
         }
         $endTime = microtime(true);
         $timeTaken = $endTime - $startTime;
