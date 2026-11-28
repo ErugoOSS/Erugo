@@ -132,12 +132,24 @@ Route::group([], function ($router) {
 
         //prune expired shares
         Route::post('/prune-expired', [SharesController::class, 'pruneExpiredShares'])->name('shares.pruneExpired');
+
+        //request early deletion of a share (user or admin)
+        Route::post('/{id}/request-deletion', [SharesController::class, 'requestDeletion'])->name('shares.requestDeletion');
+
+        //undo a pending deletion request
+        Route::post('/{id}/undo-deletion', [SharesController::class, 'undoDeletion'])->name('shares.undoDeletion');
+
+        //permanently remove the DB record of a deleted share (owner or admin)
+        Route::delete('/{id}', [SharesController::class, 'purgeShare'])->name('shares.purge');
     });
 
     //all shares [auth, admin]
     Route::group(['prefix' => 'shares', 'middleware' => ['auth', Admin::class]], function ($router) {
         //get all shares (admin only)
         Route::get('/all', [SharesController::class, 'allShares'])->name('shares.allShares');
+
+        //immediately delete a share's files (admin only, requires typed confirmation)
+        Route::post('/{id}/delete-immediately', [SharesController::class, 'deleteImmediately'])->name('shares.deleteImmediately');
     });
 
     //manage themes [auth, admin]

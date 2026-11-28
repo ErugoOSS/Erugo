@@ -526,7 +526,8 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
+      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informatie over uw Erugo installatie",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Kan verwijdering van verlopen aandelen niet plannen!",
       "shareExpired": "Delen niet verlopen",
-      "shareExtended": "Niet gelukt om aandeel uit te breiden"
+      "shareExtended": "Niet gelukt om aandeel uit te breiden",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -584,6 +587,18 @@
     },
     "loading": "Aandelen uploaden...",
     "noShares": "Er zijn geen aandelen. Maak er een!",
+    "pendingDeletion": {
+      "title": "Verwijdering in behandeling",
+      "description": "Voor de volgende shares is verwijdering aangevraagd. U kunt dit ongedaan maken voordat ze permanent worden verwijderd.",
+      "requestedOn": "Aangevraagd op",
+      "deleteAll": "Alles definitief verwijderen",
+      "confirmPrompt": "Typ DELETE (hoofdletters) om alle wachtende shares en hun bestanden permanent te verwijderen. Dit kan niet ongedaan worden gemaakt.",
+      "confirmMismatch": "Bevestiging komt niet overeen — u moet DELETE exact in hoofdletters typen."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 verlopen share} other {# verlopen shares}}",
+      "notice": "Deze shares zijn verlopen en hun bestanden staan nog steeds op schijf. Om ze te verwijderen, selecteer 'Verwijdering aanvragen' in het actiemenu van de share."
+    },
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
@@ -690,7 +705,9 @@
     "success": {
       "pruneExpiredShares": "Vervallen aandelen zijn gemarkeerd voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
-      "shareExtended": "Aandeel uitgebreid"
+      "shareExtended": "Aandeel uitgebreid",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
@@ -964,7 +981,11 @@
   "share": {
     "button": {
       "expireNow": "Nu verlopen",
-      "extend": "Verleng"
+      "extend": "Verleng",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Bevat: # bestand} other {Bevat: {value} bestanden}}"
@@ -990,7 +1011,10 @@
     },
     "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Wachtwoord beveiligd"
+    "passwordProtected": "Wachtwoord beveiligd",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Totale grootte",
   "upload": {

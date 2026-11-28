@@ -547,7 +547,8 @@
     },
     "close": "Close",
     "confirm": {
-      "pruneExpiredShares": "Are you sure you want to delete your expired shares? This cannot be undone."
+      "pruneExpiredShares": "Are you sure you want to delete your expired shares? This cannot be undone.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Information about your Erugo installation",
@@ -588,7 +589,9 @@
     "error": {
       "pruneExpiredShares": "Failed to schedule expired shares for deletion!",
       "shareExpired": "Failed to expire share",
-      "shareExtended": "Failed to extend share"
+      "shareExtended": "Failed to extend share",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -605,6 +608,18 @@
     },
     "loading": "Shares loading...",
     "noShares": "You have no shares. Why not create one?",
+    "pendingDeletion": {
+      "title": "Pending Deletion",
+      "description": "The following shares have been requested for deletion. You can undo this before they are permanently removed.",
+      "requestedOn": "Requested On",
+      "deleteAll": "Delete all permanently",
+      "confirmPrompt": "Type DELETE (uppercase) to permanently remove all pending shares and their files. This cannot be undone.",
+      "confirmMismatch": "Confirmation did not match — you must type DELETE in uppercase exactly."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 expired share} other {# expired shares}}",
+      "notice": "These shares have expired and their files are still stored on disk. To remove them, select 'Request Deletion' from the share's action menu."
+    },
     "provider": {
       "edit": "Edit",
       "view": "View"
@@ -711,7 +726,9 @@
     "success": {
       "pruneExpiredShares": "Expired shares have been scheduled for deletion and will be processed in the background.",
       "shareExpired": "Share expired",
-      "shareExtended": "Share extended"
+      "shareExtended": "Share extended",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Allow chunked upload mode",
@@ -985,7 +1002,14 @@
   "share": {
     "button": {
       "expireNow": "Expire Now",
-      "extend": "Extend"
+      "extend": "Extend",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
+    },
+    "status": {
+      "pendingDeletion": "Pending Deletion"
     },
     "contains": {
       "count": "{value, plural, one {# file} other {{value} files}}"

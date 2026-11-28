@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, inject, defineExpose, computed } from 'vue'
-import { getAllShares, expireShare, extendShare, setDownloadLimit } from '../../api'
+import { ref, onMounted, onUnmounted, inject, defineExpose, computed } from 'vue'
+import { getAllShares, expireShare, extendShare, setDownloadLimit, requestShareDeletion, undoShareDeletion, deleteShareImmediately, purgeShare } from '../../api'
 import {
   SquareArrowOutUpRight,
   CalendarPlus,
@@ -9,11 +9,17 @@ import {
   MessageCircleQuestion,
   Rocket,
   Lock,
-  LockOpen
+  LockOpen,
+  Clock,
+  Trash2,
+  Undo2,
+  OctagonX,
+  ChevronDown
 } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { niceFileSize, niceDate, niceFileName, niceNumber } from '../../utils'
 import HelpTip from '../helpTip.vue'
+import ExtendShareModal from '../ExtendShareModal.vue'
 import { useTranslate } from '@tolgee/vue'
 
 const { t } = useTranslate()
@@ -28,10 +34,33 @@ const loadedShares = ref(false)
 const shares = ref([])
 const showDeletedShares = ref(false)
 const selectedUserId = ref(null)
+const extendModalShare = ref(null)
+const openDropdownId = ref(null)
+
+const activeShares = computed(() =>
+  shares.value.filter(s => s.status !== 'pending_deletion')
+)
+
+const pendingDeletionShares = computed(() =>
+  shares.value.filter(s => s.status === 'pending_deletion')
+)
+
+const toggleDropdown = (id) => {
+  openDropdownId.value = openDropdownId.value === id ? null : id
+}
+
+const closeDropdown = () => {
+  openDropdownId.value = null
+}
 
 onMounted(async () => {
   showDeletedShares.value = localStorage.getItem('allSharesShowDeleted') === 'true'
   loadShares()
+  document.addEventListener('click', closeDropdown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdown)
 })
 
 const loadShares = async () => {
@@ -50,15 +79,8 @@ const handleExpireShareClick = async (share) => {
     })
 }
 
-const handleExtendShareClick = async (share) => {
-  extendShare(share.id)
-    .then(() => {
-      toast.success(t.value('settings.success.shareExtended'))
-      loadShares()
-    })
-    .catch((error) => {
-      toast.error(t.value('settings.error.shareExtended'))
-    })
+const handleExtendShareClick = (share) => {
+  extendModalShare.value = share
 }
 
 const handleDownloadLimitChange = async (share) => {
@@ -86,16 +108,80 @@ const downloadShare = async (share) => {
   window.location.href = `/api/shares/${share.long_id}/download`
 }
 
+const enableDownloadButton = (share) => {
+  return !share.expired && !share.deleted && !share.pending_deletion
+}
+
 const enableExpireShareButton = (share) => {
-  return !share.expired && !share.deleted
+  return !share.expired && !share.deleted && !share.pending_deletion
 }
 
 const enableExtendShareButton = (share) => {
-  return !share.deleted
+  return !share.deleted && !share.pending_deletion
 }
 
-const enableDownloadButton = (share) => {
-  return !share.expired && !share.deleted
+const handleRequestDeletionClick = async (share) => {
+  const confirmed = confirm(`Place share "${share.name}" into pending deletion? The link will stop working immediately.`)
+  if (!confirmed) return
+  requestShareDeletion(share.id)
+    .then(() => {
+      toast.success('Share marked for deletion')
+      loadShares()
+    })
+    .catch((error) => {
+      toast.error('Failed to mark share for deletion')
+    })
+}
+
+const handleUndoDeletionClick = async (share) => {
+  undoShareDeletion(share.id)
+    .then(() => {
+      toast.success('Share deletion undone')
+      loadShares()
+    })
+    .catch((error) => {
+      toast.error('Failed to undo share deletion')
+    })
+}
+
+const handleDeleteImmediatelyClick = async (share) => {
+  const confirmation = prompt(
+    `Type DELETE (uppercase) to immediately remove all files for share "${share.name}".\n\nThis cannot be undone.`
+  )
+  if (confirmation === null) return  // user cancelled
+  if (confirmation !== 'DELETE') {
+    toast.error('Confirmation did not match — type DELETE in uppercase to confirm')
+    return
+  }
+  deleteShareImmediately(share.id, confirmation)
+    .then(() => {
+      toast.success('Share deleted immediately')
+      loadShares()
+    })
+    .catch((error) => {
+      toast.error(error.message || 'Failed to delete share')
+    })
+}
+
+const canDeleteImmediately = (share) => {
+  return share.pending_deletion || (share.expired && !share.deleted)
+}
+
+const handlePurgeShareClick = async (share) => {
+  const input = prompt(t.value('settings.pendingDeletion.confirmPrompt'))
+  if (input === null) return
+  if (input !== 'DELETE') {
+    toast.error(t.value('settings.pendingDeletion.confirmMismatch'))
+    return
+  }
+  purgeShare(share.id)
+    .then(() => {
+      toast.success('Share record removed')
+      loadShares()
+    })
+    .catch((e) => {
+      toast.error(e.message || 'Failed to remove share record')
+    })
 }
 
 const setShowDeletedShares = (value) => {
@@ -118,6 +204,13 @@ defineExpose({
 
 <template>
   <div>
+    <ExtendShareModal
+      v-if="extendModalShare"
+      :share="extendModalShare"
+      :is-admin="true"
+      @close="extendModalShare = null"
+      @extended="loadShares"
+    />
     <HelpTip id="download-limit-help-tip-all" :header="$t('settings.help.downloadLimit.title')">
       <p>
         {{ $t('settings.help.downloadLimit.description') }}
@@ -127,7 +220,7 @@ defineExpose({
       </p>
     </HelpTip>
 
-    <table v-if="shares.length > 0">
+    <table v-if="activeShares.length > 0">
       <thead>
         <tr>
           <th>{{ $t('settings.table.name') }}</th>
@@ -142,7 +235,7 @@ defineExpose({
         </tr>
       </thead>
       <tbody>
-        <tr v-for="share in shares" :key="share.id">
+        <tr v-for="share in activeShares" :key="share.id">
           <td width="1" style="white-space: nowrap">
             <div class="slide-text">
               <strong class="content">{{ share.name }}</strong>
@@ -230,40 +323,138 @@ defineExpose({
             </div>
           </td>
           <td width="1" style="white-space: nowrap">
-            <button
-              @click="handleExpireShareClick(share)"
-              class="clear-button"
-              :disabled="!enableExpireShareButton(share)"
-            >
-              <CalendarX2 />
-              {{ $t('share.button.expireNow') }}
-            </button>
-            <button
-              @click="handleExtendShareClick(share)"
-              class="secondary"
-              :disabled="!enableExtendShareButton(share)"
-            >
-              <CalendarPlus />
-              {{ $t('share.button.extend') }}
-            </button>
-            <button
-              @click="downloadShare(share)"
-              class="secondary icon-only"
-              title="Download all files"
-              :disabled="!enableDownloadButton(share)"
-            >
-              <HardDriveDownload style="margin-right: 0" />
-            </button>
+            <div class="actions-cell">
+              <div class="split-btn-group" :class="{ open: openDropdownId === share.id }" @click.stop>
+                <button
+                  class="split-btn-main clear-button"
+                  @click="handleExpireShareClick(share)"
+                  :disabled="!enableExpireShareButton(share)"
+                  :title="$t('share.button.expireNow')"
+                >
+                  <CalendarX2 />
+                  {{ $t('share.button.expireNow') }}
+                </button>
+                <button
+                  class="split-btn-chevron clear-button"
+                  @click="toggleDropdown(share.id)"
+                  title="More actions"
+                >
+                  <ChevronDown />
+                </button>
+                <div v-if="openDropdownId === share.id" class="action-dropdown">
+                  <button
+                    v-if="enableExtendShareButton(share)"
+                    class="dropdown-item"
+                    @click="handleExtendShareClick(share); closeDropdown()"
+                  >
+                    <CalendarPlus />
+                    {{ $t('share.button.extend') }}
+                  </button>
+                  <button
+                    v-if="!share.pending_deletion && !share.deleted"
+                    class="dropdown-item danger"
+                    @click="handleRequestDeletionClick(share); closeDropdown()"
+                  >
+                    <Trash2 />
+                    {{ $t('share.button.requestDeletion') }}
+                  </button>
+                  <button
+                    v-if="canDeleteImmediately(share)"
+                    class="dropdown-item danger"
+                    @click="handleDeleteImmediatelyClick(share); closeDropdown()"
+                  >
+                    <OctagonX />
+                    {{ $t('share.button.deleteImmediately') }}
+                  </button>
+                  <button
+                    v-if="share.deleted"
+                    class="dropdown-item danger"
+                    @click="handlePurgeShareClick(share); closeDropdown()"
+                  >
+                    <Trash2 />
+                    {{ $t('share.button.removeEntry') }}
+                  </button>
+                </div>
+              </div>
+              <button
+                class="secondary icon-only"
+                @click="downloadShare(share)"
+                :disabled="!enableDownloadButton(share)"
+                title="Download all files"
+              >
+                <HardDriveDownload style="margin-right: 0" />
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
-    <div v-else-if="loadedShares" class="center-message">
+    <div v-else-if="loadedShares && pendingDeletionShares.length === 0" class="center-message">
       <Rocket />
       <p>{{ $t('settings.allShares.noShares') }}</p>
     </div>
-    <div v-else class="center-message">
+    <div v-else-if="!loadedShares" class="center-message">
       <p>{{ $t('settings.loading') }}</p>
+    </div>
+
+    <!-- Pending Deletion Section -->
+    <div v-if="pendingDeletionShares.length > 0" class="pending-deletion-section">
+      <h4 class="pending-deletion-header">
+        <Clock />
+        {{ $t('settings.pendingDeletion.title') }}
+      </h4>
+      <p class="pending-deletion-description">{{ $t('settings.pendingDeletion.description') }}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t('settings.table.name') }}</th>
+            <th>{{ $t('settings.allShares.owner') }}</th>
+            <th>{{ $t('settings.table.files') }}</th>
+            <th>{{ $t('settings.pendingDeletion.requestedOn') }}</th>
+            <th>{{ $t('settings.table.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="share in pendingDeletionShares" :key="share.id" class="pending-deletion-row">
+            <td width="1" style="white-space: nowrap">
+              <div class="slide-text">
+                <strong class="content">{{ share.name }}</strong>
+              </div>
+              <span class="pending-deletion-badge">
+                <Clock />
+                {{ $t('share.status.pendingDeletion') }}
+                <span class="deletion-requester">({{ share.deletion_requested_by }})</span>
+              </span>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="owner-info">
+                <strong>{{ share.user_name }}</strong>
+                <small>{{ share.user_email }}</small>
+              </div>
+            </td>
+            <td style="vertical-align: top">
+              <h6 class="file-count">
+                {{ $t('share.files.count', { count: share.files.length, value: share.files.length }) }}
+              </h6>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="date">{{ niceDate(share.deletion_requested_at) }}</div>
+            </td>
+            <td width="1" style="white-space: nowrap">
+              <div class="actions-cell">
+                <button @click="handleUndoDeletionClick(share)" class="secondary">
+                  <Undo2 />
+                  {{ $t('share.button.undoDeletion') }}
+                </button>
+                <button @click="handleDeleteImmediatelyClick(share)" class="danger">
+                  <OctagonX />
+                  {{ $t('share.button.deleteImmediately') }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -311,11 +502,6 @@ defineExpose({
   .some-more {
     font-size: 0.7rem;
     color: var(--panel-section-text-color);
-    margin-left: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
@@ -492,6 +678,150 @@ td {
     width: 1rem;
     height: 1rem;
     margin-top: -2px;
+  }
+}
+
+.pending-deletion-section {
+  margin-top: 2rem;
+  border-top: 2px solid var(--panel-section-background-color-alt);
+  padding-top: 1rem;
+}
+
+.pending-deletion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--panel-section-text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.7;
+  }
+}
+
+.pending-deletion-description {
+  font-size: 0.8rem;
+  color: var(--panel-section-text-color);
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.pending-deletion-row {
+  opacity: 0.8;
+}
+
+.pending-deletion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--panel-section-text-color);
+  background: var(--panel-section-background-color-alt);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 4px;
+  opacity: 0.8;
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .deletion-requester {
+    opacity: 0.6;
+    font-style: italic;
+  }
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  // Suppress global button margin-right so gap alone controls spacing
+  button {
+    margin-right: 0 !important;
+  }
+}
+
+.split-btn-group {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+
+  .split-btn-main {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: 1px solid rgba(128, 128, 128, 0.25) !important;
+    margin-right: 0 !important;
+  }
+
+  .split-btn-chevron {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    padding: 0 7px !important;
+    min-width: unset !important;
+    margin-right: 0 !important;
+
+    svg {
+      width: 0.8rem;
+      height: 0.8rem;
+      margin: 0 !important;
+      transition: transform 0.15s;
+    }
+  }
+
+  &.open .split-btn-chevron svg {
+    transform: rotate(180deg);
+  }
+
+  .action-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 200;
+    background: var(--panel-section-background-color);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    min-width: 190px;
+    overflow: hidden;
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 14px;
+      background: none;
+      border: none;
+      border-radius: 0;
+      text-align: left;
+      font-size: 0.85rem;
+      color: var(--panel-section-text-color);
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 0;
+
+      &:hover {
+        background: var(--panel-section-background-color-alt);
+      }
+
+      &.danger {
+        color: #dc3545;
+        svg { color: #dc3545; }
+      }
+
+      svg {
+        width: 0.9rem;
+        height: 0.9rem;
+        flex-shrink: 0;
+      }
+    }
   }
 }
 </style>

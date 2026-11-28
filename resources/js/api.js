@@ -917,12 +917,13 @@ export const expireShare = async (id) => {
   return data.data.share
 }
 
-export const extendShare = async (id) => {
+export const extendShare = async (id, payload = {}) => {
   const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/extend`, {
     method: 'POST',
     headers: {
       ...addJsonHeader()
-    }
+    },
+    body: JSON.stringify(payload)
   })
   const data = await response.json()
   if (!response.ok) {
@@ -960,6 +961,63 @@ export const pruneExpiredShares = async () => {
     throw new Error(data.message)
   }
   return data.data.shares
+}
+
+export const requestShareDeletion = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/request-deletion`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const deleteShareImmediately = async (id, confirmation) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/delete-immediately`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    },
+    body: JSON.stringify({ confirmation })
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const undoShareDeletion = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}/undo-deletion`, {
+    method: 'POST',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data.share
+}
+
+export const purgeShare = async (id) => {
+  const response = await fetchWithAuth(`${apiUrl}/api/shares/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data
 }
 
 export const getShare = async (id) => {
