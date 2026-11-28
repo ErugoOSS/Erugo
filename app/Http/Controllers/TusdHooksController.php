@@ -17,7 +17,7 @@ class TusdHooksController extends Controller
      * tusd sends different hook types: pre-create, post-create, post-receive, post-finish, post-terminate
      * 
      * Security: This endpoint should only be called by the tusd process.
-     * We validate the request comes from localhost or internal Docker network IPs.
+     * We check the source IP and require the TUSD_HOOK_SECRET key.
      */
     public function handleHook(Request $request)
     {
@@ -46,15 +46,17 @@ class TusdHooksController extends Controller
             return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
         }
 
-        // Optional shared secret on top of the IP check. When TUSD_HOOK_SECRET
-        // is set, the request must also carry a matching Hook-Secret header.
-        $hookSecret = config('services.tusd.hook_secret');
-        if ($hookSecret) {
-            $providedSecret = $request->header('Hook-Secret');
-            if (!hash_equals($hookSecret, (string) $providedSecret)) {
-                Log::warning('tusd hook rejected: invalid Hook-Secret header');
-                return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
-            }
+        // The IP check alone is not enough, because Docker's port mapping can
+        // make outside clients arrive from a 172.x address. Every hook call
+        // must also carry TUSD_HOOK_SECRET. The bundled tusd sends it as the
+        // password in its hook URL (http://tusd:<key>@127.0.0.1/...), which
+        // reaches us as HTTP basic auth. A proxy can send a Hook-Secret header
+        // instead. With no key configured, every hook call is refused.
+        $hookSecret = (string) config('services.tusd.hook_secret');
+        $providedSecret = (string) ($request->getPassword() ?? $request->header('Hook-Secret'));
+        if ($hookSecret === '' || !hash_equals($hookSecret, $providedSecret)) {
+            Log::warning('tusd hook rejected: missing or invalid hook key');
+            return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
         }
 
         $payload = $request->all();
