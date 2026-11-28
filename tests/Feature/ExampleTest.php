@@ -16,6 +16,10 @@ class ExampleTest extends TestCase
     {
         $this->seed();
 
+        // The PHP test job doesn't build the frontend, so there is no Vite
+        // manifest. Render the page without it.
+        $this->withoutVite();
+
         $response = $this->get('/');
 
         $response->assertStatus(200);
