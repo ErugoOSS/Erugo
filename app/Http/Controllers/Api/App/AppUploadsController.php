@@ -154,7 +154,7 @@ class AppUploadsController extends Controller
         $completePath = storage_path('app/shares/' . $sharePath);
 
         if (!file_exists($completePath)) {
-            mkdir($completePath, 0777, true);
+            mkdir($completePath, 0750, true);
         }
 
         // Find files from upload sessions by TUS upload IDs
@@ -300,7 +300,7 @@ class AppUploadsController extends Controller
             // Verify the resolved path is within the share directory
             // Create parent directories first so realpath can resolve
             if (!file_exists($destPath)) {
-                mkdir($destPath, 0777, true);
+                mkdir($destPath, 0750, true);
             }
             $resolvedPath = realpath($destPath);
             $resolvedSharePath = realpath($completePath);

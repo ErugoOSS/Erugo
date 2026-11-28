@@ -102,7 +102,7 @@ class AuthController extends Controller
         Auth::logout();
 
         //clear the refresh_token cookie
-        $cookie = cookie('refresh_token', '', 0, null, null, app()->environment('production'), true);
+        $cookie = $this->refreshTokenCookie('', 0);
         return response()->json([
             'status' => 'success',
             'message' => 'Logout successful'
@@ -250,7 +250,7 @@ class AuthController extends Controller
 
         $twentyFourHours = 60 * 60 * 24;
         $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-        $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, false, true);
+        $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
 
         return response()->json([
             'status' => 'success',
@@ -263,6 +263,18 @@ class AuthController extends Controller
                 'liveshare_long_id' => $invite->liveshare->long_id,
             ]
         ])->withCookie($cookie);
+    }
+
+    /**
+     * The refresh_token cookie. It is marked Secure when the request came in
+     * over HTTPS, either directly or through a proxy listed in the trusted
+     * proxies setting. Over plain HTTP it is sent without the flag, because
+     * browsers drop Secure cookies set on an http:// page and login would
+     * stop working for installs that run without TLS on a LAN.
+     */
+    private function refreshTokenCookie(string $value, int $minutes)
+    {
+        return cookie('refresh_token', $value, $minutes, null, null, request()->isSecure(), true);
     }
 
     private function respondWithToken($user)
@@ -279,7 +291,7 @@ class AuthController extends Controller
         $twentyFourHours = 60 * 60 * 24;
         $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
 
-        $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, app()->environment('production'), true);
+        $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
 
         return response()->json([
             'status' => 'success',
@@ -363,7 +375,7 @@ class AuthController extends Controller
         if ($status === Password::PASSWORD_RESET) {
             $user = User::where('email', $request->email)->first();
             $refreshToken = Auth::setTTL($twentyFourHours)->tokenById($user->id);
-            $cookie = cookie('refresh_token', $refreshToken, $twentyFourHours, null, null, app()->environment('production'), true);
+            $cookie = $this->refreshTokenCookie($refreshToken, $twentyFourHours);
             return response()->json([
                 'status' => 'success',
                 'message' => 'Password reset successfully'

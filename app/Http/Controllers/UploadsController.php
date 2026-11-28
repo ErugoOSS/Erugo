@@ -380,7 +380,7 @@ class UploadsController extends Controller
       Auth::logout();
       $user->delete();
 
-      $cookie = cookie('refresh_token', '', 0, null, null, false, true);
+      $cookie = cookie('refresh_token', '', 0, null, null, $request->isSecure(), true);
       return response()->json([
         'status' => 'success',
         'message' => 'Share created',
