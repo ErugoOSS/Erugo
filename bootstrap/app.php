@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Middleware\TrustProxies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Middleware\TrustProxies as IlluminateTrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -23,8 +27,29 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: [
             'refresh_token',
         ]);
+
+        $middleware->replace(IlluminateTrustProxies::class, TrustProxies::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {
+            return $request->is('api/*') || $request->expectsJson();
+        });
+
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (!($request->is('api/*') || $request->expectsJson())) {
+                return null;
+            }
+
+            $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
+            $message = 'Too many attempts. Please try again later.';
+            if ($retryAfter !== null) {
+                $message = "Too many attempts. Please try again in {$retryAfter} seconds.";
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $message,
+            ], 429, $e->getHeaders());
+        });
     })
     ->create();

@@ -37,6 +37,7 @@ final class SettingAccess
         'application_url' => SettingVisibility::Admin,
         'default_language' => SettingVisibility::Public,
         'show_language_selector' => SettingVisibility::Public,
+        'trusted_proxies' => SettingVisibility::Admin,
 
         // system.shares
         'max_expiry_time' => SettingVisibility::Public,

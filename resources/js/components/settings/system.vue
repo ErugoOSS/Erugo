@@ -18,7 +18,8 @@ import {
   Database,
   Download,
   Loader2,
-  Key
+  Key,
+  AlertTriangle
 } from 'lucide-vue-next'
 import {
   getSettingsByGroup,
@@ -31,7 +32,8 @@ import {
   getBackups,
   createBackup,
   downloadBackup,
-  deleteBackup
+  deleteBackup,
+  getProxyStatus
 } from '../../api'
 import HelpTip from '../helpTip.vue'
 
@@ -51,6 +53,7 @@ const availableProviderTypes = ref([])
 const toast = useToast()
 const confirmDialog = useConfirmDialog()
 const onLocalhost = ref(false)
+const proxyStatus = ref(null)
 
 const settings = ref({
   application_name: '',
@@ -74,6 +77,7 @@ const settings = ref({
   self_registration_enabled: false,
   self_registration_allow_any_domain: true,
   self_registration_allowed_domains: '',
+  trusted_proxies: '',
   licence: ''
 })
 
@@ -249,8 +253,35 @@ onMounted(async () => {
   await loadSettings()
   await loadAuthProviders()
   await loadBackups()
+  await loadProxyStatus()
   onLocalhost.value = window.location.hostname === 'localhost'
 })
+
+const loadProxyStatus = async () => {
+  try {
+    proxyStatus.value = await getProxyStatus()
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const trustDetectedProxy = () => {
+  const peer = proxyStatus.value?.observed_peer
+  if (!peer) {
+    return
+  }
+
+  const existing = (settings.value.trusted_proxies || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length)
+
+  if (!existing.includes(peer)) {
+    existing.push(peer)
+  }
+
+  settings.value.trusted_proxies = existing.join(',')
+}
 
 const loadSettings = async () => {
   try {
@@ -600,6 +631,35 @@ const handleDeleteAuthProvider = async (id) => {
                     <label for="show_language_selector">{{ $t('settings.system.show_language_selector') }}</label>
                   </div>
                 </div>
+
+                <div class="setting-group-body-item">
+                  <label for="trusted_proxies">{{ $t('settings.system.trusted_proxies') }}</label>
+                  <input
+                    type="text"
+                    id="trusted_proxies"
+                    v-model="settings.trusted_proxies"
+                    :placeholder="$t('settings.system.trusted_proxies_placeholder')"
+                  />
+                  <div class="proxy-warning" v-if="proxyStatus?.untrusted_forwarded_headers">
+                    <AlertTriangle />
+                    <div>
+                      <p>
+                        {{
+                          t('settings.system.trusted_proxies_untrusted_warning', {
+                            peer: proxyStatus.observed_peer
+                          })
+                        }}
+                      </p>
+                      <button type="button" @click="trustDetectedProxy">
+                        {{
+                          t('settings.system.trusted_proxies_trust_detected', {
+                            peer: proxyStatus.observed_peer
+                          })
+                        }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -619,6 +679,9 @@ const handleDeleteAuthProvider = async (id) => {
 
               <h6>{{ $t('settings.system.show_language_selector') }}</h6>
               <p>{{ $t('settings.system.show_language_selector_description') }}</p>
+
+              <h6>{{ $t('settings.system.trusted_proxies') }}</h6>
+              <p>{{ $t('settings.system.trusted_proxies_description') }}</p>
             </div>
           </div>
         </div>
@@ -1315,6 +1378,34 @@ const handleDeleteAuthProvider = async (id) => {
 </template>
 
 <style scoped lang="scss">
+.proxy-warning {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--panel-border-radius);
+  background: var(--panel-section-background-color-alt);
+  border-left: 3px solid #e0a300;
+
+  svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    stroke: #e0a300;
+  }
+
+  p {
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    color: var(--panel-text-color-alt);
+  }
+
+  button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
 .auth-provider {
   margin-bottom: 8px;
   .icon {

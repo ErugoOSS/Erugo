@@ -33,22 +33,22 @@ use App\Http\Controllers\StatsController;
 */
 Route::group(['prefix' => 'auth'], function () {
     // Public auth routes
-    Route::post('login', 'AppAuthController@login')->name('app.auth.login');
+    Route::post('login', 'AppAuthController@login')->name('app.auth.login')->middleware('throttle:auth-login');
     Route::post('refresh', 'AppAuthController@refresh')->name('app.auth.refresh');
     Route::post('logout', 'AppAuthController@logout')->name('app.auth.logout');
-    Route::post('forgot-password', 'AppAuthController@forgotPassword')->name('app.auth.forgotPassword');
-    Route::post('reset-password', 'AppAuthController@resetPassword')->name('app.auth.resetPassword');
-    
+    Route::post('forgot-password', 'AppAuthController@forgotPassword')->name('app.auth.forgotPassword')->middleware('throttle:auth-forgot-password');
+    Route::post('reset-password', 'AppAuthController@resetPassword')->name('app.auth.resetPassword')->middleware('throttle:auth-reset-password');
+
     // Self-registration routes
-    Route::post('register', 'AppAuthController@register')->name('app.auth.register');
-    Route::post('verify-email', 'AppAuthController@verifyEmail')->name('app.auth.verifyEmail');
-    Route::post('resend-verification', 'AppAuthController@resendVerification')->name('app.auth.resendVerification');
+    Route::post('register', 'AppAuthController@register')->name('app.auth.register')->middleware('throttle:auth-register');
+    Route::post('verify-email', 'AppAuthController@verifyEmail')->name('app.auth.verifyEmail')->middleware('throttle:auth-verify-email');
+    Route::post('resend-verification', 'AppAuthController@resendVerification')->name('app.auth.resendVerification')->middleware('throttle:auth-resend-verification');
     Route::get('registration-settings', 'AppAuthController@registrationSettings')->name('app.auth.registrationSettings');
-    
+
     // External auth routes (OAuth for native apps)
-    Route::post('external/initiate', 'AppAuthController@externalInitiate')->name('app.auth.external.initiate');
-    Route::post('external/complete', 'AppAuthController@externalComplete')->name('app.auth.external.complete');
-    
+    Route::post('external/initiate', 'AppAuthController@externalInitiate')->name('app.auth.external.initiate')->middleware('throttle:auth-external');
+    Route::post('external/complete', 'AppAuthController@externalComplete')->name('app.auth.external.complete')->middleware('throttle:auth-external');
+
     // Link external provider (requires authentication)
     Route::post('external/link', 'AppAuthController@externalLink')
         ->middleware('auth')
@@ -236,6 +236,7 @@ Route::group(['prefix' => 'liveshares', 'middleware' => ['auth']], function () {
 Route::get('/liveshares/invite/{token}', 'AppLivesharesController@getInviteInfo')
     ->name('app.liveshares.invites.info');
 Route::post('/liveshares/invite/{token}/register', 'AppAuthController@registerViaInvite')
+    ->middleware('throttle:auth-register')
     ->name('app.liveshares.invites.register');
 Route::get('/liveshares/{longId}/avatar', 'AppLivesharesController@avatar')
     ->name('app.liveshares.avatar');

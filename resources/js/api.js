@@ -800,6 +800,20 @@ export const getFaviconStatus = async () => {
   return data.data
 }
 
+export const getProxyStatus = async () => {
+  const response = await fetchWithAuth(`${apiUrl}/api/settings/proxy-status`, {
+    method: 'GET',
+    headers: {
+      ...addJsonHeader()
+    }
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message)
+  }
+  return data.data
+}
+
 export const installCustomTheme = async (name, file) => {
   const formData = new FormData()
   formData.append('name', name)

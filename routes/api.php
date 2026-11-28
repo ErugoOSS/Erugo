@@ -31,7 +31,7 @@ Route::group([], function ($router) {
 
     Route::post('/setup', [UsersController::class, 'createFirstUser'])
         ->name('users.createFirstUser')
-        ->middleware(NoUsers::class);
+        ->middleware([NoUsers::class, 'throttle:auth-setup']);
 
     Route::get('/health', function () {
         return response()->json([
@@ -45,16 +45,16 @@ Route::group([], function ($router) {
 
     //auth
     Route::group(['prefix' => 'auth'], function ($router) {
-        Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+        Route::post('login', [AuthController::class, 'login'])->name('auth.login')->middleware('throttle:auth-login');
         Route::post('refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
         Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
-        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword');
-        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword');
-        
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgotPassword')->middleware('throttle:auth-forgot-password');
+        Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('auth.resetPassword')->middleware('throttle:auth-reset-password');
+
         // Self-registration routes
-        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register');
-        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail');
-        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification');
+        Route::post('register', [SelfRegistrationController::class, 'register'])->name('auth.register')->middleware('throttle:auth-register');
+        Route::post('verify-email', [SelfRegistrationController::class, 'verifyEmail'])->name('auth.verifyEmail')->middleware('throttle:auth-verify-email');
+        Route::post('resend-verification', [SelfRegistrationController::class, 'resendCode'])->name('auth.resendVerification')->middleware('throttle:auth-resend-verification');
         Route::get('registration-settings', [SelfRegistrationController::class, 'getSettings'])->name('auth.registrationSettings');
     });
 
@@ -95,6 +95,8 @@ Route::group([], function ($router) {
         Route::post('/favicon', [SettingsController::class, 'writeFavicon'])->name('settings.writeFavicon');
         Route::delete('/favicon', [SettingsController::class, 'deleteFavicon'])->name('settings.deleteFavicon');
         Route::get('/favicon/status', [SettingsController::class, 'hasFavicon'])->name('settings.hasFavicon');
+        //reverse proxy configuration status (must precede the /settings/{key} route)
+        Route::get('/proxy-status', [SettingsController::class, 'proxyStatus'])->name('settings.proxyStatus');
         //list background images
         Route::get('/backgrounds', [BackgroundsController::class, 'list'])->name('backgrounds.list');
         //upload a background image
@@ -269,6 +271,7 @@ Route::group([], function ($router) {
     Route::get('/liveshares/invite/{token}', [LivesharesController::class, 'getInviteInfo'])
         ->name('liveshares.invites.info');
     Route::post('/liveshares/invite/{token}/register', [AuthController::class, 'registerViaInvite'])
+        ->middleware('throttle:auth-register')
         ->name('liveshares.invites.register');
 
     // Liveshare file download (outside auth middleware to allow ?token= query param auth)

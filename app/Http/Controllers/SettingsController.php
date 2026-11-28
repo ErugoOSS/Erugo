@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use App\Settings\SettingAccess;
+use App\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -336,6 +338,26 @@ class SettingsController extends Controller
             'data' => [
                 'has_custom_favicon' => $hasCustomFavicon,
                 'filename' => $filename,
+            ]
+        ]);
+    }
+
+    /**
+     * Report whether Erugo is receiving forwarded-IP headers from a peer that is not
+     * covered by the trusted_proxies setting. When it is, rate limiting and download
+     * logs are keyed on the peer address rather than the real client.
+     */
+    public function proxyStatus()
+    {
+        $detected = Cache::get(TrustProxies::MISCONFIGURATION_CACHE_KEY);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'trusted_proxies' => (string) (app(SettingsService::class)->get('trusted_proxies') ?? ''),
+                'untrusted_forwarded_headers' => is_array($detected),
+                'observed_peer' => $detected['peer'] ?? null,
+                'observed_at' => $detected['detected_at'] ?? null,
             ]
         ]);
     }

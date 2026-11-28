@@ -103,6 +103,14 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
+                'key' => 'trusted_proxies',
+                'value' => '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7',
+                'previous_value' => null,
+                'group' => 'system',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
                 'key' => 'login_message',
                 'value' => 'Login to your account to get started.',
                 'previous_value' => null,
