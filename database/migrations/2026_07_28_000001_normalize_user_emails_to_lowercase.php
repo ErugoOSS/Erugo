@@ -147,12 +147,27 @@ return new class extends Migration
             $lines[] = '';
         }
 
-        file_put_contents($logPath, implode("\n", $lines));
+        // The database changes are already made at this point, so a report
+        // that can't be written must not fail the migration.
+        $reportWritten = @file_put_contents($logPath, implode("\n", $lines) . "\n", FILE_APPEND) !== false;
 
-        // Also send a warning to the standard log so it appears in monitoring
+        // Also send a warning to the standard log so it appears in monitoring,
+        // with one line per account so nothing depends on the report file.
         Log::warning(
             'Email normalization: ' . count($quarantined) . ' account(s) quarantined due to case collisions. ' .
-            'Review: ' . $logPath
+            ($reportWritten ? 'Review: ' . $logPath : 'The report file could not be written.')
         );
+        foreach ($quarantined as $q) {
+            Log::warning('Email normalization: deactivated user ' . $q['id'] . ' (' . $q['original_email'] . '), ' .
+                'which clashed with user ' . $q['kept_id'] . ' <' . $q['kept_email'] . '>. ' .
+                'Its email now ends in __dup_' . $q['id'] . '.');
+        }
+
+        // Migrations run from the container's start script, so print a short
+        // notice there too where an admin watching docker logs will see it.
+        if (app()->runningInConsole() && !app()->runningUnitTests()) {
+            fwrite(STDOUT, 'Email normalization: ' . count($quarantined) . ' account(s) with clashing email case were deactivated. ' .
+                'See ' . ($reportWritten ? $logPath : 'storage/logs/laravel.log') . PHP_EOL);
+        }
     }
 };

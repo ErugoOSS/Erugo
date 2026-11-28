@@ -72,6 +72,8 @@ class AppUserController extends Controller
             ], 401);
         }
 
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'unique:users,email,' . $user->id],

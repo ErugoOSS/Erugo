@@ -191,6 +191,8 @@ class AuthController extends Controller
             ], 410);
         }
 
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],

@@ -100,6 +100,8 @@ class UsersController extends Controller
 
     $user = Auth::user();
 
+    User::normalizeRequestEmail($request);
+
     $validator = Validator::make($request->all(), [
       'password' => ['sometimes', 'confirmed', Password::min(8)],
       'current_password' => [
@@ -253,6 +255,8 @@ class UsersController extends Controller
         404
       );
     }
+
+    User::normalizeRequestEmail($request);
 
     $validator = Validator::make($request->all(), [
       'password' => ['confirmed', Password::min(8)],
@@ -444,6 +448,8 @@ class UsersController extends Controller
   //create the first user
   public function createFirstUser(Request $request)
   {
+    User::normalizeRequestEmail($request);
+
     $validator = Validator::make($request->all(), [
       'password' => ['required', 'confirmed', Password::min(8)],
       'email' => ['required', 'email', 'unique:users,email'],

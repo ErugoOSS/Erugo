@@ -49,6 +49,8 @@ class AppAuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -170,6 +172,8 @@ class AppAuthController extends Controller
      */
     public function forgotPassword(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
         ]);
@@ -209,6 +213,8 @@ class AppAuthController extends Controller
      */
     public function resetPassword(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'token' => 'required|string',
             'email' => 'required|string|email',
@@ -264,6 +270,8 @@ class AppAuthController extends Controller
                 'message' => 'Self-registration is not enabled'
             ], 403);
         }
+
+        User::normalizeRequestEmail($request);
 
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'unique:users,email'],
@@ -359,6 +367,8 @@ class AppAuthController extends Controller
      */
     public function verifyEmail(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
             'code' => ['required', 'string', 'size:6'],
@@ -425,6 +435,8 @@ class AppAuthController extends Controller
      */
     public function resendVerification(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
         ]);
@@ -494,6 +506,8 @@ class AppAuthController extends Controller
                 'message' => $message
             ], 410);
         }
+
+        User::normalizeRequestEmail($request);
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
@@ -847,13 +861,13 @@ class AppAuthController extends Controller
             $user = null;
 
             if ($provider->trust_email) {
-                $user = User::where('email', $authProviderUser->email)->first();
+                $user = User::where('email', User::normalizeEmail($authProviderUser->email))->first();
             }
 
             // If no user found and allow_registration is enabled, create a new user
             if (!$user && $provider->allow_registration) {
                 // Check if email is already taken
-                $existingUser = User::where('email', $authProviderUser->email)->first();
+                $existingUser = User::where('email', User::normalizeEmail($authProviderUser->email))->first();
                 if ($existingUser) {
                     $authState->delete();
                     return response()->json([
@@ -1007,7 +1021,7 @@ class AppAuthController extends Controller
     {
         $user = User::createAccount([
             'name' => $authProviderUser->name,
-            'email' => $authProviderUser->email,
+            'email' => User::normalizeEmail($authProviderUser->email),
             'password' => bcrypt(bin2hex(random_bytes(32))),
         ], [
             'admin' => false,

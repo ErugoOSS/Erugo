@@ -55,6 +55,8 @@ class AppReverseSharesController extends Controller
             ], 400);
         }
 
+        User::normalizeRequestEmail($request, 'recipient_email');
+
         $validator = Validator::make($request->all(), [
             'recipient_name' => ['required', 'string', 'max:255'],
             'recipient_email' => ['required', 'email', 'max:255'],
