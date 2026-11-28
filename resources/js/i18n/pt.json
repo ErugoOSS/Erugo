@@ -623,7 +623,9 @@
         "unique_downloaders_description": "Contagem de endereços IP únicos que descarregaram partilhas.",
         "unique_downloaders_title": "Descarregadores únicos",
         "users_description": "Visão geral das contas de utilizador e dos seus níveis de atividade.",
-        "users_title": "Estatísticas dos utilizadores"
+        "users_title": "Estatísticas dos utilizadores",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "A carregar estatísticas...",
       "nav": {
@@ -653,7 +655,12 @@
         "of_disk": "do disco",
         "share_storage": "Partilhar armazenamento",
         "title": "Visão geral do armazenamento",
-        "used": "utilizado"
+        "used": "utilizado",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Ativar",
@@ -676,6 +683,8 @@
       "allow_chunked_uploads_description": "O modo de carregamento em blocos divide os ficheiros em segmentos mais pequenos que são transferidos sequencialmente. Embora ligeiramente mais lento do que o carregamento direto para ficheiros mais pequenos, este método proporciona maior estabilidade e fiabilidade na transferência de ficheiros grandes. Os carregamentos fragmentados suportam o acompanhamento do progresso e permitem aos utilizadores fazer uma pausa e retomar manualmente as transferências, o que o torna ideal para ficheiros com mais de 100 MB ou quando se utilizam ligações de rede instáveis.",
       "allow_direct_uploads": "Permitir o modo de carregamento direto",
       "allow_direct_uploads_description": "O modo de carregamento direto transmite ficheiros num pedido único e ininterrupto. Embora este método ofereça as velocidades de transferência mais rápidas para a maioria dos ficheiros, os ficheiros extremamente grandes podem causar problemas de estabilidade ou tempos limite. Para um desempenho ótimo com ficheiros com mais de 100 MB, os carregamentos divididos podem ser uma melhor opção.",
+      "allow_file_replacement": "Permitir substituição de arquivo",
+      "allow_file_replacement_description": "Quando ativado, os utilizadores podem substituir o ficheiro numa partilha de ficheiro único sem criar uma nova partilha. Desativar para cenários de auditoria onde os ficheiros não devem ser alterados após a partilha.",
       "allow_reverse_shares": "Permitir a partilha inversa",
       "allow_reverse_shares_description": "Determina se os seus utilizadores registados devem ter permissão para enviar pedidos de partilha inversa. Estes pedidos fornecem a indivíduos externos um passe de carregamento único, permitindo-lhes entregar ficheiros diretamente ao utilizador registado que iniciou o pedido.\n\n\n\n\n",
       "application_name": "Nome da Aplicação",

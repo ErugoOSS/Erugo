@@ -644,7 +644,9 @@
         "unique_downloaders_description": "Nombre d'adresses IP uniques ayant téléchargé des partages.",
         "unique_downloaders_title": "Téléchargeurs uniques",
         "users_description": "Vue d'ensemble des comptes d'utilisateurs et de leurs niveaux d'activité.",
-        "users_title": "Statistiques sur les utilisateurs"
+        "users_title": "Statistiques sur les utilisateurs",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Chargement des statistiques...",
       "nav": {
@@ -674,7 +676,12 @@
         "of_disk": "de disque",
         "share_storage": "Stockage utilisé par les partages\n",
         "title": "Aperçu du stockage",
-        "used": "utilisé(s)"
+        "used": "utilisé(s)",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Actif",
@@ -697,6 +704,8 @@
       "allow_chunked_uploads_description": "Le mode de téléchargement fragmenté, ou encore \"en morceaux\", divise les fichiers en segments plus petits, transférés séquentiellement. Bien que légèrement plus lente que le téléchargement direct pour les fichiers plus petits, cette méthode offre une stabilité et une fiabilité accrues lors du transfert de fichiers volumineux. Le téléchargement fragmenté prend en charge le suivi de la progression et permet aux utilisateurs de suspendre et de reprendre manuellement les transferts, ce qui est idéal pour les fichiers de plus de 100 Mo ou en cas de connexions réseau instables.",
       "allow_direct_uploads": "Autoriser le mode téléchargement direct",
       "allow_direct_uploads_description": "Le mode de téléchargement direct transmet les fichiers en une seule demande ininterrompue. Bien que cette méthode offre les vitesses de transfert les plus rapides pour la plupart des fichiers, les fichiers très volumineux peuvent entraîner des problèmes de stabilité ou des dépassements de délai. Pour des performances optimales avec des fichiers de plus de 100 Mo, il est préférable d'opter pour des téléchargements par morceaux.",
+      "allow_file_replacement": "Autoriser le remplacement de fichier",
+      "allow_file_replacement_description": "Lorsqu'activé, les utilisateurs peuvent remplacer le fichier dans un partage à fichier unique sans créer un nouveau partage. Désactiver pour les scénarios d'audit où les fichiers ne doivent pas changer après le partage.",
       "allow_reverse_shares": "Autoriser les partages inversés",
       "allow_reverse_shares_description": "Détermine si vos utilisateurs enregistrés doivent être autorisés à envoyer des demandes de partage inversé. Ces demandes permettent à des personnes externes d'obtenir une autorisation de téléchargement unique, ce qui leur permet de livrer des fichiers directement à l'utilisateur enregistré qui a initié la demande.",
       "application_name": "Nom de l'application",
