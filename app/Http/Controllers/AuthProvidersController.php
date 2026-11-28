@@ -169,13 +169,11 @@ class AuthProvidersController extends Controller
         $this->saveProvider($provider);
       }
     } catch (\Exception $e) {
-      // If any save operation fails, return error response
+      // If any save operation fails, log the details and return a generic error
+      \Log::error('Error saving auth provider: ' . $e->getMessage());
       return response()->json([
         'status' => 'error',
         'message' => 'Error saving provider',
-        'data' => [
-          'error' => $e->getMessage()
-        ]
       ], 500);
     }
 

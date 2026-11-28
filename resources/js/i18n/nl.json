@@ -547,7 +547,8 @@
     },
     "close": "Sluit",
     "confirm": {
-      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken."
+      "pruneExpiredShares": "Weet je zeker dat je verlopen aandelen wilt verwijderen? Het is niet mogelijk om deze bewerking ongedaan te maken.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informatie over uw Erugo installatie",
@@ -588,7 +589,9 @@
     "error": {
       "pruneExpiredShares": "Kan verwijdering van verlopen aandelen niet plannen!",
       "shareExpired": "Delen niet verlopen",
-      "shareExtended": "Niet gelukt om aandeel uit te breiden"
+      "shareExtended": "Niet gelukt om aandeel uit te breiden",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -605,6 +608,18 @@
     },
     "loading": "Aandelen uploaden...",
     "noShares": "Er zijn geen aandelen. Maak er een!",
+    "pendingDeletion": {
+      "title": "Verwijdering in behandeling",
+      "description": "Voor de volgende shares is verwijdering aangevraagd. U kunt dit ongedaan maken voordat ze permanent worden verwijderd.",
+      "requestedOn": "Aangevraagd op",
+      "deleteAll": "Alles definitief verwijderen",
+      "confirmPrompt": "Typ DELETE (hoofdletters) om alle wachtende shares en hun bestanden permanent te verwijderen. Dit kan niet ongedaan worden gemaakt.",
+      "confirmMismatch": "Bevestiging komt niet overeen — u moet DELETE exact in hoofdletters typen."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 verlopen share} other {# verlopen shares}}",
+      "notice": "Deze shares zijn verlopen en hun bestanden staan nog steeds op schijf. Om ze te verwijderen, selecteer 'Verwijdering aanvragen' in het actiemenu van de share."
+    },
     "provider": {
       "edit": "Bewerk",
       "view": "Bekijk"
@@ -665,7 +680,9 @@
         "unique_downloaders_description": "Aantal unieke IP-adressen die aandelen hebben gedownload.",
         "unique_downloaders_title": "Unieke downloaders",
         "users_description": "Overzicht van gebruikersaccounts en hun activiteitsniveaus.",
-        "users_title": "Gebruikersstatistieken"
+        "users_title": "Gebruikersstatistieken",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "Statistieken worden geladen...",
       "nav": {
@@ -695,7 +712,12 @@
         "of_disk": "van schijf",
         "share_storage": "Opslag delen",
         "title": "Overzicht opslag",
-        "used": "gebruikt"
+        "used": "gebruikt",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Actief",
@@ -711,13 +733,17 @@
     "success": {
       "pruneExpiredShares": "Vervallen aandelen zijn gemarkeerd voor verwijdering en worden op de achtergrond verwerkt.",
       "shareExpired": "Aandeel verlopen",
-      "shareExtended": "Aandeel uitgebreid"
+      "shareExtended": "Aandeel uitgebreid",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Opgedeelde bestands upload toestaan",
       "allow_chunked_uploads_description": "De modus Chunked upload breekt bestanden op in kleinere segmenten die opeenvolgend worden overgedragen. Hoewel deze methode iets trager is dan directe upload voor kleinere bestanden, biedt ze meer stabiliteit en betrouwbaarheid bij de overdracht van grote bestanden. Chunked uploads ondersteunen het bijhouden van de voortgang en stellen gebruikers in staat om overdrachten handmatig te pauzeren en te hervatten, waardoor het ideaal is voor bestanden van meer dan 100MB of bij gebruik van onstabiele netwerkverbindingen.",
       "allow_direct_uploads": "Directe uploadmodus toestaan",
       "allow_direct_uploads_description": "De directe uploadmodus verzendt bestanden in één enkele, ononderbroken aanvraag. Hoewel deze methode de snelste overdrachtsnelheden biedt voor de meeste bestanden, kunnen extreem grote bestanden stabiliteitsproblemen of time-outs veroorzaken. Voor optimale prestaties met bestanden die groter zijn dan 100MB, kunnen chunked uploads een betere optie zijn.",
+      "allow_file_replacement": "Bestandsvervanging toestaan",
+      "allow_file_replacement_description": "Indien ingeschakeld kunnen gebruikers het bestand in een eenbestandsdeling vervangen zonder een nieuwe deling te maken. Schakel dit uit voor auditscenario's waarbij bestanden na het delen niet mogen worden gewijzigd.",
       "allow_reverse_shares": "Delen in omgekeerde richting toestaan",
       "allow_reverse_shares_description": "Bepaalt of je geregistreerde gebruikers toestemming moeten hebben om reverse share verzoeken te versturen. Deze verzoeken voorzien externe personen van een eenmalige upload pass, waardoor ze bestanden direct kunnen afleveren bij de geregistreerde gebruiker die het verzoek heeft geïnitieerd.\n\n\n\n\n",
       "application_name": "Naam toepassing",
@@ -990,7 +1016,11 @@
   "share": {
     "button": {
       "expireNow": "Nu verlopen",
-      "extend": "Verleng"
+      "extend": "Verleng",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Bevat: # bestand} other {Bevat: {value} bestanden}}"
@@ -1016,7 +1046,10 @@
     },
     "not_found": "Het aandeel dat u zoekt is niet gevonden. Mogelijk moet u inloggen om het te zien.",
     "passwordNotProtected": "Open",
-    "passwordProtected": "Wachtwoord beveiligd"
+    "passwordProtected": "Wachtwoord beveiligd",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Totale grootte",
   "upload": {

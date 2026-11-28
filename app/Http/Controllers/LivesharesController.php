@@ -645,7 +645,7 @@ class LivesharesController extends Controller
         // Create the liveshare storage directory
         $completePath = storage_path('app/liveshares/' . $liveshare->id);
         if (!file_exists($completePath)) {
-            mkdir($completePath, 0777, true);
+            mkdir($completePath, 0750, true);
         }
 
         $createdFiles = [];

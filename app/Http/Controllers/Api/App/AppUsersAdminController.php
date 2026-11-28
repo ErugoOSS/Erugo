@@ -11,6 +11,7 @@ use App\Models\Download;
 use App\Models\File;
 use App\Models\ReverseShareInvite;
 use App\Models\User;
+use App\Services\PasswordTokens;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -101,7 +102,7 @@ class AppUsersAdminController extends Controller
             }
 
             // Send account creation email with password reset token
-            $token = PasswordFacade::createToken($user);
+            $token = PasswordTokens::createSetupToken($user);
             sendEmail::dispatch($user->email, accountCreatedMail::class, ['token' => $token, 'user' => $user]);
 
             return response()->json([
@@ -225,6 +226,9 @@ class AppUsersAdminController extends Controller
 
             // Clean up all the user's data (shares, files, downloads)
             $this->cleanupUserData($user);
+
+            // Drop any reset or welcome tokens left for this address
+            PasswordTokens::forget($user->email);
 
             $user->delete();
 

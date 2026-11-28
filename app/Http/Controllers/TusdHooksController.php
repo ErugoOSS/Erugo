@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Models\File;
 use App\Models\UploadSession;
 use App\Utils\FileHelper;
@@ -44,6 +45,17 @@ class TusdHooksController extends Controller
                 'ip' => $clientIp
             ]);
             return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
+        }
+
+        // Optional shared secret on top of the IP check. When TUSD_HOOK_SECRET
+        // is set, the request must also carry a matching Hook-Secret header.
+        $hookSecret = config('services.tusd.hook_secret');
+        if ($hookSecret) {
+            $providedSecret = $request->header('Hook-Secret');
+            if (!hash_equals($hookSecret, (string) $providedSecret)) {
+                Log::warning('tusd hook rejected: invalid Hook-Secret header');
+                return response()->json(['ok' => false, 'message' => 'Forbidden'], 403);
+            }
         }
 
         $payload = $request->all();
@@ -166,7 +178,7 @@ class TusdHooksController extends Controller
 
             return response()->json([
                 'ok' => false,
-                'message' => 'Unauthorized: ' . $e->getMessage()
+                'message' => 'Unauthorized'
             ], 401);
         }
     }
@@ -321,11 +333,12 @@ class TusdHooksController extends Controller
 
             // Create file record
             $file = File::create([
-                'name' => $sanitizedFilename,
+                'name'          => $sanitizedFilename,
                 'original_name' => $filename,
-                'type' => $filetype,
-                'size' => $filesize,
-                'temp_path' => 'uploads/' . $uploadId // Path relative to storage/app
+                'type'          => $filetype,
+                'size'          => $filesize,
+                'temp_path'     => 'uploads/' . $uploadId, // Path relative to storage/app
+                'storage_id'    => Str::uuid()->toString(),
             ]);
 
             // Update session
@@ -441,7 +454,7 @@ class TusdHooksController extends Controller
                 $resolvedExtractDir = realpath($extractDir);
                 
                 if ($resolvedPath === false || $resolvedExtractDir === false ||
-                    strpos($resolvedPath, $resolvedExtractDir) !== 0) {
+                    ($resolvedPath !== $resolvedExtractDir && strpos($resolvedPath, $resolvedExtractDir . DIRECTORY_SEPARATOR) !== 0)) {
                     Log::warning('tusd post-finish: Path traversal attempt in bundle', [
                         'upload_id' => $uploadId,
                         'file_path' => $filePath,
@@ -462,11 +475,12 @@ class TusdHooksController extends Controller
 
                 // Create file record - store relative path for bundle files
                 $file = File::create([
-                    'name' => $sanitizedFilename,
+                    'name'          => $sanitizedFilename,
                     'original_name' => $fileInfo['originalName'],
-                    'type' => $fileInfo['type'] ?? 'application/octet-stream',
-                    'size' => $fileInfo['size'],
-                    'temp_path' => 'uploads/' . $uploadId . '_extracted/' . $safePath
+                    'type'          => $fileInfo['type'] ?? 'application/octet-stream',
+                    'size'          => $fileInfo['size'],
+                    'temp_path'     => 'uploads/' . $uploadId . '_extracted/' . $safePath,
+                    'storage_id'    => Str::uuid()->toString(),
                 ]);
 
                 $fileIds[] = $file->id;

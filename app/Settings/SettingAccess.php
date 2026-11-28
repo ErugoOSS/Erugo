@@ -51,6 +51,8 @@ final class SettingAccess
         'allow_direct_uploads' => SettingVisibility::Public,
         'allow_chunked_uploads' => SettingVisibility::Public,
         'allow_reverse_shares' => SettingVisibility::Public,
+        // Read by My Shares to show the Replace file button to share owners.
+        'allow_file_replacement' => SettingVisibility::Public,
         'share_url_mode' => SettingVisibility::Admin,
         'share_url_pattern' => SettingVisibility::Admin,
 

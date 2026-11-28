@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\Setting;
 use App\Models\ReverseShareInvite;
 use App\Models\LiveshareInvite;
@@ -49,6 +50,8 @@ class AppAuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -84,7 +87,7 @@ class AppAuthController extends Controller
                 'status' => 'error',
                 'code' => 'AUTH_ACCOUNT_INACTIVE',
                 'message' => 'Account is not active'
-            ], 401);
+            ], 403);
         }
 
         return $this->respondWithTokens($user, $request->input('device_name'));
@@ -128,7 +131,7 @@ class AppAuthController extends Controller
                     'status' => 'error',
                     'code' => 'AUTH_ACCOUNT_INACTIVE',
                     'message' => 'Account is not active'
-                ], 401);
+                ], 403);
             }
 
             // Invalidate old token and generate new ones
@@ -170,6 +173,8 @@ class AppAuthController extends Controller
      */
     public function forgotPassword(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
         ]);
@@ -209,6 +214,8 @@ class AppAuthController extends Controller
      */
     public function resetPassword(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'token' => 'required|string',
             'email' => 'required|string|email',
@@ -226,12 +233,13 @@ class AppAuthController extends Controller
             ], 422);
         }
 
-        $status = Password::reset(
+        $status = PasswordTokens::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
+                    'must_change_password' => false,
                 ])->save();
 
                 event(new PasswordReset($user));
@@ -264,6 +272,8 @@ class AppAuthController extends Controller
                 'message' => 'Self-registration is not enabled'
             ], 403);
         }
+
+        User::normalizeRequestEmail($request);
 
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'unique:users,email'],
@@ -359,6 +369,8 @@ class AppAuthController extends Controller
      */
     public function verifyEmail(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
             'code' => ['required', 'string', 'size:6'],
@@ -425,6 +437,8 @@ class AppAuthController extends Controller
      */
     public function resendVerification(Request $request): JsonResponse
     {
+        User::normalizeRequestEmail($request);
+
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
         ]);
@@ -494,6 +508,8 @@ class AppAuthController extends Controller
                 'message' => $message
             ], 410);
         }
+
+        User::normalizeRequestEmail($request);
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
@@ -610,6 +626,16 @@ class AppAuthController extends Controller
      */
     private function respondWithTokens(User $user, ?string $deviceName = null, string $message = 'Authentication successful'): JsonResponse
     {
+        // Every path that hands out tokens comes through here, including
+        // password reset and linking an SSO provider, so check once more.
+        if (!$user->active) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'AUTH_ACCOUNT_INACTIVE',
+                'message' => 'Account is not active'
+            ], 403);
+        }
+
         $accessToken = Auth::login($user);
 
         if (!$accessToken) {
@@ -826,7 +852,7 @@ class AppAuthController extends Controller
                         'status' => 'error',
                         'code' => 'AUTH_ACCOUNT_INACTIVE',
                         'message' => 'Account is not active'
-                    ], 401);
+                    ], 403);
                 }
 
                 $authState->delete();
@@ -837,13 +863,13 @@ class AppAuthController extends Controller
             $user = null;
 
             if ($provider->trust_email) {
-                $user = User::where('email', $authProviderUser->email)->first();
+                $user = User::where('email', User::normalizeEmail($authProviderUser->email))->first();
             }
 
             // If no user found and allow_registration is enabled, create a new user
             if (!$user && $provider->allow_registration) {
                 // Check if email is already taken
-                $existingUser = User::where('email', $authProviderUser->email)->first();
+                $existingUser = User::where('email', User::normalizeEmail($authProviderUser->email))->first();
                 if ($existingUser) {
                     $authState->delete();
                     return response()->json([
@@ -871,7 +897,7 @@ class AppAuthController extends Controller
                     'status' => 'error',
                     'code' => 'AUTH_ACCOUNT_INACTIVE',
                     'message' => 'Account is not active'
-                ], 401);
+                ], 403);
             }
 
             // Link the provider to the user
@@ -997,7 +1023,7 @@ class AppAuthController extends Controller
     {
         $user = User::createAccount([
             'name' => $authProviderUser->name,
-            'email' => $authProviderUser->email,
+            'email' => User::normalizeEmail($authProviderUser->email),
             'password' => bcrypt(bin2hex(random_bytes(32))),
         ], [
             'admin' => false,

@@ -526,7 +526,8 @@
     },
     "close": "Fechar",
     "confirm": {
-      "pruneExpiredShares": "Tem a certeza de que pretende eliminar as suas transferências expiradas? Não as poderá recuperar."
+      "pruneExpiredShares": "Tem a certeza de que pretende eliminar as suas transferências expiradas? Não as poderá recuperar.",
+      "requestDeletion": "Are you sure you want to request deletion of this share? The share link will stop working immediately."
     },
     "description": {
       "about": "Informações sobre a sua instalação Erugo",
@@ -567,7 +568,9 @@
     "error": {
       "pruneExpiredShares": "Falha ao agendar a eliminação das transferências expiradas!",
       "shareExpired": "Falha ao expirar a partilha",
-      "shareExtended": "Falha ao extender a partilha"
+      "shareExtended": "Falha ao extender a partilha",
+      "requestDeletion": "Failed to request share deletion",
+      "undoDeletion": "Failed to undo share deletion request"
     },
     "help": {
       "auth_provider": {
@@ -584,6 +587,18 @@
     },
     "loading": "Carregando as transferências...",
     "noShares": "Não tem transferências. Porque não criar uma?",
+    "pendingDeletion": {
+      "title": "Eliminação pendente",
+      "description": "As seguintes partilhas foram solicitadas para eliminação. Pode desfazer isto antes de serem removidas permanentemente.",
+      "requestedOn": "Solicitado em",
+      "deleteAll": "Eliminar tudo permanentemente",
+      "confirmPrompt": "Escreva DELETE (maiúsculas) para remover permanentemente todas as partilhas pendentes e os seus ficheiros. Esta ação não pode ser desfeita.",
+      "confirmMismatch": "Confirmação não corresponde — deve escrever DELETE em maiúsculas exatamente."
+    },
+    "expiredShares": {
+      "title": "{count, plural, one {1 partilha expirada} other {# partilhas expiradas}}",
+      "notice": "Estas partilhas expiraram e os seus ficheiros ainda estão armazenados no disco. Para os remover, selecione 'Solicitar eliminação' no menu de ações da partilha."
+    },
     "provider": {
       "edit": "Editar",
       "view": "Ver"
@@ -644,7 +659,9 @@
         "unique_downloaders_description": "Contagem de endereços IP únicos que descarregaram partilhas.",
         "unique_downloaders_title": "Descarregadores únicos",
         "users_description": "Visão geral das contas de utilizador e dos seus níveis de atividade.",
-        "users_title": "Estatísticas dos utilizadores"
+        "users_title": "Estatísticas dos utilizadores",
+        "physical_storage_title": "Physical vs Logical Storage",
+        "physical_storage_description": "Physical storage counts each unique file once, even when cloned via hard links. Logical storage is the sum of all share sizes."
       },
       "loading": "A carregar estatísticas...",
       "nav": {
@@ -674,7 +691,12 @@
         "of_disk": "do disco",
         "share_storage": "Partilhar armazenamento",
         "title": "Visão geral do armazenamento",
-        "used": "utilizado"
+        "used": "utilizado",
+        "logical_storage": "Logical Storage",
+        "physical_storage": "Physical Storage",
+        "dedup_savings": "Saves {amount} vs logical",
+        "dedup_savings_label": "Hard-link Deduplication",
+        "deduplicated": "deduplicated"
       },
       "users": {
         "active": "Ativar",
@@ -690,13 +712,17 @@
     "success": {
       "pruneExpiredShares": "As transferências expiradas foram agendadas para eliminação e serão processadas em segundo plano.",
       "shareExpired": "Partilha expirada",
-      "shareExtended": "Partilha extendida"
+      "shareExtended": "Partilha extendida",
+      "requestDeletion": "Share deletion requested",
+      "undoDeletion": "Share deletion request cancelled"
     },
     "system": {
       "allow_chunked_uploads": "Permitir o modo de carregamento em pedaços",
       "allow_chunked_uploads_description": "O modo de carregamento em blocos divide os ficheiros em segmentos mais pequenos que são transferidos sequencialmente. Embora ligeiramente mais lento do que o carregamento direto para ficheiros mais pequenos, este método proporciona maior estabilidade e fiabilidade na transferência de ficheiros grandes. Os carregamentos fragmentados suportam o acompanhamento do progresso e permitem aos utilizadores fazer uma pausa e retomar manualmente as transferências, o que o torna ideal para ficheiros com mais de 100 MB ou quando se utilizam ligações de rede instáveis.",
       "allow_direct_uploads": "Permitir o modo de carregamento direto",
       "allow_direct_uploads_description": "O modo de carregamento direto transmite ficheiros num pedido único e ininterrupto. Embora este método ofereça as velocidades de transferência mais rápidas para a maioria dos ficheiros, os ficheiros extremamente grandes podem causar problemas de estabilidade ou tempos limite. Para um desempenho ótimo com ficheiros com mais de 100 MB, os carregamentos divididos podem ser uma melhor opção.",
+      "allow_file_replacement": "Permitir substituição de arquivo",
+      "allow_file_replacement_description": "Quando ativado, os utilizadores podem substituir o ficheiro numa partilha de ficheiro único sem criar uma nova partilha. Desativar para cenários de auditoria onde os ficheiros não devem ser alterados após a partilha.",
       "allow_reverse_shares": "Permitir a partilha inversa",
       "allow_reverse_shares_description": "Determina se os seus utilizadores registados devem ter permissão para enviar pedidos de partilha inversa. Estes pedidos fornecem a indivíduos externos um passe de carregamento único, permitindo-lhes entregar ficheiros diretamente ao utilizador registado que iniciou o pedido.\n\n\n\n\n",
       "application_name": "Nome da Aplicação",
@@ -956,7 +982,11 @@
   "share": {
     "button": {
       "expireNow": "Expirar Agora",
-      "extend": "Extender"
+      "extend": "Extender",
+      "requestDeletion": "Request Deletion",
+      "undoDeletion": "Undo Deletion",
+      "deleteImmediately": "Delete Immediately",
+      "removeEntry": "Remove Entry"
     },
     "contains": {
       "count": "{value, plural, one {Contém: # ficheiro} other {Contém: {value} ficheiros} }"
@@ -982,7 +1012,10 @@
     },
     "not_found": "A partilha que procura não foi encontrada. Poderá ser necessário iniciar sessão para a ver.",
     "passwordNotProtected": "Aberto",
-    "passwordProtected": "Protegido por palavra-passe"
+    "passwordProtected": "Protegido por palavra-passe",
+    "status": {
+      "pendingDeletion": "Pending Deletion"
+    }
   },
   "total_size": "Tamanho Total",
   "upload": {

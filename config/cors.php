@@ -5,7 +5,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => array_filter([env('APP_URL')]),
 
     'allowed_origins_patterns' => [],
 

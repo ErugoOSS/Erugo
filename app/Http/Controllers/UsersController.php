@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Password as PasswordFacade;
 use App\Models\User;
+use App\Services\PasswordTokens;
 use App\Models\ReverseShareInvite;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\accountCreatedMail;
 use App\Jobs\sendEmail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UsersController extends Controller
@@ -85,9 +87,10 @@ class UsersController extends Controller
         'message' => 'Provider unlinked successfully'
       ]);
     } catch (\Exception $e) {
+      \Log::error('Failed to unlink provider for user ' . $user->id . ': ' . $e->getMessage());
       return response()->json([
         'status' => 'error',
-        'message' => 'Failed to unlink provider: ' . $e->getMessage()
+        'message' => 'Failed to unlink provider'
       ], 500);
     }
   }
@@ -97,6 +100,8 @@ class UsersController extends Controller
   {
 
     $user = Auth::user();
+
+    User::normalizeRequestEmail($request);
 
     $validator = Validator::make($request->all(), [
       'password' => ['sometimes', 'confirmed', Password::min(8)],
@@ -171,6 +176,8 @@ class UsersController extends Controller
   //create a new user
   public function create(Request $request)
   {
+    $request->merge(['email' => strtolower(trim($request->email ?? ''))]);
+
     $validator = Validator::make($request->all(), [
       'email' => ['required', 'email', 'unique:users,email'],
       'name' => ['required', 'string', 'max:255'],
@@ -219,7 +226,7 @@ class UsersController extends Controller
         // Continue anyway - user creation and password email are more important
       }
 
-      $token = PasswordFacade::createToken($user);
+      $token = PasswordTokens::createSetupToken($user);
 
       sendEmail::dispatch($user->email, accountCreatedMail::class, ['token' => $token, 'user' => $user]);
 
@@ -250,6 +257,8 @@ class UsersController extends Controller
       );
     }
 
+    User::normalizeRequestEmail($request);
+
     $validator = Validator::make($request->all(), [
       'password' => ['confirmed', Password::min(8)],
       'email' => ['email', 'unique:users,email,' . $user->id],
@@ -278,7 +287,7 @@ class UsersController extends Controller
         $user->name = $validated['name'];
       }
       if (array_key_exists('email', $validated)) {
-        $user->email = $validated['email'];
+        $user->email = strtolower(trim($validated['email']));
       }
       if (array_key_exists('password', $validated)) {
         $user->password = $validated['password'];
@@ -349,6 +358,9 @@ class UsersController extends Controller
 
       // Clean up all the user's data (shares, files, downloads)
       $this->cleanupUserData($user);
+
+      // Remove any pending password reset tokens for this user
+      PasswordTokens::forget($user->email);
 
       $user->delete();
 
@@ -437,6 +449,8 @@ class UsersController extends Controller
   //create the first user
   public function createFirstUser(Request $request)
   {
+    User::normalizeRequestEmail($request);
+
     $validator = Validator::make($request->all(), [
       'password' => ['required', 'confirmed', Password::min(8)],
       'email' => ['required', 'email', 'unique:users,email'],
@@ -460,7 +474,7 @@ class UsersController extends Controller
     try {
       $user = User::createAccount([
         'name' => $request->name,
-        'email' => $request->email,
+        'email' => strtolower(trim($request->email)),
         'password' => Hash::make($request->password),
       ], [
         'admin' => true,

@@ -11,6 +11,7 @@ use App\Jobs\sendEmail;
 use App\Jobs\cleanSpecificShares;
 use App\Services\SettingsService;
 use App\Services\ThumbnailService;
+use App\Utils\PathGuard;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -88,7 +89,7 @@ class AppSharesController extends Controller
                 if (in_array('active', $statuses)) {
                     // Active: not expired and not deleted
                     $q->orWhere(function ($active) use ($now) {
-                        $active->where('status', '!=', 'deleted')
+                        $active->whereNotIn('status', Share::GONE_STATUSES)
                             ->where(function ($exp) use ($now) {
                                 $exp->where('expires_at', '>=', $now)
                                     ->orWhereNull('expires_at');
@@ -99,14 +100,14 @@ class AppSharesController extends Controller
                 if (in_array('expired', $statuses)) {
                     // Expired: past expiry date but not deleted
                     $q->orWhere(function ($expired) use ($now) {
-                        $expired->where('status', '!=', 'deleted')
+                        $expired->whereNotIn('status', Share::GONE_STATUSES)
                             ->where('expires_at', '<', $now);
                     });
                 }
                 
                 if (in_array('deleted', $statuses)) {
-                    // Deleted: status is deleted
-                    $q->orWhere('status', 'deleted');
+                    // Deleted: deleted, or waiting for the cleanup job to delete it
+                    $q->orWhereIn('status', Share::GONE_STATUSES);
                 }
             });
         }
@@ -139,7 +140,7 @@ class AppSharesController extends Controller
     {
         $share = Share::where('long_id', $longId)->with(['files', 'user'])->first();
 
-        if (!$share) {
+        if (!$share || $share->isGone()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_NOT_FOUND',
@@ -147,7 +148,7 @@ class AppSharesController extends Controller
             ], 404);
         }
 
-        if ($share->expires_at < Carbon::now()) {
+        if ($share->isPastExpiry()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_EXPIRED',
@@ -188,7 +189,7 @@ class AppSharesController extends Controller
     {
         $share = Share::where('long_id', $longId)->with('files')->first();
 
-        if (!$share) {
+        if (!$share || $share->isGone()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_NOT_FOUND',
@@ -214,7 +215,7 @@ class AppSharesController extends Controller
             }
         }
 
-        if ($share->expires_at < Carbon::now()) {
+        if ($share->isPastExpiry()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_EXPIRED',
@@ -242,11 +243,13 @@ class AppSharesController extends Controller
 
         // Single file share - download directly
         if ($share->file_count == 1) {
-            if (file_exists($sharePath . '/' . $share->files[0]->name)) {
+            $file = $share->files[0];
+            $diskFilePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
+            if ($diskFilePath) {
                 $this->createDownloadRecord($share);
                 return response()->download(
-                    $sharePath . '/' . $share->files[0]->name,
-                    $this->sanitizeDownloadFilename($share->files[0]->display_name)
+                    $diskFilePath,
+                    $this->sanitizeDownloadFilename($file->display_name)
                 );
             } else {
                 return response()->json([
@@ -297,7 +300,7 @@ class AppSharesController extends Controller
     {
         $share = Share::where('long_id', $longId)->with('files')->first();
 
-        if (!$share) {
+        if (!$share || $share->isGone()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_NOT_FOUND',
@@ -323,7 +326,7 @@ class AppSharesController extends Controller
             }
         }
 
-        if ($share->expires_at < Carbon::now()) {
+        if ($share->isPastExpiry()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_EXPIRED',
@@ -357,9 +360,9 @@ class AppSharesController extends Controller
 
             if ($filePath === $expectedPath || $filePath === $file->display_name) {
                 $sharePath = storage_path('app/shares/' . $share->path);
-                $diskFilePath = $sharePath . '/' . $file->name;
+                $diskFilePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
 
-                if (file_exists($diskFilePath)) {
+                if ($diskFilePath) {
                     $this->createDownloadRecord($share);
                     return response()->download(
                         $diskFilePath,
@@ -504,6 +507,14 @@ class AppSharesController extends Controller
             ], 403);
         }
 
+        if ($share->isGone()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_DELETED',
+                'message' => 'Share is pending deletion or deleted'
+            ], 422);
+        }
+
         $share->expires_at = Carbon::now();
         $share->save();
 
@@ -549,9 +560,30 @@ class AppSharesController extends Controller
             ], 403);
         }
 
-        // Optional days parameter, default to 7
-        $days = $request->input('days', 7);
-        
+        if ($share->isGone()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_DELETED',
+                'message' => 'Share is pending deletion or deleted'
+            ], 422);
+        }
+
+        // A share with no expiry (an admin can set this on the web) would get
+        // a date from now + days, which shortens it. Refuse instead.
+        if ($share->expires_at === null) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_NO_EXPIRY',
+                'message' => 'Share has no expiry date to extend'
+            ], 422);
+        }
+
+        // Optional days parameter, default to 7. Clamp it to at least one day
+        // and at most the admin's max expiry (or a year if no max is set), so
+        // a huge value can't push the date out of range.
+        $maxDays = (int) ((new SettingsService())->get('max_expiry_time') ?: 365);
+        $days = max(1, min($maxDays, (int) $request->input('days', 7)));
+
         $share->expires_at = Carbon::now()->addDays($days);
         $share->save();
 
@@ -598,6 +630,14 @@ class AppSharesController extends Controller
             ], 403);
         }
 
+        if ($share->isGone()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 'SHARE_DELETED',
+                'message' => 'Share is pending deletion or deleted'
+            ], 422);
+        }
+
         $limit = $request->input('limit');
 
         if ($limit == -1 || $limit === null) {
@@ -637,7 +677,11 @@ class AppSharesController extends Controller
                 ->orWhereHas('invite', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 });
-        })->where('expires_at', '<', Carbon::now())->get();
+        })->where('status', '!=', 'deleted')
+          ->where(function ($q) {
+              $q->where('expires_at', '<', Carbon::now())
+                ->orWhere('status', 'pending_deletion');
+          })->get();
 
         cleanSpecificShares::dispatch($shares->pluck('id')->toArray(), $user->id);
 
@@ -716,7 +760,8 @@ class AppSharesController extends Controller
             'file_count' => $share->file_count,
             'status' => $share->status,
             'expired' => $share->expires_at ? Carbon::parse($share->expires_at)->isPast() : false,
-            'deleted' => $share->status === 'deleted',
+            'deleted' => $share->isGone(),
+            'pending_deletion' => $share->status === 'pending_deletion',
             'deletes_at' => $share->deletes_at,
             'files' => $share->files->map(function ($file) {
                 return [
@@ -753,7 +798,8 @@ class AppSharesController extends Controller
             'file_count' => $share->file_count,
             'status' => $share->status,
             'expired' => $share->expires_at ? Carbon::parse($share->expires_at)->isPast() : false,
-            'deleted' => $share->status === 'deleted',
+            'deleted' => $share->isGone(),
+            'pending_deletion' => $share->status === 'pending_deletion',
             'deletes_at' => $share->deletes_at,
             'public' => (bool) $share->public,
             'path' => $share->path,
@@ -831,7 +877,7 @@ class AppSharesController extends Controller
 
         $share = Share::where('id', $shareId)->with('files')->first();
 
-        if (!$share) {
+        if (!$share || $share->isGone()) {
             return response()->json([
                 'status' => 'error',
                 'code' => 'SHARE_NOT_FOUND',
@@ -884,8 +930,8 @@ class AppSharesController extends Controller
 
         // Single file share - file is on disk directly
         if ($share->file_count == 1) {
-            $sourcePath = $sharePath . '/' . $file->name;
-            if (!file_exists($sourcePath)) {
+            $sourcePath = PathGuard::singleShareFile($sharePath, $file->full_path, $file->name);
+            if (!$sourcePath) {
                 return response()->json([
                     'status' => 'error',
                     'code' => 'SOURCE_FILE_NOT_FOUND',

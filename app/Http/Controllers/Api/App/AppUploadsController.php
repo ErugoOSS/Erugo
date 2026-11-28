@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Jobs\CreateShareZip;
 use App\Mail\shareCreatedMail;
 use App\Jobs\sendEmail;
+use App\Utils\PathGuard;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -153,7 +154,7 @@ class AppUploadsController extends Controller
         $completePath = storage_path('app/shares/' . $sharePath);
 
         if (!file_exists($completePath)) {
-            mkdir($completePath, 0777, true);
+            mkdir($completePath, 0750, true);
         }
 
         // Find files from upload sessions by TUS upload IDs
@@ -299,13 +300,12 @@ class AppUploadsController extends Controller
             // Verify the resolved path is within the share directory
             // Create parent directories first so realpath can resolve
             if (!file_exists($destPath)) {
-                mkdir($destPath, 0777, true);
+                mkdir($destPath, 0750, true);
             }
             $resolvedPath = realpath($destPath);
             $resolvedSharePath = realpath($completePath);
             
-            if ($resolvedPath === false || $resolvedSharePath === false ||
-                strpos($resolvedPath, $resolvedSharePath) !== 0) {
+            if (!PathGuard::isWithin($destPath, $completePath)) {
                 Log::warning('Path traversal attempt detected in App API', [
                     'user_id' => $user->id,
                     'original_path' => $filePaths[$uploadId] ?? '',

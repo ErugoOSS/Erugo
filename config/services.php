@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'tusd' => [
+        // Optional shared secret for tusd hook requests. When set, a hook
+        // request must pass the internal IP check and also carry a matching
+        // Hook-Secret header. tusd itself cannot add a fixed header (its
+        // -hooks-http-forward-headers flag only copies headers from the
+        // client's upload request), so leave this unset with the bundled
+        // tusd. It is for setups where something between tusd and Erugo
+        // adds the header.
+        'hook_secret' => env('TUSD_HOOK_SECRET'),
+    ],
+
 ];
