@@ -198,12 +198,10 @@ npm run dev
 To build the docker image yourself, run the following command.
 
 ```sh
-docker build -t erugo:local -f docker/alpine/Dockerfile .
+docker build -t erugo:local --build-arg VERSION=local -f docker/alpine/Dockerfile .
 ```
-If you would like to push the image to Docker Hub, run the following command. You will need to have a Docker Hub account and be logged in.
-```sh
-DOCKER_HUB_USERNAME=<your-docker-hub-username> ./publish-docker-image.sh
-```
+
+`.dockerignore` keeps `.env`, `storage/` and other local files out of the image, so it is safe to build from your working copy. Official images are built and pushed by GitHub Actions when a version tag is pushed. See [RELEASING.md](RELEASING.md).
 
 ## Contributing
 

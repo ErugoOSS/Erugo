@@ -1,0 +1,67 @@
+# Keep secrets, local state and build output out of the image. The release
+# workflow and local builds both use the working copy as the build context,
+# so anything not listed here ends up in the image. Patterns without **/
+# only match at the top of the repo.
+
+# Git and CI
+.git
+.gitattributes
+.github
+.claude
+
+# Environment files. .env.example holds no secrets and is kept.
+.env*
+**/.env
+!.env.example
+auth.json
+
+# Dependencies and build output. The Dockerfile runs composer install and
+# npm ci + vite build itself.
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+public/backgrounds
+public/images
+
+# Runtime storage. The image only needs storage_skell, which start-container
+# copies into the storage volume on first run. The empty storage folders and
+# their .gitignore files are kept so Laravel can boot during composer install.
+storage/**
+!storage/**/.gitignore
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+
+# Database files
+**/*.sqlite
+**/*.sqlite-*
+**/*.sqlite3
+**/*.db
+
+# Docker Compose files, including local overrides
+docker-compose*.yml
+docker-compose*.yaml
+compose*.yml
+compose*.yaml
+
+# Logs, test caches and crash dumps
+**/*.log
+.phpunit.cache
+.phpunit.result.cache
+/core
+
+# Editor and OS files
+.idea
+.vscode
+.fleet
+.nova
+.zed
+.phpactor.json
+**/*.swp
+**/*.swo
+**/*~
+**/.DS_Store
+Homestead.json
+Homestead.yaml
+ISSUES_TODO.md
