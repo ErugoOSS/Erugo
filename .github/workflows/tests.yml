@@ -63,3 +63,5 @@ jobs:
 
       - name: Install and build
         run: npm ci && npx vite build
+      - name: Frontend static checks
+        run: node tests/frontend/static-checks.mjs
