@@ -1,3 +1,12 @@
+# Pass X-Forwarded-* headers on to Laravel when they come from a private
+# address, so a reverse proxy's real client IP isn't lost here. Laravel's own
+# trusted_proxies setting then decides whether to believe them.
+{
+    servers {
+        trusted_proxies static private_ranges
+    }
+}
+
 # Basic Caddyfile for Laravel
 :80 {
     root * /var/www/html/public
